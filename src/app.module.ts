@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { CaisseModule } from './caisse/caisse.module';
 import { ConsultationsModule } from './consultations/consultations.module';
 import { MedicamentsModule } from './medicaments/medicaments.module';
+import { PharmacieModule } from './pharmacie/pharmacie.module';
 import { AuthModule } from './auth/auth.module';
 import { CliniquesModule } from './cliniques/cliniques.module';
 import { ImpressionModule } from './impression/impression.module';
@@ -25,6 +26,7 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
     CaisseModule,
     ConsultationsModule,
     MedicamentsModule,
+    PharmacieModule,
     CliniquesModule,
     ServicesModule,
     PersonnelModule,

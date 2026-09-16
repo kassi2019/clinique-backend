@@ -14,6 +14,7 @@ const app_service_1 = require("./app.service");
 const caisse_module_1 = require("./caisse/caisse.module");
 const consultations_module_1 = require("./consultations/consultations.module");
 const medicaments_module_1 = require("./medicaments/medicaments.module");
+const pharmacie_module_1 = require("./pharmacie/pharmacie.module");
 const auth_module_1 = require("./auth/auth.module");
 const cliniques_module_1 = require("./cliniques/cliniques.module");
 const impression_module_1 = require("./impression/impression.module");
@@ -37,6 +38,7 @@ exports.AppModule = AppModule = __decorate([
             caisse_module_1.CaisseModule,
             consultations_module_1.ConsultationsModule,
             medicaments_module_1.MedicamentsModule,
+            pharmacie_module_1.PharmacieModule,
             cliniques_module_1.CliniquesModule,
             services_module_1.ServicesModule,
             personnel_module_1.PersonnelModule,

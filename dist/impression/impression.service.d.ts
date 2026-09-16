@@ -51,6 +51,7 @@ export declare class ImpressionService {
     }): string;
     imprimerRecuPaiement(paiementId: number): Promise<ResultatImpression>;
     imprimerOrdonnance(consultationId: number): Promise<ResultatImpression>;
+    imprimerRecuPharmacie(paiementId: number): Promise<ResultatImpression>;
     imprimerTicketPassage(passageId: number): Promise<ResultatImpression>;
     imprimer(texte: string): Promise<ResultatImpression>;
     private sendRawToNetwork;

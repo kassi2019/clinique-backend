@@ -41,6 +41,9 @@ export class MedicamentsController {
         forme: dto.forme,
         dosage: dto.dosage,
         stock: dto.stock !== undefined ? Number(dto.stock) : 0,
+        prixVente: dto.prixVente !== undefined ? Number(dto.prixVente) : undefined,
+        seuilAlerte: dto.seuilAlerte !== undefined ? Number(dto.seuilAlerte) : 0,
+        uniteVente: dto.uniteVente ?? 'BOITE',
       },
     });
   }
@@ -56,6 +59,9 @@ export class MedicamentsController {
         forme: dto.forme,
         dosage: dto.dosage,
         stock: dto.stock !== undefined ? Number(dto.stock) : undefined,
+        prixVente: dto.prixVente !== undefined ? Number(dto.prixVente) : undefined,
+        seuilAlerte: dto.seuilAlerte !== undefined ? Number(dto.seuilAlerte) : undefined,
+        uniteVente: dto.uniteVente,
         actif: dto.actif,
       },
     });

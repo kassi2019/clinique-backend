@@ -541,6 +541,81 @@ export class ImpressionService {
     return this.imprimer(texte);
   }
 
+  /** Imprime le reçu de la caisse pharmacie. */
+  async imprimerRecuPharmacie(paiementId: number): Promise<ResultatImpression> {
+    const paiement = await this.prisma.pharmaciePaiement.findUnique({
+      where: { id: paiementId },
+      include: {
+        dispensation: {
+          include: {
+            consultation: {
+              include: {
+                passage: { include: { patient: true, clinique: { select: { nom: true, adresse: true } } } },
+              },
+            },
+            pharmacien: { select: { matricule: true, personnel: { select: { nom: true, prenom: true } } } },
+            lignes: true,
+          },
+        },
+      },
+    });
+    if (!paiement) throw new NotFoundException('Paiement introuvable.');
+
+    const L = this.getConfig().largeur;
+    const trait = (c = '-') => c.repeat(L);
+    const centrer = (t: string) =>
+      ' '.repeat(Math.max(0, Math.floor((L - t.length) / 2))) + t;
+    const deuxColonnes = (gauche: string, droite: string) =>
+      gauche + ' '.repeat(Math.max(1, L - gauche.length - droite.length)) + droite;
+
+    const COEUR = '\x03';
+    const p = paiement.dispensation.consultation.passage.patient;
+    const clinique = paiement.dispensation.consultation.passage.clinique;
+
+    const lignes: string[] = [];
+    lignes.push(centrer(clinique.nom.toUpperCase()));
+    if (clinique.adresse) lignes.push(centrer(clinique.adresse));
+    lignes.push(trait());
+    lignes.push(centrer('RECU PHARMACIE'));
+    lignes.push(CMDS.BOLD_ON + centrer(paiement.numeroRecu) + CMDS.BOLD_OFF);
+    lignes.push(trait());
+    lignes.push(deuxColonnes('Patient', `${p.nom} ${p.prenom}`.toUpperCase()));
+    lignes.push(deuxColonnes('Code', p.code));
+    lignes.push(trait());
+    for (const l of paiement.dispensation.lignes) {
+      // Prix unitaire × quantité = total, sur la même ligne que le médicament
+      const detail =
+        `${Number(l.prixUnitaire)} F x ${l.quantiteDelivree} = ` +
+        `${Number(l.montant)} F`;
+      if (l.medicamentNom.length + detail.length + 2 <= L) {
+        lignes.push(deuxColonnes(l.medicamentNom, detail));
+      } else {
+        // Nom trop long : le détail passe à la ligne suivante
+        lignes.push(deuxColonnes(l.medicamentNom, ''));
+        lignes.push(deuxColonnes(`  ${detail}`, ''));
+      }
+    }
+    lignes.push(trait());
+    lignes.push(
+      CMDS.BOLD_ON +
+        deuxColonnes('TOTAL', `${Number(paiement.montantTotal)} FCFA`) +
+        CMDS.BOLD_OFF,
+    );
+    lignes.push(deuxColonnes('Mode', paiement.modePaiement));
+    lignes.push(
+      deuxColonnes(
+        'Caissière',
+        `${paiement.dispensation.pharmacien.personnel?.prenom ?? ''} ${paiement.dispensation.pharmacien.personnel?.nom ?? ''}`.trim(),
+      ),
+    );
+    lignes.push(trait());
+    lignes.push(centrer(`${COEUR} Merci de votre visite ${COEUR}`));
+    lignes.push('');
+
+    const texte = normalizeText(lignes.join('\n'));
+    return this.imprimer(texte);
+  }
+
   /** Imprime le ticket d'un passage (données récupérées en base). */
   async imprimerTicketPassage(passageId: number): Promise<ResultatImpression> {
     const passage = await this.prisma.passage.findUnique({

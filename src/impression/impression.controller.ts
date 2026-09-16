@@ -44,6 +44,13 @@ export class ImpressionController {
     return this.impressionService.imprimerOrdonnance(id);
   }
 
+  /** Imprime le reçu de la caisse pharmacie. */
+  @UseGuards(JwtAuthGuard)
+  @Post('pharmacie-paiements/:id')
+  imprimerRecuPharmacie(@Param('id', ParseIntPipe) id: number) {
+    return this.impressionService.imprimerRecuPharmacie(id);
+  }
+
   /** Liste les imprimantes installées sur le serveur. */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMINISTRATEUR')

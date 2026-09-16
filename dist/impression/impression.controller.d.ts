@@ -6,6 +6,7 @@ export declare class ImpressionController {
     imprimerTicket(id: number): Promise<import("./impression.service").ResultatImpression>;
     imprimerRecu(id: number): Promise<import("./impression.service").ResultatImpression>;
     imprimerOrdonnance(id: number): Promise<import("./impression.service").ResultatImpression>;
+    imprimerRecuPharmacie(id: number): Promise<import("./impression.service").ResultatImpression>;
     listPrinters(): Promise<{
         printers: string[];
     }>;

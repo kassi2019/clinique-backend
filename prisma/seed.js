@@ -180,22 +180,44 @@ async function main() {
 
   // ---------- 7. Catalogue de médicaments ----------
   const medicamentsData = [
-    { nom: 'Paracétamol', forme: 'Comprimé', dosage: '500 mg', stock: 50 },
-    { nom: 'Amoxicilline', forme: 'Gélule', dosage: '500 mg', stock: 30 },
-    { nom: 'Ibuprofène', forme: 'Comprimé', dosage: '400 mg', stock: 25 },
-    { nom: 'Amoxicilline + Acide clavulanique', forme: 'Comprimé', dosage: '1 g', stock: 15 },
-    { nom: 'Métronidazole', forme: 'Comprimé', dosage: '500 mg', stock: 20 },
-    { nom: 'Artéméther + Luméfantrine', forme: 'Comprimé', dosage: '80/480 mg', stock: 40 },
-    { nom: 'Sérum de réhydratation orale (SRO)', forme: 'Sachet', dosage: '20,5 g', stock: 60 },
-    { nom: 'Diazépam', forme: 'Comprimé', dosage: '10 mg', stock: 0 },
-    { nom: 'Salbutamol', forme: 'Aérosol', dosage: '100 µg/dose', stock: 12 },
+    { nom: 'Paracétamol', forme: 'Comprimé', dosage: '500 mg', stock: 50, prixVente: 1000, seuilAlerte: 10, uniteVente: 'PLAQUE' },
+    { nom: 'Amoxicilline', forme: 'Gélule', dosage: '500 mg', stock: 30, prixVente: 2500, seuilAlerte: 10, uniteVente: 'BOITE' },
+    { nom: 'Ibuprofène', forme: 'Comprimé', dosage: '400 mg', stock: 25, prixVente: 1500, seuilAlerte: 5, uniteVente: 'PLAQUE' },
+    { nom: 'Amoxicilline + Acide clavulanique', forme: 'Comprimé', dosage: '1 g', stock: 15, prixVente: 4000, seuilAlerte: 5, uniteVente: 'BOITE' },
+    { nom: 'Métronidazole', forme: 'Comprimé', dosage: '500 mg', stock: 20, prixVente: 1200, seuilAlerte: 5, uniteVente: 'PLAQUE' },
+    { nom: 'Artéméther + Luméfantrine', forme: 'Comprimé', dosage: '80/480 mg', stock: 40, prixVente: 3500, seuilAlerte: 10, uniteVente: 'BOITE' },
+    { nom: 'Sérum de réhydratation orale (SRO)', forme: 'Sachet', dosage: '20,5 g', stock: 60, prixVente: 500, seuilAlerte: 10, uniteVente: 'BOITE' },
+    { nom: 'Diazépam', forme: 'Comprimé', dosage: '10 mg', stock: 0, prixVente: 800, seuilAlerte: 5, uniteVente: 'PLAQUE' },
+    { nom: 'Salbutamol', forme: 'Aérosol', dosage: '100 µg/dose', stock: 12, prixVente: 3000, seuilAlerte: 3, uniteVente: 'BOITE' },
   ];
   for (const m of medicamentsData) {
     await prisma.medicament.upsert({
       where: { cliniqueId_nom: { cliniqueId: clinique.id, nom: m.nom } },
-      update: { forme: m.forme, dosage: m.dosage, stock: m.stock },
+      update: {
+        forme: m.forme,
+        dosage: m.dosage,
+        prixVente: m.prixVente,
+        seuilAlerte: m.seuilAlerte,
+        uniteVente: m.uniteVente,
+      },
       create: { cliniqueId: clinique.id, ...m },
     });
+    // Lot initial correspondant au stock de départ
+    const med = await prisma.medicament.findUnique({
+      where: { cliniqueId_nom: { cliniqueId: clinique.id, nom: m.nom } },
+    });
+    const nbLots = await prisma.lot.count({ where: { medicamentId: med.id } });
+    if (nbLots === 0 && med.stock > 0) {
+      await prisma.lot.create({
+        data: {
+          medicamentId: med.id,
+          numeroLot: `LOT-INIT-${med.id}`,
+          quantiteInitiale: med.stock,
+          quantiteRestante: med.stock,
+          datePeremption: new Date('2027-12-31'),
+        },
+      });
+    }
   }
 
   console.log('Seed terminé avec succès.');
