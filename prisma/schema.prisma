@@ -1,0 +1,230 @@
+// ============================================================
+//  Schéma Prisma — Gestion Clinique
+//  Base : bd_clinique (SQL Server 2022 Express)
+//  Périmètre actuel : module Paramétrage (cf. cahier des charges §16)
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Établissement (multi-clinique, §16.2) ----------
+model Clinique {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  nom       String
+  adresse   String?
+  telephone String?
+  statut    String   @default("ACTIF") // ACTIF / INACTIF
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services    Service[]
+  personnel   Personnel[]
+  prestations Prestation[]
+  parametre   Parametre?
+  patients    Patient[]
+  passages    Passage[]
+
+  @@map("cliniques")
+}
+
+// ---------- Patients ----------
+model Patient {
+  id            Int       @id @default(autoincrement())
+  cliniqueId    Int
+  numeroDossier String // unique par clinique
+  code          String    @unique // code unique PERMANENT du patient (ex. P-9N7Z5A) : clé de recherche à vie
+  nom           String
+  prenom        String
+  age           String?
+  sexe          String? // M / F
+  ville         String?
+  quartier      String?
+  profession    String?
+  telephone     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  clinique Clinique  @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  passages Passage[]
+
+  @@unique([cliniqueId, numeroDossier])
+  @@map("patients")
+}
+
+// ---------- Passages (le N° d'ordre expire après 10 jours ; le code du patient est permanent) ----------
+model Passage {
+  id                Int      @id @default(autoincrement())
+  cliniqueId        Int
+  patientId         Int
+  numeroOrdre       String // ex. MED-001092026 (code service + ordre/mois/année)
+  serviceId         Int
+  typePatient       String   @default("INTERNE") // INTERNE / EXTERNE
+  motif             String?
+  referent          String? // patient externe : structure/professionnel référent
+  prestationDemandee String? // patient externe : prestation demandée
+  statut            String   @default("EN_ATTENTE_PAIEMENT") // CREE, EN_ATTENTE_PAIEMENT, ACTIF, UTILISE, CLOTURE, EXPIRE
+  // Constantes saisies à l'accueil (§5.1)
+  taille            String?
+  temperature       Decimal? @db.Decimal(4, 1)
+  pouls             Int?
+  tensionGauche     String? // ex. 12/8
+  tensionDroite     String?
+  poids             Decimal? @db.Decimal(5, 1)
+  expireLe          DateTime // validité : 10 jours (§4.3)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  patient  Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  service  Service  @relation(fields: [serviceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([cliniqueId, numeroOrdre])
+  @@map("passages")
+}
+
+// ---------- Paramètres de la clinique (ex. image de la page de connexion) ----------
+model Parametre {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int      @unique
+  loginImage String?  @db.NVarChar(Max) // image au format data URL (base64)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  clinique Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("parametres")
+}
+
+// ---------- Services de la clinique ----------
+model Service {
+  id          Int      @id @default(autoincrement())
+  cliniqueId  Int
+  code        String // code court (ex. MED, LAB, IMA) — sert aussi au N° d'ordre
+  nom         String
+  description String?
+  actif       Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // NoAction : évite les chemins de cascade multiples (SQL Server)
+  clinique    Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  personnel   Personnel[]
+  prestations Prestation[]
+  passages    Passage[]
+
+  @@unique([cliniqueId, code])
+  @@map("services")
+}
+
+// ---------- Personnel (fiche RH, §16.3) ----------
+model Personnel {
+  id           Int       @id @default(autoincrement())
+  cliniqueId   Int
+  matricule    String // unique par clinique (§16.2)
+  nom          String
+  prenom       String
+  sexe         String? // M / F
+  photo        String?  @db.NVarChar(Max) // photo du membre du personnel (data URL base64)
+  fonction     String // médecin, agent d'accueil, pharmacien...
+  serviceId    Int?
+  telephone    String?
+  email        String?
+  statut       String    @default("ACTIF") // ACTIF / INACTIF
+  dateEmbauche DateTime? @db.Date
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  clinique    Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: Cascade)
+  service     Service?     @relation(fields: [serviceId], references: [id])
+  utilisateur Utilisateur?
+
+  @@unique([cliniqueId, matricule])
+  @@map("personnel")
+}
+
+// ---------- Utilisateurs (comptes de connexion, §16.2/16.3) ----------
+model Utilisateur {
+  id                Int       @id @default(autoincrement())
+  personnelId       Int       @unique
+  matricule         String    @unique // login
+  motDePasse        String // hash bcrypt
+  roleId            Int
+  statut            String    @default("ACTIF") // ACTIF / SUSPENDU
+  derniereConnexion DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  personnel Personnel @relation(fields: [personnelId], references: [id], onDelete: Cascade)
+  role      Role      @relation(fields: [roleId], references: [id])
+
+  @@map("utilisateurs")
+}
+
+// ---------- Rôles ----------
+model Role {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique // ADMINISTRATEUR, ACCUEIL, CAISSE, MEDECIN...
+  nom         String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  utilisateurs  Utilisateur[]
+  habilitations RoleModule[]
+
+  @@map("roles")
+}
+
+// ---------- Modules applicatifs ----------
+model Module {
+  id          Int     @id @default(autoincrement())
+  code        String  @unique // ACCUEIL, CAISSE, CONSULTATION...
+  nom         String
+  description String?
+
+  habilitations RoleModule[]
+
+  @@map("modules")
+}
+
+// ---------- Habilitations rôle ↔ module (§16) ----------
+model RoleModule {
+  roleId     Int
+  moduleId   Int
+  lecture    Boolean @default(true)
+  ecriture   Boolean @default(true)
+  validation Boolean @default(false)
+
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, moduleId])
+  @@map("roles_modules")
+}
+
+// ---------- Prestations et tarifs ----------
+model Prestation {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  serviceId  Int
+  code       String
+  libelle    String
+  type       String // CONSULTATION, EXAMEN_LABO, IMAGERIE, SOIN, MATERNITE, HOSPITALISATION, MEDICAMENT, AUTRE
+  montant    Decimal  @db.Decimal(18, 2)
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  clinique Clinique @relation(fields: [cliniqueId], references: [id], onDelete: Cascade)
+  service  Service  @relation(fields: [serviceId], references: [id])
+
+  @@unique([cliniqueId, code])
+  @@map("prestations")
+}

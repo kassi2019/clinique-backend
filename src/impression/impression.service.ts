@@ -1,0 +1,515 @@
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { exec } from 'child_process';
+import * as fs from 'fs';
+import * as net from 'net';
+import * as os from 'os';
+import * as path from 'path';
+import { promisify } from 'util';
+import { PrismaService } from '../prisma/prisma.service';
+
+const execAsync = promisify(exec);
+
+// ─── Commandes ESC/POS ─────────────────────────────────────────────
+const ESC = '\x1b';
+const GS = '\x1d';
+
+const CMDS = {
+  INIT: ESC + '@',
+  CP1252: ESC + 't' + '\x10', // Code page Windows-1252 (accents français)
+  ALIGN_CENTER: ESC + 'a' + '\x01',
+  ALIGN_LEFT: ESC + 'a' + '\x00',
+  BOLD_ON: ESC + 'E' + '\x01',
+  BOLD_OFF: ESC + 'E' + '\x00',
+  DOUBLE_ON: GS + '!' + '\x11', // double largeur + hauteur (imprimantes compatibles Epson)
+  DOUBLE_OFF: GS + '!' + '\x00',
+  FEED_LINE: ESC + 'd' + '\x01',
+  CUT_PARTIAL: GS + 'V' + '\x01',
+  CUT_FULL: GS + 'V' + '\x00',
+};
+
+export interface ConfigImprimante {
+  type: 'WINDOWS' | 'NETWORK' | 'BLUETOOTH' | 'NONE';
+  ip: string;
+  port: number;
+  nom: string;
+  partage: string;
+  largeur: number;
+  autoPrint: boolean;
+  bluetooth?: string;
+}
+
+export interface ResultatImpression {
+  ok: boolean;
+  message: string;
+  contenu?: string;
+  bluetooth?: boolean;
+}
+
+/** Remplace les caractères accentués pour les imprimantes thermiques. */
+export function normalizeText(texte: string): string {
+  const MAP: Record<string, string> = {
+    À: 'A', Á: 'A', Â: 'A', Ã: 'A', Ä: 'A', Å: 'A',
+    à: 'a', á: 'a', â: 'a', ã: 'a', ä: 'a', å: 'a',
+    Ç: 'C', ç: 'c',
+    È: 'E', É: 'E', Ê: 'E', Ë: 'E',
+    è: 'e', é: 'e', ê: 'e', ë: 'e',
+    Ì: 'I', Í: 'I', Î: 'I', Ï: 'I',
+    ì: 'i', í: 'i', î: 'i', ï: 'i',
+    Ò: 'O', Ó: 'O', Ô: 'O', Õ: 'O', Ö: 'O',
+    ò: 'o', ó: 'o', ô: 'o', õ: 'o', ö: 'o',
+    Ù: 'U', Ú: 'U', Û: 'U', Ü: 'U',
+    ù: 'u', ú: 'u', û: 'u', ü: 'u',
+    Ñ: 'N', ñ: 'n',
+    Œ: 'OE', œ: 'oe', ß: 'ss', ÿ: 'y', Ÿ: 'Y',
+  };
+  return texte
+    .split('')
+    .map((c) => MAP[c] || c)
+    .join('');
+}
+
+@Injectable()
+export class ImpressionService {
+  private readonly logger = new Logger(ImpressionService.name);
+
+  constructor(private prisma: PrismaService) {}
+
+  // ─── Configuration (.env) ────────────────────────────────────────
+
+  getConfig(): ConfigImprimante {
+    return {
+      type: (process.env.PRINTER_TYPE as ConfigImprimante['type']) || 'WINDOWS',
+      ip: process.env.PRINTER_IP || '192.168.1.100',
+      port: parseInt(process.env.PRINTER_PORT || '9100', 10),
+      nom: process.env.PRINTER_NAME || 'POS-80C',
+      partage: process.env.PRINTER_SHARE || 'RECU',
+      largeur: parseInt(process.env.PRINTER_CHAR_WIDTH || '42', 10),
+      autoPrint: process.env.PRINTER_AUTO_PRINT !== 'false',
+      bluetooth: process.env.PRINTER_BLUETOOTH_DEVICE || '',
+    };
+  }
+
+  /** Met à jour la configuration dans le fichier .env (appliquée au redémarrage). */
+  updateConfigEnv(updates: Partial<ConfigImprimante>): string {
+    const envPath = path.join(process.cwd(), '.env');
+    const content = fs.readFileSync(envPath, 'utf-8');
+    const lines = content.split('\n');
+
+    const mapping: Record<string, keyof ConfigImprimante> = {
+      PRINTER_TYPE: 'type',
+      PRINTER_IP: 'ip',
+      PRINTER_PORT: 'port',
+      PRINTER_NAME: 'nom',
+      PRINTER_SHARE: 'partage',
+      PRINTER_CHAR_WIDTH: 'largeur',
+      PRINTER_AUTO_PRINT: 'autoPrint',
+      PRINTER_BLUETOOTH_DEVICE: 'bluetooth',
+    };
+
+    for (const [envKey, configKey] of Object.entries(mapping)) {
+      if (updates[configKey] !== undefined) {
+        const val =
+          configKey === 'autoPrint'
+            ? updates.autoPrint
+              ? 'true'
+              : 'false'
+            : String(updates[configKey]);
+        const regex = new RegExp(`^${envKey}=.*`);
+        const i = lines.findIndex((l) => regex.test(l));
+        if (i >= 0) {
+          lines[i] = `${envKey}=${val}`;
+        } else {
+          lines.push(`${envKey}=${val}`);
+        }
+      }
+    }
+
+    fs.writeFileSync(envPath, lines.join('\n'), 'utf-8');
+    for (const [envKey, configKey] of Object.entries(mapping)) {
+      if (updates[configKey] !== undefined) {
+        process.env[envKey] =
+          configKey === 'autoPrint'
+            ? updates.autoPrint
+              ? 'true'
+              : 'false'
+            : String(updates[configKey]);
+      }
+    }
+    return 'Configuration mise à jour. Redémarrez le serveur pour appliquer complètement.';
+  }
+
+  /** Liste les imprimantes installées sur ce poste Windows. */
+  async listWindowsPrinters(): Promise<string[]> {
+    try {
+      const { stdout } = await execAsync(
+        `powershell -NoProfile -Command "Get-Printer | Select-Object -ExpandProperty Name"`,
+        { timeout: 8000 },
+      );
+      return stdout
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0);
+    } catch (err: any) {
+      this.logger.warn(`Impossible de lister les imprimantes: ${err.message}`);
+      return [];
+    }
+  }
+
+  /** Teste la connexion à l'imprimante (comme dans gestion-restaurant). */
+  async testPrinter(): Promise<{ ok: boolean; message: string; debug?: string }> {
+    const config = this.getConfig();
+
+    if (config.type === 'NONE') {
+      return {
+        ok: false,
+        message: 'Aucune imprimante configurée (PRINTER_TYPE=NONE)',
+      };
+    }
+
+    if (config.type === 'NETWORK') {
+      try {
+        await this.sendRawToNetwork(
+          config,
+          CMDS.INIT + CMDS.FEED_LINE + CMDS.FEED_LINE,
+        );
+        return {
+          ok: true,
+          message: `Imprimante réseau OK — ${config.ip}:${config.port}`,
+        };
+      } catch (err: any) {
+        return {
+          ok: false,
+          message: `Échec connexion ${config.ip}:${config.port} — ${err.message}`,
+        };
+      }
+    }
+
+    if (config.type === 'BLUETOOTH') {
+      return {
+        ok: true,
+        message: `Imprimante Bluetooth "${config.bluetooth || 'Non spécifiée'}" — le test doit être fait depuis le navigateur (Web Bluetooth)`,
+      };
+    }
+
+    return this.testWindowsPrinter(config);
+  }
+
+  private async testWindowsPrinter(
+    config: ConfigImprimante,
+  ): Promise<{ ok: boolean; message: string; debug?: string }> {
+    const results: string[] = [];
+    const testText = [
+      '',
+      '===== TEST IMPRESSION =====',
+      '',
+      'Si vous voyez ce ticket,',
+      `l'imprimante "${config.nom}"`,
+      'est bien configuree !',
+      '',
+      new Date().toLocaleString('fr-FR'),
+      '',
+      '',
+    ].join('\r\n');
+
+    const tmpFile = path.join(os.tmpdir(), `test_ticket_${Date.now()}.txt`);
+
+    // Méthode 1 : partage (copy /b) avec commande de coupe ESC/POS
+    if (config.partage) {
+      try {
+        const cutCmd = '\x1d\x56\x01'; // GS V 1 = coupe partielle
+        fs.writeFileSync(tmpFile, testText + cutCmd, 'latin1');
+        const sharePath = `\\\\localhost\\${config.partage}`;
+        await execAsync(`cmd /c "copy /b \"${tmpFile}\" \"${sharePath}\""`, {
+          timeout: 10000,
+        });
+        results.push(`✅ Méthode 1 (copy /b \\\\localhost\\${config.partage}) OK`);
+        try { fs.unlinkSync(tmpFile); } catch {}
+        return {
+          ok: true,
+          message: `Imprimante OK via partage \\\\localhost\\${config.partage}`,
+          debug: results.join(' | '),
+        };
+      } catch (err: any) {
+        results.push(`❌ copy /b: ${err.message}`);
+      }
+    }
+
+    // Méthode 2 : Out-Printer
+    try {
+      fs.writeFileSync(tmpFile, testText, 'latin1');
+      const psScript = `Get-Content -Path '${tmpFile.replace(/'/g, "''")}' -Encoding Default | Out-Printer -Name '${config.nom.replace(/'/g, "''")}'`;
+      await execAsync(`powershell -NoProfile -Command "${psScript}"`, {
+        timeout: 10000,
+      });
+      results.push('✅ Méthode 2 (Out-Printer) OK');
+      try { fs.unlinkSync(tmpFile); } catch {}
+      return {
+        ok: true,
+        message: `Imprimante OK via Out-Printer "${config.nom}"`,
+        debug: results.join(' | '),
+      };
+    } catch (err: any) {
+      results.push(`❌ Out-Printer: ${err.message}`);
+    }
+
+    // Méthode 3 : print /d
+    try {
+      fs.writeFileSync(tmpFile, testText, 'latin1');
+      await execAsync(`print /d:"${config.nom}" "${tmpFile}"`, {
+        timeout: 10000,
+      });
+      results.push('✅ Méthode 3 (print /d) OK');
+      try { fs.unlinkSync(tmpFile); } catch {}
+      return {
+        ok: true,
+        message: `Imprimante OK via print /d "${config.nom}"`,
+        debug: results.join(' | '),
+      };
+    } catch (err: any) {
+      results.push(`❌ print /d: ${err.message}`);
+    }
+
+    const printers = await this.listWindowsPrinters();
+    results.push(`Imprimantes disponibles: ${printers.join(', ') || 'aucune'}`);
+
+    return {
+      ok: false,
+      message:
+        `Aucune méthode n'a fonctionné pour "${config.nom}". ` +
+        `Vérifiez que l'imprimante est allumée et partagée (nom de partage: "${config.partage}"). ` +
+        `Imprimantes trouvées: ${printers.slice(0, 5).join(', ') || 'aucune'}`,
+      debug: results.join(' | '),
+    };
+  }
+
+  // ─── Ticket de passage ───────────────────────────────────────────
+
+  /** Génère le texte brut du ticket (largeur configurée, 80 mm = 42 car.). */
+  genererTicketPassage(passage: {
+    numeroOrdre: string;
+    motif: string | null;
+    typePatient: string;
+    createdAt: Date;
+    patient: {
+      nom: string;
+      prenom: string;
+      age: string | null;
+      sexe: string | null;
+      code: string;
+    };
+    service: { nom: string } | null;
+    clinique: { nom: string; adresse: string | null };
+  }): string {
+    const L = this.getConfig().largeur;
+    const trait = (c = '=') => c.repeat(L);
+    const centrer = (t: string) => ' '.repeat(Math.max(0, Math.floor((L - t.length) / 2))) + t;
+
+    const d = passage.createdAt;
+    const dateHeure = `${String(d.getDate()).padStart(2, '0')}/${String(
+      d.getMonth() + 1,
+    ).padStart(2, '0')}/${d.getFullYear()} ${String(d.getHours()).padStart(
+      2,
+      '0',
+    )}:${String(d.getMinutes()).padStart(2, '0')}`;
+
+    // Symboles CP437 sûrs pour imprimantes thermiques (aucune fonction de contrôle)
+    const COEUR = '\x03'; // ♥
+    const PUCE = '\x07'; // •
+
+    const lignes: string[] = [];
+    lignes.push(centrer(passage.clinique.nom.toUpperCase()));
+    if (passage.clinique.adresse) {
+      lignes.push(centrer(passage.clinique.adresse));
+    }
+    lignes.push(trait('-'));
+    lignes.push(centrer('TICKET DE PASSAGE'));
+    // N° d'ordre en double taille (largeur+hauteur) + gras : le centrage tient
+    // compte du doublement de largeur des caractères (espaces doublés aussi).
+    const ordre = passage.numeroOrdre;
+    const espaces = Math.max(0, Math.round((L - ordre.length * 2) / 4));
+    lignes.push(
+      CMDS.DOUBLE_ON +
+        CMDS.BOLD_ON +
+        ' '.repeat(espaces) +
+        ordre +
+        CMDS.BOLD_OFF +
+        CMDS.DOUBLE_OFF,
+    );
+    lignes.push(
+      centrer(`${PUCE} ${passage.patient.nom} ${passage.patient.prenom}`.toUpperCase()),
+    );
+    const infos: string[] = [];
+    if (passage.patient.age) infos.push(`${passage.patient.age} ans`);
+    if (passage.patient.sexe) {
+      infos.push(passage.patient.sexe === 'M' ? 'Masculin' : 'Feminin');
+    }
+    if (infos.length) lignes.push(centrer(infos.join(' | ')));
+    lignes.push(centrer(passage.service?.nom ?? '-'));
+    lignes.push('');
+    lignes.push(centrer('Date de passage'));
+    lignes.push(CMDS.BOLD_ON + centrer(dateHeure) + CMDS.BOLD_OFF);
+    lignes.push(trait('-'));
+    lignes.push(centrer(`${COEUR} Merci de votre visite ${COEUR}`));
+    lignes.push('');
+    return lignes.join('\n');
+  }
+
+  /** Imprime le ticket d'un passage (données récupérées en base). */
+  async imprimerTicketPassage(passageId: number): Promise<ResultatImpression> {
+    const passage = await this.prisma.passage.findUnique({
+      where: { id: passageId },
+      include: {
+        patient: true,
+        service: { select: { id: true, code: true, nom: true } },
+        clinique: { select: { id: true, code: true, nom: true, adresse: true } },
+      },
+    });
+    if (!passage) throw new NotFoundException('Passage introuvable.');
+
+    const texte = normalizeText(this.genererTicketPassage(passage));
+    return this.imprimer(texte);
+  }
+
+  /** Envoie le texte à l'imprimante selon le mode configuré. */
+  async imprimer(texte: string): Promise<ResultatImpression> {
+    const config = this.getConfig();
+
+    if (config.type === 'NONE') {
+      return {
+        ok: false,
+        message: 'Impression désactivée (PRINTER_TYPE=NONE)',
+        contenu: texte,
+      };
+    }
+
+    if (config.type === 'BLUETOOTH') {
+      // Retourne le contenu : le frontend l'envoie via Web Bluetooth
+      return {
+        ok: true,
+        message: 'Ticket prêt pour Bluetooth',
+        contenu: texte,
+        bluetooth: true,
+      };
+    }
+
+    try {
+      if (config.type === 'NETWORK') {
+        // Réseau : flux TCP brut (port 9100)
+        await this.sendRawToNetwork(
+          config,
+          Buffer.from(texte + '\r\n\r\n\r\n' + CMDS.CUT_PARTIAL, 'latin1'),
+        );
+        return {
+          ok: true,
+          message: `Ticket envoyé à l'imprimante réseau ${config.ip}:${config.port}`,
+        };
+      }
+
+      if (config.type === 'WINDOWS') {
+        await this.sendTextToWindowsPrinter(config, texte);
+        return {
+          ok: true,
+          message: `Ticket envoyé à "${config.nom}"`,
+        };
+      }
+
+      return { ok: false, message: "Type d'imprimante inconnu" };
+    } catch (err: any) {
+      this.logger.error(`Erreur impression: ${err.message}`);
+      return { ok: false, message: `Erreur impression: ${err.message}` };
+    }
+  }
+
+  // ─── Envoi réseau TCP brut ───────────────────────────────────────
+
+  private sendRawToNetwork(
+    config: ConfigImprimante,
+    data: string | Buffer,
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const client = new net.Socket();
+      const timeout = setTimeout(() => {
+        client.destroy();
+        reject(new Error('Timeout connexion imprimante'));
+      }, 5000);
+
+      client.connect(config.port, config.ip, () => {
+        clearTimeout(timeout);
+        client.write(data, (err) => {
+          if (err) {
+            client.destroy();
+            reject(err);
+            return;
+          }
+          setTimeout(() => {
+            client.destroy();
+            resolve();
+          }, 1000);
+        });
+      });
+
+      client.on('error', (err) => {
+        clearTimeout(timeout);
+        reject(err);
+      });
+    });
+  }
+
+  // ─── Envoi vers imprimante Windows (3 méthodes de repli) ─────────
+
+  private async sendTextToWindowsPrinter(
+    config: ConfigImprimante,
+    texte: string,
+  ): Promise<void> {
+    const tmpFile = path.join(os.tmpdir(), `ticket_${Date.now()}.txt`);
+    const errors: string[] = [];
+
+    try {
+      // Méthode 1 : partage Windows (copy /b) — envoi brut + coupe ESC/POS
+      if (config.partage) {
+        try {
+          const cutCmd = '\x1d\x56\x01'; // GS V 1 = coupe partielle
+          fs.writeFileSync(tmpFile, texte + cutCmd, 'latin1');
+          const sharePath = `\\\\localhost\\${config.partage}`;
+          await execAsync(`cmd /c "copy /b \"${tmpFile}\" \"${sharePath}\""`, {
+            timeout: 15000,
+          });
+          return;
+        } catch (err: any) {
+          errors.push(`copy /b: ${err.message}`);
+          this.logger.warn(`copy /b échoué: ${err.message}`);
+        }
+      }
+
+      // Méthode 2 : Out-Printer PowerShell
+      try {
+        fs.writeFileSync(tmpFile, texte, 'latin1');
+        const psScript = `Get-Content -Path '${tmpFile.replace(/'/g, "''")}' -Encoding Default | Out-Printer -Name '${config.nom.replace(/'/g, "''")}'`;
+        await execAsync(`powershell -NoProfile -Command "${psScript}"`, {
+          timeout: 15000,
+        });
+        return;
+      } catch (err: any) {
+        errors.push(`Out-Printer: ${err.message}`);
+        this.logger.warn(`Out-Printer échoué: ${err.message}`);
+      }
+
+      // Méthode 3 : commande print
+      try {
+        fs.writeFileSync(tmpFile, texte, 'latin1');
+        await execAsync(`print /d:"${config.nom}" "${tmpFile}"`, {
+          timeout: 15000,
+        });
+        return;
+      } catch (err: any) {
+        errors.push(`print /d: ${err.message}`);
+      }
+
+      throw new Error(errors.join(' | '));
+    } finally {
+      try {
+        fs.unlinkSync(tmpFile);
+      } catch {}
+    }
+  }
+}
