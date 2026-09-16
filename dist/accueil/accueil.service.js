@@ -142,7 +142,8 @@ let AccueilService = AccueilService_1 = class AccueilService {
         };
     }
     async passageParReference(reference, cliniqueId) {
-        const ref = reference.trim().toUpperCase().replace(/[\s-]/g, '');
+        const ref = reference.trim().toUpperCase();
+        const refSansTiret = ref.replace(/[\s-]/g, '');
         const parNumeroOrdre = await this.prisma.passage.findFirst({
             where: {
                 ...(cliniqueId ? { cliniqueId } : {}),
@@ -155,7 +156,7 @@ let AccueilService = AccueilService_1 = class AccueilService {
         const patient = await this.prisma.patient.findFirst({
             where: {
                 ...(cliniqueId ? { cliniqueId } : {}),
-                code: ref,
+                code: refSansTiret,
             },
         });
         if (patient) {
@@ -232,6 +233,26 @@ let AccueilService = AccueilService_1 = class AccueilService {
             },
             include: includePassage,
         });
+        const prestationsService = await this.prisma.prestation.findMany({
+            where: {
+                cliniqueId: dto.cliniqueId,
+                serviceId: dto.serviceId,
+                actif: true,
+            },
+        });
+        if (prestationsService.length > 0) {
+            await this.prisma.passagePrestation.createMany({
+                data: prestationsService.map((p) => ({
+                    passageId: passage.id,
+                    prestationId: p.id,
+                    libelle: p.libelle,
+                    montant: p.montant,
+                    serviceId: p.serviceId,
+                    source: 'ACCUEIL',
+                    statut: p.type === 'CONSULTATION' ? 'EN_ATTENTE' : 'NON_PRESCRITE',
+                })),
+            });
+        }
         const resultat = await this.avecStatutVerifie(passage);
         let impression = null;
         if (this.impressionService.getConfig().autoPrint) {

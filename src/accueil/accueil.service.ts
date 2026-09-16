@@ -175,8 +175,9 @@ export class AccueilService {
    * La référence est normalisée (majuscules, espaces/tirets retirés).
    */
   async passageParReference(reference: string, cliniqueId?: number) {
-    const ref = reference.trim().toUpperCase().replace(/[\s-]/g, '');
-    // 1. N° d'ordre exact (recherche insensible aux tirets)
+    const ref = reference.trim().toUpperCase();
+    const refSansTiret = ref.replace(/[\s-]/g, '');
+    // 1. N° d'ordre (les tirets sont conservés pour la correspondance)
     const parNumeroOrdre = await this.prisma.passage.findFirst({
       where: {
         ...(cliniqueId ? { cliniqueId } : {}),
@@ -190,7 +191,7 @@ export class AccueilService {
     const patient = await this.prisma.patient.findFirst({
       where: {
         ...(cliniqueId ? { cliniqueId } : {}),
-        code: ref,
+        code: refSansTiret,
       },
     });
     if (patient) {
@@ -280,6 +281,31 @@ export class AccueilService {
       },
       include: includePassage,
     });
+
+    // Prestations du dossier (§6.1) : toutes les prestations actives du service.
+    // - consultations : payables immédiatement (EN_ATTENTE)
+    // - examens/actes : NON_PRESCRITE — grisés à la caisse jusqu'à la prescription
+    //   du médecin (« pas encore prescrite »)
+    const prestationsService = await this.prisma.prestation.findMany({
+      where: {
+        cliniqueId: dto.cliniqueId,
+        serviceId: dto.serviceId,
+        actif: true,
+      },
+    });
+    if (prestationsService.length > 0) {
+      await this.prisma.passagePrestation.createMany({
+        data: prestationsService.map((p) => ({
+          passageId: passage.id,
+          prestationId: p.id,
+          libelle: p.libelle,
+          montant: p.montant,
+          serviceId: p.serviceId,
+          source: 'ACCUEIL',
+          statut: p.type === 'CONSULTATION' ? 'EN_ATTENTE' : 'NON_PRESCRITE',
+        })),
+      });
+    }
 
     const resultat = await this.avecStatutVerifie(passage);
 

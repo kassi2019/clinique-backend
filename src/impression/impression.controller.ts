@@ -30,6 +30,20 @@ export class ImpressionController {
     return this.impressionService.imprimerTicketPassage(id);
   }
 
+  /** Imprime le reçu d'un paiement sur l'imprimante configurée. */
+  @UseGuards(JwtAuthGuard)
+  @Post('paiements/:id')
+  imprimerRecu(@Param('id', ParseIntPipe) id: number) {
+    return this.impressionService.imprimerRecuPaiement(id);
+  }
+
+  /** Imprime l'ordonnance d'une consultation. */
+  @UseGuards(JwtAuthGuard)
+  @Post('consultations/:id')
+  imprimerOrdonnance(@Param('id', ParseIntPipe) id: number) {
+    return this.impressionService.imprimerOrdonnance(id);
+  }
+
   /** Liste les imprimantes installées sur le serveur. */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMINISTRATEUR')

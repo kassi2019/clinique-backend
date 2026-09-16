@@ -17,8 +17,8 @@ export declare class UtilisateursService {
                 nom: string;
                 id: number;
                 statut: string;
-                prenom: string;
                 matricule: string;
+                prenom: string;
                 fonction: string;
             };
             role: {
@@ -51,8 +51,8 @@ export declare class UtilisateursService {
             nom: string;
             id: number;
             statut: string;
-            prenom: string;
             matricule: string;
+            prenom: string;
             fonction: string;
         };
         role: {
@@ -80,8 +80,8 @@ export declare class UtilisateursService {
             nom: string;
             id: number;
             statut: string;
-            prenom: string;
             matricule: string;
+            prenom: string;
             fonction: string;
         };
         role: {
@@ -109,8 +109,8 @@ export declare class UtilisateursService {
             nom: string;
             id: number;
             statut: string;
-            prenom: string;
             matricule: string;
+            prenom: string;
             fonction: string;
         };
         role: {
@@ -138,8 +138,8 @@ export declare class UtilisateursService {
             nom: string;
             id: number;
             statut: string;
-            prenom: string;
             matricule: string;
+            prenom: string;
             fonction: string;
         };
         role: {
@@ -167,8 +167,8 @@ export declare class UtilisateursService {
             nom: string;
             id: number;
             statut: string;
-            prenom: string;
             matricule: string;
+            prenom: string;
             fonction: string;
         };
         role: {

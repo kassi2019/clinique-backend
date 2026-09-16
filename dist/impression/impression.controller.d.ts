@@ -4,6 +4,8 @@ export declare class ImpressionController {
     constructor(impressionService: ImpressionService);
     getConfig(): import("./impression.service").ConfigImprimante;
     imprimerTicket(id: number): Promise<import("./impression.service").ResultatImpression>;
+    imprimerRecu(id: number): Promise<import("./impression.service").ResultatImpression>;
+    imprimerOrdonnance(id: number): Promise<import("./impression.service").ResultatImpression>;
     listPrinters(): Promise<{
         printers: string[];
     }>;

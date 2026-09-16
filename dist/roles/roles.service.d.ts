@@ -16,10 +16,10 @@ export declare class RolesService {
                     description: string | null;
                 };
             } & {
+                roleId: number;
                 lecture: boolean;
                 ecriture: boolean;
                 validation: boolean;
-                roleId: number;
                 moduleId: number;
             })[];
         } & {
@@ -44,10 +44,10 @@ export declare class RolesService {
                 description: string | null;
             };
         } & {
+            roleId: number;
             lecture: boolean;
             ecriture: boolean;
             validation: boolean;
-            roleId: number;
             moduleId: number;
         })[];
     } & {
@@ -67,10 +67,10 @@ export declare class RolesService {
                 description: string | null;
             };
         } & {
+            roleId: number;
             lecture: boolean;
             ecriture: boolean;
             validation: boolean;
-            roleId: number;
             moduleId: number;
         })[];
     } & {
@@ -90,10 +90,10 @@ export declare class RolesService {
                 description: string | null;
             };
         } & {
+            roleId: number;
             lecture: boolean;
             ecriture: boolean;
             validation: boolean;
-            roleId: number;
             moduleId: number;
         })[];
     } & {

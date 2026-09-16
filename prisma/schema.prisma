@@ -30,6 +30,8 @@ model Clinique {
   parametre   Parametre?
   patients    Patient[]
   passages    Passage[]
+  paiements   Paiement[]
+  medicaments Medicament[]
 
   @@map("cliniques")
 }
@@ -53,6 +55,8 @@ model Patient {
 
   clinique Clinique  @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   passages Passage[]
+
+  consultations Consultation[]
 
   @@unique([cliniqueId, numeroDossier])
   @@map("patients")
@@ -85,8 +89,120 @@ model Passage {
   service  Service  @relation(fields: [serviceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   clinique Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  prestations  PassagePrestation[]
+  paiements    Paiement[]
+  consultations Consultation[]
+
   @@unique([cliniqueId, numeroOrdre])
   @@map("passages")
+}
+
+// ---------- Prestations rattachées à un passage (caisse, §6) ----------
+model PassagePrestation {
+  id           Int      @id @default(autoincrement())
+  passageId    Int
+  prestationId Int? // référence (gardée nullable pour l'historique)
+  libelle      String // copie du libellé au moment de l'ajout
+  montant      Decimal  @db.Decimal(18, 2)
+  serviceId    Int?
+  source       String   @default("ACCUEIL") // ACCUEIL / MANUEL / PRESCRIPTION
+  statut       String   @default("EN_ATTENTE") // EN_ATTENTE / PAYEE / ANNULEE
+  paiementId   Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  passage    Passage    @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  // NoAction : évite les chemins de cascade multiples (l'annulation d'un paiement est douce)
+  paiement   Paiement?  @relation(fields: [paiementId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  prestation Prestation? @relation(fields: [prestationId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  service    Service?   @relation(fields: [serviceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("passages_prestations")
+}
+
+// ---------- Médicaments (catalogue, prescrits en consultation §7) ----------
+model Medicament {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  nom        String
+  forme      String? // comprimé, sirop, injectable, pommade...
+  dosage     String? // 500 mg, 125 mg/5 ml...
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  clinique     Clinique      @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  prescriptions Prescription[]
+
+  @@unique([cliniqueId, nom])
+  @@map("medicaments")
+}
+
+// ---------- Consultations (§7) ----------
+model Consultation {
+  id                   Int      @id @default(autoincrement())
+  passageId            Int      @unique
+  patientId            Int
+  medecinId            Int // utilisateur médecin
+  motif                String?
+  observation          String?
+  diagnostic           String?
+  hospitalisation      Boolean  @default(false)
+  hospitalisationDuree String?
+  statut               String   @default("EN_COURS") // EN_COURS / VALIDEE
+  valideeLe            DateTime?
+  ordonnanceSauveeLe   DateTime? // date de sauvegarde explicite de l'ordonnance
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  passage     Passage       @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  patient     Patient       @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  medecin     Utilisateur   @relation(fields: [medecinId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  medicaments Prescription[]
+
+  @@map("consultations")
+}
+
+// ---------- Prescriptions de médicaments ----------
+model Prescription {
+  id             Int      @id @default(autoincrement())
+  consultationId Int
+  medicamentId   Int?
+  medicamentNom  String // copie du nom au moment de la prescription
+  forme          String?
+  posologie      String?
+  quantite       String?
+  duree          String?
+  createdAt      DateTime @default(now())
+
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  medicament   Medicament?  @relation(fields: [medicamentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("prescriptions")
+}
+
+// ---------- Paiements (caisse, §6) ----------
+model Paiement {
+  id              Int      @id @default(autoincrement())
+  cliniqueId      Int
+  passageId       Int
+  caissierId      Int // utilisateur ayant encaissé
+  numeroRecu      String // unique par clinique
+  montantTotal    Decimal  @db.Decimal(18, 2)
+  modePaiement    String   @default("ESPECES") // ESPECES / MOBILE_MONEY / CARTE
+  statut          String   @default("VALIDE") // VALIDE / ANNULE
+  motifAnnulation String?
+  dateAnnulation  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  clinique Clinique    @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  passage  Passage     @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  caissier Utilisateur @relation(fields: [caissierId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lignes   PassagePrestation[]
+
+  @@unique([cliniqueId, numeroRecu])
+  @@map("paiements")
 }
 
 // ---------- Paramètres de la clinique (ex. image de la page de connexion) ----------
@@ -118,6 +234,7 @@ model Service {
   personnel   Personnel[]
   prestations Prestation[]
   passages    Passage[]
+  lignes      PassagePrestation[]
 
   @@unique([cliniqueId, code])
   @@map("services")
@@ -163,6 +280,9 @@ model Utilisateur {
 
   personnel Personnel @relation(fields: [personnelId], references: [id], onDelete: Cascade)
   role      Role      @relation(fields: [roleId], references: [id])
+
+  paiements     Paiement[]
+  consultations Consultation[]
 
   @@map("utilisateurs")
 }
@@ -224,6 +344,8 @@ model Prestation {
 
   clinique Clinique @relation(fields: [cliniqueId], references: [id], onDelete: Cascade)
   service  Service  @relation(fields: [serviceId], references: [id])
+
+  lignes PassagePrestation[]
 
   @@unique([cliniqueId, code])
   @@map("prestations")

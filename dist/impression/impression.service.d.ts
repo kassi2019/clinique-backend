@@ -49,6 +49,8 @@ export declare class ImpressionService {
             adresse: string | null;
         };
     }): string;
+    imprimerRecuPaiement(paiementId: number): Promise<ResultatImpression>;
+    imprimerOrdonnance(consultationId: number): Promise<ResultatImpression>;
     imprimerTicketPassage(passageId: number): Promise<ResultatImpression>;
     imprimer(texte: string): Promise<ResultatImpression>;
     private sendRawToNetwork;

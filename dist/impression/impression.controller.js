@@ -28,6 +28,12 @@ let ImpressionController = class ImpressionController {
     imprimerTicket(id) {
         return this.impressionService.imprimerTicketPassage(id);
     }
+    imprimerRecu(id) {
+        return this.impressionService.imprimerRecuPaiement(id);
+    }
+    imprimerOrdonnance(id) {
+        return this.impressionService.imprimerOrdonnance(id);
+    }
     async listPrinters() {
         const printers = await this.impressionService.listWindowsPrinters();
         return { printers };
@@ -56,6 +62,22 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], ImpressionController.prototype, "imprimerTicket", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('paiements/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ImpressionController.prototype, "imprimerRecu", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('consultations/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ImpressionController.prototype, "imprimerOrdonnance", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),

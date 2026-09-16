@@ -178,6 +178,26 @@ async function main() {
     });
   }
 
+  // ---------- 7. Catalogue de médicaments ----------
+  const medicamentsData = [
+    { nom: 'Paracétamol', forme: 'Comprimé', dosage: '500 mg' },
+    { nom: 'Amoxicilline', forme: 'Gélule', dosage: '500 mg' },
+    { nom: 'Ibuprofène', forme: 'Comprimé', dosage: '400 mg' },
+    { nom: 'Amoxicilline + Acide clavulanique', forme: 'Comprimé', dosage: '1 g' },
+    { nom: 'Métronidazole', forme: 'Comprimé', dosage: '500 mg' },
+    { nom: 'Artéméther + Luméfantrine', forme: 'Comprimé', dosage: '80/480 mg' },
+    { nom: 'Sérum de réhydratation orale (SRO)', forme: 'Sachet', dosage: '20,5 g' },
+    { nom: 'Diazépam', forme: 'Comprimé', dosage: '10 mg' },
+    { nom: 'Salbutamol', forme: 'Aérosol', dosage: '100 µg/dose' },
+  ];
+  for (const m of medicamentsData) {
+    await prisma.medicament.upsert({
+      where: { cliniqueId_nom: { cliniqueId: clinique.id, nom: m.nom } },
+      update: { forme: m.forme, dosage: m.dosage },
+      create: { cliniqueId: clinique.id, ...m },
+    });
+  }
+
   console.log('Seed terminé avec succès.');
   console.log('Connexion admin : matricule "admin" / mot de passe "admin123"');
 }

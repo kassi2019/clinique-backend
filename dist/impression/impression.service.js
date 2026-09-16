@@ -290,6 +290,152 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         lignes.push('');
         return lignes.join('\n');
     }
+    async imprimerRecuPaiement(paiementId) {
+        const paiement = await this.prisma.paiement.findUnique({
+            where: { id: paiementId },
+            include: {
+                passage: {
+                    include: {
+                        patient: true,
+                        service: { select: { nom: true } },
+                    },
+                },
+                clinique: { select: { nom: true, adresse: true } },
+                caissier: {
+                    select: {
+                        matricule: true,
+                        personnel: { select: { nom: true, prenom: true } },
+                    },
+                },
+                lignes: true,
+            },
+        });
+        if (!paiement)
+            throw new common_1.NotFoundException('Paiement introuvable.');
+        const L = this.getConfig().largeur;
+        const trait = (c = '-') => c.repeat(L);
+        const centrer = (t) => ' '.repeat(Math.max(0, Math.floor((L - t.length) / 2))) + t;
+        const deuxColonnes = (gauche, droite) => gauche + ' '.repeat(Math.max(1, L - gauche.length - droite.length)) + droite;
+        const COEUR = '\x03';
+        const d = paiement.createdAt;
+        const dateHeure = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        const lignes = [];
+        lignes.push(centrer(paiement.clinique.nom.toUpperCase()));
+        if (paiement.clinique.adresse) {
+            lignes.push(centrer(paiement.clinique.adresse));
+        }
+        lignes.push(trait());
+        lignes.push(centrer('RECU DE PAIEMENT'));
+        lignes.push(CMDS.BOLD_ON + centrer(paiement.numeroRecu) + CMDS.BOLD_OFF);
+        lignes.push(trait());
+        lignes.push(deuxColonnes('Patient', `${paiement.passage.patient.nom} ${paiement.passage.patient.prenom}`.toUpperCase()));
+        lignes.push(deuxColonnes('Code', paiement.passage.patient.code));
+        lignes.push(deuxColonnes('N ordre', paiement.passage.numeroOrdre));
+        lignes.push(trait());
+        for (const l of paiement.lignes) {
+            lignes.push(deuxColonnes(l.libelle, `${Number(l.montant)} F`));
+        }
+        lignes.push(trait());
+        lignes.push(CMDS.BOLD_ON +
+            deuxColonnes('TOTAL', `${Number(paiement.montantTotal)} FCFA`) +
+            CMDS.BOLD_OFF);
+        lignes.push(deuxColonnes('Mode', paiement.modePaiement));
+        lignes.push(deuxColonnes('Caissier', `${paiement.caissier.personnel?.prenom ?? ''} ${paiement.caissier.personnel?.nom ?? ''}`.trim() ||
+            paiement.caissier.matricule));
+        lignes.push(trait());
+        lignes.push(centrer(`${COEUR} Merci de votre visite ${COEUR}`));
+        lignes.push('');
+        const texte = normalizeText(lignes.join('\n'));
+        return this.imprimer(texte);
+    }
+    async imprimerOrdonnance(consultationId) {
+        const consultation = await this.prisma.consultation.findUnique({
+            where: { id: consultationId },
+            include: {
+                passage: {
+                    include: {
+                        patient: true,
+                        service: { select: { nom: true } },
+                        clinique: { select: { nom: true, adresse: true } },
+                        prestations: {
+                            where: { statut: { in: ['EN_ATTENTE', 'PAYEE'] } },
+                            include: { service: { select: { nom: true } } },
+                        },
+                    },
+                },
+                medecin: {
+                    select: {
+                        matricule: true,
+                        personnel: { select: { nom: true, prenom: true } },
+                    },
+                },
+                medicaments: true,
+            },
+        });
+        if (!consultation)
+            throw new common_1.NotFoundException('Consultation introuvable.');
+        const L = this.getConfig().largeur;
+        const trait = (c = '-') => c.repeat(L);
+        const centrer = (t) => ' '.repeat(Math.max(0, Math.floor((L - t.length) / 2))) + t;
+        const deuxColonnes = (gauche, droite) => gauche + ' '.repeat(Math.max(1, L - gauche.length - droite.length)) + droite;
+        const COEUR = '\x03';
+        const d = consultation.createdAt;
+        const dateHeure = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+        const p = consultation.passage.patient;
+        const lignes = [];
+        lignes.push(centrer(consultation.passage.clinique.nom.toUpperCase()));
+        if (consultation.passage.clinique.adresse) {
+            lignes.push(centrer(consultation.passage.clinique.adresse));
+        }
+        lignes.push(trait());
+        lignes.push(centrer('ORDONNANCE'));
+        lignes.push(trait());
+        lignes.push(deuxColonnes('Patient', `${p.nom} ${p.prenom}`.toUpperCase()));
+        lignes.push(deuxColonnes('Code', p.code));
+        if (p.age)
+            lignes.push(deuxColonnes('Age', `${p.age} ans`));
+        if (p.sexe) {
+            lignes.push(deuxColonnes('Sexe', p.sexe === 'M' ? 'Masculin' : 'Feminin'));
+        }
+        lignes.push(deuxColonnes('Medecin', `Dr ${consultation.medecin.personnel?.nom ?? ''} ${consultation.medecin.personnel?.prenom ?? ''}`.trim()));
+        lignes.push(deuxColonnes('Date', dateHeure));
+        lignes.push(trait());
+        if (consultation.medicaments.length === 0) {
+            lignes.push(centrer('Aucun medicament prescrit.'));
+        }
+        else {
+            let i = 1;
+            for (const m of consultation.medicaments) {
+                const nomComplet = `${m.medicamentNom}${m.forme ? ' (' + m.forme + ')' : ''}`;
+                lignes.push(`${i}. ${nomComplet}`);
+                if (m.posologie)
+                    lignes.push(`   Posologie : ${m.posologie}`);
+                if (m.quantite)
+                    lignes.push(`   Quantite  : ${m.quantite}`);
+                if (m.duree)
+                    lignes.push(`   Duree     : ${m.duree}`);
+                i++;
+            }
+        }
+        const examens = consultation.passage.prestations.filter((x) => x.source !== 'ACCUEIL' || x.statut === 'PAYEE');
+        if (examens.length > 0) {
+            lignes.push(trait());
+            lignes.push(centrer('Examens demandes'));
+            for (const e of examens) {
+                lignes.push(centrer(`- ${e.libelle}`));
+            }
+        }
+        if (consultation.diagnostic) {
+            lignes.push(trait());
+            lignes.push(centrer('Diagnostic'));
+            lignes.push(deuxColonnes('', consultation.diagnostic));
+        }
+        lignes.push(trait());
+        lignes.push(centrer(`${COEUR} Merci de votre visite ${COEUR}`));
+        lignes.push('');
+        const texte = normalizeText(lignes.join('\n'));
+        return this.imprimer(texte);
+    }
     async imprimerTicketPassage(passageId) {
         const passage = await this.prisma.passage.findUnique({
             where: { id: passageId },

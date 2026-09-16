@@ -14,8 +14,8 @@ export declare class UtilisateursController {
                 nom: string;
                 id: number;
                 statut: string;
-                prenom: string;
                 matricule: string;
+                prenom: string;
                 fonction: string;
             };
             role: {
@@ -48,8 +48,8 @@ export declare class UtilisateursController {
             nom: string;
             id: number;
             statut: string;
-            prenom: string;
             matricule: string;
+            prenom: string;
             fonction: string;
         };
         role: {
@@ -77,8 +77,8 @@ export declare class UtilisateursController {
             nom: string;
             id: number;
             statut: string;
-            prenom: string;
             matricule: string;
+            prenom: string;
             fonction: string;
         };
         role: {
@@ -106,8 +106,8 @@ export declare class UtilisateursController {
             nom: string;
             id: number;
             statut: string;
-            prenom: string;
             matricule: string;
+            prenom: string;
             fonction: string;
         };
         role: {
@@ -135,8 +135,8 @@ export declare class UtilisateursController {
             nom: string;
             id: number;
             statut: string;
-            prenom: string;
             matricule: string;
+            prenom: string;
             fonction: string;
         };
         role: {
@@ -164,8 +164,8 @@ export declare class UtilisateursController {
             nom: string;
             id: number;
             statut: string;
-            prenom: string;
             matricule: string;
+            prenom: string;
             fonction: string;
         };
         role: {

@@ -13,10 +13,10 @@ export declare class RolesController {
                     description: string | null;
                 };
             } & {
+                roleId: number;
                 lecture: boolean;
                 ecriture: boolean;
                 validation: boolean;
-                roleId: number;
                 moduleId: number;
             })[];
         } & {
@@ -41,10 +41,10 @@ export declare class RolesController {
                 description: string | null;
             };
         } & {
+            roleId: number;
             lecture: boolean;
             ecriture: boolean;
             validation: boolean;
-            roleId: number;
             moduleId: number;
         })[];
     } & {
@@ -64,10 +64,10 @@ export declare class RolesController {
                 description: string | null;
             };
         } & {
+            roleId: number;
             lecture: boolean;
             ecriture: boolean;
             validation: boolean;
-            roleId: number;
             moduleId: number;
         })[];
     } & {
@@ -87,10 +87,10 @@ export declare class RolesController {
                 description: string | null;
             };
         } & {
+            roleId: number;
             lecture: boolean;
             ecriture: boolean;
             validation: boolean;
-            roleId: number;
             moduleId: number;
         })[];
     } & {
