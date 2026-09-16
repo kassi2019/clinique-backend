@@ -8,6 +8,7 @@ export declare class ConsultationsService {
         id: number;
         numeroOrdre: string;
         statut: string;
+        typePatient: string;
         createdAt: Date;
         patient: {
             nom: string;
@@ -37,6 +38,7 @@ export declare class ConsultationsService {
             id: number;
             numeroOrdre: string;
             statut: string;
+            typePatient: string;
             createdAt: Date;
             constantes: {
                 taille: string;

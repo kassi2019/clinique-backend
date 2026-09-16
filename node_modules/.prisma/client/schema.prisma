@@ -127,6 +127,7 @@ model Medicament {
   nom        String
   forme      String? // comprimé, sirop, injectable, pommade...
   dosage     String? // 500 mg, 125 mg/5 ml...
+  stock      Int      @default(0) // quantité disponible (gérée par le module Pharmacie)
   actif      Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

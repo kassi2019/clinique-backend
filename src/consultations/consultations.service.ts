@@ -69,6 +69,7 @@ export class ConsultationsService {
         id: passage.id,
         numeroOrdre: passage.numeroOrdre,
         statut: passage.statut,
+        typePatient: passage.typePatient,
         createdAt: passage.createdAt,
         patient: passage.patient,
         service: passage.service,
@@ -117,6 +118,7 @@ export class ConsultationsService {
         id: passage.id,
         numeroOrdre: passage.numeroOrdre,
         statut: passage.statut,
+        typePatient: passage.typePatient,
         createdAt: passage.createdAt,
         // Constantes récupérées automatiquement de l'accueil (§7)
         constantes: {
@@ -171,8 +173,14 @@ export class ConsultationsService {
   async ajouterMedicament(consultationId: number, dto: PrescriptionDto) {
     const consultation = await this.prisma.consultation.findUnique({
       where: { id: consultationId },
+      include: { passage: { select: { typePatient: true } } },
     });
     if (!consultation) throw new NotFoundException('Consultation introuvable.');
+
+    // Règles selon le type de patient :
+    // - INTERNE : catalogue uniquement si stock > 0 ; la saisie libre reste permise.
+    // - EXTERNE : catalogue complet (même en rupture) + saisie libre.
+    const estInterne = consultation.passage.typePatient !== 'EXTERNE';
 
     let nom = dto.nom?.trim();
     let forme = dto.forme;
@@ -182,6 +190,11 @@ export class ConsultationsService {
         where: { id: dto.medicamentId },
       });
       if (!medicament) throw new BadRequestException('Médicament introuvable.');
+      if (estInterne && medicament.stock <= 0) {
+        throw new BadRequestException(
+          `« ${medicament.nom} » est en rupture de stock : prescription impossible pour un patient interne.`,
+        );
+      }
       nom = medicament.nom;
       forme = medicament.forme ?? dto.forme;
       medicamentId = medicament.id;

@@ -11,6 +11,7 @@ export declare class MedicamentsController {
         actif: boolean;
         forme: string | null;
         dosage: string | null;
+        stock: number;
     }[]>;
     create(dto: any): Promise<{
         nom: string;
@@ -21,6 +22,7 @@ export declare class MedicamentsController {
         actif: boolean;
         forme: string | null;
         dosage: string | null;
+        stock: number;
     }>;
     update(id: number, dto: any): Promise<{
         nom: string;
@@ -31,6 +33,7 @@ export declare class MedicamentsController {
         actif: boolean;
         forme: string | null;
         dosage: string | null;
+        stock: number;
     }>;
     remove(id: number): Promise<{
         nom: string;
@@ -41,5 +44,6 @@ export declare class MedicamentsController {
         actif: boolean;
         forme: string | null;
         dosage: string | null;
+        stock: number;
     }>;
 }

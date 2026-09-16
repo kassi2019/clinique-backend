@@ -180,20 +180,20 @@ async function main() {
 
   // ---------- 7. Catalogue de médicaments ----------
   const medicamentsData = [
-    { nom: 'Paracétamol', forme: 'Comprimé', dosage: '500 mg' },
-    { nom: 'Amoxicilline', forme: 'Gélule', dosage: '500 mg' },
-    { nom: 'Ibuprofène', forme: 'Comprimé', dosage: '400 mg' },
-    { nom: 'Amoxicilline + Acide clavulanique', forme: 'Comprimé', dosage: '1 g' },
-    { nom: 'Métronidazole', forme: 'Comprimé', dosage: '500 mg' },
-    { nom: 'Artéméther + Luméfantrine', forme: 'Comprimé', dosage: '80/480 mg' },
-    { nom: 'Sérum de réhydratation orale (SRO)', forme: 'Sachet', dosage: '20,5 g' },
-    { nom: 'Diazépam', forme: 'Comprimé', dosage: '10 mg' },
-    { nom: 'Salbutamol', forme: 'Aérosol', dosage: '100 µg/dose' },
+    { nom: 'Paracétamol', forme: 'Comprimé', dosage: '500 mg', stock: 50 },
+    { nom: 'Amoxicilline', forme: 'Gélule', dosage: '500 mg', stock: 30 },
+    { nom: 'Ibuprofène', forme: 'Comprimé', dosage: '400 mg', stock: 25 },
+    { nom: 'Amoxicilline + Acide clavulanique', forme: 'Comprimé', dosage: '1 g', stock: 15 },
+    { nom: 'Métronidazole', forme: 'Comprimé', dosage: '500 mg', stock: 20 },
+    { nom: 'Artéméther + Luméfantrine', forme: 'Comprimé', dosage: '80/480 mg', stock: 40 },
+    { nom: 'Sérum de réhydratation orale (SRO)', forme: 'Sachet', dosage: '20,5 g', stock: 60 },
+    { nom: 'Diazépam', forme: 'Comprimé', dosage: '10 mg', stock: 0 },
+    { nom: 'Salbutamol', forme: 'Aérosol', dosage: '100 µg/dose', stock: 12 },
   ];
   for (const m of medicamentsData) {
     await prisma.medicament.upsert({
       where: { cliniqueId_nom: { cliniqueId: clinique.id, nom: m.nom } },
-      update: { forme: m.forme, dosage: m.dosage },
+      update: { forme: m.forme, dosage: m.dosage, stock: m.stock },
       create: { cliniqueId: clinique.id, ...m },
     });
   }

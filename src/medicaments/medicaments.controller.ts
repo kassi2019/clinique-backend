@@ -40,6 +40,7 @@ export class MedicamentsController {
         nom: dto.nom,
         forme: dto.forme,
         dosage: dto.dosage,
+        stock: dto.stock !== undefined ? Number(dto.stock) : 0,
       },
     });
   }
@@ -54,6 +55,7 @@ export class MedicamentsController {
         nom: dto.nom,
         forme: dto.forme,
         dosage: dto.dosage,
+        stock: dto.stock !== undefined ? Number(dto.stock) : undefined,
         actif: dto.actif,
       },
     });
