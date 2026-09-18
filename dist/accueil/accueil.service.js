@@ -212,7 +212,7 @@ let AccueilService = AccueilService_1 = class AccueilService {
         else {
             throw new common_1.BadRequestException('Patient requis : patientId ou nouveauPatient.');
         }
-        const numeroOrdre = await this.prochainNumeroOrdre(dto.cliniqueId, dto.serviceId);
+        const numeroOrdre = await this.prochainNumeroOrdre(dto.cliniqueId, dto.serviceId, dto.typePatient ?? 'INTERNE');
         const passage = await this.prisma.passage.create({
             data: {
                 cliniqueId: dto.cliniqueId,
@@ -240,16 +240,29 @@ let AccueilService = AccueilService_1 = class AccueilService {
                 actif: true,
             },
         });
-        if (prestationsService.length > 0) {
+        const consultations = prestationsService.filter((p) => p.type === 'CONSULTATION');
+        let consultationChoisie = null;
+        if (dto.consultationPrestationId) {
+            consultationChoisie =
+                consultations.find((p) => p.id === dto.consultationPrestationId) ?? null;
+            if (!consultationChoisie) {
+                throw new common_1.BadRequestException('Cette consultation ne correspond pas au service choisi.');
+            }
+        }
+        else if (consultations.length === 1) {
+            consultationChoisie = consultations[0];
+        }
+        const lignes = prestationsService.filter((p) => p.type !== 'CONSULTATION' || p.id === consultationChoisie?.id);
+        if (lignes.length > 0) {
             await this.prisma.passagePrestation.createMany({
-                data: prestationsService.map((p) => ({
+                data: lignes.map((p) => ({
                     passageId: passage.id,
                     prestationId: p.id,
                     libelle: p.libelle,
                     montant: p.montant,
                     serviceId: p.serviceId,
                     source: 'ACCUEIL',
-                    statut: p.type === 'CONSULTATION' ? 'EN_ATTENTE' : 'NON_PRESCRITE',
+                    statut: p.id === consultationChoisie?.id ? 'EN_ATTENTE' : 'NON_PRESCRITE',
                 })),
             });
         }
@@ -295,16 +308,30 @@ let AccueilService = AccueilService_1 = class AccueilService {
         });
         return this.avecStatutVerifie(maj);
     }
-    async prochainNumeroOrdre(cliniqueId, serviceId) {
+    async prochainNumeroOrdre(cliniqueId, serviceId, typePatient) {
         const d = new Date();
         const debutMois = new Date(d.getFullYear(), d.getMonth(), 1);
-        const nb = await this.prisma.passage.count({
-            where: { cliniqueId, serviceId, createdAt: { gte: debutMois } },
-        });
-        const service = await this.prisma.service.findUnique({
-            where: { id: serviceId },
-        });
-        const prefixe = service?.code || 'SRV';
+        let prefixe;
+        let nb;
+        if (typePatient === 'EXTERNE') {
+            nb = await this.prisma.passage.count({
+                where: { cliniqueId, serviceId, createdAt: { gte: debutMois } },
+            });
+            const service = await this.prisma.service.findUnique({
+                where: { id: serviceId },
+            });
+            prefixe = service?.code || 'SRV';
+        }
+        else {
+            nb = await this.prisma.passage.count({
+                where: {
+                    cliniqueId,
+                    typePatient: 'INTERNE',
+                    createdAt: { gte: debutMois },
+                },
+            });
+            prefixe = 'INT';
+        }
         return `${prefixe}-${String(nb + 1).padStart(3, '0')}${String(d.getMonth() + 1).padStart(2, '0')}${d.getFullYear()}`;
     }
     async prochainNumeroDossier(cliniqueId) {

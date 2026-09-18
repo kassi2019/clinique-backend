@@ -15,6 +15,7 @@ import { ConsultationsService } from './consultations.service';
 import {
   CreerConsultationDto,
   PrescriptionDto,
+  PrescrireExamenDto,
   PrescrireExamensDto,
 } from './dto/consultation.dto';
 
@@ -70,6 +71,15 @@ export class ConsultationsController {
     @Body() dto: PrescrireExamensDto,
   ) {
     return this.consultationsService.prescrireExamens(id, dto.lignesIds);
+  }
+
+  /** Ajoute un examen à la prescription (catalogue ou saisie libre hors clinique). */
+  @Post(':id/examens/ajouter')
+  ajouterExamen(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: PrescrireExamenDto,
+  ) {
+    return this.consultationsService.ajouterExamen(id, dto);
   }
 
   @Delete('examens/:id')

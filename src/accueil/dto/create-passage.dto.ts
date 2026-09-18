@@ -164,6 +164,11 @@ export class CreatePassageDto {
   @IsString()
   prestationDemandee?: string;
 
+  /** Si le service propose plusieurs tarifs de consultation, l'accueil précise laquelle retenir. */
+  @IsOptional()
+  @IsInt()
+  consultationPrestationId?: number;
+
   // Constantes (§5.1)
   @IsOptional()
   @IsString()

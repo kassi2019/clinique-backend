@@ -1,0 +1,268 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { EnregistrerCrDto } from './dto/imagerie.dto';
+export declare class ImagerieService {
+    private prisma;
+    constructor(prisma: PrismaService);
+    private imaServiceId;
+    rechercher(reference: string, cliniqueId: number): Promise<{
+        id: number;
+        numeroOrdre: string;
+        statut: string;
+        createdAt: Date;
+        patient: {
+            nom: string;
+            id: number;
+            cliniqueId: number;
+            createdAt: Date;
+            updatedAt: Date;
+            code: string;
+            telephone: string | null;
+            prenom: string;
+            sexe: string | null;
+            numeroDossier: string;
+            age: string | null;
+            ville: string | null;
+            quartier: string | null;
+            profession: string | null;
+            nationalite: string | null;
+            scolarisation: string | null;
+            statutConjugal: string | null;
+            typePopulation: string | null;
+            populationsRisque: string | null;
+            protectionSociale: string | null;
+            residenceHabituelle: string | null;
+            residenceActuelle: string | null;
+        };
+        service: {
+            nom: string;
+            id: number;
+            code: string;
+        };
+        examensPayes: {
+            montant: number;
+            service: {
+                nom: string;
+            };
+            id: number;
+            passageId: number;
+            statut: string;
+            createdAt: Date;
+            updatedAt: Date;
+            serviceId: number | null;
+            prestationId: number | null;
+            libelle: string;
+            source: string;
+            paiementId: number | null;
+        }[];
+        nbExamensIma: number;
+        nbExamensTraites: number;
+    }[]>;
+    detailPassage(passageId: number): Promise<{
+        passage: {
+            id: number;
+            numeroOrdre: string;
+            statut: string;
+            typePatient: string;
+            referent: string;
+            prestationDemandee: string;
+            createdAt: Date;
+            patient: {
+                nom: string;
+                id: number;
+                cliniqueId: number;
+                createdAt: Date;
+                updatedAt: Date;
+                code: string;
+                telephone: string | null;
+                prenom: string;
+                sexe: string | null;
+                numeroDossier: string;
+                age: string | null;
+                ville: string | null;
+                quartier: string | null;
+                profession: string | null;
+                nationalite: string | null;
+                scolarisation: string | null;
+                statutConjugal: string | null;
+                typePopulation: string | null;
+                populationsRisque: string | null;
+                protectionSociale: string | null;
+                residenceHabituelle: string | null;
+                residenceActuelle: string | null;
+            };
+            service: {
+                nom: string;
+                id: number;
+                code: string;
+            };
+            prestations: {
+                montant: number;
+                service: {
+                    nom: string;
+                    id: number;
+                    code: string;
+                };
+                prestation: {
+                    type: string;
+                };
+                id: number;
+                passageId: number;
+                statut: string;
+                createdAt: Date;
+                updatedAt: Date;
+                serviceId: number | null;
+                prestationId: number | null;
+                libelle: string;
+                source: string;
+                paiementId: number | null;
+            }[];
+            examens: ({
+                validePar: {
+                    personnel: {
+                        nom: string;
+                        prenom: string;
+                    };
+                    matricule: string;
+                };
+            } & {
+                id: number;
+                cliniqueId: number;
+                passageId: number;
+                statut: string;
+                createdAt: Date;
+                updatedAt: Date;
+                patientId: number;
+                libelle: string;
+                passagePrestationId: number;
+                indication: string | null;
+                technique: string | null;
+                resultat: string | null;
+                conclusion: string | null;
+                valideParId: number | null;
+                valideLe: Date | null;
+            })[];
+        };
+        historique: ({
+            passage: {
+                service: {
+                    nom: string;
+                };
+                createdAt: Date;
+                numeroOrdre: string;
+            };
+        } & {
+            id: number;
+            cliniqueId: number;
+            passageId: number;
+            statut: string;
+            createdAt: Date;
+            updatedAt: Date;
+            patientId: number;
+            libelle: string;
+            passagePrestationId: number;
+            indication: string | null;
+            technique: string | null;
+            resultat: string | null;
+            conclusion: string | null;
+            valideParId: number | null;
+            valideLe: Date | null;
+        })[];
+    }>;
+    enregistrerCr(passageId: number, dto: EnregistrerCrDto): Promise<{
+        validePar: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+    } & {
+        id: number;
+        cliniqueId: number;
+        passageId: number;
+        statut: string;
+        createdAt: Date;
+        updatedAt: Date;
+        patientId: number;
+        libelle: string;
+        passagePrestationId: number;
+        indication: string | null;
+        technique: string | null;
+        resultat: string | null;
+        conclusion: string | null;
+        valideParId: number | null;
+        valideLe: Date | null;
+    }>;
+    valider(examenId: number, utilisateurId: number): Promise<{
+        validePar: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+    } & {
+        id: number;
+        cliniqueId: number;
+        passageId: number;
+        statut: string;
+        createdAt: Date;
+        updatedAt: Date;
+        patientId: number;
+        libelle: string;
+        passagePrestationId: number;
+        indication: string | null;
+        technique: string | null;
+        resultat: string | null;
+        conclusion: string | null;
+        valideParId: number | null;
+        valideLe: Date | null;
+    }>;
+    historique(params: {
+        jour?: string;
+        recherche?: string;
+        page: number;
+        perPage: number;
+        cliniqueId: number;
+    }): Promise<{
+        data: ({
+            patient: {
+                nom: string;
+                code: string;
+                prenom: string;
+                sexe: string;
+                age: string;
+            };
+            passage: {
+                createdAt: Date;
+                numeroOrdre: string;
+            };
+            validePar: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+            };
+        } & {
+            id: number;
+            cliniqueId: number;
+            passageId: number;
+            statut: string;
+            createdAt: Date;
+            updatedAt: Date;
+            patientId: number;
+            libelle: string;
+            passagePrestationId: number;
+            indication: string | null;
+            technique: string | null;
+            resultat: string | null;
+            conclusion: string | null;
+            valideParId: number | null;
+            valideLe: Date | null;
+        })[];
+        total: number;
+        page: number;
+        perPage: number;
+        totalPages: number;
+    }>;
+}

@@ -18,6 +18,9 @@ const pharmacie_module_1 = require("./pharmacie/pharmacie.module");
 const auth_module_1 = require("./auth/auth.module");
 const cliniques_module_1 = require("./cliniques/cliniques.module");
 const impression_module_1 = require("./impression/impression.module");
+const imagerie_module_1 = require("./imagerie/imagerie.module");
+const hospitalisation_module_1 = require("./hospitalisation/hospitalisation.module");
+const laboratoire_module_1 = require("./laboratoire/laboratoire.module");
 const modules_module_1 = require("./modules/modules.module");
 const parametres_module_1 = require("./parametres/parametres.module");
 const personnel_module_1 = require("./personnel/personnel.module");
@@ -25,6 +28,7 @@ const prestations_module_1 = require("./prestations/prestations.module");
 const prisma_module_1 = require("./prisma/prisma.module");
 const roles_module_1 = require("./roles/roles.module");
 const services_module_1 = require("./services/services.module");
+const statistiques_module_1 = require("./statistiques/statistiques.module");
 const utilisateurs_module_1 = require("./utilisateurs/utilisateurs.module");
 let AppModule = class AppModule {
 };
@@ -39,6 +43,9 @@ exports.AppModule = AppModule = __decorate([
             consultations_module_1.ConsultationsModule,
             medicaments_module_1.MedicamentsModule,
             pharmacie_module_1.PharmacieModule,
+            laboratoire_module_1.LaboratoireModule,
+            imagerie_module_1.ImagerieModule,
+            hospitalisation_module_1.HospitalisationModule,
             cliniques_module_1.CliniquesModule,
             services_module_1.ServicesModule,
             personnel_module_1.PersonnelModule,
@@ -48,6 +55,7 @@ exports.AppModule = AppModule = __decorate([
             prestations_module_1.PrestationsModule,
             parametres_module_1.ParametresModule,
             impression_module_1.ImpressionModule,
+            statistiques_module_1.StatistiquesModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

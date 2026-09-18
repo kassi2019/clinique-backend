@@ -68,6 +68,16 @@ async function main() {
   const services = await prisma.service.findMany({ where: { cliniqueId: clinique.id } });
   const serviceByCode = Object.fromEntries(services.map((s) => [s.code, s]));
 
+  // Types de chambres par défaut (§13) : référentiel paramétrable
+  const typesChambresData = ['Simple', 'Double', 'Suite'];
+  for (const t of typesChambresData) {
+    await prisma.typeChambre.upsert({
+      where: { cliniqueId_libelle: { cliniqueId: clinique.id, libelle: t } },
+      update: {},
+      create: { cliniqueId: clinique.id, libelle: t },
+    });
+  }
+
   // ---------- 4. Rôles ----------
   const roleAdmin = await prisma.role.upsert({
     where: { code: 'ADMINISTRATEUR' },
@@ -115,6 +125,42 @@ async function main() {
   for (const m of modules.filter((x) => ['CONSULTATION', 'MATERNITE', 'STATISTIQUES'].includes(x.code))) {
     await prisma.roleModule.create({
       data: { roleId: roleMedecin.id, moduleId: m.id, lecture: true, ecriture: true, validation: true },
+    });
+  }
+
+  const roleLaboratoire = await prisma.role.upsert({
+    where: { code: 'LABORATOIRE' },
+    update: {},
+    create: { code: 'LABORATOIRE', nom: 'Technicien de laboratoire', description: 'Prélèvements, résultats et comptes rendus' },
+  });
+  await prisma.roleModule.deleteMany({ where: { roleId: roleLaboratoire.id } });
+  for (const m of modules.filter((x) => x.code === 'LABORATOIRE')) {
+    await prisma.roleModule.create({
+      data: { roleId: roleLaboratoire.id, moduleId: m.id, lecture: true, ecriture: true, validation: true },
+    });
+  }
+
+  const roleImagerie = await prisma.role.upsert({
+    where: { code: 'IMAGERIE' },
+    update: {},
+    create: { code: 'IMAGERIE', nom: 'Technicien d\'imagerie', description: 'Échographies, comptes rendus et historique' },
+  });
+  await prisma.roleModule.deleteMany({ where: { roleId: roleImagerie.id } });
+  for (const m of modules.filter((x) => x.code === 'IMAGERIE')) {
+    await prisma.roleModule.create({
+      data: { roleId: roleImagerie.id, moduleId: m.id, lecture: true, ecriture: true, validation: true },
+    });
+  }
+
+  const roleHospitalisation = await prisma.role.upsert({
+    where: { code: 'HOSPITALISATION' },
+    update: {},
+    create: { code: 'HOSPITALISATION', nom: 'Agent d\'hospitalisation', description: 'Admissions, chambres, lits et sorties' },
+  });
+  await prisma.roleModule.deleteMany({ where: { roleId: roleHospitalisation.id } });
+  for (const m of modules.filter((x) => x.code === 'HOSPITALISATION')) {
+    await prisma.roleModule.create({
+      data: { roleId: roleHospitalisation.id, moduleId: m.id, lecture: true, ecriture: true, validation: true },
     });
   }
 

@@ -9,6 +9,9 @@ import { PharmacieModule } from './pharmacie/pharmacie.module';
 import { AuthModule } from './auth/auth.module';
 import { CliniquesModule } from './cliniques/cliniques.module';
 import { ImpressionModule } from './impression/impression.module';
+import { ImagerieModule } from './imagerie/imagerie.module';
+import { HospitalisationModule } from './hospitalisation/hospitalisation.module';
+import { LaboratoireModule } from './laboratoire/laboratoire.module';
 import { ModulesModule } from './modules/modules.module';
 import { ParametresModule } from './parametres/parametres.module';
 import { PersonnelModule } from './personnel/personnel.module';
@@ -16,6 +19,7 @@ import { PrestationsModule } from './prestations/prestations.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RolesModule } from './roles/roles.module';
 import { ServicesModule } from './services/services.module';
+import { StatistiquesModule } from './statistiques/statistiques.module';
 import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
 
 @Module({
@@ -27,6 +31,9 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
     ConsultationsModule,
     MedicamentsModule,
     PharmacieModule,
+    LaboratoireModule,
+    ImagerieModule,
+    HospitalisationModule,
     CliniquesModule,
     ServicesModule,
     PersonnelModule,
@@ -36,6 +43,7 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
     PrestationsModule,
     ParametresModule,
     ImpressionModule,
+    StatistiquesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

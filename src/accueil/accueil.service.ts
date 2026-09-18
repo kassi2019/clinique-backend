@@ -259,6 +259,7 @@ export class AccueilService {
     const numeroOrdre = await this.prochainNumeroOrdre(
       dto.cliniqueId,
       dto.serviceId,
+      dto.typePatient ?? 'INTERNE',
     );
 
     const passage = await this.prisma.passage.create({
@@ -283,7 +284,10 @@ export class AccueilService {
     });
 
     // Prestations du dossier (§6.1) : toutes les prestations actives du service.
-    // - consultations : payables immédiatement (EN_ATTENTE)
+    // - consultation : payable immédiatement (EN_ATTENTE) — UNE SEULE par passage :
+    //   si le service a plusieurs tarifs de consultation, l'accueil précise
+    //   laquelle retenir (consultationPrestationId), sinon celle du service est
+    //   retenue automatiquement.
     // - examens/actes : NON_PRESCRITE — grisés à la caisse jusqu'à la prescription
     //   du médecin (« pas encore prescrite »)
     const prestationsService = await this.prisma.prestation.findMany({
@@ -293,16 +297,34 @@ export class AccueilService {
         actif: true,
       },
     });
-    if (prestationsService.length > 0) {
+    const consultations = prestationsService.filter(
+      (p) => p.type === 'CONSULTATION',
+    );
+    let consultationChoisie: (typeof consultations)[number] | null = null;
+    if (dto.consultationPrestationId) {
+      consultationChoisie =
+        consultations.find((p) => p.id === dto.consultationPrestationId) ?? null;
+      if (!consultationChoisie) {
+        throw new BadRequestException(
+          'Cette consultation ne correspond pas au service choisi.',
+        );
+      }
+    } else if (consultations.length === 1) {
+      consultationChoisie = consultations[0];
+    }
+    const lignes = prestationsService.filter(
+      (p) => p.type !== 'CONSULTATION' || p.id === consultationChoisie?.id,
+    );
+    if (lignes.length > 0) {
       await this.prisma.passagePrestation.createMany({
-        data: prestationsService.map((p) => ({
+        data: lignes.map((p) => ({
           passageId: passage.id,
           prestationId: p.id,
           libelle: p.libelle,
           montant: p.montant,
           serviceId: p.serviceId,
           source: 'ACCUEIL',
-          statut: p.type === 'CONSULTATION' ? 'EN_ATTENTE' : 'NON_PRESCRITE',
+          statut: p.id === consultationChoisie?.id ? 'EN_ATTENTE' : 'NON_PRESCRITE',
         })),
       });
     }
@@ -361,21 +383,43 @@ export class AccueilService {
   }
 
   /**
-   * N° d'ordre : codeCourtService + tiret + compteur du service (3 chiffres)
-   * + mois/année compact (ex. MED-001092026). Le compteur est propre à chaque
-   * service et continu sur le mois (le format ne contient pas le jour : un
-   * compteur quotidien créerait des doublons d'un jour à l'autre).
+   * N° d'ordre (tiret de 6 + ordre/mois/année compact) :
+   * - patient INTERNE  → INT-021092026 : préfixe fixe INT + compteur mensuel
+   *   GLOBAL (tous services confondus) — le même code suit le patient partout ;
+   * - patient EXTERNE  → IMA-002092026 : préfixe du service + compteur mensuel
+   *   propre au service (patient référé directement vers ce service, §15).
+   * Le format ne contient pas le jour : un compteur quotidien créerait des
+   * doublons d'un jour à l'autre.
    */
-  private async prochainNumeroOrdre(cliniqueId: number, serviceId: number) {
+  private async prochainNumeroOrdre(
+    cliniqueId: number,
+    serviceId: number,
+    typePatient: string,
+  ) {
     const d = new Date();
     const debutMois = new Date(d.getFullYear(), d.getMonth(), 1);
-    const nb = await this.prisma.passage.count({
-      where: { cliniqueId, serviceId, createdAt: { gte: debutMois } },
-    });
-    const service = await this.prisma.service.findUnique({
-      where: { id: serviceId },
-    });
-    const prefixe = service?.code || 'SRV';
+    let prefixe: string;
+    let nb: number;
+    if (typePatient === 'EXTERNE') {
+      // Compteur inchangé : tous les passages du service sur le mois
+      nb = await this.prisma.passage.count({
+        where: { cliniqueId, serviceId, createdAt: { gte: debutMois } },
+      });
+      const service = await this.prisma.service.findUnique({
+        where: { id: serviceId },
+      });
+      prefixe = service?.code || 'SRV';
+    } else {
+      // Patient interne : compteur global de tous les passages internes du mois
+      nb = await this.prisma.passage.count({
+        where: {
+          cliniqueId,
+          typePatient: 'INTERNE',
+          createdAt: { gte: debutMois },
+        },
+      });
+      prefixe = 'INT';
+    }
     return `${prefixe}-${String(nb + 1).padStart(3, '0')}${String(
       d.getMonth() + 1,
     ).padStart(2, '0')}${d.getFullYear()}`;

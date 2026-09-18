@@ -10,20 +10,28 @@ export declare class PharmacieService {
         numeroOrdre: string;
         createdAt: Date;
         patient: {
+            nom: string;
             id: number;
             cliniqueId: number;
             createdAt: Date;
             updatedAt: Date;
-            numeroDossier: string;
             code: string;
-            nom: string;
+            telephone: string | null;
             prenom: string;
-            age: string | null;
             sexe: string | null;
+            numeroDossier: string;
+            age: string | null;
             ville: string | null;
             quartier: string | null;
             profession: string | null;
-            telephone: string | null;
+            nationalite: string | null;
+            scolarisation: string | null;
+            statutConjugal: string | null;
+            typePopulation: string | null;
+            populationsRisque: string | null;
+            protectionSociale: string | null;
+            residenceHabituelle: string | null;
+            residenceActuelle: string | null;
         };
         consultations: {
             id: number;
@@ -57,14 +65,14 @@ export declare class PharmacieService {
                 paiement: {
                     montantTotal: number;
                     id: number;
-                    statut: string;
-                    createdAt: Date;
-                    dispensationId: number;
                     caissierId: number;
                     numeroRecu: string;
                     modePaiement: string;
+                    statut: string;
                     motifAnnulation: string | null;
                     dateAnnulation: Date | null;
+                    createdAt: Date;
+                    dispensationId: number;
                 };
                 id: number;
                 statut: string;
@@ -82,20 +90,28 @@ export declare class PharmacieService {
             statut: string;
             valideeLe: Date;
             patient: {
+                nom: string;
                 id: number;
                 cliniqueId: number;
                 createdAt: Date;
                 updatedAt: Date;
-                numeroDossier: string;
                 code: string;
-                nom: string;
+                telephone: string | null;
                 prenom: string;
-                age: string | null;
                 sexe: string | null;
+                numeroDossier: string;
+                age: string | null;
                 ville: string | null;
                 quartier: string | null;
                 profession: string | null;
-                telephone: string | null;
+                nationalite: string | null;
+                scolarisation: string | null;
+                statutConjugal: string | null;
+                typePopulation: string | null;
+                populationsRisque: string | null;
+                protectionSociale: string | null;
+                residenceHabituelle: string | null;
+                residenceActuelle: string | null;
             };
             service: {
                 nom: string;
@@ -145,14 +161,14 @@ export declare class PharmacieService {
             paiement: {
                 montantTotal: number;
                 id: number;
-                statut: string;
-                createdAt: Date;
-                dispensationId: number;
                 caissierId: number;
                 numeroRecu: string;
                 modePaiement: string;
+                statut: string;
                 motifAnnulation: string | null;
                 dateAnnulation: Date | null;
+                createdAt: Date;
+                dispensationId: number;
             };
             pharmacien: {
                 personnel: {
@@ -173,8 +189,21 @@ export declare class PharmacieService {
         prescriptionId: number;
         quantiteDelivree: number;
     }[], pharmacienId: number): Promise<{
+        paiement: {
+            id: number;
+            caissierId: number;
+            numeroRecu: string;
+            montantTotal: import("@prisma/client/runtime/library").Decimal;
+            modePaiement: string;
+            statut: string;
+            motifAnnulation: string | null;
+            dateAnnulation: Date | null;
+            createdAt: Date;
+            dispensationId: number;
+        };
         lignes: {
             id: number;
+            montant: import("@prisma/client/runtime/library").Decimal;
             medicamentId: number | null;
             medicamentNom: string;
             dispensationId: number;
@@ -183,52 +212,39 @@ export declare class PharmacieService {
             quantiteDelivree: number;
             uniteVente: string | null;
             prixUnitaire: import("@prisma/client/runtime/library").Decimal;
-            montant: import("@prisma/client/runtime/library").Decimal;
         }[];
-        paiement: {
-            id: number;
-            statut: string;
-            createdAt: Date;
-            montantTotal: import("@prisma/client/runtime/library").Decimal;
-            dispensationId: number;
-            caissierId: number;
-            numeroRecu: string;
-            modePaiement: string;
-            motifAnnulation: string | null;
-            dateAnnulation: Date | null;
-        };
     } & {
         id: number;
+        montantTotal: import("@prisma/client/runtime/library").Decimal;
         statut: string;
         createdAt: Date;
         updatedAt: Date;
         consultationId: number;
         pharmacienId: number;
-        montantTotal: import("@prisma/client/runtime/library").Decimal;
         clotureeLe: Date | null;
     }>;
     cloturer(dispensationId: number): Promise<{
         id: number;
+        montantTotal: import("@prisma/client/runtime/library").Decimal;
         statut: string;
         createdAt: Date;
         updatedAt: Date;
         consultationId: number;
         pharmacienId: number;
-        montantTotal: import("@prisma/client/runtime/library").Decimal;
         clotureeLe: Date | null;
     }>;
     payer(dispensationId: number, modePaiement: string, caissierId: number): Promise<{
         paiement: {
             montantTotal: number;
             id: number;
-            statut: string;
-            createdAt: Date;
-            dispensationId: number;
             caissierId: number;
             numeroRecu: string;
             modePaiement: string;
+            statut: string;
             motifAnnulation: string | null;
             dateAnnulation: Date | null;
+            createdAt: Date;
+            dispensationId: number;
         };
         lignes: {
             id: number;
@@ -241,15 +257,15 @@ export declare class PharmacieService {
     }>;
     annulerPaiement(paiementId: number, motif: string): Promise<{
         id: number;
-        statut: string;
-        createdAt: Date;
-        montantTotal: import("@prisma/client/runtime/library").Decimal;
-        dispensationId: number;
         caissierId: number;
         numeroRecu: string;
+        montantTotal: import("@prisma/client/runtime/library").Decimal;
         modePaiement: string;
+        statut: string;
         motifAnnulation: string | null;
         dateAnnulation: Date | null;
+        createdAt: Date;
+        dispensationId: number;
     }>;
     stocks(cliniqueId: number, search?: string): Promise<{
         prixVente: number;
@@ -267,14 +283,14 @@ export declare class PharmacieService {
             prixAchat: import("@prisma/client/runtime/library").Decimal | null;
         }[];
         alerteStock: boolean;
+        nom: string;
         id: number;
         cliniqueId: number;
         createdAt: Date;
         updatedAt: Date;
-        nom: string;
+        actif: boolean;
         forme: string | null;
         uniteVente: string;
-        actif: boolean;
         dosage: string | null;
         stock: number;
         seuilAlerte: number;
@@ -301,14 +317,14 @@ export declare class PharmacieService {
         quantiteReelle: number;
         commentaire?: string;
     }, utilisateurId: number): Promise<{
+        nom: string;
         id: number;
         cliniqueId: number;
         createdAt: Date;
         updatedAt: Date;
-        nom: string;
+        actif: boolean;
         forme: string | null;
         uniteVente: string;
-        actif: boolean;
         dosage: string | null;
         stock: number;
         seuilAlerte: number;
@@ -323,15 +339,15 @@ export declare class PharmacieService {
         lot: {
             numeroLot: string;
         };
+        type: string;
         id: number;
         createdAt: Date;
         medicamentId: number;
         quantite: number;
-        type: string;
-        lotId: number | null;
         reference: string | null;
-        utilisateurId: number | null;
         commentaire: string | null;
+        lotId: number | null;
+        utilisateurId: number | null;
     }[]>;
     alertes(cliniqueId: number): Promise<{
         stockBas: {
@@ -350,14 +366,14 @@ export declare class PharmacieService {
                 prixAchat: import("@prisma/client/runtime/library").Decimal | null;
             }[];
             alerteStock: boolean;
+            nom: string;
             id: number;
             cliniqueId: number;
             createdAt: Date;
             updatedAt: Date;
-            nom: string;
+            actif: boolean;
             forme: string | null;
             uniteVente: string;
-            actif: boolean;
             dosage: string | null;
             stock: number;
             seuilAlerte: number;
@@ -379,35 +395,35 @@ export declare class PharmacieService {
     }>;
     consommables(cliniqueId: number): Promise<{
         alerte: boolean;
+        nom: string;
         id: number;
         cliniqueId: number;
         createdAt: Date;
         updatedAt: Date;
-        nom: string;
-        quantite: number;
         actif: boolean;
+        quantite: number;
         seuilAlerte: number;
         unite: string | null;
     }[]>;
     creerConsommable(dto: any): Promise<{
+        nom: string;
         id: number;
         cliniqueId: number;
         createdAt: Date;
         updatedAt: Date;
-        nom: string;
-        quantite: number;
         actif: boolean;
+        quantite: number;
         seuilAlerte: number;
         unite: string | null;
     }>;
     majConsommable(id: number, dto: any): Promise<{
+        nom: string;
         id: number;
         cliniqueId: number;
         createdAt: Date;
         updatedAt: Date;
-        nom: string;
-        quantite: number;
         actif: boolean;
+        quantite: number;
         seuilAlerte: number;
         unite: string | null;
     }>;
@@ -416,24 +432,24 @@ export declare class PharmacieService {
         quantite: number;
         commentaire?: string;
     }, utilisateurId: number): Promise<{
+        nom: string;
         id: number;
         cliniqueId: number;
         createdAt: Date;
         updatedAt: Date;
-        nom: string;
-        quantite: number;
         actif: boolean;
+        quantite: number;
         seuilAlerte: number;
         unite: string | null;
     }>;
     mouvementsConsommable(id: number): Promise<{
+        type: string;
         id: number;
         createdAt: Date;
         quantite: number;
-        type: string;
         reference: string | null;
-        utilisateurId: number | null;
         commentaire: string | null;
+        utilisateurId: number | null;
         consommableId: number;
     }[]>;
 }

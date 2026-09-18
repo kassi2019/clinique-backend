@@ -33,6 +33,11 @@ model Clinique {
   paiements   Paiement[]
   medicaments Medicament[]
   consommables Consommable[]
+  examensLabo ExamenLabo[]
+  examensImagerie ExamenImagerie[]
+  chambres Chambre[]
+  hospitalisations Hospitalisation[]
+  typesChambres TypeChambre[]
 
   @@map("cliniques")
 }
@@ -51,6 +56,15 @@ model Patient {
   quartier      String?
   profession    String?
   telephone     String?
+  // Données administratives de la fiche de consultation curative
+  nationalite         String?
+  scolarisation       String? // OUI / NON / NA
+  statutConjugal      String?
+  typePopulation      String? // POPULATION_GENERALE / TS / OEV / HSH / PC
+  populationsRisque   String?
+  protectionSociale   String? // NON_ASSURE / CMU / ASSURANCE_PRIVEE / CMU_AP / INDIGENT
+  residenceHabituelle String?
+  residenceActuelle   String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -58,6 +72,9 @@ model Patient {
   passages Passage[]
 
   consultations Consultation[]
+  examensLabo  ExamenLabo[]
+  examensImagerie ExamenImagerie[]
+  hospitalisations Hospitalisation[]
 
   @@unique([cliniqueId, numeroDossier])
   @@map("patients")
@@ -93,6 +110,9 @@ model Passage {
   prestations  PassagePrestation[]
   paiements    Paiement[]
   consultations Consultation[]
+  examensLabo  ExamenLabo[]
+  examensImagerie ExamenImagerie[]
+  hospitalisation Hospitalisation?
 
   @@unique([cliniqueId, numeroOrdre])
   @@map("passages")
@@ -117,6 +137,9 @@ model PassagePrestation {
   paiement   Paiement?  @relation(fields: [paiementId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   prestation Prestation? @relation(fields: [prestationId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   service    Service?   @relation(fields: [serviceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  examenLabo ExamenLabo?
+  examenImagerie ExamenImagerie?
+  hospitalisation Hospitalisation? @relation("LignesHospitalisation")
 
   @@map("passages_prestations")
 }
@@ -284,13 +307,51 @@ model Consultation {
   patientId            Int
   medecinId            Int // utilisateur médecin
   motif                String?
-  observation          String?
+  observation          String? // examen physique
   diagnostic           String?
   hospitalisation      Boolean  @default(false)
   hospitalisationDuree String?
   statut               String   @default("EN_COURS") // EN_COURS / VALIDEE
   valideeLe            DateTime?
   ordonnanceSauveeLe   DateTime? // date de sauvegarde explicite de l'ordonnance
+  // ── Fiche de consultation curative ──
+  modeEntree           String? // VENUE_DIRECTE / REFERE_CENTRE / REFERE_MEDECIN / AUTRE
+  modeEntreeAutre      String?
+  traitementAnterieur  String?
+  hta                  Boolean?
+  diabete              Boolean?
+  antecedentsMedicaux  String?
+  antecedentsChirurgicaux String?
+  ddr                  String? // date des dernières règles
+  grossesseEnCours     Boolean?
+  tabac                Boolean?
+  alcool               Boolean?
+  typeSuivi            String?
+  consultantType       String? // CONTROLE / SOINS
+  imc                  String?
+  zscore               String?
+  frequenceRespiratoire String?
+  perimetreBrachial    String?
+  perimetreCranien     String?
+  rechercheTB          String? // OUI / NON / NA
+  pathologiesAssociees String?
+  tdrPaludisme         String? // POSITIF / NEGATIF / NON_REALISE / NA
+  goutteEpaisse        String? // POSITIVE / NEGATIVE / NON_REALISEE / NA
+  mildaEligible        String? // OUI / NON / NA
+  mildaRemise          String? // OUI / NON / NA
+  cdipPropose          Boolean?
+  cdipRealise          Boolean?
+  codeDepistage        String?
+  glycemieAjeun        String?
+  glycemieNonAjeun     String?
+  autresExamens        String?
+  conduiteTenir        String? // traitement : médicaments, posologie, voie, durée, conseils
+  issueSortie          String? // HOSPITALISE / MO / REFERE_INTERNE / REFERE_EXTERNE
+  casPresumeTB         String? // A_REVOIR / DECEDE
+  moDureeHeures        Int?
+  moDureeMinutes       Int?
+  moDebut              DateTime?
+  moFin                DateTime?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
@@ -320,6 +381,157 @@ model Prescription {
   lignes       LigneDispensation[]
 
   @@map("prescriptions")
+}
+
+// ---------- Laboratoire (§11) ----------
+model ExamenLabo {
+  id                  Int       @id @default(autoincrement())
+  passageId           Int
+  passagePrestationId Int       @unique // ligne de prestation LAB payée qui déclenche l'examen
+  cliniqueId          Int
+  patientId           Int
+  libelle             String // copie du libellé de la prestation (l'historique reste lisible)
+  statut              String    @default("PRELEVE") // PRELEVE / RESULTATS / VALIDE
+  preleveParId        Int? // utilisateur ayant fait le prélèvement
+  preleveLe           DateTime?
+  conclusion          String? // texte libre du compte rendu
+  valideParId         Int? // utilisateur ayant validé
+  valideLe            DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  passage           Passage           @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  // NoAction : évite un chemin de cascade multiple Passage → PassagePrestation → ExamenLabo
+  passagePrestation PassagePrestation @relation(fields: [passagePrestationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique          Clinique          @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  patient           Patient           @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  prelevePar        Utilisateur?      @relation("Prelevements", fields: [preleveParId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  validePar         Utilisateur?      @relation("Validations", fields: [valideParId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lignes            ResultatLigne[]
+
+  @@map("examens_labo")
+}
+
+// ---------- Lignes de résultats d'examen (paramètre / valeur / unité / normes) ----------
+model ResultatLigne {
+  id           Int     @id @default(autoincrement())
+  examenLaboId Int
+  parametre    String // ex. Hémoglobine
+  valeur       String? // ex. 12.5
+  unite        String? // ex. g/dL
+  normes       String? // ex. 11.5 - 16.0
+
+  examenLabo ExamenLabo @relation(fields: [examenLaboId], references: [id], onDelete: Cascade)
+
+  @@map("examens_labo_lignes")
+}
+
+// ---------- Imagerie médicale (§12) ----------
+model ExamenImagerie {
+  id                  Int       @id @default(autoincrement())
+  passageId           Int
+  passagePrestationId Int       @unique // ligne de prestation IMA payée
+  cliniqueId          Int
+  patientId           Int
+  libelle             String // copie du libellé (l'historique reste lisible)
+  statut              String    @default("RESULTATS") // RESULTATS / VALIDE (créé à la saisie du compte rendu)
+  indication          String? // section 1 du compte rendu
+  technique           String? // section 2
+  resultat            String? // section 3
+  conclusion          String? // section 4
+  valideParId         Int? // utilisateur ayant validé
+  valideLe            DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  passage           Passage           @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  // NoAction : évite un chemin de cascade multiple Passage → PassagePrestation → ExamenImagerie
+  passagePrestation PassagePrestation @relation(fields: [passagePrestationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique          Clinique          @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  patient           Patient           @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  validePar         Utilisateur?      @relation("ValidationsImagerie", fields: [valideParId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("examens_imagerie")
+}
+
+// ---------- Types de chambres (référentiel, §13) ----------
+model TypeChambre {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  libelle    String // Simple, Double, Suite, VIP…
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  clinique Clinique  @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  chambres Chambre[]
+
+  @@unique([cliniqueId, libelle])
+  @@map("types_chambres")
+}
+
+// ---------- Hospitalisation (§13) ----------
+model Chambre {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  numero     String // 101, 102…
+  typeChambreId Int? // type paramétrable (Simple, Double, Suite…)
+  tarifJournalier Decimal? @db.Decimal(18, 2) // tarif par nuit (sinon tarif HOSP-JOUR)
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  clinique Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  typeChambre TypeChambre? @relation(fields: [typeChambreId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  lits     Lit[]
+
+  @@unique([cliniqueId, numero])
+  @@map("chambres")
+}
+
+// ---------- Lits (§13) ----------
+model Lit {
+  id        Int     @id @default(autoincrement())
+  chambreId Int
+  numero    String // A, B… (affiché "101-A")
+  actif     Boolean @default(true)
+
+  chambre         Chambre          @relation(fields: [chambreId], references: [id], onDelete: Cascade)
+  hospitalisations Hospitalisation[]
+
+  @@unique([chambreId, numero])
+  @@map("lits")
+}
+
+// ---------- Séjours d'hospitalisation (§13) ----------
+model Hospitalisation {
+  id                Int      @id @default(autoincrement())
+  passageId         Int      @unique // un séjour par passage (v1)
+  cliniqueId        Int
+  patientId         Int
+  litId             Int
+  dateEntree        DateTime
+  dateSortie        DateTime?
+  dureePrevue       String? // copie de la durée prévue (fiche médecin)
+  motif             String? // motif d'hospitalisation
+  observations      String? // suivi du séjour
+  statut            String   @default("EN_COURS") // EN_COURS / SORTI
+  sortieMotif       String? // EXEAT / TRANSFERT / DECES / AUTRE
+  sortieParId       Int?
+  nbJoursFactures   Int? // jours calculés à la sortie
+  montantJournalier Decimal? @db.Decimal(18, 2) // copie du tarif à la sortie
+  passagePrestationId Int? @unique // ligne de prestation créée à la sortie (payable à la caisse)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  passage     Passage      @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  clinique    Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lit         Lit          @relation(fields: [litId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sortiePar   Utilisateur? @relation("SortiesHospitalisations", fields: [sortieParId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ligneCaisse PassagePrestation? @relation("LignesHospitalisation", fields: [passagePrestationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("hospitalisations")
 }
 
 // ---------- Paiements (caisse, §6) ----------
@@ -428,6 +640,10 @@ model Utilisateur {
   paiementsPharma PharmaciePaiement[]
   mouvementsStock MouvementStock[]
   mouvementsConsommables MouvementConsommable[]
+  prelevements  ExamenLabo[] @relation("Prelevements")
+  validations   ExamenLabo[] @relation("Validations")
+  validationsImagerie ExamenImagerie[] @relation("ValidationsImagerie")
+  sortiesHospitalisations Hospitalisation[] @relation("SortiesHospitalisations")
 
   @@map("utilisateurs")
 }

@@ -156,14 +156,39 @@ export class ConsultationsService {
       );
     }
 
+    // Données administratives → report sur la fiche patient
+    if (dto.patient) {
+      await this.prisma.patient.update({
+        where: { id: passage.patientId },
+        data: {
+          profession: dto.patient.profession,
+          nationalite: dto.patient.nationalite,
+          scolarisation: dto.patient.scolarisation,
+          statutConjugal: dto.patient.statutConjugal,
+          typePopulation: dto.patient.typePopulation,
+          populationsRisque: dto.patient.populationsRisque,
+          protectionSociale: dto.patient.protectionSociale,
+          residenceHabituelle: dto.patient.residenceHabituelle,
+          residenceActuelle: dto.patient.residenceActuelle,
+        },
+      });
+    }
+
+    const { patient: _patient, moDebut, moFin, ...donnees } = dto;
     return this.prisma.consultation.upsert({
       where: { passageId },
-      update: dto,
+      update: {
+        ...donnees,
+        moDebut: moDebut ? new Date(moDebut) : undefined,
+        moFin: moFin ? new Date(moFin) : undefined,
+      },
       create: {
         passageId,
         patientId: passage.patientId,
         medecinId,
-        ...dto,
+        ...donnees,
+        moDebut: moDebut ? new Date(moDebut) : undefined,
+        moFin: moFin ? new Date(moFin) : undefined,
       },
       include: includeConsultation,
     });
@@ -253,16 +278,107 @@ export class ConsultationsService {
     });
   }
 
+  /**
+   * Ajoute un examen à la prescription (§7) :
+   * - depuis le catalogue (prestationId) → ligne EN_ATTENTE payable à la caisse ;
+   * - en saisie libre (libelle) → examen réalisé hors clinique, non facturable (EXTERNE).
+   */
+  async ajouterExamen(
+    consultationId: number,
+    dto: { prestationId?: number; libelle?: string },
+  ) {
+    const consultation = await this.prisma.consultation.findUnique({
+      where: { id: consultationId },
+      include: { passage: { include: { prestations: true } } },
+    });
+    if (!consultation) throw new NotFoundException('Consultation introuvable.');
+
+    const libelleLibre = dto.libelle?.trim();
+
+    // ── Saisie libre : examen hors clinique (non facturable) ──
+    if (libelleLibre) {
+      const doublon = consultation.passage.prestations.find(
+        (l) =>
+          l.prestationId === null &&
+          l.source === 'PRESCRIPTION' &&
+          l.statut === 'EXTERNE' &&
+          l.libelle.toLowerCase() === libelleLibre.toLowerCase(),
+      );
+      if (doublon) {
+        throw new BadRequestException('Cet examen libre est déjà prescrit.');
+      }
+      return this.prisma.passagePrestation.create({
+        data: {
+          passageId: consultation.passageId,
+          libelle: libelleLibre,
+          montant: 0,
+          source: 'PRESCRIPTION',
+          statut: 'EXTERNE', // non facturable à la caisse
+        },
+      });
+    }
+
+    // ── Catalogue ──
+    if (!dto.prestationId) {
+      throw new BadRequestException(
+        'Choisissez un examen du catalogue ou saisissez un libellé.',
+      );
+    }
+    const prestation = await this.prisma.prestation.findUnique({
+      where: { id: dto.prestationId },
+    });
+    if (!prestation || !prestation.actif) {
+      throw new BadRequestException('Prestation introuvable ou inactive.');
+    }
+    if (prestation.type === 'CONSULTATION') {
+      throw new BadRequestException(
+        'Une consultation ne peut pas être ajoutée comme examen.',
+      );
+    }
+
+    // Ligne déjà présente sur le passage ?
+    const existante = consultation.passage.prestations.find(
+      (l) => l.prestationId === dto.prestationId,
+    );
+    if (existante) {
+      if (existante.statut === 'EN_ATTENTE' || existante.statut === 'PAYEE') {
+        throw new BadRequestException('Cet examen est déjà prescrit (ou payé).');
+      }
+      // NON_PRESCRITE → simple prescription
+      return this.prisma.passagePrestation.update({
+        where: { id: existante.id },
+        data: { statut: 'EN_ATTENTE' },
+      });
+    }
+
+    return this.prisma.passagePrestation.create({
+      data: {
+        passageId: consultation.passageId,
+        prestationId: prestation.id,
+        libelle: prestation.libelle,
+        montant: prestation.montant,
+        serviceId: prestation.serviceId,
+        source: 'PRESCRIPTION',
+        statut: 'EN_ATTENTE',
+      },
+    });
+  }
+
   /** Retire une prescription d'examen (la ligne redevient NON_PRESCRITE). */
   async retirerExamen(ligneId: number) {
     const ligne = await this.prisma.passagePrestation.findUnique({
       where: { id: ligneId },
     });
     if (!ligne) throw new NotFoundException('Ligne introuvable.');
-    if (ligne.statut !== 'EN_ATTENTE') {
+    const libreExterne = ligne.source === 'PRESCRIPTION' && ligne.statut === 'EXTERNE';
+    if (ligne.statut !== 'EN_ATTENTE' && !libreExterne) {
       throw new BadRequestException(
         'Cette prestation est déjà payée : impossible de retirer la prescription.',
       );
+    }
+    // Ligne ajoutée par le médecin (catalogue ou saisie libre) : on la retire entièrement.
+    if (ligne.source === 'PRESCRIPTION') {
+      return this.prisma.passagePrestation.delete({ where: { id: ligneId } });
     }
     return this.prisma.passagePrestation.update({
       where: { id: ligneId },
