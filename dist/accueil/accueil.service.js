@@ -252,6 +252,14 @@ let AccueilService = AccueilService_1 = class AccueilService {
         else if (consultations.length === 1) {
             consultationChoisie = consultations[0];
         }
+        let acteChoisi = null;
+        if (dto.actePrestationId) {
+            acteChoisi =
+                prestationsService.find((p) => p.id === dto.actePrestationId && p.type !== 'CONSULTATION') ?? null;
+            if (!acteChoisi) {
+                throw new common_1.BadRequestException('Cet acte ne correspond pas au service choisi.');
+            }
+        }
         const lignes = prestationsService.filter((p) => p.type !== 'CONSULTATION' || p.id === consultationChoisie?.id);
         if (lignes.length > 0) {
             await this.prisma.passagePrestation.createMany({
@@ -262,7 +270,9 @@ let AccueilService = AccueilService_1 = class AccueilService {
                     montant: p.montant,
                     serviceId: p.serviceId,
                     source: 'ACCUEIL',
-                    statut: p.id === consultationChoisie?.id ? 'EN_ATTENTE' : 'NON_PRESCRITE',
+                    statut: p.id === consultationChoisie?.id || p.id === acteChoisi?.id
+                        ? 'EN_ATTENTE'
+                        : 'NON_PRESCRITE',
                 })),
             });
         }

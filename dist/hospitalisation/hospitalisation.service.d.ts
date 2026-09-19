@@ -52,8 +52,8 @@ export declare class HospitalisationService {
         lits: {
             id: number;
             actif: boolean;
-            numero: string;
             chambreId: number;
+            numero: string;
         }[];
     } & {
         id: number;
@@ -77,8 +77,8 @@ export declare class HospitalisationService {
         lits: {
             id: number;
             actif: boolean;
-            numero: string;
             chambreId: number;
+            numero: string;
         }[];
     } & {
         id: number;
@@ -102,8 +102,8 @@ export declare class HospitalisationService {
         lits: {
             id: number;
             actif: boolean;
-            numero: string;
             chambreId: number;
+            numero: string;
         }[];
     } & {
         id: number;
@@ -128,14 +128,14 @@ export declare class HospitalisationService {
     creerLit(chambreId: number, dto: CreerLitDto): Promise<{
         id: number;
         actif: boolean;
-        numero: string;
         chambreId: number;
+        numero: string;
     }>;
     desactiverLit(id: number): Promise<{
         id: number;
         actif: boolean;
-        numero: string;
         chambreId: number;
+        numero: string;
     }>;
     listerLits(cliniqueId: number): Promise<{
         id: number;
@@ -177,8 +177,8 @@ export declare class HospitalisationService {
             updatedAt: Date;
             patientId: number;
             motif: string | null;
-            passagePrestationId: number | null;
             litId: number;
+            passagePrestationId: number | null;
             dateEntree: Date;
             dateSortie: Date | null;
             dureePrevue: string | null;
@@ -236,6 +236,9 @@ export declare class HospitalisationService {
             observation: string | null;
             diagnostic: string | null;
             hospitalisationDuree: string | null;
+            typeHospitalisation: string | null;
+            hospitalisationDureeJours: number | null;
+            litId: number | null;
             valideeLe: Date | null;
             ordonnanceSauveeLe: Date | null;
             modeEntree: string | null;
@@ -285,8 +288,8 @@ export declare class HospitalisationService {
             updatedAt: Date;
             patientId: number;
             motif: string | null;
-            passagePrestationId: number | null;
             litId: number;
+            passagePrestationId: number | null;
             dateEntree: Date;
             dateSortie: Date | null;
             dureePrevue: string | null;
@@ -353,6 +356,9 @@ export declare class HospitalisationService {
                 observation: string | null;
                 diagnostic: string | null;
                 hospitalisationDuree: string | null;
+                typeHospitalisation: string | null;
+                hospitalisationDureeJours: number | null;
+                litId: number | null;
                 valideeLe: Date | null;
                 ordonnanceSauveeLe: Date | null;
                 modeEntree: string | null;
@@ -429,8 +435,8 @@ export declare class HospitalisationService {
                 } & {
                     id: number;
                     actif: boolean;
-                    numero: string;
                     chambreId: number;
+                    numero: string;
                 };
                 sortiePar: {
                     personnel: {
@@ -454,8 +460,8 @@ export declare class HospitalisationService {
                 updatedAt: Date;
                 patientId: number;
                 motif: string | null;
-                passagePrestationId: number | null;
                 litId: number;
+                passagePrestationId: number | null;
                 dateEntree: Date;
                 dateSortie: Date | null;
                 dureePrevue: string | null;
@@ -485,8 +491,8 @@ export declare class HospitalisationService {
             } & {
                 id: number;
                 actif: boolean;
-                numero: string;
                 chambreId: number;
+                numero: string;
             };
         } & {
             id: number;
@@ -497,8 +503,8 @@ export declare class HospitalisationService {
             updatedAt: Date;
             patientId: number;
             motif: string | null;
-            passagePrestationId: number | null;
             litId: number;
+            passagePrestationId: number | null;
             dateEntree: Date;
             dateSortie: Date | null;
             dureePrevue: string | null;
@@ -545,8 +551,8 @@ export declare class HospitalisationService {
         } & {
             id: number;
             actif: boolean;
-            numero: string;
             chambreId: number;
+            numero: string;
         };
         sortiePar: {
             personnel: {
@@ -570,8 +576,8 @@ export declare class HospitalisationService {
         updatedAt: Date;
         patientId: number;
         motif: string | null;
-        passagePrestationId: number | null;
         litId: number;
+        passagePrestationId: number | null;
         dateEntree: Date;
         dateSortie: Date | null;
         dureePrevue: string | null;
@@ -617,8 +623,8 @@ export declare class HospitalisationService {
         } & {
             id: number;
             actif: boolean;
-            numero: string;
             chambreId: number;
+            numero: string;
         };
         sortiePar: {
             personnel: {
@@ -642,8 +648,8 @@ export declare class HospitalisationService {
         updatedAt: Date;
         patientId: number;
         motif: string | null;
-        passagePrestationId: number | null;
         litId: number;
+        passagePrestationId: number | null;
         dateEntree: Date;
         dateSortie: Date | null;
         dureePrevue: string | null;
@@ -689,8 +695,8 @@ export declare class HospitalisationService {
         } & {
             id: number;
             actif: boolean;
-            numero: string;
             chambreId: number;
+            numero: string;
         };
         sortiePar: {
             personnel: {
@@ -714,8 +720,8 @@ export declare class HospitalisationService {
         updatedAt: Date;
         patientId: number;
         motif: string | null;
-        passagePrestationId: number | null;
         litId: number;
+        passagePrestationId: number | null;
         dateEntree: Date;
         dateSortie: Date | null;
         dureePrevue: string | null;
@@ -770,8 +776,8 @@ export declare class HospitalisationService {
             } & {
                 id: number;
                 actif: boolean;
-                numero: string;
                 chambreId: number;
+                numero: string;
             };
             sortiePar: {
                 personnel: {
@@ -794,8 +800,8 @@ export declare class HospitalisationService {
             updatedAt: Date;
             patientId: number;
             motif: string | null;
-            passagePrestationId: number | null;
             litId: number;
+            passagePrestationId: number | null;
             dateEntree: Date;
             dateSortie: Date | null;
             dureePrevue: string | null;

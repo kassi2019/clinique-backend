@@ -10,7 +10,7 @@ export declare class CreerLitDto {
     numero: string;
 }
 export declare class AdmissionDto {
-    litId: number;
+    litId?: number;
     dateEntree?: string;
     motif?: string;
 }

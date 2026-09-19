@@ -312,6 +312,19 @@ export class AccueilService {
     } else if (consultations.length === 1) {
       consultationChoisie = consultations[0];
     }
+    // Acte précis demandé (ex. type d'échographie) : payable directement à la caisse.
+    let acteChoisi: (typeof prestationsService)[number] | null = null;
+    if (dto.actePrestationId) {
+      acteChoisi =
+        prestationsService.find(
+          (p) => p.id === dto.actePrestationId && p.type !== 'CONSULTATION',
+        ) ?? null;
+      if (!acteChoisi) {
+        throw new BadRequestException(
+          'Cet acte ne correspond pas au service choisi.',
+        );
+      }
+    }
     const lignes = prestationsService.filter(
       (p) => p.type !== 'CONSULTATION' || p.id === consultationChoisie?.id,
     );
@@ -324,7 +337,10 @@ export class AccueilService {
           montant: p.montant,
           serviceId: p.serviceId,
           source: 'ACCUEIL',
-          statut: p.id === consultationChoisie?.id ? 'EN_ATTENTE' : 'NON_PRESCRITE',
+          statut:
+            p.id === consultationChoisie?.id || p.id === acteChoisi?.id
+              ? 'EN_ATTENTE'
+              : 'NON_PRESCRITE',
         })),
       });
     }

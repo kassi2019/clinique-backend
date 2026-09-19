@@ -169,6 +169,11 @@ export class CreatePassageDto {
   @IsInt()
   consultationPrestationId?: number;
 
+  /** Acte précis demandé (ex. type d'échographie) : payable directement à la caisse. */
+  @IsOptional()
+  @IsInt()
+  actePrestationId?: number;
+
   // Constantes (§5.1)
   @IsOptional()
   @IsString()

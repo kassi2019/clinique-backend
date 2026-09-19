@@ -299,20 +299,24 @@ export class HospitalisationService {
       throw new BadRequestException('Aucune prescription d\'hospitalisation pour ce passage.');
     }
 
-    const lit = await this.prisma.lit.findUnique({
-      where: { id: dto.litId },
-      include: {
-        chambre: true,
-        hospitalisations: { where: { statut: 'EN_COURS' } },
-      },
-    });
+    // Lit choisi par le médecin (si fourni), sinon le lit demandé par l'agent.
+    const litDemande = dto.litId ?? consultation.litId ?? null;
+    const lit = litDemande
+      ? await this.prisma.lit.findUnique({
+          where: { id: litDemande },
+          include: {
+            chambre: true,
+            hospitalisations: { where: { statut: 'EN_COURS' } },
+          },
+        })
+      : null;
     if (!lit || !lit.actif) throw new BadRequestException('Lit introuvable ou désactivé.');
     if (lit.hospitalisations.length > 0) {
       throw new BadRequestException('Ce lit est déjà occupé.');
     }
 
-    // Tarif journalier : celui de la chambre, sinon le tarif HOSP-JOUR.
-    // Copié sur le séjour à l'admission (le tarif de la chambre peut changer ensuite).
+    // Facturation à l'entrée : tarif copié au moment de l'admission
+    // (déjà payé à la caisse via la ligne créée à la prescription).
     let tarif = lit.chambre.tarifJournalier;
     if (!tarif) {
       const prestationHosp = await this.prisma.prestation.findFirst({
@@ -323,12 +327,7 @@ export class HospitalisationService {
           service: { code: 'HOS' },
         },
       });
-      if (!prestationHosp) {
-        throw new BadRequestException(
-          'Aucun tarif d\'hospitalisation paramétré (ni sur la chambre, ni en prestation).',
-        );
-      }
-      tarif = prestationHosp.montant;
+      tarif = prestationHosp?.montant ?? null;
     }
 
     return this.prisma.hospitalisation.create({
@@ -359,13 +358,12 @@ export class HospitalisationService {
   }
 
   /**
-   * Sortie du patient : calcule la facture (tarif journalier × jours réels)
-   * et crée la ligne payable à la caisse (§6.2).
+   * Sortie du patient : libère le lit. La facturation a déjà été faite à
+   * l'entrée (jours prévus × tarif de la chambre, payée à la caisse).
    */
   async sortie(sejourId: number, dto: SortieDto, utilisateurId: number) {
     const sejour = await this.prisma.hospitalisation.findUnique({
       where: { id: sejourId },
-      include: { passage: true },
     });
     if (!sejour) throw new NotFoundException('Séjour introuvable.');
     if (sejour.statut !== 'EN_COURS') {
@@ -377,28 +375,8 @@ export class HospitalisationService {
       throw new BadRequestException('La date de sortie est antérieure à l\'entrée.');
     }
 
-    // Tarif journalier copié à l'admission (chambre ou prestation HOSP-JOUR)
-    if (!sejour.montantJournalier) {
-      throw new BadRequestException('Aucun tarif d\'hospitalisation paramétré.');
-    }
-
     const dureeMs = dateSortie.getTime() - sejour.dateEntree.getTime();
     const nbJours = Math.max(1, Math.ceil(dureeMs / (24 * 3600 * 1000)));
-
-    const serviceHos = await this.prisma.service.findFirst({
-      where: { cliniqueId: sejour.cliniqueId, code: 'HOS' },
-    });
-
-    const ligne = await this.prisma.passagePrestation.create({
-      data: {
-        passageId: sejour.passageId,
-        libelle: `Hospitalisation — ${nbJours} jour(s)`,
-        montant: sejour.montantJournalier.mul(nbJours),
-        serviceId: serviceHos?.id ?? null,
-        source: 'PRESCRIPTION',
-        statut: 'EN_ATTENTE',
-      },
-    });
 
     return this.prisma.hospitalisation.update({
       where: { id: sejourId },
@@ -407,8 +385,7 @@ export class HospitalisationService {
         dateSortie,
         sortieMotif: dto.sortieMotif,
         sortieParId: utilisateurId,
-        nbJoursFactures: nbJours,
-        passagePrestationId: ligne.id,
+        nbJoursFactures: nbJours, // informatif (durée réelle du séjour)
       },
       include: includeSejour,
     });

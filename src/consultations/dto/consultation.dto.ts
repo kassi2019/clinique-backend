@@ -67,6 +67,21 @@ export class CreerConsultationDto {
   @IsString()
   hospitalisationDuree?: string;
 
+  /** Type d'hospitalisation : MISE_EN_OBSERVATION / MOYENNE / LONGUE (§13). */
+  @IsOptional()
+  @IsString()
+  typeHospitalisation?: string;
+
+  /** Durée prévue en jours (sert à la facturation à l'entrée). */
+  @IsOptional()
+  @IsInt()
+  hospitalisationDureeJours?: number;
+
+  /** Chambre/lit choisi par le médecin. */
+  @IsOptional()
+  @IsInt()
+  litId?: number;
+
   // ── Fiche de consultation curative ──
   @IsOptional()
   @IsString()

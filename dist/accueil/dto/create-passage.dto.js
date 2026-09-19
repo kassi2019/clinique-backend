@@ -209,6 +209,11 @@ __decorate([
 ], CreatePassageDto.prototype, "consultationPrestationId", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], CreatePassageDto.prototype, "actePrestationId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePassageDto.prototype, "taille", void 0);

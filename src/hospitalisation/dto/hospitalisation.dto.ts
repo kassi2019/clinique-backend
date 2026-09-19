@@ -36,8 +36,10 @@ export class CreerLitDto {
 }
 
 export class AdmissionDto {
+  /** Lit demandé ; sinon le lit choisi par le médecin à la consultation est utilisé. */
+  @IsOptional()
   @IsInt()
-  litId: number;
+  litId?: number;
 
   @IsOptional()
   @IsString()

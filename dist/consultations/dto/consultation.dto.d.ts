@@ -15,6 +15,9 @@ export declare class CreerConsultationDto {
     diagnostic?: string;
     hospitalisation?: boolean;
     hospitalisationDuree?: string;
+    typeHospitalisation?: string;
+    hospitalisationDureeJours?: number;
+    litId?: number;
     modeEntree?: string;
     modeEntreeAutre?: string;
     traitementAnterieur?: string;

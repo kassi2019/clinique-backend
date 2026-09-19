@@ -40,11 +40,11 @@ export declare class StatistiquesService {
                 id: number;
                 numeroOrdre: string;
                 patient: {
-                    code: string;
                     nom: string;
+                    code: string;
                     prenom: string;
-                    age: string;
                     sexe: string;
+                    age: string;
                 };
                 service: string;
                 typePatient: string;

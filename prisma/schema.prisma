@@ -311,6 +311,10 @@ model Consultation {
   diagnostic           String?
   hospitalisation      Boolean  @default(false)
   hospitalisationDuree String?
+  // Hospitalisation (§13) : type + durée en jours + chambre choisie par le médecin
+  typeHospitalisation   String? // MISE_EN_OBSERVATION (0-3 j) / MOYENNE (3-10 j) / LONGUE (> 10 j)
+  hospitalisationDureeJours Int?
+  litId                Int?
   statut               String   @default("EN_COURS") // EN_COURS / VALIDEE
   valideeLe            DateTime?
   ordonnanceSauveeLe   DateTime? // date de sauvegarde explicite de l'ordonnance
@@ -358,6 +362,7 @@ model Consultation {
   passage     Passage       @relation(fields: [passageId], references: [id], onDelete: Cascade)
   patient     Patient       @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   medecin     Utilisateur   @relation(fields: [medecinId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lit         Lit?          @relation(fields: [litId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   medicaments Prescription[]
   dispensations Dispensation[]
 
@@ -498,6 +503,7 @@ model Lit {
 
   chambre         Chambre          @relation(fields: [chambreId], references: [id], onDelete: Cascade)
   hospitalisations Hospitalisation[]
+  consultations   Consultation[]
 
   @@unique([chambreId, numero])
   @@map("lits")

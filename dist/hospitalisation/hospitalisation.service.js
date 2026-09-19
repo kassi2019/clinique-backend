@@ -287,13 +287,16 @@ let HospitalisationService = class HospitalisationService {
         if (!consultation || !consultation.hospitalisation) {
             throw new common_1.BadRequestException('Aucune prescription d\'hospitalisation pour ce passage.');
         }
-        const lit = await this.prisma.lit.findUnique({
-            where: { id: dto.litId },
-            include: {
-                chambre: true,
-                hospitalisations: { where: { statut: 'EN_COURS' } },
-            },
-        });
+        const litDemande = dto.litId ?? consultation.litId ?? null;
+        const lit = litDemande
+            ? await this.prisma.lit.findUnique({
+                where: { id: litDemande },
+                include: {
+                    chambre: true,
+                    hospitalisations: { where: { statut: 'EN_COURS' } },
+                },
+            })
+            : null;
         if (!lit || !lit.actif)
             throw new common_1.BadRequestException('Lit introuvable ou désactivé.');
         if (lit.hospitalisations.length > 0) {
@@ -309,10 +312,7 @@ let HospitalisationService = class HospitalisationService {
                     service: { code: 'HOS' },
                 },
             });
-            if (!prestationHosp) {
-                throw new common_1.BadRequestException('Aucun tarif d\'hospitalisation paramétré (ni sur la chambre, ni en prestation).');
-            }
-            tarif = prestationHosp.montant;
+            tarif = prestationHosp?.montant ?? null;
         }
         return this.prisma.hospitalisation.create({
             data: {
@@ -342,7 +342,6 @@ let HospitalisationService = class HospitalisationService {
     async sortie(sejourId, dto, utilisateurId) {
         const sejour = await this.prisma.hospitalisation.findUnique({
             where: { id: sejourId },
-            include: { passage: true },
         });
         if (!sejour)
             throw new common_1.NotFoundException('Séjour introuvable.');
@@ -353,24 +352,8 @@ let HospitalisationService = class HospitalisationService {
         if (dateSortie < sejour.dateEntree) {
             throw new common_1.BadRequestException('La date de sortie est antérieure à l\'entrée.');
         }
-        if (!sejour.montantJournalier) {
-            throw new common_1.BadRequestException('Aucun tarif d\'hospitalisation paramétré.');
-        }
         const dureeMs = dateSortie.getTime() - sejour.dateEntree.getTime();
         const nbJours = Math.max(1, Math.ceil(dureeMs / (24 * 3600 * 1000)));
-        const serviceHos = await this.prisma.service.findFirst({
-            where: { cliniqueId: sejour.cliniqueId, code: 'HOS' },
-        });
-        const ligne = await this.prisma.passagePrestation.create({
-            data: {
-                passageId: sejour.passageId,
-                libelle: `Hospitalisation — ${nbJours} jour(s)`,
-                montant: sejour.montantJournalier.mul(nbJours),
-                serviceId: serviceHos?.id ?? null,
-                source: 'PRESCRIPTION',
-                statut: 'EN_ATTENTE',
-            },
-        });
         return this.prisma.hospitalisation.update({
             where: { id: sejourId },
             data: {
@@ -379,7 +362,6 @@ let HospitalisationService = class HospitalisationService {
                 sortieMotif: dto.sortieMotif,
                 sortieParId: utilisateurId,
                 nbJoursFactures: nbJours,
-                passagePrestationId: ligne.id,
             },
             include: includeSejour,
         });

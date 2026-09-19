@@ -42,6 +42,7 @@ export declare class CreatePassageDto {
     referent?: string;
     prestationDemandee?: string;
     consultationPrestationId?: number;
+    actePrestationId?: number;
     taille?: string;
     temperature?: number;
     pouls?: number;

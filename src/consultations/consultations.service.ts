@@ -87,9 +87,15 @@ export class ConsultationsService {
         patient: true,
         service: { select: { id: true, code: true, nom: true } },
         prestations: {
-          include: { service: { select: { nom: true } } },
+          include: {
+            service: { select: { id: true, code: true, nom: true } },
+            prestation: { select: { type: true } },
+          },
           orderBy: { createdAt: 'asc' },
         },
+        // Réalisations par les services (état « déjà fait » de l'ordonnance d'examens)
+        examensLabo: { select: { passagePrestationId: true, statut: true } },
+        examensImagerie: { select: { passagePrestationId: true, statut: true } },
         consultations: { include: includeConsultation },
       },
     });
@@ -136,6 +142,8 @@ export class ConsultationsService {
           montant: Number(l.montant),
         })),
         consultation: passage.consultations[0] ?? null,
+        examensLabo: passage.examensLabo,
+        examensImagerie: passage.examensImagerie,
       },
       historique,
     };
@@ -175,7 +183,7 @@ export class ConsultationsService {
     }
 
     const { patient: _patient, moDebut, moFin, ...donnees } = dto;
-    return this.prisma.consultation.upsert({
+    const consultation = await this.prisma.consultation.upsert({
       where: { passageId },
       update: {
         ...donnees,
@@ -192,6 +200,83 @@ export class ConsultationsService {
       },
       include: includeConsultation,
     });
+
+    // Facturation de l'hospitalisation à l'entrée (§13) : la ligne payable
+    // est créée dès que le médecin valide la prescription (lit + jours).
+    await this.synchroniserFactureHospitalisation(passage.cliniqueId, passageId, dto);
+
+    return consultation;
+  }
+
+  /**
+   * Ligne de caisse « Hospitalisation — N jours » : créée/mise à jour quand le
+   * médecin prescrit l'hospitalisation (jours prévus × tarif de la chambre),
+   * retirée si la prescription est annulée (tant qu'elle n'est pas payée).
+   */
+  private async synchroniserFactureHospitalisation(
+    cliniqueId: number,
+    passageId: number,
+    dto: CreerConsultationDto,
+  ) {
+    if (dto.hospitalisation === true) {
+      if (!dto.litId || dto.hospitalisationDureeJours == null || dto.hospitalisationDureeJours < 1) {
+        return; // prescription incomplète : le médecin doit choisir le lit et la durée
+      }
+      const lit = await this.prisma.lit.findUnique({
+        where: { id: dto.litId },
+        include: { chambre: true },
+      });
+      if (!lit || !lit.actif) throw new BadRequestException('Lit introuvable ou désactivé.');
+
+      let tarif = lit.chambre.tarifJournalier;
+      if (!tarif) {
+        const prestationHosp = await this.prisma.prestation.findFirst({
+          where: {
+            cliniqueId,
+            type: 'HOSPITALISATION',
+            actif: true,
+            service: { code: 'HOS' },
+          },
+        });
+        if (!prestationHosp) {
+          throw new BadRequestException('Aucun tarif d\'hospitalisation paramétré.');
+        }
+        tarif = prestationHosp.montant;
+      }
+
+      const montant = tarif.mul(dto.hospitalisationDureeJours);
+      const libelle = `Hospitalisation — ${dto.hospitalisationDureeJours} jour(s) — chambre ${lit.chambre.numero}`;
+      const existante = await this.prisma.passagePrestation.findFirst({
+        where: { passageId, statut: 'EN_ATTENTE', libelle: { startsWith: 'Hospitalisation —' } },
+      });
+      if (existante) {
+        await this.prisma.passagePrestation.update({
+          where: { id: existante.id },
+          data: { libelle, montant },
+        });
+      } else {
+        const serviceHos = await this.prisma.service.findFirst({
+          where: { cliniqueId, code: 'HOS' },
+        });
+        await this.prisma.passagePrestation.create({
+          data: {
+            passageId,
+            libelle,
+            montant,
+            serviceId: serviceHos?.id ?? null,
+            source: 'PRESCRIPTION',
+            statut: 'EN_ATTENTE',
+          },
+        });
+      }
+    } else if (dto.hospitalisation === false) {
+      const existante = await this.prisma.passagePrestation.findFirst({
+        where: { passageId, statut: 'EN_ATTENTE', libelle: { startsWith: 'Hospitalisation —' } },
+      });
+      if (existante) {
+        await this.prisma.passagePrestation.delete({ where: { id: existante.id } });
+      }
+    }
   }
 
   /** Ajoute une prescription de médicament (catalogue ou saisie libre). */

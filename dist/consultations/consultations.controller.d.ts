@@ -10,20 +10,20 @@ export declare class ConsultationsController {
         typePatient: string;
         createdAt: Date;
         patient: {
-            nom: string;
             id: number;
             cliniqueId: number;
             createdAt: Date;
             updatedAt: Date;
             code: string;
-            telephone: string | null;
-            prenom: string;
-            sexe: string | null;
+            nom: string;
             numeroDossier: string;
+            prenom: string;
             age: string | null;
+            sexe: string | null;
             ville: string | null;
             quartier: string | null;
             profession: string | null;
+            telephone: string | null;
             nationalite: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
@@ -34,9 +34,9 @@ export declare class ConsultationsController {
             residenceActuelle: string | null;
         };
         service: {
-            nom: string;
             id: number;
             code: string;
+            nom: string;
         };
         consultable: boolean;
     }[]>;
@@ -56,20 +56,20 @@ export declare class ConsultationsController {
                 poids: number;
             };
             patient: {
-                nom: string;
                 id: number;
                 cliniqueId: number;
                 createdAt: Date;
                 updatedAt: Date;
                 code: string;
-                telephone: string | null;
-                prenom: string;
-                sexe: string | null;
+                nom: string;
                 numeroDossier: string;
+                prenom: string;
                 age: string | null;
+                sexe: string | null;
                 ville: string | null;
                 quartier: string | null;
                 profession: string | null;
+                telephone: string | null;
                 nationalite: string | null;
                 scolarisation: string | null;
                 statutConjugal: string | null;
@@ -80,27 +80,39 @@ export declare class ConsultationsController {
                 residenceActuelle: string | null;
             };
             service: {
-                nom: string;
                 id: number;
                 code: string;
+                nom: string;
             };
             prestations: {
                 montant: number;
                 service: {
+                    id: number;
+                    code: string;
                     nom: string;
                 };
+                prestation: {
+                    type: string;
+                };
                 id: number;
-                passageId: number;
+                serviceId: number | null;
                 statut: string;
                 createdAt: Date;
                 updatedAt: Date;
-                serviceId: number | null;
-                prestationId: number | null;
                 libelle: string;
+                passageId: number;
+                prestationId: number | null;
                 source: string;
                 paiementId: number | null;
             }[];
             consultation: {
+                medecin: {
+                    personnel: {
+                        nom: string;
+                        prenom: string;
+                    };
+                    matricule: string;
+                };
                 medicaments: {
                     id: number;
                     createdAt: Date;
@@ -112,26 +124,22 @@ export declare class ConsultationsController {
                     quantite: string | null;
                     duree: string | null;
                 }[];
-                medecin: {
-                    personnel: {
-                        nom: string;
-                        prenom: string;
-                    };
-                    matricule: string;
-                };
             } & {
-                hospitalisation: boolean;
                 id: number;
-                passageId: number;
+                patientId: number;
+                motif: string | null;
                 statut: string;
                 createdAt: Date;
                 updatedAt: Date;
-                patientId: number;
-                motif: string | null;
+                hospitalisation: boolean;
+                passageId: number;
                 medecinId: number;
                 observation: string | null;
                 diagnostic: string | null;
                 hospitalisationDuree: string | null;
+                typeHospitalisation: string | null;
+                hospitalisationDureeJours: number | null;
+                litId: number | null;
                 valideeLe: Date | null;
                 ordonnanceSauveeLe: Date | null;
                 modeEntree: string | null;
@@ -172,14 +180,29 @@ export declare class ConsultationsController {
                 moDebut: Date | null;
                 moFin: Date | null;
             };
+            examensLabo: {
+                statut: string;
+                passagePrestationId: number;
+            }[];
+            examensImagerie: {
+                statut: string;
+                passagePrestationId: number;
+            }[];
         };
         historique: ({
             passage: {
+                numeroOrdre: string;
+                createdAt: Date;
                 service: {
                     nom: string;
                 };
-                createdAt: Date;
-                numeroOrdre: string;
+            };
+            medecin: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
             };
             medicaments: {
                 id: number;
@@ -192,26 +215,22 @@ export declare class ConsultationsController {
                 quantite: string | null;
                 duree: string | null;
             }[];
-            medecin: {
-                personnel: {
-                    nom: string;
-                    prenom: string;
-                };
-                matricule: string;
-            };
         } & {
-            hospitalisation: boolean;
             id: number;
-            passageId: number;
+            patientId: number;
+            motif: string | null;
             statut: string;
             createdAt: Date;
             updatedAt: Date;
-            patientId: number;
-            motif: string | null;
+            hospitalisation: boolean;
+            passageId: number;
             medecinId: number;
             observation: string | null;
             diagnostic: string | null;
             hospitalisationDuree: string | null;
+            typeHospitalisation: string | null;
+            hospitalisationDureeJours: number | null;
+            litId: number | null;
             valideeLe: Date | null;
             ordonnanceSauveeLe: Date | null;
             modeEntree: string | null;
@@ -254,6 +273,13 @@ export declare class ConsultationsController {
         })[];
     }>;
     creerOuMaj(id: number, dto: CreerConsultationDto, req: any): Promise<{
+        medecin: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
         medicaments: {
             id: number;
             createdAt: Date;
@@ -265,26 +291,22 @@ export declare class ConsultationsController {
             quantite: string | null;
             duree: string | null;
         }[];
-        medecin: {
-            personnel: {
-                nom: string;
-                prenom: string;
-            };
-            matricule: string;
-        };
     } & {
-        hospitalisation: boolean;
         id: number;
-        passageId: number;
+        patientId: number;
+        motif: string | null;
         statut: string;
         createdAt: Date;
         updatedAt: Date;
-        patientId: number;
-        motif: string | null;
+        hospitalisation: boolean;
+        passageId: number;
         medecinId: number;
         observation: string | null;
         diagnostic: string | null;
         hospitalisationDuree: string | null;
+        typeHospitalisation: string | null;
+        hospitalisationDureeJours: number | null;
+        litId: number | null;
         valideeLe: Date | null;
         ordonnanceSauveeLe: Date | null;
         modeEntree: string | null;
@@ -349,44 +371,51 @@ export declare class ConsultationsController {
     }>;
     prescrireExamens(id: number, dto: PrescrireExamensDto): Promise<{
         id: number;
-        passageId: number;
+        serviceId: number | null;
         statut: string;
         createdAt: Date;
         updatedAt: Date;
-        serviceId: number | null;
-        prestationId: number | null;
         libelle: string;
         montant: import("@prisma/client/runtime/library").Decimal;
+        passageId: number;
+        prestationId: number | null;
         source: string;
         paiementId: number | null;
     }[]>;
     ajouterExamen(id: number, dto: PrescrireExamenDto): Promise<{
         id: number;
-        passageId: number;
+        serviceId: number | null;
         statut: string;
         createdAt: Date;
         updatedAt: Date;
-        serviceId: number | null;
-        prestationId: number | null;
         libelle: string;
         montant: import("@prisma/client/runtime/library").Decimal;
+        passageId: number;
+        prestationId: number | null;
         source: string;
         paiementId: number | null;
     }>;
     retirerExamen(id: number): Promise<{
         id: number;
-        passageId: number;
+        serviceId: number | null;
         statut: string;
         createdAt: Date;
         updatedAt: Date;
-        serviceId: number | null;
-        prestationId: number | null;
         libelle: string;
         montant: import("@prisma/client/runtime/library").Decimal;
+        passageId: number;
+        prestationId: number | null;
         source: string;
         paiementId: number | null;
     }>;
     sauvegarderOrdonnance(id: number): Promise<{
+        medecin: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
         medicaments: {
             id: number;
             createdAt: Date;
@@ -398,26 +427,22 @@ export declare class ConsultationsController {
             quantite: string | null;
             duree: string | null;
         }[];
-        medecin: {
-            personnel: {
-                nom: string;
-                prenom: string;
-            };
-            matricule: string;
-        };
     } & {
-        hospitalisation: boolean;
         id: number;
-        passageId: number;
+        patientId: number;
+        motif: string | null;
         statut: string;
         createdAt: Date;
         updatedAt: Date;
-        patientId: number;
-        motif: string | null;
+        hospitalisation: boolean;
+        passageId: number;
         medecinId: number;
         observation: string | null;
         diagnostic: string | null;
         hospitalisationDuree: string | null;
+        typeHospitalisation: string | null;
+        hospitalisationDureeJours: number | null;
+        litId: number | null;
         valideeLe: Date | null;
         ordonnanceSauveeLe: Date | null;
         modeEntree: string | null;
@@ -459,6 +484,13 @@ export declare class ConsultationsController {
         moFin: Date | null;
     }>;
     valider(id: number): Promise<{
+        medecin: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
         medicaments: {
             id: number;
             createdAt: Date;
@@ -470,26 +502,22 @@ export declare class ConsultationsController {
             quantite: string | null;
             duree: string | null;
         }[];
-        medecin: {
-            personnel: {
-                nom: string;
-                prenom: string;
-            };
-            matricule: string;
-        };
     } & {
-        hospitalisation: boolean;
         id: number;
-        passageId: number;
+        patientId: number;
+        motif: string | null;
         statut: string;
         createdAt: Date;
         updatedAt: Date;
-        patientId: number;
-        motif: string | null;
+        hospitalisation: boolean;
+        passageId: number;
         medecinId: number;
         observation: string | null;
         diagnostic: string | null;
         hospitalisationDuree: string | null;
+        typeHospitalisation: string | null;
+        hospitalisationDureeJours: number | null;
+        litId: number | null;
         valideeLe: Date | null;
         ordonnanceSauveeLe: Date | null;
         modeEntree: string | null;
