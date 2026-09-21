@@ -9,14 +9,14 @@ export declare class AccueilController {
                 nom: string;
             };
             id: number;
-            statut: string;
             createdAt: Date;
+            statut: string;
             numeroOrdre: string;
         }[];
     } & {
-        nom: string;
         id: number;
         cliniqueId: number;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
         code: string;
@@ -40,15 +40,15 @@ export declare class AccueilController {
     listerPassages(cliniqueId: number, date?: string, debut?: string, fin?: string, constantes?: string, search?: string, serviceId?: string, page?: string, perPage?: string): Promise<{
         data: ({
             clinique: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
                 adresse: string;
             };
             patient: {
-                nom: string;
                 id: number;
                 cliniqueId: number;
+                nom: string;
                 createdAt: Date;
                 updatedAt: Date;
                 code: string;
@@ -70,16 +70,16 @@ export declare class AccueilController {
                 residenceActuelle: string | null;
             };
             service: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
             };
         } & {
             id: number;
             cliniqueId: number;
-            statut: string;
             createdAt: Date;
             updatedAt: Date;
+            statut: string;
             serviceId: number;
             patientId: number;
             numeroOrdre: string;
@@ -102,15 +102,15 @@ export declare class AccueilController {
     }>;
     passageParReference(code: string, cliniqueId?: string): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
             adresse: string;
         };
         patient: {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
             createdAt: Date;
             updatedAt: Date;
             code: string;
@@ -132,16 +132,16 @@ export declare class AccueilController {
             residenceActuelle: string | null;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
     } & {
         id: number;
         cliniqueId: number;
-        statut: string;
         createdAt: Date;
         updatedAt: Date;
+        statut: string;
         serviceId: number;
         patientId: number;
         numeroOrdre: string;
@@ -159,15 +159,15 @@ export declare class AccueilController {
     }>;
     findOne(id: number): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
             adresse: string;
         };
         patient: {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
             createdAt: Date;
             updatedAt: Date;
             code: string;
@@ -189,16 +189,16 @@ export declare class AccueilController {
             residenceActuelle: string | null;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
     } & {
         id: number;
         cliniqueId: number;
-        statut: string;
         createdAt: Date;
         updatedAt: Date;
+        statut: string;
         serviceId: number;
         patientId: number;
         numeroOrdre: string;
@@ -217,15 +217,15 @@ export declare class AccueilController {
     creerPassage(dto: CreatePassageDto): Promise<{
         impression: any;
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
             adresse: string;
         };
         patient: {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
             createdAt: Date;
             updatedAt: Date;
             code: string;
@@ -247,15 +247,15 @@ export declare class AccueilController {
             residenceActuelle: string | null;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         id: number;
         cliniqueId: number;
-        statut: string;
         createdAt: Date;
         updatedAt: Date;
+        statut: string;
         serviceId: number;
         patientId: number;
         numeroOrdre: string;
@@ -273,15 +273,15 @@ export declare class AccueilController {
     }>;
     modifierPassage(id: number, dto: UpdatePassageDto): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
             adresse: string;
         };
         patient: {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
             createdAt: Date;
             updatedAt: Date;
             code: string;
@@ -303,16 +303,16 @@ export declare class AccueilController {
             residenceActuelle: string | null;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
     } & {
         id: number;
         cliniqueId: number;
-        statut: string;
         createdAt: Date;
         updatedAt: Date;
+        statut: string;
         serviceId: number;
         patientId: number;
         numeroOrdre: string;

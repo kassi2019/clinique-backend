@@ -310,7 +310,14 @@ export class PharmacieService {
 
     // Impression automatique du reçu pharmacie
     let impression = null;
-    if (this.impressionService.getConfig().autoPrint) {
+    if (
+      (
+        await this.impressionService.getConfigPoste(
+          dispensation.consultation.passage.cliniqueId,
+          'PHARMACIE',
+        )
+      ).autoPrint
+    ) {
       try {
         impression = await this.impressionService.imprimerRecuPharmacie(paiement.id);
       } catch (err: any) {

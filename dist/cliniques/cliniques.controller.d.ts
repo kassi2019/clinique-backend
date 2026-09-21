@@ -4,11 +4,11 @@ export declare class CliniquesController {
     private cliniquesService;
     constructor(cliniquesService: CliniquesService);
     findAll(): import(".prisma/client").Prisma.PrismaPromise<{
-        nom: string;
         id: number;
-        statut: string;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
+        statut: string;
         code: string;
         adresse: string | null;
         telephone: string | null;
@@ -19,41 +19,41 @@ export declare class CliniquesController {
             services: number;
         };
     } & {
-        nom: string;
         id: number;
-        statut: string;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
+        statut: string;
         code: string;
         adresse: string | null;
         telephone: string | null;
     }>;
     create(dto: CreateCliniqueDto): Promise<{
-        nom: string;
         id: number;
-        statut: string;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
+        statut: string;
         code: string;
         adresse: string | null;
         telephone: string | null;
     }>;
     update(id: number, dto: UpdateCliniqueDto): Promise<{
-        nom: string;
         id: number;
-        statut: string;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
+        statut: string;
         code: string;
         adresse: string | null;
         telephone: string | null;
     }>;
     remove(id: number): Promise<{
-        nom: string;
         id: number;
-        statut: string;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
+        statut: string;
         code: string;
         adresse: string | null;
         telephone: string | null;

@@ -62,7 +62,7 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         this.prisma = prisma;
         this.logger = new common_1.Logger(ImpressionService_1.name);
     }
-    getConfig() {
+    getConfigEnv() {
         return {
             type: process.env.PRINTER_TYPE || 'WINDOWS',
             ip: process.env.PRINTER_IP || '192.168.1.100',
@@ -74,49 +74,70 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
             bluetooth: process.env.PRINTER_BLUETOOTH_DEVICE || '',
         };
     }
-    updateConfigEnv(updates) {
-        const envPath = path.join(process.cwd(), '.env');
-        const content = fs.readFileSync(envPath, 'utf-8');
-        const lines = content.split('\n');
-        const mapping = {
-            PRINTER_TYPE: 'type',
-            PRINTER_IP: 'ip',
-            PRINTER_PORT: 'port',
-            PRINTER_NAME: 'nom',
-            PRINTER_SHARE: 'partage',
-            PRINTER_CHAR_WIDTH: 'largeur',
-            PRINTER_AUTO_PRINT: 'autoPrint',
-            PRINTER_BLUETOOTH_DEVICE: 'bluetooth',
+    async getConfigPoste(cliniqueId, poste) {
+        const defaut = this.getConfigEnv();
+        const row = await this.prisma.imprimante.findUnique({
+            where: { cliniqueId_poste: { cliniqueId, poste } },
+        });
+        if (!row)
+            return defaut;
+        return {
+            type: row.type || defaut.type,
+            ip: row.ip || defaut.ip,
+            port: row.port || defaut.port,
+            nom: row.nom || defaut.nom,
+            partage: row.partage || defaut.partage,
+            largeur: row.largeur || defaut.largeur,
+            autoPrint: row.autoPrint,
+            bluetooth: defaut.bluetooth,
         };
-        for (const [envKey, configKey] of Object.entries(mapping)) {
-            if (updates[configKey] !== undefined) {
-                const val = configKey === 'autoPrint'
-                    ? updates.autoPrint
-                        ? 'true'
-                        : 'false'
-                    : String(updates[configKey]);
-                const regex = new RegExp(`^${envKey}=.*`);
-                const i = lines.findIndex((l) => regex.test(l));
-                if (i >= 0) {
-                    lines[i] = `${envKey}=${val}`;
-                }
-                else {
-                    lines.push(`${envKey}=${val}`);
-                }
-            }
-        }
-        fs.writeFileSync(envPath, lines.join('\n'), 'utf-8');
-        for (const [envKey, configKey] of Object.entries(mapping)) {
-            if (updates[configKey] !== undefined) {
-                process.env[envKey] =
-                    configKey === 'autoPrint'
-                        ? updates.autoPrint
-                            ? 'true'
-                            : 'false'
-                        : String(updates[configKey]);
-            }
-        }
-        return 'Configuration mise à jour. Redémarrez le serveur pour appliquer complètement.';
+    }
+    async getConfigs(cliniqueId) {
+        const lignes = await this.prisma.imprimante.findMany({
+            where: { cliniqueId },
+        });
+        return ImpressionService_1.POSTES.map((poste) => {
+            const row = lignes.find((l) => l.poste === poste);
+            return {
+                poste,
+                libelle: ImpressionService_1.LIBELLES_POSTES[poste],
+                config: {
+                    type: row?.type ?? 'WINDOWS',
+                    nom: row?.nom ?? '',
+                    partage: row?.partage ?? '',
+                    ip: row?.ip ?? '',
+                    port: row?.port ?? 9100,
+                    largeur: row?.largeur ?? 42,
+                    autoPrint: row?.autoPrint ?? true,
+                },
+            };
+        });
+    }
+    async updateConfig(cliniqueId, poste, updates) {
+        return this.prisma.imprimante.upsert({
+            where: { cliniqueId_poste: { cliniqueId, poste } },
+            update: {
+                type: updates.type,
+                nom: updates.nom,
+                partage: updates.partage,
+                ip: updates.ip,
+                port: updates.port,
+                largeur: updates.largeur,
+                autoPrint: updates.autoPrint,
+            },
+            create: {
+                cliniqueId,
+                poste,
+                libelle: ImpressionService_1.LIBELLES_POSTES[poste] ?? poste,
+                type: updates.type ?? 'WINDOWS',
+                nom: updates.nom,
+                partage: updates.partage,
+                ip: updates.ip,
+                port: updates.port ?? 9100,
+                largeur: updates.largeur ?? 42,
+                autoPrint: updates.autoPrint ?? true,
+            },
+        });
     }
     async listWindowsPrinters() {
         try {
@@ -131,8 +152,8 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
             return [];
         }
     }
-    async testPrinter() {
-        const config = this.getConfig();
+    async testPrinter(cliniqueId, poste) {
+        const config = await this.getConfigPoste(cliniqueId, poste);
         if (config.type === 'NONE') {
             return {
                 ok: false,
@@ -249,8 +270,8 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
             debug: results.join(' | '),
         };
     }
-    genererTicketPassage(passage) {
-        const L = this.getConfig().largeur;
+    genererTicketPassage(passage, largeur) {
+        const L = largeur;
         const trait = (c = '=') => c.repeat(L);
         const centrer = (t) => ' '.repeat(Math.max(0, Math.floor((L - t.length) / 2))) + t;
         const d = passage.createdAt;
@@ -312,7 +333,8 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         });
         if (!paiement)
             throw new common_1.NotFoundException('Paiement introuvable.');
-        const L = this.getConfig().largeur;
+        const config = await this.getConfigPoste(paiement.cliniqueId, 'RECU');
+        const L = config.largeur;
         const trait = (c = '-') => c.repeat(L);
         const centrer = (t) => ' '.repeat(Math.max(0, Math.floor((L - t.length) / 2))) + t;
         const deuxColonnes = (gauche, droite) => gauche + ' '.repeat(Math.max(1, L - gauche.length - droite.length)) + droite;
@@ -346,7 +368,7 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         lignes.push(centrer(`${COEUR} Merci de votre visite ${COEUR}`));
         lignes.push('');
         const texte = normalizeText(lignes.join('\n'));
-        return this.imprimer(texte);
+        return this.imprimer(texte, config);
     }
     async imprimerOrdonnance(consultationId) {
         const consultation = await this.prisma.consultation.findUnique({
@@ -374,7 +396,8 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         });
         if (!consultation)
             throw new common_1.NotFoundException('Consultation introuvable.');
-        const L = this.getConfig().largeur;
+        const config = await this.getConfigPoste(consultation.passage.cliniqueId, 'ORDONNANCE');
+        const L = config.largeur;
         const trait = (c = '-') => c.repeat(L);
         const centrer = (t) => ' '.repeat(Math.max(0, Math.floor((L - t.length) / 2))) + t;
         const deuxColonnes = (gauche, droite) => gauche + ' '.repeat(Math.max(1, L - gauche.length - droite.length)) + droite;
@@ -434,7 +457,7 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         lignes.push(centrer(`${COEUR} Merci de votre visite ${COEUR}`));
         lignes.push('');
         const texte = normalizeText(lignes.join('\n'));
-        return this.imprimer(texte);
+        return this.imprimer(texte, config);
     }
     async imprimerRecuPharmacie(paiementId) {
         const paiement = await this.prisma.pharmaciePaiement.findUnique({
@@ -455,7 +478,8 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         });
         if (!paiement)
             throw new common_1.NotFoundException('Paiement introuvable.');
-        const L = this.getConfig().largeur;
+        const config = await this.getConfigPoste(paiement.dispensation.consultation.passage.cliniqueId, 'PHARMACIE');
+        const L = config.largeur;
         const trait = (c = '-') => c.repeat(L);
         const centrer = (t) => ' '.repeat(Math.max(0, Math.floor((L - t.length) / 2))) + t;
         const deuxColonnes = (gauche, droite) => gauche + ' '.repeat(Math.max(1, L - gauche.length - droite.length)) + droite;
@@ -494,7 +518,7 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         lignes.push(centrer(`${COEUR} Merci de votre visite ${COEUR}`));
         lignes.push('');
         const texte = normalizeText(lignes.join('\n'));
-        return this.imprimer(texte);
+        return this.imprimer(texte, config);
     }
     async imprimerTicketPassage(passageId) {
         const passage = await this.prisma.passage.findUnique({
@@ -507,11 +531,11 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         });
         if (!passage)
             throw new common_1.NotFoundException('Passage introuvable.');
-        const texte = normalizeText(this.genererTicketPassage(passage));
-        return this.imprimer(texte);
+        const config = await this.getConfigPoste(passage.cliniqueId, 'TICKET');
+        const texte = normalizeText(this.genererTicketPassage(passage, config.largeur));
+        return this.imprimer(texte, config);
     }
-    async imprimer(texte) {
-        const config = this.getConfig();
+    async imprimer(texte, config) {
         if (config.type === 'NONE') {
             return {
                 ok: false,
@@ -628,6 +652,14 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
     }
 };
 exports.ImpressionService = ImpressionService;
+ImpressionService.POSTES = ['TICKET', 'RECU', 'PHARMACIE', 'ORDONNANCE', 'IMAGERIE'];
+ImpressionService.LIBELLES_POSTES = {
+    TICKET: 'Imprimante de tickets (accueil)',
+    RECU: 'Imprimante des reçus (caisse)',
+    PHARMACIE: 'Imprimante des reçus (pharmacie)',
+    ORDONNANCE: 'Imprimante des ordonnances (consultation)',
+    IMAGERIE: 'Imprimante du service imagerie',
+};
 exports.ImpressionService = ImpressionService = ImpressionService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])

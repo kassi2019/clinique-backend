@@ -9,9 +9,9 @@ export declare class LaboratoireController {
         statut: string;
         createdAt: Date;
         patient: {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
             createdAt: Date;
             updatedAt: Date;
             code: string;
@@ -33,8 +33,8 @@ export declare class LaboratoireController {
             residenceActuelle: string | null;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         examensPayes: {
@@ -43,13 +43,13 @@ export declare class LaboratoireController {
                 nom: string;
             };
             id: number;
-            passageId: number;
-            statut: string;
+            libelle: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             serviceId: number | null;
             prestationId: number | null;
-            libelle: string;
             source: string;
             paiementId: number | null;
         }[];
@@ -74,9 +74,9 @@ export declare class LaboratoireController {
                 poids: number;
             };
             patient: {
-                nom: string;
                 id: number;
                 cliniqueId: number;
+                nom: string;
                 createdAt: Date;
                 updatedAt: Date;
                 code: string;
@@ -98,28 +98,28 @@ export declare class LaboratoireController {
                 residenceActuelle: string | null;
             };
             service: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
             };
             prestations: {
                 montant: number;
                 service: {
-                    nom: string;
                     id: number;
+                    nom: string;
                     code: string;
                 };
                 prestation: {
                     type: string;
                 };
                 id: number;
-                passageId: number;
-                statut: string;
+                libelle: string;
                 createdAt: Date;
                 updatedAt: Date;
+                passageId: number;
+                statut: string;
                 serviceId: number | null;
                 prestationId: number | null;
-                libelle: string;
                 source: string;
                 paiementId: number | null;
             }[];
@@ -132,14 +132,14 @@ export declare class LaboratoireController {
                     normes: string | null;
                     examenLaboId: number;
                 }[];
-                validePar: {
+                prelevePar: {
                     personnel: {
                         nom: string;
                         prenom: string;
                     };
                     matricule: string;
                 };
-                prelevePar: {
+                validePar: {
                     personnel: {
                         nom: string;
                         prenom: string;
@@ -149,18 +149,18 @@ export declare class LaboratoireController {
             } & {
                 id: number;
                 cliniqueId: number;
-                passageId: number;
-                statut: string;
+                libelle: string;
                 createdAt: Date;
                 updatedAt: Date;
+                passageId: number;
+                statut: string;
                 patientId: number;
-                libelle: string;
                 passagePrestationId: number;
+                preleveParId: number | null;
+                preleveLe: Date | null;
                 conclusion: string | null;
                 valideParId: number | null;
                 valideLe: Date | null;
-                preleveParId: number | null;
-                preleveLe: Date | null;
             })[];
         };
         historique: ({
@@ -182,18 +182,18 @@ export declare class LaboratoireController {
         } & {
             id: number;
             cliniqueId: number;
-            passageId: number;
-            statut: string;
+            libelle: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             patientId: number;
-            libelle: string;
             passagePrestationId: number;
+            preleveParId: number | null;
+            preleveLe: Date | null;
             conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;
-            preleveParId: number | null;
-            preleveLe: Date | null;
         })[];
     }>;
     enregistrerPrelevement(id: number, dto: EnregistrerPrelevementDto, req: any): Promise<{
@@ -205,14 +205,14 @@ export declare class LaboratoireController {
             normes: string | null;
             examenLaboId: number;
         }[];
-        validePar: {
+        prelevePar: {
             personnel: {
                 nom: string;
                 prenom: string;
             };
             matricule: string;
         };
-        prelevePar: {
+        validePar: {
             personnel: {
                 nom: string;
                 prenom: string;
@@ -222,18 +222,18 @@ export declare class LaboratoireController {
     } & {
         id: number;
         cliniqueId: number;
-        passageId: number;
-        statut: string;
+        libelle: string;
         createdAt: Date;
         updatedAt: Date;
+        passageId: number;
+        statut: string;
         patientId: number;
-        libelle: string;
         passagePrestationId: number;
+        preleveParId: number | null;
+        preleveLe: Date | null;
         conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
-        preleveParId: number | null;
-        preleveLe: Date | null;
     }>;
     enregistrerResultats(id: number, dto: EnregistrerResultatsDto): Promise<{
         lignes: {
@@ -244,14 +244,14 @@ export declare class LaboratoireController {
             normes: string | null;
             examenLaboId: number;
         }[];
-        validePar: {
+        prelevePar: {
             personnel: {
                 nom: string;
                 prenom: string;
             };
             matricule: string;
         };
-        prelevePar: {
+        validePar: {
             personnel: {
                 nom: string;
                 prenom: string;
@@ -261,18 +261,18 @@ export declare class LaboratoireController {
     } & {
         id: number;
         cliniqueId: number;
-        passageId: number;
-        statut: string;
+        libelle: string;
         createdAt: Date;
         updatedAt: Date;
+        passageId: number;
+        statut: string;
         patientId: number;
-        libelle: string;
         passagePrestationId: number;
+        preleveParId: number | null;
+        preleveLe: Date | null;
         conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
-        preleveParId: number | null;
-        preleveLe: Date | null;
     }>;
     valider(id: number, req: any): Promise<{
         lignes: {
@@ -283,14 +283,14 @@ export declare class LaboratoireController {
             normes: string | null;
             examenLaboId: number;
         }[];
-        validePar: {
+        prelevePar: {
             personnel: {
                 nom: string;
                 prenom: string;
             };
             matricule: string;
         };
-        prelevePar: {
+        validePar: {
             personnel: {
                 nom: string;
                 prenom: string;
@@ -300,18 +300,18 @@ export declare class LaboratoireController {
     } & {
         id: number;
         cliniqueId: number;
-        passageId: number;
-        statut: string;
+        libelle: string;
         createdAt: Date;
         updatedAt: Date;
+        passageId: number;
+        statut: string;
         patientId: number;
-        libelle: string;
         passagePrestationId: number;
+        preleveParId: number | null;
+        preleveLe: Date | null;
         conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
-        preleveParId: number | null;
-        preleveLe: Date | null;
     }>;
     historique(jour?: string, recherche?: string, page?: string, perPage?: string, cliniqueId?: string): Promise<{
         data: ({
@@ -334,13 +334,13 @@ export declare class LaboratoireController {
                 normes: string | null;
                 examenLaboId: number;
             }[];
-            validePar: {
+            prelevePar: {
                 personnel: {
                     nom: string;
                     prenom: string;
                 };
             };
-            prelevePar: {
+            validePar: {
                 personnel: {
                     nom: string;
                     prenom: string;
@@ -349,18 +349,18 @@ export declare class LaboratoireController {
         } & {
             id: number;
             cliniqueId: number;
-            passageId: number;
-            statut: string;
+            libelle: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             patientId: number;
-            libelle: string;
             passagePrestationId: number;
+            preleveParId: number | null;
+            preleveLe: Date | null;
             conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;
-            preleveParId: number | null;
-            preleveLe: Date | null;
         })[];
         total: number;
         page: number;

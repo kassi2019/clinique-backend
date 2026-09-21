@@ -10,8 +10,8 @@ export declare class RolesService {
         data: ({
             habilitations: ({
                 module: {
-                    nom: string;
                     id: number;
+                    nom: string;
                     code: string;
                     description: string | null;
                 };
@@ -23,8 +23,8 @@ export declare class RolesService {
                 moduleId: number;
             })[];
         } & {
-            nom: string;
             id: number;
+            nom: string;
             createdAt: Date;
             updatedAt: Date;
             code: string;
@@ -38,8 +38,8 @@ export declare class RolesService {
     findOne(id: number): Promise<{
         habilitations: ({
             module: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
                 description: string | null;
             };
@@ -51,8 +51,8 @@ export declare class RolesService {
             moduleId: number;
         })[];
     } & {
-        nom: string;
         id: number;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
         code: string;
@@ -61,8 +61,8 @@ export declare class RolesService {
     create(dto: CreateRoleDto): Promise<{
         habilitations: ({
             module: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
                 description: string | null;
             };
@@ -74,8 +74,8 @@ export declare class RolesService {
             moduleId: number;
         })[];
     } & {
-        nom: string;
         id: number;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
         code: string;
@@ -84,8 +84,8 @@ export declare class RolesService {
     update(id: number, dto: CreateRoleDto): Promise<{
         habilitations: ({
             module: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
                 description: string | null;
             };
@@ -97,16 +97,16 @@ export declare class RolesService {
             moduleId: number;
         })[];
     } & {
-        nom: string;
         id: number;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
         code: string;
         description: string | null;
     }>;
     remove(id: number): Promise<{
-        nom: string;
         id: number;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
         code: string;

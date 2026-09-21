@@ -6,25 +6,25 @@ export declare class PrestationsController {
     findAll(cliniqueId?: string, serviceId?: string, search?: string, page?: string, perPage?: string): Promise<{
         data: ({
             clinique: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
             };
             service: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
             };
         } & {
             type: string;
             id: number;
             cliniqueId: number;
+            libelle: string;
+            actif: boolean;
             createdAt: Date;
             updatedAt: Date;
             code: string;
-            actif: boolean;
             serviceId: number;
-            libelle: string;
             montant: import("@prisma/client/runtime/library").Decimal;
         } & {
             montant: number;
@@ -36,100 +36,100 @@ export declare class PrestationsController {
     }>;
     findOne(id: number): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
     } & {
         type: string;
         id: number;
         cliniqueId: number;
+        libelle: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
         code: string;
-        actif: boolean;
         serviceId: number;
-        libelle: string;
         montant: import("@prisma/client/runtime/library").Decimal;
     } & {
         montant: number;
     }>;
     create(dto: CreatePrestationDto): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
     } & {
         type: string;
         id: number;
         cliniqueId: number;
+        libelle: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
         code: string;
-        actif: boolean;
         serviceId: number;
-        libelle: string;
         montant: import("@prisma/client/runtime/library").Decimal;
     } & {
         montant: number;
     }>;
     update(id: number, dto: UpdatePrestationDto): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
     } & {
         type: string;
         id: number;
         cliniqueId: number;
+        libelle: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
         code: string;
-        actif: boolean;
         serviceId: number;
-        libelle: string;
         montant: import("@prisma/client/runtime/library").Decimal;
     } & {
         montant: number;
     }>;
     remove(id: number): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
     } & {
         type: string;
         id: number;
         cliniqueId: number;
+        libelle: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
         code: string;
-        actif: boolean;
         serviceId: number;
-        libelle: string;
         montant: import("@prisma/client/runtime/library").Decimal;
     } & {
         montant: number;

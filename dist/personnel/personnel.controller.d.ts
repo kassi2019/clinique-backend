@@ -7,19 +7,19 @@ export declare class PersonnelController {
     findAll(search?: string, statut?: string, cliniqueId?: string, page?: string, perPage?: string): Promise<{
         data: ({
             clinique: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
             };
             service: {
-                nom: string;
                 id: number;
                 cliniqueId: number;
+                nom: string;
+                actif: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 code: string;
                 description: string | null;
-                actif: boolean;
             };
             utilisateur: {
                 role: {
@@ -31,12 +31,12 @@ export declare class PersonnelController {
                 matricule: string;
             };
         } & {
-            nom: string;
             id: number;
             cliniqueId: number;
-            statut: string;
+            nom: string;
             createdAt: Date;
             updatedAt: Date;
+            statut: string;
             telephone: string | null;
             matricule: string;
             prenom: string;
@@ -54,19 +54,19 @@ export declare class PersonnelController {
     }>;
     findOne(id: number): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         service: {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
+            actif: boolean;
             createdAt: Date;
             updatedAt: Date;
             code: string;
             description: string | null;
-            actif: boolean;
         };
         utilisateur: {
             role: {
@@ -78,12 +78,12 @@ export declare class PersonnelController {
             matricule: string;
         };
     } & {
-        nom: string;
         id: number;
         cliniqueId: number;
-        statut: string;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
+        statut: string;
         telephone: string | null;
         matricule: string;
         prenom: string;
@@ -96,19 +96,19 @@ export declare class PersonnelController {
     }>;
     create(dto: CreatePersonnelDto): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         service: {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
+            actif: boolean;
             createdAt: Date;
             updatedAt: Date;
             code: string;
             description: string | null;
-            actif: boolean;
         };
         utilisateur: {
             role: {
@@ -120,12 +120,12 @@ export declare class PersonnelController {
             matricule: string;
         };
     } & {
-        nom: string;
         id: number;
         cliniqueId: number;
-        statut: string;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
+        statut: string;
         telephone: string | null;
         matricule: string;
         prenom: string;
@@ -138,19 +138,19 @@ export declare class PersonnelController {
     }>;
     update(id: number, dto: UpdatePersonnelDto): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         service: {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
+            actif: boolean;
             createdAt: Date;
             updatedAt: Date;
             code: string;
             description: string | null;
-            actif: boolean;
         };
         utilisateur: {
             role: {
@@ -162,12 +162,12 @@ export declare class PersonnelController {
             matricule: string;
         };
     } & {
-        nom: string;
         id: number;
         cliniqueId: number;
-        statut: string;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
+        statut: string;
         telephone: string | null;
         matricule: string;
         prenom: string;
@@ -180,19 +180,19 @@ export declare class PersonnelController {
     }>;
     remove(id: number): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         service: {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
+            actif: boolean;
             createdAt: Date;
             updatedAt: Date;
             code: string;
             description: string | null;
-            actif: boolean;
         };
         utilisateur: {
             role: {
@@ -204,12 +204,12 @@ export declare class PersonnelController {
             matricule: string;
         };
     } & {
-        nom: string;
         id: number;
         cliniqueId: number;
-        statut: string;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
+        statut: string;
         telephone: string | null;
         matricule: string;
         prenom: string;

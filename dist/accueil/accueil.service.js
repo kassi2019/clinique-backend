@@ -278,7 +278,7 @@ let AccueilService = AccueilService_1 = class AccueilService {
         }
         const resultat = await this.avecStatutVerifie(passage);
         let impression = null;
-        if (this.impressionService.getConfig().autoPrint) {
+        if ((await this.impressionService.getConfigPoste(passage.cliniqueId, 'TICKET')).autoPrint) {
             try {
                 impression = await this.impressionService.imprimerTicketPassage(passage.id);
                 if (!impression.ok) {

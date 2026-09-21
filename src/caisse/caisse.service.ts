@@ -198,7 +198,7 @@ export class CaisseService {
 
     // Impression automatique du reçu si activée (PRINTER_AUTO_PRINT)
     let impression = null;
-    if (this.impressionService.getConfig().autoPrint) {
+    if ((await this.impressionService.getConfigPoste(passage.cliniqueId, 'RECU')).autoPrint) {
       try {
         impression = await this.impressionService.imprimerRecuPaiement(
           paiement.id,

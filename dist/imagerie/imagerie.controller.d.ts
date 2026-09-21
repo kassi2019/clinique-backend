@@ -9,9 +9,9 @@ export declare class ImagerieController {
         statut: string;
         createdAt: Date;
         patient: {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
             createdAt: Date;
             updatedAt: Date;
             code: string;
@@ -33,8 +33,8 @@ export declare class ImagerieController {
             residenceActuelle: string | null;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         examensPayes: {
@@ -43,13 +43,13 @@ export declare class ImagerieController {
                 nom: string;
             };
             id: number;
-            passageId: number;
-            statut: string;
+            libelle: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             serviceId: number | null;
             prestationId: number | null;
-            libelle: string;
             source: string;
             paiementId: number | null;
         }[];
@@ -66,9 +66,9 @@ export declare class ImagerieController {
             prestationDemandee: string;
             createdAt: Date;
             patient: {
-                nom: string;
                 id: number;
                 cliniqueId: number;
+                nom: string;
                 createdAt: Date;
                 updatedAt: Date;
                 code: string;
@@ -90,28 +90,28 @@ export declare class ImagerieController {
                 residenceActuelle: string | null;
             };
             service: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
             };
             prestations: {
                 montant: number;
                 service: {
-                    nom: string;
                     id: number;
+                    nom: string;
                     code: string;
                 };
                 prestation: {
                     type: string;
                 };
                 id: number;
-                passageId: number;
-                statut: string;
+                libelle: string;
                 createdAt: Date;
                 updatedAt: Date;
+                passageId: number;
+                statut: string;
                 serviceId: number | null;
                 prestationId: number | null;
-                libelle: string;
                 source: string;
                 paiementId: number | null;
             }[];
@@ -126,19 +126,19 @@ export declare class ImagerieController {
             } & {
                 id: number;
                 cliniqueId: number;
-                passageId: number;
-                statut: string;
+                libelle: string;
                 createdAt: Date;
                 updatedAt: Date;
+                passageId: number;
+                statut: string;
                 patientId: number;
-                libelle: string;
                 passagePrestationId: number;
-                indication: string | null;
-                technique: string | null;
-                resultat: string | null;
                 conclusion: string | null;
                 valideParId: number | null;
                 valideLe: Date | null;
+                indication: string | null;
+                technique: string | null;
+                resultat: string | null;
             })[];
         };
         historique: ({
@@ -152,19 +152,19 @@ export declare class ImagerieController {
         } & {
             id: number;
             cliniqueId: number;
-            passageId: number;
-            statut: string;
+            libelle: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             patientId: number;
-            libelle: string;
             passagePrestationId: number;
-            indication: string | null;
-            technique: string | null;
-            resultat: string | null;
             conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;
+            indication: string | null;
+            technique: string | null;
+            resultat: string | null;
         })[];
     }>;
     enregistrerCr(id: number, dto: EnregistrerCrDto): Promise<{
@@ -178,19 +178,19 @@ export declare class ImagerieController {
     } & {
         id: number;
         cliniqueId: number;
-        passageId: number;
-        statut: string;
+        libelle: string;
         createdAt: Date;
         updatedAt: Date;
+        passageId: number;
+        statut: string;
         patientId: number;
-        libelle: string;
         passagePrestationId: number;
-        indication: string | null;
-        technique: string | null;
-        resultat: string | null;
         conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
+        indication: string | null;
+        technique: string | null;
+        resultat: string | null;
     }>;
     valider(id: number, req: any): Promise<{
         validePar: {
@@ -203,19 +203,19 @@ export declare class ImagerieController {
     } & {
         id: number;
         cliniqueId: number;
-        passageId: number;
-        statut: string;
+        libelle: string;
         createdAt: Date;
         updatedAt: Date;
+        passageId: number;
+        statut: string;
         patientId: number;
-        libelle: string;
         passagePrestationId: number;
-        indication: string | null;
-        technique: string | null;
-        resultat: string | null;
         conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
+        indication: string | null;
+        technique: string | null;
+        resultat: string | null;
     }>;
     historique(jour?: string, recherche?: string, page?: string, perPage?: string, cliniqueId?: string): Promise<{
         data: ({
@@ -239,19 +239,19 @@ export declare class ImagerieController {
         } & {
             id: number;
             cliniqueId: number;
-            passageId: number;
-            statut: string;
+            libelle: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             patientId: number;
-            libelle: string;
             passagePrestationId: number;
-            indication: string | null;
-            technique: string | null;
-            resultat: string | null;
             conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;
+            indication: string | null;
+            technique: string | null;
+            resultat: string | null;
         })[];
         total: number;
         page: number;

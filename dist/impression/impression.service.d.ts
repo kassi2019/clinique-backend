@@ -20,10 +20,49 @@ export declare class ImpressionService {
     private prisma;
     private readonly logger;
     constructor(prisma: PrismaService);
-    getConfig(): ConfigImprimante;
-    updateConfigEnv(updates: Partial<ConfigImprimante>): string;
+    static POSTES: readonly ["TICKET", "RECU", "PHARMACIE", "ORDONNANCE", "IMAGERIE"];
+    static LIBELLES_POSTES: Record<string, string>;
+    getConfigEnv(): ConfigImprimante;
+    getConfigPoste(cliniqueId: number, poste: string): Promise<ConfigImprimante>;
+    getConfigs(cliniqueId: number): Promise<{
+        poste: "TICKET" | "RECU" | "PHARMACIE" | "ORDONNANCE" | "IMAGERIE";
+        libelle: string;
+        config: {
+            type: string;
+            nom: string;
+            partage: string;
+            ip: string;
+            port: number;
+            largeur: number;
+            autoPrint: boolean;
+        };
+    }[]>;
+    updateConfig(cliniqueId: number, poste: string, updates: {
+        type?: string;
+        nom?: string;
+        partage?: string;
+        ip?: string;
+        port?: number;
+        largeur?: number;
+        autoPrint?: boolean;
+    }): Promise<{
+        type: string;
+        id: number;
+        cliniqueId: number;
+        poste: string;
+        libelle: string;
+        nom: string | null;
+        partage: string | null;
+        ip: string | null;
+        port: number;
+        largeur: number;
+        autoPrint: boolean;
+        actif: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
     listWindowsPrinters(): Promise<string[]>;
-    testPrinter(): Promise<{
+    testPrinter(cliniqueId: number, poste: string): Promise<{
         ok: boolean;
         message: string;
         debug?: string;
@@ -48,12 +87,12 @@ export declare class ImpressionService {
             nom: string;
             adresse: string | null;
         };
-    }): string;
+    }, largeur: number): string;
     imprimerRecuPaiement(paiementId: number): Promise<ResultatImpression>;
     imprimerOrdonnance(consultationId: number): Promise<ResultatImpression>;
     imprimerRecuPharmacie(paiementId: number): Promise<ResultatImpression>;
     imprimerTicketPassage(passageId: number): Promise<ResultatImpression>;
-    imprimer(texte: string): Promise<ResultatImpression>;
+    imprimer(texte: string, config: ConfigImprimante): Promise<ResultatImpression>;
     private sendRawToNetwork;
     private sendTextToWindowsPrinter;
 }

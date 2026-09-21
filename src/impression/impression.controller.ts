@@ -5,6 +5,8 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -16,28 +18,30 @@ import { ImpressionService } from './impression.service';
 export class ImpressionController {
   constructor(private impressionService: ImpressionService) {}
 
-  /** Configuration courante de l'imprimante (tous les utilisateurs connectés). */
+  /** Configurations des imprimantes par poste (tous les utilisateurs connectés). */
   @UseGuards(JwtAuthGuard)
   @Get('config')
-  getConfig() {
-    return this.impressionService.getConfig();
+  async getConfig(@Query('cliniqueId') cliniqueId?: string) {
+    if (!cliniqueId) return { printers: [] };
+    const printers = await this.impressionService.getConfigs(Number(cliniqueId));
+    return { printers };
   }
 
-  /** Imprime le ticket de passage sur l'imprimante configurée. */
+  /** Imprime le ticket de passage sur l'imprimante de tickets. */
   @UseGuards(JwtAuthGuard)
   @Post('passages/:id')
   imprimerTicket(@Param('id', ParseIntPipe) id: number) {
     return this.impressionService.imprimerTicketPassage(id);
   }
 
-  /** Imprime le reçu d'un paiement sur l'imprimante configurée. */
+  /** Imprime le reçu d'un paiement sur l'imprimante de la caisse. */
   @UseGuards(JwtAuthGuard)
   @Post('paiements/:id')
   imprimerRecu(@Param('id', ParseIntPipe) id: number) {
     return this.impressionService.imprimerRecuPaiement(id);
   }
 
-  /** Imprime l'ordonnance d'une consultation. */
+  /** Imprime l'ordonnance d'une consultation sur l'imprimante des ordonnances. */
   @UseGuards(JwtAuthGuard)
   @Post('consultations/:id')
   imprimerOrdonnance(@Param('id', ParseIntPipe) id: number) {
@@ -60,20 +64,31 @@ export class ImpressionController {
     return { printers };
   }
 
-  /** Met à jour la configuration imprimante (fichier .env). */
+  /** Enregistre la configuration d'une imprimante (par poste, en base). */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMINISTRATEUR')
-  @Post('config')
-  updateConfig(@Body() updates: any) {
-    const message = this.impressionService.updateConfigEnv(updates);
-    return { message, config: this.impressionService.getConfig() };
+  @Put('config')
+  updateConfig(@Body() body: any) {
+    return this.impressionService.updateConfig(
+      Number(body.cliniqueId),
+      body.poste,
+      {
+        type: body.type,
+        nom: body.nom,
+        partage: body.partage,
+        ip: body.ip,
+        port: body.port != null ? Number(body.port) : undefined,
+        largeur: body.largeur != null ? Number(body.largeur) : undefined,
+        autoPrint: body.autoPrint,
+      },
+    );
   }
 
-  /** Teste la connexion à l'imprimante et imprime un ticket de test. */
+  /** Teste la connexion à l'imprimante d'un poste. */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMINISTRATEUR')
   @Post('test')
-  async test() {
-    return this.impressionService.testPrinter();
+  test(@Body() body: any) {
+    return this.impressionService.testPrinter(Number(body.cliniqueId), body.poste ?? 'TICKET');
   }
 }

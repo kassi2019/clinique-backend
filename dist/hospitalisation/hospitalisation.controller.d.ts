@@ -10,43 +10,43 @@ export declare class HospitalisationController {
     } & {
         id: number;
         cliniqueId: number;
+        libelle: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
-        libelle: string;
     })[]>;
     creerType(cliniqueId: string, dto: CreerTypeChambreDto): Promise<{
         id: number;
         cliniqueId: number;
+        libelle: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
-        libelle: string;
     }>;
     modifierType(id: number, dto: CreerTypeChambreDto): Promise<{
         id: number;
         cliniqueId: number;
+        libelle: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
-        libelle: string;
     }>;
     desactiverType(id: number): Promise<{
         id: number;
         cliniqueId: number;
+        libelle: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
-        libelle: string;
     }>;
     listerChambres(cliniqueId?: string): any[] | Promise<({
         typeChambre: {
             id: number;
             cliniqueId: number;
+            libelle: string;
+            actif: boolean;
             createdAt: Date;
             updatedAt: Date;
-            actif: boolean;
-            libelle: string;
         };
         lits: {
             id: number;
@@ -57,9 +57,9 @@ export declare class HospitalisationController {
     } & {
         id: number;
         cliniqueId: number;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
         numero: string;
         typeChambreId: number | null;
         tarifJournalier: import("@prisma/client/runtime/library").Decimal | null;
@@ -68,10 +68,10 @@ export declare class HospitalisationController {
         typeChambre: {
             id: number;
             cliniqueId: number;
+            libelle: string;
+            actif: boolean;
             createdAt: Date;
             updatedAt: Date;
-            actif: boolean;
-            libelle: string;
         };
         lits: {
             id: number;
@@ -82,9 +82,9 @@ export declare class HospitalisationController {
     } & {
         id: number;
         cliniqueId: number;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
         numero: string;
         typeChambreId: number | null;
         tarifJournalier: import("@prisma/client/runtime/library").Decimal | null;
@@ -93,10 +93,10 @@ export declare class HospitalisationController {
         typeChambre: {
             id: number;
             cliniqueId: number;
+            libelle: string;
+            actif: boolean;
             createdAt: Date;
             updatedAt: Date;
-            actif: boolean;
-            libelle: string;
         };
         lits: {
             id: number;
@@ -107,9 +107,9 @@ export declare class HospitalisationController {
     } & {
         id: number;
         cliniqueId: number;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
         numero: string;
         typeChambreId: number | null;
         tarifJournalier: import("@prisma/client/runtime/library").Decimal | null;
@@ -117,9 +117,9 @@ export declare class HospitalisationController {
     desactiverChambre(id: number): Promise<{
         id: number;
         cliniqueId: number;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
         numero: string;
         typeChambreId: number | null;
         tarifJournalier: import("@prisma/client/runtime/library").Decimal | null;
@@ -144,17 +144,17 @@ export declare class HospitalisationController {
             typeChambre: {
                 id: number;
                 cliniqueId: number;
+                libelle: string;
+                actif: boolean;
                 createdAt: Date;
                 updatedAt: Date;
-                actif: boolean;
-                libelle: string;
             };
         } & {
             id: number;
             cliniqueId: number;
+            actif: boolean;
             createdAt: Date;
             updatedAt: Date;
-            actif: boolean;
             numero: string;
             typeChambreId: number | null;
             tarifJournalier: import("@prisma/client/runtime/library").Decimal | null;
@@ -170,10 +170,10 @@ export declare class HospitalisationController {
         } & {
             id: number;
             cliniqueId: number;
-            passageId: number;
-            statut: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             patientId: number;
             motif: string | null;
             litId: number;
@@ -194,9 +194,9 @@ export declare class HospitalisationController {
         statut: string;
         createdAt: Date;
         patient: {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
             createdAt: Date;
             updatedAt: Date;
             code: string;
@@ -218,17 +218,17 @@ export declare class HospitalisationController {
             residenceActuelle: string | null;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         consultation: {
             hospitalisation: boolean;
             id: number;
-            passageId: number;
-            statut: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             patientId: number;
             motif: string | null;
             medecinId: number;
@@ -281,10 +281,10 @@ export declare class HospitalisationController {
         sejour: {
             id: number;
             cliniqueId: number;
-            passageId: number;
-            statut: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             patientId: number;
             motif: string | null;
             litId: number;
@@ -307,9 +307,9 @@ export declare class HospitalisationController {
             typePatient: string;
             createdAt: Date;
             patient: {
-                nom: string;
                 id: number;
                 cliniqueId: number;
+                nom: string;
                 createdAt: Date;
                 updatedAt: Date;
                 code: string;
@@ -331,8 +331,8 @@ export declare class HospitalisationController {
                 residenceActuelle: string | null;
             };
             service: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
             };
             consultation: {
@@ -345,10 +345,10 @@ export declare class HospitalisationController {
             } & {
                 hospitalisation: boolean;
                 id: number;
-                passageId: number;
-                statut: string;
                 createdAt: Date;
                 updatedAt: Date;
+                passageId: number;
+                statut: string;
                 patientId: number;
                 motif: string | null;
                 medecinId: number;
@@ -400,8 +400,8 @@ export declare class HospitalisationController {
             };
             sejour: {
                 patient: {
-                    nom: string;
                     id: number;
+                    nom: string;
                     code: string;
                     prenom: string;
                     sexe: string;
@@ -416,17 +416,17 @@ export declare class HospitalisationController {
                         typeChambre: {
                             id: number;
                             cliniqueId: number;
+                            libelle: string;
+                            actif: boolean;
                             createdAt: Date;
                             updatedAt: Date;
-                            actif: boolean;
-                            libelle: string;
                         };
                     } & {
                         id: number;
                         cliniqueId: number;
+                        actif: boolean;
                         createdAt: Date;
                         updatedAt: Date;
-                        actif: boolean;
                         numero: string;
                         typeChambreId: number | null;
                         tarifJournalier: import("@prisma/client/runtime/library").Decimal | null;
@@ -446,17 +446,17 @@ export declare class HospitalisationController {
                 };
                 ligneCaisse: {
                     id: number;
-                    statut: string;
                     libelle: string;
+                    statut: string;
                     montant: import("@prisma/client/runtime/library").Decimal;
                 };
             } & {
                 id: number;
                 cliniqueId: number;
-                passageId: number;
-                statut: string;
                 createdAt: Date;
                 updatedAt: Date;
+                passageId: number;
+                statut: string;
                 patientId: number;
                 motif: string | null;
                 litId: number;
@@ -480,9 +480,9 @@ export declare class HospitalisationController {
                 chambre: {
                     id: number;
                     cliniqueId: number;
+                    actif: boolean;
                     createdAt: Date;
                     updatedAt: Date;
-                    actif: boolean;
                     numero: string;
                     typeChambreId: number | null;
                     tarifJournalier: import("@prisma/client/runtime/library").Decimal | null;
@@ -496,10 +496,10 @@ export declare class HospitalisationController {
         } & {
             id: number;
             cliniqueId: number;
-            passageId: number;
-            statut: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             patientId: number;
             motif: string | null;
             litId: number;
@@ -516,8 +516,8 @@ export declare class HospitalisationController {
     }>;
     admettre(id: number, dto: AdmissionDto): Promise<{
         patient: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
             prenom: string;
             sexe: string;
@@ -532,17 +532,17 @@ export declare class HospitalisationController {
                 typeChambre: {
                     id: number;
                     cliniqueId: number;
+                    libelle: string;
+                    actif: boolean;
                     createdAt: Date;
                     updatedAt: Date;
-                    actif: boolean;
-                    libelle: string;
                 };
             } & {
                 id: number;
                 cliniqueId: number;
+                actif: boolean;
                 createdAt: Date;
                 updatedAt: Date;
-                actif: boolean;
                 numero: string;
                 typeChambreId: number | null;
                 tarifJournalier: import("@prisma/client/runtime/library").Decimal | null;
@@ -562,17 +562,17 @@ export declare class HospitalisationController {
         };
         ligneCaisse: {
             id: number;
-            statut: string;
             libelle: string;
+            statut: string;
             montant: import("@prisma/client/runtime/library").Decimal;
         };
     } & {
         id: number;
         cliniqueId: number;
-        passageId: number;
-        statut: string;
         createdAt: Date;
         updatedAt: Date;
+        passageId: number;
+        statut: string;
         patientId: number;
         motif: string | null;
         litId: number;
@@ -588,8 +588,8 @@ export declare class HospitalisationController {
     }>;
     suivi(id: number, dto: SuiviDto): Promise<{
         patient: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
             prenom: string;
             sexe: string;
@@ -604,17 +604,17 @@ export declare class HospitalisationController {
                 typeChambre: {
                     id: number;
                     cliniqueId: number;
+                    libelle: string;
+                    actif: boolean;
                     createdAt: Date;
                     updatedAt: Date;
-                    actif: boolean;
-                    libelle: string;
                 };
             } & {
                 id: number;
                 cliniqueId: number;
+                actif: boolean;
                 createdAt: Date;
                 updatedAt: Date;
-                actif: boolean;
                 numero: string;
                 typeChambreId: number | null;
                 tarifJournalier: import("@prisma/client/runtime/library").Decimal | null;
@@ -634,17 +634,17 @@ export declare class HospitalisationController {
         };
         ligneCaisse: {
             id: number;
-            statut: string;
             libelle: string;
+            statut: string;
             montant: import("@prisma/client/runtime/library").Decimal;
         };
     } & {
         id: number;
         cliniqueId: number;
-        passageId: number;
-        statut: string;
         createdAt: Date;
         updatedAt: Date;
+        passageId: number;
+        statut: string;
         patientId: number;
         motif: string | null;
         litId: number;
@@ -660,8 +660,8 @@ export declare class HospitalisationController {
     }>;
     sortie(id: number, dto: SortieDto, req: any): Promise<{
         patient: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
             prenom: string;
             sexe: string;
@@ -676,17 +676,17 @@ export declare class HospitalisationController {
                 typeChambre: {
                     id: number;
                     cliniqueId: number;
+                    libelle: string;
+                    actif: boolean;
                     createdAt: Date;
                     updatedAt: Date;
-                    actif: boolean;
-                    libelle: string;
                 };
             } & {
                 id: number;
                 cliniqueId: number;
+                actif: boolean;
                 createdAt: Date;
                 updatedAt: Date;
-                actif: boolean;
                 numero: string;
                 typeChambreId: number | null;
                 tarifJournalier: import("@prisma/client/runtime/library").Decimal | null;
@@ -706,17 +706,17 @@ export declare class HospitalisationController {
         };
         ligneCaisse: {
             id: number;
-            statut: string;
             libelle: string;
+            statut: string;
             montant: import("@prisma/client/runtime/library").Decimal;
         };
     } & {
         id: number;
         cliniqueId: number;
-        passageId: number;
-        statut: string;
         createdAt: Date;
         updatedAt: Date;
+        passageId: number;
+        statut: string;
         patientId: number;
         motif: string | null;
         litId: number;
@@ -734,8 +734,8 @@ export declare class HospitalisationController {
         data: {
             montantJournalier: number;
             patient: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
                 prenom: string;
                 sexe: string;
@@ -750,17 +750,17 @@ export declare class HospitalisationController {
                     typeChambre: {
                         id: number;
                         cliniqueId: number;
+                        libelle: string;
+                        actif: boolean;
                         createdAt: Date;
                         updatedAt: Date;
-                        actif: boolean;
-                        libelle: string;
                     };
                 } & {
                     id: number;
                     cliniqueId: number;
+                    actif: boolean;
                     createdAt: Date;
                     updatedAt: Date;
-                    actif: boolean;
                     numero: string;
                     typeChambreId: number | null;
                     tarifJournalier: import("@prisma/client/runtime/library").Decimal | null;
@@ -780,16 +780,16 @@ export declare class HospitalisationController {
             };
             ligneCaisse: {
                 id: number;
-                statut: string;
                 libelle: string;
+                statut: string;
                 montant: import("@prisma/client/runtime/library").Decimal;
             };
             id: number;
             cliniqueId: number;
-            passageId: number;
-            statut: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             patientId: number;
             motif: string | null;
             litId: number;

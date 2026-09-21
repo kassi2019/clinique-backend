@@ -6,19 +6,19 @@ export declare class ServicesController {
     findAll(cliniqueId?: string, page?: string, perPage?: string): Promise<{
         data: ({
             clinique: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
             };
         } & {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
+            actif: boolean;
             createdAt: Date;
             updatedAt: Date;
             code: string;
             description: string | null;
-            actif: boolean;
         })[];
         total: number;
         page: number;
@@ -27,48 +27,48 @@ export declare class ServicesController {
     }>;
     findOne(id: number): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
     } & {
-        nom: string;
         id: number;
         cliniqueId: number;
+        nom: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
         code: string;
         description: string | null;
-        actif: boolean;
     }>;
     create(dto: CreateServiceDto): Promise<{
-        nom: string;
         id: number;
         cliniqueId: number;
+        nom: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
         code: string;
         description: string | null;
-        actif: boolean;
     }>;
     update(id: number, dto: UpdateServiceDto): Promise<{
-        nom: string;
         id: number;
         cliniqueId: number;
+        nom: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
         code: string;
         description: string | null;
-        actif: boolean;
     }>;
     remove(id: number): Promise<{
-        nom: string;
         id: number;
         cliniqueId: number;
+        nom: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
         code: string;
         description: string | null;
-        actif: boolean;
     }>;
 }

@@ -349,7 +349,7 @@ export class AccueilService {
 
     // Impression automatique du ticket si activée (PRINTER_AUTO_PRINT=true)
     let impression = null;
-    if (this.impressionService.getConfig().autoPrint) {
+    if ((await this.impressionService.getConfigPoste(passage.cliniqueId, 'TICKET')).autoPrint) {
       try {
         impression = await this.impressionService.imprimerTicketPassage(
           passage.id,

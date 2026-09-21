@@ -281,7 +281,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             data: { statut: 'CLOTUREE', clotureeLe: new Date() },
         });
         let impression = null;
-        if (this.impressionService.getConfig().autoPrint) {
+        if ((await this.impressionService.getConfigPoste(dispensation.consultation.passage.cliniqueId, 'PHARMACIE')).autoPrint) {
             try {
                 impression = await this.impressionService.imprimerRecuPharmacie(paiement.id);
             }

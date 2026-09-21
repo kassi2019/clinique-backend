@@ -3,8 +3,8 @@ export declare class ModulesController {
     private prisma;
     constructor(prisma: PrismaService);
     findAll(): import(".prisma/client").Prisma.PrismaPromise<{
-        nom: string;
         id: number;
+        nom: string;
         code: string;
         description: string | null;
     }[]>;

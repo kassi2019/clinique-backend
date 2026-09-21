@@ -78,6 +78,34 @@ async function main() {
     });
   }
 
+  // Imprimantes par poste (valeurs par défaut issues du .env) : tickets, reçus caisse,
+  // reçus pharmacie, ordonnances — paramétrables dans Paramétrage → Paramètres.
+  const imprimantesData = [
+    { poste: 'TICKET', libelle: 'Imprimante de tickets (accueil)' },
+    { poste: 'RECU', libelle: 'Imprimante des reçus (caisse)' },
+    { poste: 'PHARMACIE', libelle: 'Imprimante des reçus (pharmacie)' },
+    { poste: 'ORDONNANCE', libelle: 'Imprimante des ordonnances (consultation)' },
+    { poste: 'IMAGERIE', libelle: 'Imprimante du service imagerie' },
+  ];
+  for (const i of imprimantesData) {
+    await prisma.imprimante.upsert({
+      where: { cliniqueId_poste: { cliniqueId: clinique.id, poste: i.poste } },
+      update: {},
+      create: {
+        cliniqueId: clinique.id,
+        poste: i.poste,
+        libelle: i.libelle,
+        type: process.env.PRINTER_TYPE || 'WINDOWS',
+        nom: process.env.PRINTER_NAME || 'POS-80C',
+        partage: process.env.PRINTER_SHARE || 'RECU',
+        ip: process.env.PRINTER_IP || '192.168.1.100',
+        port: parseInt(process.env.PRINTER_PORT || '9100', 10),
+        largeur: parseInt(process.env.PRINTER_CHAR_WIDTH || '42', 10),
+        autoPrint: process.env.PRINTER_AUTO_PRINT !== 'false',
+      },
+    });
+  }
+
   // ---------- 4. Rôles ----------
   const roleAdmin = await prisma.role.upsert({
     where: { code: 'ADMINISTRATEUR' },

@@ -173,7 +173,7 @@ let CaisseService = CaisseService_1 = class CaisseService {
             data: { statut: 'ACTIF' },
         });
         let impression = null;
-        if (this.impressionService.getConfig().autoPrint) {
+        if ((await this.impressionService.getConfigPoste(passage.cliniqueId, 'RECU')).autoPrint) {
             try {
                 impression = await this.impressionService.imprimerRecuPaiement(paiement.id);
                 if (!impression.ok) {

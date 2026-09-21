@@ -13,25 +13,25 @@ export declare class PrestationsService {
     }): Promise<{
         data: ({
             clinique: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
             };
             service: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
             };
         } & {
             type: string;
             id: number;
             cliniqueId: number;
+            libelle: string;
+            actif: boolean;
             createdAt: Date;
             updatedAt: Date;
             code: string;
-            actif: boolean;
             serviceId: number;
-            libelle: string;
             montant: Prisma.Decimal;
         } & {
             montant: number;
@@ -43,100 +43,100 @@ export declare class PrestationsService {
     }>;
     findOne(id: number): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
     } & {
         type: string;
         id: number;
         cliniqueId: number;
+        libelle: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
         code: string;
-        actif: boolean;
         serviceId: number;
-        libelle: string;
         montant: Prisma.Decimal;
     } & {
         montant: number;
     }>;
     create(dto: CreatePrestationDto): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
     } & {
         type: string;
         id: number;
         cliniqueId: number;
+        libelle: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
         code: string;
-        actif: boolean;
         serviceId: number;
-        libelle: string;
         montant: Prisma.Decimal;
     } & {
         montant: number;
     }>;
     update(id: number, dto: UpdatePrestationDto): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
     } & {
         type: string;
         id: number;
         cliniqueId: number;
+        libelle: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
         code: string;
-        actif: boolean;
         serviceId: number;
-        libelle: string;
         montant: Prisma.Decimal;
     } & {
         montant: number;
     }>;
     remove(id: number): Promise<{
         clinique: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
     } & {
         type: string;
         id: number;
         cliniqueId: number;
+        libelle: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
         code: string;
-        actif: boolean;
         serviceId: number;
-        libelle: string;
         montant: Prisma.Decimal;
     } & {
         montant: number;

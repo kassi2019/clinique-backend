@@ -7,9 +7,9 @@ export declare class PharmacieController {
         numeroOrdre: string;
         createdAt: Date;
         patient: {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
             createdAt: Date;
             updatedAt: Date;
             code: string;
@@ -62,19 +62,19 @@ export declare class PharmacieController {
                 paiement: {
                     montantTotal: number;
                     id: number;
+                    createdAt: Date;
                     caissierId: number;
                     numeroRecu: string;
                     modePaiement: string;
                     statut: string;
                     motifAnnulation: string | null;
                     dateAnnulation: Date | null;
-                    createdAt: Date;
                     dispensationId: number;
                 };
                 id: number;
-                statut: string;
                 createdAt: Date;
                 updatedAt: Date;
+                statut: string;
                 consultationId: number;
                 pharmacienId: number;
                 clotureeLe: Date | null;
@@ -87,9 +87,9 @@ export declare class PharmacieController {
             statut: string;
             valideeLe: Date;
             patient: {
-                nom: string;
                 id: number;
                 cliniqueId: number;
+                nom: string;
                 createdAt: Date;
                 updatedAt: Date;
                 code: string;
@@ -158,13 +158,13 @@ export declare class PharmacieController {
             paiement: {
                 montantTotal: number;
                 id: number;
+                createdAt: Date;
                 caissierId: number;
                 numeroRecu: string;
                 modePaiement: string;
                 statut: string;
                 motifAnnulation: string | null;
                 dateAnnulation: Date | null;
-                createdAt: Date;
                 dispensationId: number;
             };
             pharmacien: {
@@ -174,9 +174,9 @@ export declare class PharmacieController {
                 };
             };
             id: number;
-            statut: string;
             createdAt: Date;
             updatedAt: Date;
+            statut: string;
             consultationId: number;
             pharmacienId: number;
             clotureeLe: Date | null;
@@ -190,6 +190,7 @@ export declare class PharmacieController {
     }, req: any): Promise<{
         paiement: {
             id: number;
+            createdAt: Date;
             caissierId: number;
             numeroRecu: string;
             montantTotal: import("@prisma/client/runtime/library").Decimal;
@@ -197,7 +198,6 @@ export declare class PharmacieController {
             statut: string;
             motifAnnulation: string | null;
             dateAnnulation: Date | null;
-            createdAt: Date;
             dispensationId: number;
         };
         lignes: {
@@ -214,20 +214,20 @@ export declare class PharmacieController {
         }[];
     } & {
         id: number;
-        montantTotal: import("@prisma/client/runtime/library").Decimal;
-        statut: string;
         createdAt: Date;
         updatedAt: Date;
+        montantTotal: import("@prisma/client/runtime/library").Decimal;
+        statut: string;
         consultationId: number;
         pharmacienId: number;
         clotureeLe: Date | null;
     }>;
     cloturer(id: number): Promise<{
         id: number;
-        montantTotal: import("@prisma/client/runtime/library").Decimal;
-        statut: string;
         createdAt: Date;
         updatedAt: Date;
+        montantTotal: import("@prisma/client/runtime/library").Decimal;
+        statut: string;
         consultationId: number;
         pharmacienId: number;
         clotureeLe: Date | null;
@@ -238,13 +238,13 @@ export declare class PharmacieController {
         paiement: {
             montantTotal: number;
             id: number;
+            createdAt: Date;
             caissierId: number;
             numeroRecu: string;
             modePaiement: string;
             statut: string;
             motifAnnulation: string | null;
             dateAnnulation: Date | null;
-            createdAt: Date;
             dispensationId: number;
         };
         lignes: {
@@ -260,6 +260,7 @@ export declare class PharmacieController {
         motif: string;
     }): Promise<{
         id: number;
+        createdAt: Date;
         caissierId: number;
         numeroRecu: string;
         montantTotal: import("@prisma/client/runtime/library").Decimal;
@@ -267,7 +268,6 @@ export declare class PharmacieController {
         statut: string;
         motifAnnulation: string | null;
         dateAnnulation: Date | null;
-        createdAt: Date;
         dispensationId: number;
     }>;
     stocks(cliniqueId?: number, search?: string): any[] | Promise<{
@@ -286,12 +286,12 @@ export declare class PharmacieController {
             prixAchat: import("@prisma/client/runtime/library").Decimal | null;
         }[];
         alerteStock: boolean;
-        nom: string;
         id: number;
         cliniqueId: number;
+        nom: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
         forme: string | null;
         uniteVente: string;
         dosage: string | null;
@@ -310,12 +310,12 @@ export declare class PharmacieController {
         prixAchat: import("@prisma/client/runtime/library").Decimal | null;
     }>;
     inventaire(dto: any, req: any): Promise<{
-        nom: string;
         id: number;
         cliniqueId: number;
+        nom: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
         forme: string | null;
         uniteVente: string;
         dosage: string | null;
@@ -359,12 +359,12 @@ export declare class PharmacieController {
                 prixAchat: import("@prisma/client/runtime/library").Decimal | null;
             }[];
             alerteStock: boolean;
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
+            actif: boolean;
             createdAt: Date;
             updatedAt: Date;
-            actif: boolean;
             forme: string | null;
             uniteVente: string;
             dosage: string | null;
@@ -391,34 +391,34 @@ export declare class PharmacieController {
     };
     consommables(cliniqueId?: number): any[] | Promise<{
         alerte: boolean;
-        nom: string;
         id: number;
         cliniqueId: number;
+        nom: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
         quantite: number;
         seuilAlerte: number;
         unite: string | null;
     }[]>;
     creerConsommable(dto: any): Promise<{
-        nom: string;
         id: number;
         cliniqueId: number;
+        nom: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
         quantite: number;
         seuilAlerte: number;
         unite: string | null;
     }>;
     majConsommable(id: number, dto: any): Promise<{
-        nom: string;
         id: number;
         cliniqueId: number;
+        nom: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
         quantite: number;
         seuilAlerte: number;
         unite: string | null;
@@ -428,12 +428,12 @@ export declare class PharmacieController {
         quantite: number;
         commentaire?: string;
     }, req: any): Promise<{
-        nom: string;
         id: number;
         cliniqueId: number;
+        nom: string;
+        actif: boolean;
         createdAt: Date;
         updatedAt: Date;
-        actif: boolean;
         quantite: number;
         seuilAlerte: number;
         unite: string | null;

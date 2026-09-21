@@ -7,8 +7,8 @@ export declare class RolesController {
         data: ({
             habilitations: ({
                 module: {
-                    nom: string;
                     id: number;
+                    nom: string;
                     code: string;
                     description: string | null;
                 };
@@ -20,8 +20,8 @@ export declare class RolesController {
                 moduleId: number;
             })[];
         } & {
-            nom: string;
             id: number;
+            nom: string;
             createdAt: Date;
             updatedAt: Date;
             code: string;
@@ -35,8 +35,8 @@ export declare class RolesController {
     findOne(id: number): Promise<{
         habilitations: ({
             module: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
                 description: string | null;
             };
@@ -48,8 +48,8 @@ export declare class RolesController {
             moduleId: number;
         })[];
     } & {
-        nom: string;
         id: number;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
         code: string;
@@ -58,8 +58,8 @@ export declare class RolesController {
     create(dto: CreateRoleDto): Promise<{
         habilitations: ({
             module: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
                 description: string | null;
             };
@@ -71,8 +71,8 @@ export declare class RolesController {
             moduleId: number;
         })[];
     } & {
-        nom: string;
         id: number;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
         code: string;
@@ -81,8 +81,8 @@ export declare class RolesController {
     update(id: number, dto: CreateRoleDto): Promise<{
         habilitations: ({
             module: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
                 description: string | null;
             };
@@ -94,16 +94,16 @@ export declare class RolesController {
             moduleId: number;
         })[];
     } & {
-        nom: string;
         id: number;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
         code: string;
         description: string | null;
     }>;
     remove(id: number): Promise<{
-        nom: string;
         id: number;
+        nom: string;
         createdAt: Date;
         updatedAt: Date;
         code: string;

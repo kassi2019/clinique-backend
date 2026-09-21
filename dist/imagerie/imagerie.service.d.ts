@@ -10,9 +10,9 @@ export declare class ImagerieService {
         statut: string;
         createdAt: Date;
         patient: {
-            nom: string;
             id: number;
             cliniqueId: number;
+            nom: string;
             createdAt: Date;
             updatedAt: Date;
             code: string;
@@ -34,8 +34,8 @@ export declare class ImagerieService {
             residenceActuelle: string | null;
         };
         service: {
-            nom: string;
             id: number;
+            nom: string;
             code: string;
         };
         examensPayes: {
@@ -44,13 +44,13 @@ export declare class ImagerieService {
                 nom: string;
             };
             id: number;
-            passageId: number;
-            statut: string;
+            libelle: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             serviceId: number | null;
             prestationId: number | null;
-            libelle: string;
             source: string;
             paiementId: number | null;
         }[];
@@ -67,9 +67,9 @@ export declare class ImagerieService {
             prestationDemandee: string;
             createdAt: Date;
             patient: {
-                nom: string;
                 id: number;
                 cliniqueId: number;
+                nom: string;
                 createdAt: Date;
                 updatedAt: Date;
                 code: string;
@@ -91,28 +91,28 @@ export declare class ImagerieService {
                 residenceActuelle: string | null;
             };
             service: {
-                nom: string;
                 id: number;
+                nom: string;
                 code: string;
             };
             prestations: {
                 montant: number;
                 service: {
-                    nom: string;
                     id: number;
+                    nom: string;
                     code: string;
                 };
                 prestation: {
                     type: string;
                 };
                 id: number;
-                passageId: number;
-                statut: string;
+                libelle: string;
                 createdAt: Date;
                 updatedAt: Date;
+                passageId: number;
+                statut: string;
                 serviceId: number | null;
                 prestationId: number | null;
-                libelle: string;
                 source: string;
                 paiementId: number | null;
             }[];
@@ -127,19 +127,19 @@ export declare class ImagerieService {
             } & {
                 id: number;
                 cliniqueId: number;
-                passageId: number;
-                statut: string;
+                libelle: string;
                 createdAt: Date;
                 updatedAt: Date;
+                passageId: number;
+                statut: string;
                 patientId: number;
-                libelle: string;
                 passagePrestationId: number;
-                indication: string | null;
-                technique: string | null;
-                resultat: string | null;
                 conclusion: string | null;
                 valideParId: number | null;
                 valideLe: Date | null;
+                indication: string | null;
+                technique: string | null;
+                resultat: string | null;
             })[];
         };
         historique: ({
@@ -153,19 +153,19 @@ export declare class ImagerieService {
         } & {
             id: number;
             cliniqueId: number;
-            passageId: number;
-            statut: string;
+            libelle: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             patientId: number;
-            libelle: string;
             passagePrestationId: number;
-            indication: string | null;
-            technique: string | null;
-            resultat: string | null;
             conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;
+            indication: string | null;
+            technique: string | null;
+            resultat: string | null;
         })[];
     }>;
     enregistrerCr(passageId: number, dto: EnregistrerCrDto): Promise<{
@@ -179,19 +179,19 @@ export declare class ImagerieService {
     } & {
         id: number;
         cliniqueId: number;
-        passageId: number;
-        statut: string;
+        libelle: string;
         createdAt: Date;
         updatedAt: Date;
+        passageId: number;
+        statut: string;
         patientId: number;
-        libelle: string;
         passagePrestationId: number;
-        indication: string | null;
-        technique: string | null;
-        resultat: string | null;
         conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
+        indication: string | null;
+        technique: string | null;
+        resultat: string | null;
     }>;
     valider(examenId: number, utilisateurId: number): Promise<{
         validePar: {
@@ -204,19 +204,19 @@ export declare class ImagerieService {
     } & {
         id: number;
         cliniqueId: number;
-        passageId: number;
-        statut: string;
+        libelle: string;
         createdAt: Date;
         updatedAt: Date;
+        passageId: number;
+        statut: string;
         patientId: number;
-        libelle: string;
         passagePrestationId: number;
-        indication: string | null;
-        technique: string | null;
-        resultat: string | null;
         conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
+        indication: string | null;
+        technique: string | null;
+        resultat: string | null;
     }>;
     historique(params: {
         jour?: string;
@@ -246,19 +246,19 @@ export declare class ImagerieService {
         } & {
             id: number;
             cliniqueId: number;
-            passageId: number;
-            statut: string;
+            libelle: string;
             createdAt: Date;
             updatedAt: Date;
+            passageId: number;
+            statut: string;
             patientId: number;
-            libelle: string;
             passagePrestationId: number;
-            indication: string | null;
-            technique: string | null;
-            resultat: string | null;
             conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;
+            indication: string | null;
+            technique: string | null;
+            resultat: string | null;
         })[];
         total: number;
         page: number;

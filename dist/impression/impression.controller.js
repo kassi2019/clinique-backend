@@ -22,8 +22,11 @@ let ImpressionController = class ImpressionController {
     constructor(impressionService) {
         this.impressionService = impressionService;
     }
-    getConfig() {
-        return this.impressionService.getConfig();
+    async getConfig(cliniqueId) {
+        if (!cliniqueId)
+            return { printers: [] };
+        const printers = await this.impressionService.getConfigs(Number(cliniqueId));
+        return { printers };
     }
     imprimerTicket(id) {
         return this.impressionService.imprimerTicketPassage(id);
@@ -41,21 +44,29 @@ let ImpressionController = class ImpressionController {
         const printers = await this.impressionService.listWindowsPrinters();
         return { printers };
     }
-    updateConfig(updates) {
-        const message = this.impressionService.updateConfigEnv(updates);
-        return { message, config: this.impressionService.getConfig() };
+    updateConfig(body) {
+        return this.impressionService.updateConfig(Number(body.cliniqueId), body.poste, {
+            type: body.type,
+            nom: body.nom,
+            partage: body.partage,
+            ip: body.ip,
+            port: body.port != null ? Number(body.port) : undefined,
+            largeur: body.largeur != null ? Number(body.largeur) : undefined,
+            autoPrint: body.autoPrint,
+        });
     }
-    async test() {
-        return this.impressionService.testPrinter();
+    test(body) {
+        return this.impressionService.testPrinter(Number(body.cliniqueId), body.poste ?? 'TICKET');
     }
 };
 exports.ImpressionController = ImpressionController;
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)('config'),
+    __param(0, (0, common_1.Query)('cliniqueId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
 ], ImpressionController.prototype, "getConfig", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
@@ -100,7 +111,7 @@ __decorate([
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
-    (0, common_1.Post)('config'),
+    (0, common_1.Put)('config'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -110,9 +121,10 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
     (0, common_1.Post)('test'),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
 ], ImpressionController.prototype, "test", null);
 exports.ImpressionController = ImpressionController = __decorate([
     (0, common_1.Controller)('impression'),
