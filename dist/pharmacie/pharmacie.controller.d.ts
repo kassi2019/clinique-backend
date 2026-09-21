@@ -2,7 +2,8 @@ import { PharmacieService } from './pharmacie.service';
 export declare class PharmacieController {
     private pharmacieService;
     constructor(pharmacieService: PharmacieService);
-    rechercherOrdonnances(code?: string, cliniqueId?: number): any[] | Promise<{
+    rechercherOrdonnances(code?: string, cliniqueId?: number, medecinId?: string, statut?: string, debut?: string, fin?: string): Promise<{
+        liste: boolean;
         id: number;
         numeroOrdre: string;
         createdAt: Date;
@@ -34,6 +35,8 @@ export declare class PharmacieController {
             id: number;
             statut: string;
             valideeLe: Date;
+            numeroOrdonnance: string;
+            ordonnanceStatut: string;
             medicaments: {
                 id: number;
                 createdAt: Date;
@@ -80,7 +83,34 @@ export declare class PharmacieController {
                 clotureeLe: Date | null;
             }[];
         }[];
-    }[]>;
+    }[] | {
+        liste: boolean;
+        ordonnances: {
+            id: number;
+            numeroOrdonnance: string;
+            ordonnanceStatut: string;
+            createdAt: Date;
+            patient: {
+                nom: string;
+                code: string;
+                prenom: string;
+            };
+            passage: {
+                numeroOrdre: string;
+            };
+            medecin: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+            nbMedicaments: number;
+        }[];
+    }> | {
+        liste: boolean;
+        ordonnances: any[];
+    };
     detailOrdonnance(id: number): Promise<{
         consultation: {
             id: number;

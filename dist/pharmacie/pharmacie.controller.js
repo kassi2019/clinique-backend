@@ -22,10 +22,15 @@ let PharmacieController = class PharmacieController {
     constructor(pharmacieService) {
         this.pharmacieService = pharmacieService;
     }
-    rechercherOrdonnances(code, cliniqueId) {
+    rechercherOrdonnances(code, cliniqueId, medecinId, statut, debut, fin) {
         if (!cliniqueId)
-            return [];
-        return this.pharmacieService.rechercherOrdonnances(code ?? '', cliniqueId);
+            return { liste: true, ordonnances: [] };
+        return this.pharmacieService.rechercherOrdonnances(code ?? '', cliniqueId, {
+            medecinId: medecinId ? Number(medecinId) : undefined,
+            statut,
+            debut,
+            fin,
+        });
     }
     detailOrdonnance(id) {
         return this.pharmacieService.detailOrdonnance(id);
@@ -84,8 +89,12 @@ __decorate([
     (0, common_1.Get)('ordonnances'),
     __param(0, (0, common_1.Query)('code')),
     __param(1, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(2, (0, common_1.Query)('medecinId')),
+    __param(3, (0, common_1.Query)('statut')),
+    __param(4, (0, common_1.Query)('debut')),
+    __param(5, (0, common_1.Query)('fin')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:paramtypes", [String, Number, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "rechercherOrdonnances", null);
 __decorate([

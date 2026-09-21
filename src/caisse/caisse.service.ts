@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ImpressionService } from '../impression/impression.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { AffectationService } from '../affectation/affectation.service';
 import { EncaisserDto } from './dto/encaisser.dto';
 
 const formatMontant = (x: any) => Number(x);
@@ -17,6 +18,7 @@ export class CaisseService {
   constructor(
     private prisma: PrismaService,
     private impressionService: ImpressionService,
+    private affectationService: AffectationService,
   ) {}
 
   /**
@@ -196,6 +198,22 @@ export class CaisseService {
       data: { statut: 'ACTIF' },
     });
 
+    // Affectation automatique au médecin quand la consultation est payée
+    // (nouveau cahier des charges : file d'attente équilibrée).
+    const consultationPayee = await this.prisma.passagePrestation.findFirst({
+      where: {
+        id: { in: lignes.map((l) => l.id) },
+        prestation: { type: 'CONSULTATION' },
+      },
+    });
+    if (consultationPayee) {
+      try {
+        await this.affectationService.assignerPassage(passage.id);
+      } catch (err: any) {
+        this.logger.warn(`Affectation auto #${passage.id}: ${err.message}`);
+      }
+    }
+
     // Impression automatique du reçu si activée (PRINTER_AUTO_PRINT)
     let impression = null;
     if ((await this.impressionService.getConfigPoste(passage.cliniqueId, 'RECU')).autoPrint) {
@@ -238,6 +256,71 @@ export class CaisseService {
   }
 
   /** Annulation d'un paiement (droits administrateur) : les prestations reviennent en attente. */
+  /**
+   * File de la caisse : passages ayant des prestations à payer,
+   * dans l'ordre d'arrivée (même logique que la file des médecins).
+   */
+  async fileAttente(cliniqueId: number, page = 1, perPage = 100) {
+    const passages = await this.prisma.passage.findMany({
+      where: { cliniqueId, prestations: { some: { statut: 'EN_ATTENTE' } } },
+      include: {
+        patient: { select: { nom: true, prenom: true, code: true } },
+        service: { select: { nom: true } },
+        prestations: { where: { statut: 'EN_ATTENTE' }, select: { montant: true } },
+      },
+      orderBy: { createdAt: 'asc' },
+      skip: (page - 1) * perPage,
+      take: perPage,
+    });
+    const total = await this.prisma.passage.count({
+      where: { cliniqueId, prestations: { some: { statut: 'EN_ATTENTE' } } },
+    });
+    const data = passages.map((p) => ({
+      id: p.id,
+      numeroOrdre: p.numeroOrdre,
+      patient: p.patient,
+      service: p.service,
+      totalAPayer: p.prestations.reduce((s, l) => s + Number(l.montant), 0),
+      nbLignes: p.prestations.length,
+    }));
+    return { data, total, page, perPage, totalPages: Math.ceil(total / perPage) };
+  }
+
+  /** Paiements valides du jour (reçus émis). */
+  async payesDuJour(cliniqueId: number, page = 1, perPage = 100) {
+    const debut = new Date();
+    debut.setHours(0, 0, 0, 0);
+    const [paiements, total] = await this.prisma.$transaction([
+      this.prisma.paiement.findMany({
+        where: { cliniqueId, statut: 'VALIDE', createdAt: { gte: debut } },
+        include: {
+          passage: {
+            select: {
+              numeroOrdre: true,
+              patient: { select: { nom: true, prenom: true } },
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * perPage,
+        take: perPage,
+      }),
+      this.prisma.paiement.count({
+        where: { cliniqueId, statut: 'VALIDE', createdAt: { gte: debut } },
+      }),
+    ]);
+    const data = paiements.map((p) => ({
+      id: p.id,
+      numeroRecu: p.numeroRecu,
+      modePaiement: p.modePaiement,
+      montant: Number(p.montantTotal),
+      createdAt: p.createdAt,
+      numeroOrdre: p.passage.numeroOrdre,
+      patient: p.passage.patient,
+    }));
+    return { data, total, page, perPage, totalPages: Math.ceil(total / perPage) };
+  }
+
   async annulerPaiement(paiementId: number, motif: string) {
     const paiement = await this.prisma.paiement.findUnique({
       where: { id: paiementId },
@@ -269,6 +352,14 @@ export class CaisseService {
         where: { id: paiement.passageId },
         data: { statut: 'EN_ATTENTE_PAIEMENT' },
       });
+    }
+
+    // Si la consultation n'a pas été validée, l'affectation est annulée
+    const consultation = await this.prisma.consultation.findUnique({
+      where: { passageId: paiement.passageId },
+    });
+    if (!consultation || consultation.statut !== 'VALIDEE') {
+      await this.affectationService.annulerAffectation(paiement.passageId);
     }
 
     return this.prisma.paiement.findUnique({ where: { id: paiementId } });

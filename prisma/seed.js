@@ -192,6 +192,41 @@ async function main() {
     });
   }
 
+  // Médecins de démonstration (affectation automatique, file d'attente)
+  const medecinsData = [
+    { matricule: 'MED001', nom: 'KONE', prenom: 'Adama', sexe: 'M' },
+    { matricule: 'MED002', nom: 'DIABATE', prenom: 'Mariam', sexe: 'F' },
+  ];
+  for (const m of medecinsData) {
+    const personnel = await prisma.personnel.upsert({
+      where: { cliniqueId_matricule: { cliniqueId: clinique.id, matricule: m.matricule } },
+      update: {},
+      create: {
+        cliniqueId: clinique.id,
+        matricule: m.matricule,
+        nom: m.nom,
+        prenom: m.prenom,
+        sexe: m.sexe,
+        fonction: 'Médecin',
+        serviceId: serviceByCode['MED']?.id ?? null,
+        statut: 'ACTIF',
+      },
+    });
+    const compte = await prisma.utilisateur.findUnique({ where: { matricule: m.matricule } });
+    if (!compte) {
+      const motDePasse = await bcrypt.hash('med123', 10);
+      await prisma.utilisateur.create({
+        data: {
+          matricule: m.matricule,
+          motDePasse,
+          roleId: roleMedecin.id,
+          personnelId: personnel.id,
+          statut: 'ACTIF',
+        },
+      });
+    }
+  }
+
   // ---------- 5. Personnel administrateur + compte ----------
   const adminPersonnel = await prisma.personnel.upsert({
     where: { cliniqueId_matricule: { cliniqueId: clinique.id, matricule: 'ADM001' } },

@@ -241,6 +241,8 @@ export declare class HospitalisationService {
             litId: number | null;
             valideeLe: Date | null;
             ordonnanceSauveeLe: Date | null;
+            numeroOrdonnance: string | null;
+            ordonnanceStatut: string;
             modeEntree: string | null;
             modeEntreeAutre: string | null;
             traitementAnterieur: string | null;
@@ -361,6 +363,8 @@ export declare class HospitalisationService {
                 litId: number | null;
                 valideeLe: Date | null;
                 ordonnanceSauveeLe: Date | null;
+                numeroOrdonnance: string | null;
+                ordonnanceStatut: string;
                 modeEntree: string | null;
                 modeEntreeAutre: string | null;
                 traitementAnterieur: string | null;

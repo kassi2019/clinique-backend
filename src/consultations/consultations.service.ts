@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { AffectationService } from '../affectation/affectation.service';
 import {
   CreerConsultationDto,
   PrescriptionDto,
@@ -22,7 +23,10 @@ const includeConsultation = {
 
 @Injectable()
 export class ConsultationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private affectationService: AffectationService,
+  ) {}
 
   /**
    * Recherche d'un passage par code patient ou N° d'ordre (§7).
@@ -283,7 +287,7 @@ export class ConsultationsService {
   async ajouterMedicament(consultationId: number, dto: PrescriptionDto) {
     const consultation = await this.prisma.consultation.findUnique({
       where: { id: consultationId },
-      include: { passage: { select: { typePatient: true } } },
+      include: { passage: { select: { typePatient: true, cliniqueId: true } } },
     });
     if (!consultation) throw new NotFoundException('Consultation introuvable.');
 
@@ -311,7 +315,7 @@ export class ConsultationsService {
     }
     if (!nom) throw new BadRequestException('Nom du médicament requis.');
 
-    return this.prisma.prescription.create({
+    const prescription = await this.prisma.prescription.create({
       data: {
         consultationId,
         medicamentId,
@@ -322,6 +326,22 @@ export class ConsultationsService {
         duree: dto.duree,
       },
     });
+
+    // Numéro d'ordonnance généré à la première prescription (ORD-XXXXX par clinique)
+    if (!consultation.numeroOrdonnance) {
+      const nb = await this.prisma.consultation.count({
+        where: {
+          numeroOrdonnance: { not: null },
+          passage: { cliniqueId: consultation.passage.cliniqueId },
+        },
+      });
+      await this.prisma.consultation.update({
+        where: { id: consultationId },
+        data: { numeroOrdonnance: `ORD-${String(nb + 1).padStart(5, '0')}` },
+      });
+    }
+
+    return prescription;
   }
 
   async retirerMedicament(prescriptionId: number) {
@@ -484,16 +504,149 @@ export class ConsultationsService {
     });
   }
 
-  /** Validation de la consultation (§7). */
+  // ─────────── Affectation automatique (file d'attente médecins) ───────────
+
+  /** Change la disponibilité du médecin connecté ; DISPONIBLE → redistribution des non affectés. */
+  async changerDisponibilite(utilisateurId: number, disponibilite: 'DISPONIBLE' | 'INDISPONIBLE') {
+    const utilisateur = await this.prisma.utilisateur.update({
+      where: { id: utilisateurId },
+      data: {
+        disponibilite,
+        derniereActivite: new Date(),
+      },
+      include: { personnel: { select: { cliniqueId: true } } },
+    });
+    if (disponibilite === 'DISPONIBLE' && utilisateur.personnel?.cliniqueId) {
+      await this.affectationService.redistribuerNonAffectees(
+        utilisateur.personnel.cliniqueId,
+      );
+    }
+    return { disponibilite: utilisateur.disponibilite };
+  }
+
+  /**
+   * Signal de vie du poste du médecin (appelé toutes les 60 s par le navigateur).
+   * Au retour du poste, les patients non affectés sont redistribués.
+   */
+  async ping(utilisateurId: number) {
+    const utilisateur = await this.prisma.utilisateur.findUnique({
+      where: { id: utilisateurId },
+      include: { personnel: { select: { cliniqueId: true } } },
+    });
+    if (!utilisateur) return { ok: false };
+    await this.prisma.utilisateur.update({
+      where: { id: utilisateurId },
+      data: { derniereActivite: new Date() },
+    });
+    if (
+      utilisateur.disponibilite === 'DISPONIBLE' &&
+      utilisateur.personnel?.cliniqueId
+    ) {
+      await this.affectationService.redistribuerNonAffectees(
+        utilisateur.personnel.cliniqueId,
+      );
+    }
+    return { ok: true };
+  }
+
+  /** File d'attente du médecin connecté : patients en attente + terminés du jour. */
+  async maFile(utilisateurId: number) {
+    const utilisateur = await this.prisma.utilisateur.findUnique({
+      where: { id: utilisateurId },
+      include: { personnel: { select: { cliniqueId: true } } },
+    });
+    if (!utilisateur) throw new NotFoundException('Utilisateur introuvable.');
+
+    const enAttente = await this.prisma.affectation.findMany({
+      where: {
+        medecinId: utilisateurId,
+        statut: { in: ['EN_ATTENTE', 'EN_CONSULTATION'] },
+      },
+      include: {
+        passage: {
+          select: {
+            id: true,
+            numeroOrdre: true,
+            createdAt: true,
+            statut: true,
+            patient: { select: { nom: true, prenom: true, code: true, age: true, sexe: true } },
+            service: { select: { nom: true } },
+          },
+        },
+      },
+      orderBy: { dateAffectation: 'asc' },
+    });
+
+    const debut = new Date();
+    debut.setHours(0, 0, 0, 0);
+    const terminees = await this.prisma.affectation.findMany({
+      where: {
+        medecinId: utilisateurId,
+        statut: 'TERMINE',
+        updatedAt: { gte: debut },
+      },
+      include: {
+        passage: {
+          select: {
+            id: true,
+            numeroOrdre: true,
+            patient: { select: { nom: true, prenom: true, code: true, age: true, sexe: true } },
+            consultations: { select: { statut: true, valideeLe: true } },
+          },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    return {
+      disponibilite: utilisateur.disponibilite,
+      enAttente,
+      terminees,
+    };
+  }
+
+  /** Le médecin ouvre un dossier de sa file : EN_ATTENTE → EN_CONSULTATION. */
+  async ouvrirAffectation(affectationId: number) {
+    const affectation = await this.prisma.affectation.findUnique({
+      where: { id: affectationId },
+    });
+    if (!affectation) throw new NotFoundException('Affectation introuvable.');
+    if (affectation.statut !== 'EN_ATTENTE') return affectation;
+    return this.prisma.affectation.update({
+      where: { id: affectationId },
+      data: { statut: 'EN_CONSULTATION' },
+    });
+  }
+
+  /** Le médecin quitte le dossier sans valider : EN_CONSULTATION → EN_ATTENTE. */
+  async fermerAffectation(affectationId: number) {
+    const affectation = await this.prisma.affectation.findUnique({
+      where: { id: affectationId },
+    });
+    if (!affectation) throw new NotFoundException('Affectation introuvable.');
+    if (affectation.statut !== 'EN_CONSULTATION') return affectation;
+    return this.prisma.affectation.update({
+      where: { id: affectationId },
+      data: { statut: 'EN_ATTENTE' },
+    });
+  }
+
+  /** Validation de la consultation (§7) : clôt aussi l'affectation (TERMINE). */
   async valider(consultationId: number) {
     const consultation = await this.prisma.consultation.findUnique({
       where: { id: consultationId },
     });
     if (!consultation) throw new NotFoundException('Consultation introuvable.');
-    return this.prisma.consultation.update({
+    const resultat = await this.prisma.consultation.update({
       where: { id: consultationId },
       data: { statut: 'VALIDEE', valideeLe: new Date() },
       include: includeConsultation,
     });
+    // Le patient passe dans « Consultations terminées »
+    await this.prisma.affectation.updateMany({
+      where: { passageId: consultation.passageId, statut: { in: ['EN_ATTENTE', 'EN_CONSULTATION'] } },
+      data: { statut: 'TERMINE' },
+    });
+    return resultat;
   }
 }

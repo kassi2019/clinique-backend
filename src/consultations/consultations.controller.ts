@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
@@ -97,5 +98,40 @@ export class ConsultationsController {
   @Post(':id/valider')
   valider(@Param('id', ParseIntPipe) id: number) {
     return this.consultationsService.valider(id);
+  }
+
+  // ─────────── Affectation automatique (file d'attente médecins) ───────────
+
+  /** Change la disponibilité du médecin connecté (DISPONIBLE / INDISPONIBLE). */
+  @Put('disponibilite')
+  changerDisponibilite(@Body() dto: { disponibilite: string }, @Req() req) {
+    return this.consultationsService.changerDisponibilite(
+      req.user.id,
+      dto.disponibilite === 'DISPONIBLE' ? 'DISPONIBLE' : 'INDISPONIBLE',
+    );
+  }
+
+  /** Signal de vie du poste (heartbeat, toutes les 60 s). */
+  @Post('ping')
+  ping(@Req() req) {
+    return this.consultationsService.ping(req.user.id);
+  }
+
+  /** File d'attente du médecin connecté : patients en attente + terminés du jour. */
+  @Get('moi')
+  maFile(@Req() req) {
+    return this.consultationsService.maFile(req.user.id);
+  }
+
+  /** Le médecin ouvre un dossier de sa file (EN_ATTENTE → EN_CONSULTATION). */
+  @Post('affectations/:id/ouvrir')
+  ouvrirAffectation(@Param('id', ParseIntPipe) id: number) {
+    return this.consultationsService.ouvrirAffectation(id);
+  }
+
+  /** Le médecin quitte le dossier sans valider (EN_CONSULTATION → EN_ATTENTE). */
+  @Post('affectations/:id/fermer')
+  fermerAffectation(@Param('id', ParseIntPipe) id: number) {
+    return this.consultationsService.fermerAffectation(id);
   }
 }

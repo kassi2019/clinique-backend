@@ -20,11 +20,70 @@ export class PharmacieService {
 
   // ═══════════════ ORDONNANCES (§9.1) ═══════════════
 
-  /** Recherche d'une ordonnance par code patient ou N° d'ordre. */
-  async rechercherOrdonnances(reference: string, cliniqueId: number) {
+  /**
+   * Recherche d'une ordonnance par code patient ou N° d'ordre ; sans code,
+   * renvoie la liste des ordonnances en attente (avec filtres).
+   */
+  async rechercherOrdonnances(
+    reference: string,
+    cliniqueId: number,
+    filtres: {
+      medecinId?: number;
+      statut?: string;
+      debut?: string;
+      fin?: string;
+    } = {},
+  ) {
     const ref = reference.trim().toUpperCase();
     const refSans = ref.replace(/[\s-]/g, '');
-    if (!ref) return [];
+
+    // ── Mode liste : ordonnances en attente (pas de code saisi) ──
+    if (!ref) {
+      const debut = filtres.debut
+        ? new Date(`${filtres.debut}T00:00:00`)
+        : new Date(new Date().setHours(0, 0, 0, 0));
+      const fin = filtres.fin
+        ? new Date(`${filtres.fin}T23:59:59.999`)
+        : new Date(new Date().setHours(23, 59, 59, 999));
+
+      const where: any = {
+        passage: { cliniqueId },
+        medicaments: { some: {} },
+        createdAt: { gte: debut, lte: fin },
+      };
+      if (filtres.statut === 'EN_ATTENTE' || filtres.statut === 'TRAITEE') {
+        where.ordonnanceStatut = filtres.statut;
+      } else {
+        where.ordonnanceStatut = 'EN_ATTENTE';
+      }
+      if (filtres.medecinId) where.medecinId = filtres.medecinId;
+
+      const consultations = await this.prisma.consultation.findMany({
+        where,
+        include: {
+          medecin: {
+            select: { matricule: true, personnel: { select: { nom: true, prenom: true } } },
+          },
+          patient: { select: { nom: true, prenom: true, code: true } },
+          passage: { select: { numeroOrdre: true } },
+          _count: { select: { medicaments: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      return {
+        liste: true,
+        ordonnances: consultations.map((c) => ({
+          id: c.id,
+          numeroOrdonnance: c.numeroOrdonnance ?? '—',
+          ordonnanceStatut: c.ordonnanceStatut,
+          createdAt: c.createdAt,
+          patient: c.patient,
+          passage: c.passage,
+          medecin: c.medecin,
+          nbMedicaments: c._count.medicaments,
+        })),
+      };
+    }
 
     const passages = await this.prisma.passage.findMany({
       where: {
@@ -54,6 +113,7 @@ export class PharmacieService {
     return passages
       .filter((p) => p.consultations.some((c) => c.medicaments.length > 0))
       .map((p) => ({
+        liste: false,
         id: p.id,
         numeroOrdre: p.numeroOrdre,
         createdAt: p.createdAt,
@@ -62,6 +122,8 @@ export class PharmacieService {
           id: c.id,
           statut: c.statut,
           valideeLe: c.valideeLe,
+          numeroOrdonnance: c.numeroOrdonnance,
+          ordonnanceStatut: c.ordonnanceStatut,
           medicaments: c.medicaments,
           dispensations: c.dispensations.map((d) => ({
             ...d,
@@ -306,6 +368,12 @@ export class PharmacieService {
     await this.prisma.dispensation.update({
       where: { id: dispensationId },
       data: { statut: 'CLOTUREE', clotureeLe: new Date() },
+    });
+
+    // L'ordonnance passe au statut TRAITEE (disparaît de la liste des ordonnances en attente)
+    await this.prisma.consultation.update({
+      where: { id: dispensation.consultationId },
+      data: { ordonnanceStatut: 'TRAITEE' },
     });
 
     // Impression automatique du reçu pharmacie

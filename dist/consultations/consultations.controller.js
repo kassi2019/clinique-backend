@@ -53,6 +53,21 @@ let ConsultationsController = class ConsultationsController {
     valider(id) {
         return this.consultationsService.valider(id);
     }
+    changerDisponibilite(dto, req) {
+        return this.consultationsService.changerDisponibilite(req.user.id, dto.disponibilite === 'DISPONIBLE' ? 'DISPONIBLE' : 'INDISPONIBLE');
+    }
+    ping(req) {
+        return this.consultationsService.ping(req.user.id);
+    }
+    maFile(req) {
+        return this.consultationsService.maFile(req.user.id);
+    }
+    ouvrirAffectation(id) {
+        return this.consultationsService.ouvrirAffectation(id);
+    }
+    fermerAffectation(id) {
+        return this.consultationsService.fermerAffectation(id);
+    }
 };
 exports.ConsultationsController = ConsultationsController;
 __decorate([
@@ -131,6 +146,42 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "valider", null);
+__decorate([
+    (0, common_1.Put)('disponibilite'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "changerDisponibilite", null);
+__decorate([
+    (0, common_1.Post)('ping'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "ping", null);
+__decorate([
+    (0, common_1.Get)('moi'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "maFile", null);
+__decorate([
+    (0, common_1.Post)('affectations/:id/ouvrir'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "ouvrirAffectation", null);
+__decorate([
+    (0, common_1.Post)('affectations/:id/fermer'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "fermerAffectation", null);
 exports.ConsultationsController = ConsultationsController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('consultations'),

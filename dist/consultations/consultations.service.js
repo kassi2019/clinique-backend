@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConsultationsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const affectation_service_1 = require("../affectation/affectation.service");
 const includeConsultation = {
     medicaments: true,
     medecin: {
@@ -22,8 +23,9 @@ const includeConsultation = {
     },
 };
 let ConsultationsService = class ConsultationsService {
-    constructor(prisma) {
+    constructor(prisma, affectationService) {
         this.prisma = prisma;
+        this.affectationService = affectationService;
     }
     async rechercher(reference, cliniqueId) {
         const ref = reference.trim().toUpperCase();
@@ -246,7 +248,7 @@ let ConsultationsService = class ConsultationsService {
     async ajouterMedicament(consultationId, dto) {
         const consultation = await this.prisma.consultation.findUnique({
             where: { id: consultationId },
-            include: { passage: { select: { typePatient: true } } },
+            include: { passage: { select: { typePatient: true, cliniqueId: true } } },
         });
         if (!consultation)
             throw new common_1.NotFoundException('Consultation introuvable.');
@@ -269,7 +271,7 @@ let ConsultationsService = class ConsultationsService {
         }
         if (!nom)
             throw new common_1.BadRequestException('Nom du médicament requis.');
-        return this.prisma.prescription.create({
+        const prescription = await this.prisma.prescription.create({
             data: {
                 consultationId,
                 medicamentId,
@@ -280,6 +282,19 @@ let ConsultationsService = class ConsultationsService {
                 duree: dto.duree,
             },
         });
+        if (!consultation.numeroOrdonnance) {
+            const nb = await this.prisma.consultation.count({
+                where: {
+                    numeroOrdonnance: { not: null },
+                    passage: { cliniqueId: consultation.passage.cliniqueId },
+                },
+            });
+            await this.prisma.consultation.update({
+                where: { id: consultationId },
+                data: { numeroOrdonnance: `ORD-${String(nb + 1).padStart(5, '0')}` },
+            });
+        }
+        return prescription;
     }
     async retirerMedicament(prescriptionId) {
         const prescription = await this.prisma.prescription.findUnique({
@@ -403,22 +418,137 @@ let ConsultationsService = class ConsultationsService {
             include: includeConsultation,
         });
     }
+    async changerDisponibilite(utilisateurId, disponibilite) {
+        const utilisateur = await this.prisma.utilisateur.update({
+            where: { id: utilisateurId },
+            data: {
+                disponibilite,
+                derniereActivite: new Date(),
+            },
+            include: { personnel: { select: { cliniqueId: true } } },
+        });
+        if (disponibilite === 'DISPONIBLE' && utilisateur.personnel?.cliniqueId) {
+            await this.affectationService.redistribuerNonAffectees(utilisateur.personnel.cliniqueId);
+        }
+        return { disponibilite: utilisateur.disponibilite };
+    }
+    async ping(utilisateurId) {
+        const utilisateur = await this.prisma.utilisateur.findUnique({
+            where: { id: utilisateurId },
+            include: { personnel: { select: { cliniqueId: true } } },
+        });
+        if (!utilisateur)
+            return { ok: false };
+        await this.prisma.utilisateur.update({
+            where: { id: utilisateurId },
+            data: { derniereActivite: new Date() },
+        });
+        if (utilisateur.disponibilite === 'DISPONIBLE' &&
+            utilisateur.personnel?.cliniqueId) {
+            await this.affectationService.redistribuerNonAffectees(utilisateur.personnel.cliniqueId);
+        }
+        return { ok: true };
+    }
+    async maFile(utilisateurId) {
+        const utilisateur = await this.prisma.utilisateur.findUnique({
+            where: { id: utilisateurId },
+            include: { personnel: { select: { cliniqueId: true } } },
+        });
+        if (!utilisateur)
+            throw new common_1.NotFoundException('Utilisateur introuvable.');
+        const enAttente = await this.prisma.affectation.findMany({
+            where: {
+                medecinId: utilisateurId,
+                statut: { in: ['EN_ATTENTE', 'EN_CONSULTATION'] },
+            },
+            include: {
+                passage: {
+                    select: {
+                        id: true,
+                        numeroOrdre: true,
+                        createdAt: true,
+                        statut: true,
+                        patient: { select: { nom: true, prenom: true, code: true, age: true, sexe: true } },
+                        service: { select: { nom: true } },
+                    },
+                },
+            },
+            orderBy: { dateAffectation: 'asc' },
+        });
+        const debut = new Date();
+        debut.setHours(0, 0, 0, 0);
+        const terminees = await this.prisma.affectation.findMany({
+            where: {
+                medecinId: utilisateurId,
+                statut: 'TERMINE',
+                updatedAt: { gte: debut },
+            },
+            include: {
+                passage: {
+                    select: {
+                        id: true,
+                        numeroOrdre: true,
+                        patient: { select: { nom: true, prenom: true, code: true, age: true, sexe: true } },
+                        consultations: { select: { statut: true, valideeLe: true } },
+                    },
+                },
+            },
+            orderBy: { updatedAt: 'desc' },
+        });
+        return {
+            disponibilite: utilisateur.disponibilite,
+            enAttente,
+            terminees,
+        };
+    }
+    async ouvrirAffectation(affectationId) {
+        const affectation = await this.prisma.affectation.findUnique({
+            where: { id: affectationId },
+        });
+        if (!affectation)
+            throw new common_1.NotFoundException('Affectation introuvable.');
+        if (affectation.statut !== 'EN_ATTENTE')
+            return affectation;
+        return this.prisma.affectation.update({
+            where: { id: affectationId },
+            data: { statut: 'EN_CONSULTATION' },
+        });
+    }
+    async fermerAffectation(affectationId) {
+        const affectation = await this.prisma.affectation.findUnique({
+            where: { id: affectationId },
+        });
+        if (!affectation)
+            throw new common_1.NotFoundException('Affectation introuvable.');
+        if (affectation.statut !== 'EN_CONSULTATION')
+            return affectation;
+        return this.prisma.affectation.update({
+            where: { id: affectationId },
+            data: { statut: 'EN_ATTENTE' },
+        });
+    }
     async valider(consultationId) {
         const consultation = await this.prisma.consultation.findUnique({
             where: { id: consultationId },
         });
         if (!consultation)
             throw new common_1.NotFoundException('Consultation introuvable.');
-        return this.prisma.consultation.update({
+        const resultat = await this.prisma.consultation.update({
             where: { id: consultationId },
             data: { statut: 'VALIDEE', valideeLe: new Date() },
             include: includeConsultation,
         });
+        await this.prisma.affectation.updateMany({
+            where: { passageId: consultation.passageId, statut: { in: ['EN_ATTENTE', 'EN_CONSULTATION'] } },
+            data: { statut: 'TERMINE' },
+        });
+        return resultat;
     }
 };
 exports.ConsultationsService = ConsultationsService;
 exports.ConsultationsService = ConsultationsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        affectation_service_1.AffectationService])
 ], ConsultationsService);
 //# sourceMappingURL=consultations.service.js.map

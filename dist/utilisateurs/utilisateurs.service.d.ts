@@ -36,6 +36,8 @@ export declare class UtilisateursService {
             motDePasse: string;
             roleId: number;
             derniereConnexion: Date | null;
+            disponibilite: string;
+            derniereActivite: Date | null;
         })[];
         total: number;
         page: number;
@@ -70,6 +72,8 @@ export declare class UtilisateursService {
         motDePasse: string;
         roleId: number;
         derniereConnexion: Date | null;
+        disponibilite: string;
+        derniereActivite: Date | null;
     }>;
     create(dto: CreateUtilisateurDto): Promise<{
         personnel: {
@@ -99,6 +103,8 @@ export declare class UtilisateursService {
         motDePasse: string;
         roleId: number;
         derniereConnexion: Date | null;
+        disponibilite: string;
+        derniereActivite: Date | null;
     }>;
     update(id: number, dto: UpdateUtilisateurDto): Promise<{
         personnel: {
@@ -128,6 +134,8 @@ export declare class UtilisateursService {
         motDePasse: string;
         roleId: number;
         derniereConnexion: Date | null;
+        disponibilite: string;
+        derniereActivite: Date | null;
     }>;
     resetMotDePasse(id: number, motDePasse: string): Promise<{
         personnel: {
@@ -157,6 +165,8 @@ export declare class UtilisateursService {
         motDePasse: string;
         roleId: number;
         derniereConnexion: Date | null;
+        disponibilite: string;
+        derniereActivite: Date | null;
     }>;
     remove(id: number): Promise<{
         personnel: {
@@ -186,5 +196,7 @@ export declare class UtilisateursService {
         motDePasse: string;
         roleId: number;
         derniereConnexion: Date | null;
+        disponibilite: string;
+        derniereActivite: Date | null;
     }>;
 }

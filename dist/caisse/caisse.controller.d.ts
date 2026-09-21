@@ -11,18 +11,18 @@ export declare class CaisseController {
         patient: {
             id: number;
             cliniqueId: number;
-            nom: string;
             createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
-            prenom: string;
-            sexe: string | null;
             numeroDossier: string;
+            code: string;
+            nom: string;
+            prenom: string;
             age: string | null;
+            sexe: string | null;
             ville: string | null;
             quartier: string | null;
             profession: string | null;
+            telephone: string | null;
             nationalite: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
@@ -34,10 +34,48 @@ export declare class CaisseController {
         };
         service: {
             id: number;
-            nom: string;
             code: string;
+            nom: string;
         };
     }[]>;
+    fileAttente(cliniqueId: number, page?: string, perPage?: string): Promise<{
+        data: {
+            id: number;
+            numeroOrdre: string;
+            patient: {
+                code: string;
+                nom: string;
+                prenom: string;
+            };
+            service: {
+                nom: string;
+            };
+            totalAPayer: number;
+            nbLignes: number;
+        }[];
+        total: number;
+        page: number;
+        perPage: number;
+        totalPages: number;
+    }>;
+    payesDuJour(cliniqueId: number, page?: string, perPage?: string): Promise<{
+        data: {
+            id: number;
+            numeroRecu: string;
+            modePaiement: string;
+            montant: number;
+            createdAt: Date;
+            numeroOrdre: string;
+            patient: {
+                nom: string;
+                prenom: string;
+            };
+        }[];
+        total: number;
+        page: number;
+        perPage: number;
+        totalPages: number;
+    }>;
     detail(id: number): Promise<{
         prestations: {
             montant: number;
@@ -45,13 +83,13 @@ export declare class CaisseController {
                 nom: string;
             };
             id: number;
-            libelle: string;
+            serviceId: number | null;
+            statut: string;
             createdAt: Date;
             updatedAt: Date;
             passageId: number;
-            statut: string;
-            serviceId: number | null;
             prestationId: number | null;
+            libelle: string;
             source: string;
             paiementId: number | null;
         }[];
@@ -60,13 +98,13 @@ export declare class CaisseController {
             lignes: {
                 montant: number;
                 id: number;
-                libelle: string;
+                serviceId: number | null;
+                statut: string;
                 createdAt: Date;
                 updatedAt: Date;
                 passageId: number;
-                statut: string;
-                serviceId: number | null;
                 prestationId: number | null;
+                libelle: string;
                 source: string;
                 paiementId: number | null;
             }[];
@@ -79,31 +117,31 @@ export declare class CaisseController {
             };
             id: number;
             cliniqueId: number;
+            statut: string;
             createdAt: Date;
             updatedAt: Date;
             passageId: number;
             caissierId: number;
             numeroRecu: string;
             modePaiement: string;
-            statut: string;
             motifAnnulation: string | null;
             dateAnnulation: Date | null;
         }[];
         patient: {
             id: number;
             cliniqueId: number;
-            nom: string;
             createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
-            prenom: string;
-            sexe: string | null;
             numeroDossier: string;
+            code: string;
+            nom: string;
+            prenom: string;
             age: string | null;
+            sexe: string | null;
             ville: string | null;
             quartier: string | null;
             profession: string | null;
+            telephone: string | null;
             nationalite: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
@@ -115,21 +153,19 @@ export declare class CaisseController {
         };
         service: {
             id: number;
-            nom: string;
             code: string;
+            nom: string;
         };
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
-        statut: string;
-        serviceId: number;
         patientId: number;
         numeroOrdre: string;
+        serviceId: number;
         typePatient: string;
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
+        statut: string;
         taille: string | null;
         temperature: import("@prisma/client/runtime/library").Decimal | null;
         pouls: number | null;
@@ -137,29 +173,31 @@ export declare class CaisseController {
         tensionDroite: string | null;
         poids: import("@prisma/client/runtime/library").Decimal | null;
         expireLe: Date;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     ajouterPrestation(id: number, dto: AjouterPrestationDto): Promise<{
         montant: number;
         id: number;
-        libelle: string;
+        serviceId: number | null;
+        statut: string;
         createdAt: Date;
         updatedAt: Date;
         passageId: number;
-        statut: string;
-        serviceId: number | null;
         prestationId: number | null;
+        libelle: string;
         source: string;
         paiementId: number | null;
     }>;
     retirerPrestation(id: number): Promise<{
         id: number;
-        libelle: string;
+        serviceId: number | null;
+        statut: string;
         createdAt: Date;
         updatedAt: Date;
         passageId: number;
-        statut: string;
-        serviceId: number | null;
         prestationId: number | null;
+        libelle: string;
         montant: import("@prisma/client/runtime/library").Decimal;
         source: string;
         paiementId: number | null;
@@ -169,13 +207,13 @@ export declare class CaisseController {
             montantTotal: number;
             id: number;
             cliniqueId: number;
+            statut: string;
             createdAt: Date;
             updatedAt: Date;
             passageId: number;
             caissierId: number;
             numeroRecu: string;
             modePaiement: string;
-            statut: string;
             motifAnnulation: string | null;
             dateAnnulation: Date | null;
         };
@@ -199,6 +237,7 @@ export declare class CaisseController {
     annuler(id: number, dto: AnnulerPaiementDto): Promise<{
         id: number;
         cliniqueId: number;
+        statut: string;
         createdAt: Date;
         updatedAt: Date;
         passageId: number;
@@ -206,7 +245,6 @@ export declare class CaisseController {
         numeroRecu: string;
         montantTotal: import("@prisma/client/runtime/library").Decimal;
         modePaiement: string;
-        statut: string;
         motifAnnulation: string | null;
         dateAnnulation: Date | null;
     }>;

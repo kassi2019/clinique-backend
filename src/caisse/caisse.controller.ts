@@ -35,6 +35,34 @@ export class CaisseController {
     return this.caisseService.rechercher(search ?? '', cliniqueId);
   }
 
+  /** File de la caisse : patients en attente de paiement (ordre d'arrivée). */
+  @Get('file-attente')
+  fileAttente(
+    @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
+    @Query('page') page?: string,
+    @Query('perPage') perPage?: string,
+  ) {
+    return this.caisseService.fileAttente(
+      cliniqueId,
+      page ? Number(page) : 1,
+      perPage ? Number(perPage) : 100,
+    );
+  }
+
+  /** Paiements valides du jour (reçus émis). */
+  @Get('payes')
+  payesDuJour(
+    @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
+    @Query('page') page?: string,
+    @Query('perPage') perPage?: string,
+  ) {
+    return this.caisseService.payesDuJour(
+      cliniqueId,
+      page ? Number(page) : 1,
+      perPage ? Number(perPage) : 100,
+    );
+  }
+
   /** Détail d'un passage : prestations à régler + historique des paiements. */
   @Get('passages/:id')
   detail(@Param('id', ParseIntPipe) id: number) {

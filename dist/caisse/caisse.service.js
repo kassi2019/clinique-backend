@@ -14,11 +14,13 @@ exports.CaisseService = void 0;
 const common_1 = require("@nestjs/common");
 const impression_service_1 = require("../impression/impression.service");
 const prisma_service_1 = require("../prisma/prisma.service");
+const affectation_service_1 = require("../affectation/affectation.service");
 const formatMontant = (x) => Number(x);
 let CaisseService = CaisseService_1 = class CaisseService {
-    constructor(prisma, impressionService) {
+    constructor(prisma, impressionService, affectationService) {
         this.prisma = prisma;
         this.impressionService = impressionService;
+        this.affectationService = affectationService;
         this.logger = new common_1.Logger(CaisseService_1.name);
     }
     async rechercher(search, cliniqueId) {
@@ -172,6 +174,20 @@ let CaisseService = CaisseService_1 = class CaisseService {
             where: { id: passage.id },
             data: { statut: 'ACTIF' },
         });
+        const consultationPayee = await this.prisma.passagePrestation.findFirst({
+            where: {
+                id: { in: lignes.map((l) => l.id) },
+                prestation: { type: 'CONSULTATION' },
+            },
+        });
+        if (consultationPayee) {
+            try {
+                await this.affectationService.assignerPassage(passage.id);
+            }
+            catch (err) {
+                this.logger.warn(`Affectation auto #${passage.id}: ${err.message}`);
+            }
+        }
         let impression = null;
         if ((await this.impressionService.getConfigPoste(passage.cliniqueId, 'RECU')).autoPrint) {
             try {
@@ -207,6 +223,64 @@ let CaisseService = CaisseService_1 = class CaisseService {
             impression,
         };
     }
+    async fileAttente(cliniqueId, page = 1, perPage = 100) {
+        const passages = await this.prisma.passage.findMany({
+            where: { cliniqueId, prestations: { some: { statut: 'EN_ATTENTE' } } },
+            include: {
+                patient: { select: { nom: true, prenom: true, code: true } },
+                service: { select: { nom: true } },
+                prestations: { where: { statut: 'EN_ATTENTE' }, select: { montant: true } },
+            },
+            orderBy: { createdAt: 'asc' },
+            skip: (page - 1) * perPage,
+            take: perPage,
+        });
+        const total = await this.prisma.passage.count({
+            where: { cliniqueId, prestations: { some: { statut: 'EN_ATTENTE' } } },
+        });
+        const data = passages.map((p) => ({
+            id: p.id,
+            numeroOrdre: p.numeroOrdre,
+            patient: p.patient,
+            service: p.service,
+            totalAPayer: p.prestations.reduce((s, l) => s + Number(l.montant), 0),
+            nbLignes: p.prestations.length,
+        }));
+        return { data, total, page, perPage, totalPages: Math.ceil(total / perPage) };
+    }
+    async payesDuJour(cliniqueId, page = 1, perPage = 100) {
+        const debut = new Date();
+        debut.setHours(0, 0, 0, 0);
+        const [paiements, total] = await this.prisma.$transaction([
+            this.prisma.paiement.findMany({
+                where: { cliniqueId, statut: 'VALIDE', createdAt: { gte: debut } },
+                include: {
+                    passage: {
+                        select: {
+                            numeroOrdre: true,
+                            patient: { select: { nom: true, prenom: true } },
+                        },
+                    },
+                },
+                orderBy: { createdAt: 'desc' },
+                skip: (page - 1) * perPage,
+                take: perPage,
+            }),
+            this.prisma.paiement.count({
+                where: { cliniqueId, statut: 'VALIDE', createdAt: { gte: debut } },
+            }),
+        ]);
+        const data = paiements.map((p) => ({
+            id: p.id,
+            numeroRecu: p.numeroRecu,
+            modePaiement: p.modePaiement,
+            montant: Number(p.montantTotal),
+            createdAt: p.createdAt,
+            numeroOrdre: p.passage.numeroOrdre,
+            patient: p.passage.patient,
+        }));
+        return { data, total, page, perPage, totalPages: Math.ceil(total / perPage) };
+    }
     async annulerPaiement(paiementId, motif) {
         const paiement = await this.prisma.paiement.findUnique({
             where: { id: paiementId },
@@ -237,6 +311,12 @@ let CaisseService = CaisseService_1 = class CaisseService {
                 data: { statut: 'EN_ATTENTE_PAIEMENT' },
             });
         }
+        const consultation = await this.prisma.consultation.findUnique({
+            where: { passageId: paiement.passageId },
+        });
+        if (!consultation || consultation.statut !== 'VALIDEE') {
+            await this.affectationService.annulerAffectation(paiement.passageId);
+        }
         return this.prisma.paiement.findUnique({ where: { id: paiementId } });
     }
 };
@@ -244,6 +324,7 @@ exports.CaisseService = CaisseService;
 exports.CaisseService = CaisseService = CaisseService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        impression_service_1.ImpressionService])
+        impression_service_1.ImpressionService,
+        affectation_service_1.AffectationService])
 ], CaisseService);
 //# sourceMappingURL=caisse.service.js.map

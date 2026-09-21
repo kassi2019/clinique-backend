@@ -25,9 +25,18 @@ export class PharmacieController {
   rechercherOrdonnances(
     @Query('code') code?: string,
     @Query('cliniqueId', ParseIntPipe) cliniqueId?: number,
+    @Query('medecinId') medecinId?: string,
+    @Query('statut') statut?: string,
+    @Query('debut') debut?: string,
+    @Query('fin') fin?: string,
   ) {
-    if (!cliniqueId) return [];
-    return this.pharmacieService.rechercherOrdonnances(code ?? '', cliniqueId);
+    if (!cliniqueId) return { liste: true, ordonnances: [] };
+    return this.pharmacieService.rechercherOrdonnances(code ?? '', cliniqueId, {
+      medecinId: medecinId ? Number(medecinId) : undefined,
+      statut,
+      debut,
+      fin,
+    });
   }
 
   @Get('consultations/:id')
