@@ -1,13 +1,15 @@
 import { ImpressionService } from '../impression/impression.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AffectationService } from '../affectation/affectation.service';
+import { AssurancesService } from '../assurances/assurances.service';
 import { EncaisserDto } from './dto/encaisser.dto';
 export declare class CaisseService {
     private prisma;
     private impressionService;
     private affectationService;
+    private assurancesService;
     private readonly logger;
-    constructor(prisma: PrismaService, impressionService: ImpressionService, affectationService: AffectationService);
+    constructor(prisma: PrismaService, impressionService: ImpressionService, affectationService: AffectationService, assurancesService: AssurancesService);
     rechercher(search: string, cliniqueId: number): Promise<{
         id: number;
         numeroOrdre: string;
@@ -44,8 +46,21 @@ export declare class CaisseService {
         };
     }[]>;
     detailPassage(passageId: number): Promise<{
+        assurancePatient: {
+            assurance: {
+                code: string;
+                libelle: string;
+            };
+            formule: {
+                code: string;
+                libelle: string;
+            };
+            numeroAssure: string;
+            typeBeneficiaire: string;
+        };
         prestations: {
             montant: number;
+            couverture: any;
             service: {
                 nom: string;
             };
@@ -62,6 +77,8 @@ export declare class CaisseService {
         }[];
         paiements: {
             montantTotal: number;
+            partAssurance: number;
+            partPatient: number;
             lignes: {
                 montant: number;
                 id: number;
@@ -93,6 +110,11 @@ export declare class CaisseService {
             modePaiement: string;
             motifAnnulation: string | null;
             dateAnnulation: Date | null;
+            assuranceId: number | null;
+            formuleLibelle: string | null;
+            tauxParametre: number | null;
+            tauxApplique: number | null;
+            motifTaux: string | null;
         }[];
         patient: {
             id: number;
@@ -183,6 +205,13 @@ export declare class CaisseService {
             modePaiement: string;
             motifAnnulation: string | null;
             dateAnnulation: Date | null;
+            assuranceId: number | null;
+            formuleLibelle: string | null;
+            tauxParametre: number | null;
+            tauxApplique: number | null;
+            partAssurance: import("@prisma/client/runtime/library").Decimal | null;
+            partPatient: import("@prisma/client/runtime/library").Decimal | null;
+            motifTaux: string | null;
         };
         lignes: {
             id: number;
@@ -201,7 +230,7 @@ export declare class CaisseService {
         };
         impression: any;
     }>;
-    fileAttente(cliniqueId: number, page?: number, perPage?: number): Promise<{
+    fileAttente(cliniqueId: number, page?: number, perPage?: number, jour?: string): Promise<{
         data: {
             id: number;
             numeroOrdre: string;
@@ -252,5 +281,12 @@ export declare class CaisseService {
         modePaiement: string;
         motifAnnulation: string | null;
         dateAnnulation: Date | null;
+        assuranceId: number | null;
+        formuleLibelle: string | null;
+        tauxParametre: number | null;
+        tauxApplique: number | null;
+        partAssurance: import("@prisma/client/runtime/library").Decimal | null;
+        partPatient: import("@prisma/client/runtime/library").Decimal | null;
+        motifTaux: string | null;
     }>;
 }

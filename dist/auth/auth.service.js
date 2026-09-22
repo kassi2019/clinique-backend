@@ -14,14 +14,16 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = require("bcryptjs");
 const prisma_service_1 = require("../prisma/prisma.service");
+const affectation_service_1 = require("../affectation/affectation.service");
 const includeUtilisateur = {
     personnel: { include: { service: true, clinique: true } },
     role: { include: { habilitations: { include: { module: true } } } },
 };
 let AuthService = class AuthService {
-    constructor(prisma, jwt) {
+    constructor(prisma, jwt, affectationService) {
         this.prisma = prisma;
         this.jwt = jwt;
+        this.affectationService = affectationService;
     }
     buildUser(u) {
         return {
@@ -70,8 +72,19 @@ let AuthService = class AuthService {
         }
         await this.prisma.utilisateur.update({
             where: { id: utilisateur.id },
-            data: { derniereConnexion: new Date() },
+            data: {
+                derniereConnexion: new Date(),
+                disponibilite: utilisateur.role.code === 'MEDECIN' ? 'DISPONIBLE' : utilisateur.disponibilite,
+                derniereActivite: new Date(),
+            },
         });
+        if (utilisateur.role.code === 'MEDECIN' && utilisateur.personnel?.cliniqueId) {
+            try {
+                await this.affectationService.redistribuerNonAffectees(utilisateur.personnel.cliniqueId);
+            }
+            catch {
+            }
+        }
         const payload = {
             sub: utilisateur.id,
             matricule: utilisateur.matricule,
@@ -97,6 +110,7 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        affectation_service_1.AffectationService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

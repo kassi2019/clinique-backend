@@ -15,12 +15,14 @@ const common_1 = require("@nestjs/common");
 const impression_service_1 = require("../impression/impression.service");
 const prisma_service_1 = require("../prisma/prisma.service");
 const affectation_service_1 = require("../affectation/affectation.service");
+const assurances_service_1 = require("../assurances/assurances.service");
 const formatMontant = (x) => Number(x);
 let CaisseService = CaisseService_1 = class CaisseService {
-    constructor(prisma, impressionService, affectationService) {
+    constructor(prisma, impressionService, affectationService, assurancesService) {
         this.prisma = prisma;
         this.impressionService = impressionService;
         this.affectationService = affectationService;
+        this.assurancesService = assurancesService;
         this.logger = new common_1.Logger(CaisseService_1.name);
     }
     async rechercher(search, cliniqueId) {
@@ -79,15 +81,56 @@ let CaisseService = CaisseService_1 = class CaisseService {
         });
         if (!passage)
             throw new common_1.NotFoundException('Passage introuvable.');
+        const rattachement = await this.assurancesService.couvertureActiveDuPatient(passage.patientId);
+        const lignes = passage.prestations;
+        const couvertures = {};
+        for (const l of lignes) {
+            if (l.statut === 'EN_ATTENTE' && l.prestationId) {
+                const couv = await this.assurancesService.tauxApplicable(passage.patientId, l.prestationId);
+                if (couv)
+                    couvertures[l.id] = couv;
+            }
+        }
         return {
             ...passage,
-            prestations: passage.prestations.map((l) => ({
-                ...l,
-                montant: formatMontant(l.montant),
-            })),
+            assurancePatient: rattachement
+                ? {
+                    assurance: {
+                        code: rattachement.assurance.code,
+                        libelle: rattachement.assurance.libelle,
+                    },
+                    formule: {
+                        code: rattachement.formule.code,
+                        libelle: rattachement.formule.libelle,
+                    },
+                    numeroAssure: rattachement.numeroAssure,
+                    typeBeneficiaire: rattachement.typeBeneficiaire,
+                }
+                : null,
+            prestations: passage.prestations.map((l) => {
+                const couv = couvertures[l.id];
+                const montant = formatMontant(l.montant);
+                let partAssurance = 0;
+                let partPatient = montant;
+                if (couv) {
+                    partAssurance = Math.round((montant * couv.taux) / 100);
+                    if (couv.plafond != null)
+                        partAssurance = Math.min(partAssurance, couv.plafond);
+                    partPatient = Math.max(0, montant - partAssurance);
+                }
+                return {
+                    ...l,
+                    montant,
+                    couverture: couv
+                        ? { ...couv, partAssurance, partPatient }
+                        : null,
+                };
+            }),
             paiements: passage.paiements.map((p) => ({
                 ...p,
                 montantTotal: formatMontant(p.montantTotal),
+                partAssurance: p.partAssurance ? formatMontant(p.partAssurance) : null,
+                partPatient: p.partPatient ? formatMontant(p.partPatient) : null,
                 lignes: p.lignes.map((l) => ({ ...l, montant: formatMontant(l.montant) })),
             })),
         };
@@ -148,6 +191,9 @@ let CaisseService = CaisseService_1 = class CaisseService {
             throw new common_1.BadRequestException('Certaines prestations sont déjà payées ou inexistantes.');
         }
         const montantTotal = lignes.reduce((somme, l) => somme + Number(l.montant), 0);
+        if (dto.tauxApplique != null && !dto.motifTaux) {
+            throw new common_1.BadRequestException('Indiquez le motif de la modification exceptionnelle du taux.');
+        }
         const annee = new Date().getFullYear();
         const nb = await this.prisma.paiement.count({
             where: {
@@ -170,6 +216,54 @@ let CaisseService = CaisseService_1 = class CaisseService {
             where: { id: { in: lignes.map((l) => l.id) } },
             data: { statut: 'PAYEE', paiementId: paiement.id },
         });
+        let partAssurance = 0;
+        let partPatient = montantTotal;
+        let assuranceInfo = null;
+        for (const l of lignes) {
+            if (!l.prestationId)
+                continue;
+            const couv = await this.assurancesService.tauxApplicable(passage.patientId, l.prestationId);
+            if (!couv)
+                continue;
+            if (!assuranceInfo)
+                assuranceInfo = couv;
+            const tauxApplique = dto.tauxApplique ?? couv.taux;
+            let montantAss = Math.round((Number(l.montant) * tauxApplique) / 100);
+            if (couv.plafond != null)
+                montantAss = Math.min(montantAss, couv.plafond);
+            const montantPat = Math.max(0, Number(l.montant) - montantAss);
+            partAssurance += montantAss;
+            partPatient -= montantAss;
+            await this.prisma.priseEnCharge.create({
+                data: {
+                    paiementId: paiement.id,
+                    ligneId: l.id,
+                    assuranceId: couv.assurance.id,
+                    formuleId: couv.formule.id,
+                    tauxParametre: couv.taux,
+                    tauxApplique,
+                    montantTotal: l.montant,
+                    montantAssurance: montantAss,
+                    montantPatient: montantPat,
+                    motifModification: dto.motifTaux ?? null,
+                    utilisateurId,
+                },
+            });
+        }
+        if (assuranceInfo) {
+            await this.prisma.paiement.update({
+                where: { id: paiement.id },
+                data: {
+                    assuranceId: assuranceInfo.assurance.id,
+                    formuleLibelle: `${assuranceInfo.assurance.libelle} — ${assuranceInfo.formule.libelle}`,
+                    tauxParametre: assuranceInfo.taux,
+                    tauxApplique: dto.tauxApplique ?? assuranceInfo.taux,
+                    partAssurance,
+                    partPatient: Math.max(0, partPatient),
+                    motifTaux: dto.motifTaux ?? null,
+                },
+            });
+        }
         await this.prisma.passage.update({
             where: { id: passage.id },
             data: { statut: 'ACTIF' },
@@ -223,9 +317,15 @@ let CaisseService = CaisseService_1 = class CaisseService {
             impression,
         };
     }
-    async fileAttente(cliniqueId, page = 1, perPage = 100) {
+    async fileAttente(cliniqueId, page = 1, perPage = 100, jour) {
+        const where = { cliniqueId, prestations: { some: { statut: 'EN_ATTENTE' } } };
+        if (jour) {
+            const debut = new Date(`${jour}T00:00:00`);
+            const fin = new Date(`${jour}T23:59:59.999`);
+            where.createdAt = { gte: debut, lte: fin };
+        }
         const passages = await this.prisma.passage.findMany({
-            where: { cliniqueId, prestations: { some: { statut: 'EN_ATTENTE' } } },
+            where,
             include: {
                 patient: { select: { nom: true, prenom: true, code: true } },
                 service: { select: { nom: true } },
@@ -235,9 +335,7 @@ let CaisseService = CaisseService_1 = class CaisseService {
             skip: (page - 1) * perPage,
             take: perPage,
         });
-        const total = await this.prisma.passage.count({
-            where: { cliniqueId, prestations: { some: { statut: 'EN_ATTENTE' } } },
-        });
+        const total = await this.prisma.passage.count({ where });
         const data = passages.map((p) => ({
             id: p.id,
             numeroOrdre: p.numeroOrdre,
@@ -325,6 +423,7 @@ exports.CaisseService = CaisseService = CaisseService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         impression_service_1.ImpressionService,
-        affectation_service_1.AffectationService])
+        affectation_service_1.AffectationService,
+        assurances_service_1.AssurancesService])
 ], CaisseService);
 //# sourceMappingURL=caisse.service.js.map

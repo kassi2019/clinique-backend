@@ -16,6 +16,7 @@ const consultations_module_1 = require("./consultations/consultations.module");
 const medicaments_module_1 = require("./medicaments/medicaments.module");
 const pharmacie_module_1 = require("./pharmacie/pharmacie.module");
 const auth_module_1 = require("./auth/auth.module");
+const assurances_module_1 = require("./assurances/assurances.module");
 const cliniques_module_1 = require("./cliniques/cliniques.module");
 const impression_module_1 = require("./impression/impression.module");
 const imagerie_module_1 = require("./imagerie/imagerie.module");
@@ -38,6 +39,7 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             prisma_module_1.PrismaModule,
             auth_module_1.AuthModule,
+            assurances_module_1.AssurancesModule,
             accueil_module_1.AccueilModule,
             caisse_module_1.CaisseModule,
             consultations_module_1.ConsultationsModule,

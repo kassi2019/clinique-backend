@@ -549,18 +549,22 @@ export class ConsultationsService {
     return { ok: true };
   }
 
-  /** File d'attente du médecin connecté : patients en attente + terminés du jour. */
-  async maFile(utilisateurId: number) {
+  /** File d'attente du médecin connecté : patients en attente + terminés (jour courant par défaut). */
+  async maFile(utilisateurId: number, jour?: string) {
     const utilisateur = await this.prisma.utilisateur.findUnique({
       where: { id: utilisateurId },
       include: { personnel: { select: { cliniqueId: true } } },
     });
     if (!utilisateur) throw new NotFoundException('Utilisateur introuvable.');
 
+    const debut = jour ? new Date(`${jour}T00:00:00`) : new Date(new Date().setHours(0, 0, 0, 0));
+    const fin = jour ? new Date(`${jour}T23:59:59.999`) : new Date(new Date().setHours(23, 59, 59, 999));
+
     const enAttente = await this.prisma.affectation.findMany({
       where: {
         medecinId: utilisateurId,
         statut: { in: ['EN_ATTENTE', 'EN_CONSULTATION'] },
+        dateAffectation: { gte: debut, lte: fin },
       },
       include: {
         passage: {
@@ -577,13 +581,11 @@ export class ConsultationsService {
       orderBy: { dateAffectation: 'asc' },
     });
 
-    const debut = new Date();
-    debut.setHours(0, 0, 0, 0);
     const terminees = await this.prisma.affectation.findMany({
       where: {
         medecinId: utilisateurId,
         statut: 'TERMINE',
-        updatedAt: { gte: debut },
+        updatedAt: { gte: debut, lte: fin },
       },
       include: {
         passage: {

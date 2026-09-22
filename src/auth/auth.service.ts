@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
+import { AffectationService } from '../affectation/affectation.service';
 
 const includeUtilisateur = {
   personnel: { include: { service: true, clinique: true } },
@@ -13,6 +14,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
+    private affectationService: AffectationService,
   ) {}
 
   /**
@@ -101,8 +103,26 @@ export class AuthService {
 
     await this.prisma.utilisateur.update({
       where: { id: utilisateur.id },
-      data: { derniereConnexion: new Date() },
+      data: {
+        derniereConnexion: new Date(),
+        // Un médecin qui se connecte est automatiquement Disponible
+        // (il peut ensuite se mettre Indisponible avec le bouton).
+        disponibilite:
+          utilisateur.role.code === 'MEDECIN' ? 'DISPONIBLE' : utilisateur.disponibilite,
+        derniereActivite: new Date(),
+      },
     });
+
+    // Redistribution immédiate des patients non affectés vers ce médecin
+    if (utilisateur.role.code === 'MEDECIN' && utilisateur.personnel?.cliniqueId) {
+      try {
+        await this.affectationService.redistribuerNonAffectees(
+          utilisateur.personnel.cliniqueId,
+        );
+      } catch {
+        /* la redistribution est tolérante */
+      }
+    }
 
     const payload = {
       sub: utilisateur.id,

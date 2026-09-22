@@ -7,6 +7,7 @@ import {
 import { ImpressionService } from '../impression/impression.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AffectationService } from '../affectation/affectation.service';
+import { AssurancesService } from '../assurances/assurances.service';
 import { EncaisserDto } from './dto/encaisser.dto';
 
 const formatMontant = (x: any) => Number(x);
@@ -19,6 +20,7 @@ export class CaisseService {
     private prisma: PrismaService,
     private impressionService: ImpressionService,
     private affectationService: AffectationService,
+    private assurancesService: AssurancesService,
   ) {}
 
   /**
@@ -81,15 +83,64 @@ export class CaisseService {
       },
     });
     if (!passage) throw new NotFoundException('Passage introuvable.');
+
+    // Assurance du patient : rattachement actif (affiché en bandeau à la caisse)
+    const rattachement = await this.assurancesService.couvertureActiveDuPatient(
+      passage.patientId,
+    );
+
+    // Couverture assurance du patient : taux applicable par ligne
+    const lignes = passage.prestations;
+    const couvertures: Record<number, any> = {};
+    for (const l of lignes) {
+      if (l.statut === 'EN_ATTENTE' && l.prestationId) {
+        const couv = await this.assurancesService.tauxApplicable(
+          passage.patientId,
+          l.prestationId,
+        );
+        if (couv) couvertures[l.id] = couv;
+      }
+    }
+
     return {
       ...passage,
-      prestations: passage.prestations.map((l) => ({
-        ...l,
-        montant: formatMontant(l.montant),
-      })),
+      assurancePatient: rattachement
+        ? {
+            assurance: {
+              code: rattachement.assurance.code,
+              libelle: rattachement.assurance.libelle,
+            },
+            formule: {
+              code: rattachement.formule.code,
+              libelle: rattachement.formule.libelle,
+            },
+            numeroAssure: rattachement.numeroAssure,
+            typeBeneficiaire: rattachement.typeBeneficiaire,
+          }
+        : null,
+      prestations: passage.prestations.map((l) => {
+        const couv = couvertures[l.id];
+        const montant = formatMontant(l.montant);
+        let partAssurance = 0;
+        let partPatient = montant;
+        if (couv) {
+          partAssurance = Math.round((montant * couv.taux) / 100);
+          if (couv.plafond != null) partAssurance = Math.min(partAssurance, couv.plafond);
+          partPatient = Math.max(0, montant - partAssurance);
+        }
+        return {
+          ...l,
+          montant,
+          couverture: couv
+            ? { ...couv, partAssurance, partPatient }
+            : null,
+        };
+      }),
       paiements: passage.paiements.map((p) => ({
         ...p,
         montantTotal: formatMontant(p.montantTotal),
+        partAssurance: p.partAssurance ? formatMontant(p.partAssurance) : null,
+        partPatient: p.partPatient ? formatMontant(p.partPatient) : null,
         lignes: p.lignes.map((l) => ({ ...l, montant: formatMontant(l.montant) })),
       })),
     };
@@ -166,6 +217,14 @@ export class CaisseService {
       0,
     );
 
+    // Assurance : validation AVANT tout paiement (sinon les lignes seraient
+    // déjà payées quand l'erreur est levée).
+    if (dto.tauxApplique != null && !dto.motifTaux) {
+      throw new BadRequestException(
+        'Indiquez le motif de la modification exceptionnelle du taux.',
+      );
+    }
+
     // Numéro de reçu unique par clinique : R<année>-<séquence>
     const annee = new Date().getFullYear();
     const nb = await this.prisma.paiement.count({
@@ -191,6 +250,55 @@ export class CaisseService {
       where: { id: { in: lignes.map((l) => l.id) } },
       data: { statut: 'PAYEE', paiementId: paiement.id },
     });
+
+    // ── Assurance : prises en charge par ligne + parts sur le paiement ──
+    let partAssurance = 0;
+    let partPatient = montantTotal;
+    let assuranceInfo: any = null;
+    for (const l of lignes) {
+      if (!l.prestationId) continue;
+      const couv = await this.assurancesService.tauxApplicable(
+        passage.patientId,
+        l.prestationId,
+      );
+      if (!couv) continue;
+      if (!assuranceInfo) assuranceInfo = couv;
+      const tauxApplique = dto.tauxApplique ?? couv.taux;
+      let montantAss = Math.round((Number(l.montant) * tauxApplique) / 100);
+      if (couv.plafond != null) montantAss = Math.min(montantAss, couv.plafond);
+      const montantPat = Math.max(0, Number(l.montant) - montantAss);
+      partAssurance += montantAss;
+      partPatient -= montantAss;
+      await this.prisma.priseEnCharge.create({
+        data: {
+          paiementId: paiement.id,
+          ligneId: l.id,
+          assuranceId: couv.assurance.id,
+          formuleId: couv.formule.id,
+          tauxParametre: couv.taux,
+          tauxApplique,
+          montantTotal: l.montant,
+          montantAssurance: montantAss,
+          montantPatient: montantPat,
+          motifModification: dto.motifTaux ?? null,
+          utilisateurId,
+        },
+      });
+    }
+    if (assuranceInfo) {
+      await this.prisma.paiement.update({
+        where: { id: paiement.id },
+        data: {
+          assuranceId: assuranceInfo.assurance.id,
+          formuleLibelle: `${assuranceInfo.assurance.libelle} — ${assuranceInfo.formule.libelle}`,
+          tauxParametre: assuranceInfo.taux,
+          tauxApplique: dto.tauxApplique ?? assuranceInfo.taux,
+          partAssurance,
+          partPatient: Math.max(0, partPatient),
+          motifTaux: dto.motifTaux ?? null,
+        },
+      });
+    }
 
     // Activation automatique des actes après règlement (§6.2)
     await this.prisma.passage.update({
@@ -258,11 +366,17 @@ export class CaisseService {
   /** Annulation d'un paiement (droits administrateur) : les prestations reviennent en attente. */
   /**
    * File de la caisse : passages ayant des prestations à payer,
-   * dans l'ordre d'arrivée (même logique que la file des médecins).
+   * dans l'ordre d'arrivée. Données du jour par défaut (vide = tout).
    */
-  async fileAttente(cliniqueId: number, page = 1, perPage = 100) {
+  async fileAttente(cliniqueId: number, page = 1, perPage = 100, jour?: string) {
+    const where: any = { cliniqueId, prestations: { some: { statut: 'EN_ATTENTE' } } };
+    if (jour) {
+      const debut = new Date(`${jour}T00:00:00`);
+      const fin = new Date(`${jour}T23:59:59.999`);
+      where.createdAt = { gte: debut, lte: fin };
+    }
     const passages = await this.prisma.passage.findMany({
-      where: { cliniqueId, prestations: { some: { statut: 'EN_ATTENTE' } } },
+      where,
       include: {
         patient: { select: { nom: true, prenom: true, code: true } },
         service: { select: { nom: true } },
@@ -272,9 +386,7 @@ export class CaisseService {
       skip: (page - 1) * perPage,
       take: perPage,
     });
-    const total = await this.prisma.passage.count({
-      where: { cliniqueId, prestations: { some: { statut: 'EN_ATTENTE' } } },
-    });
+    const total = await this.prisma.passage.count({ where });
     const data = passages.map((p) => ({
       id: p.id,
       numeroOrdre: p.numeroOrdre,

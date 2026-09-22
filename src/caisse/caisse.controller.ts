@@ -35,10 +35,11 @@ export class CaisseController {
     return this.caisseService.rechercher(search ?? '', cliniqueId);
   }
 
-  /** File de la caisse : patients en attente de paiement (ordre d'arrivée). */
+  /** File de la caisse : patients en attente de paiement (ordre d'arrivée, jour courant par défaut). */
   @Get('file-attente')
   fileAttente(
     @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
+    @Query('jour') jour?: string,
     @Query('page') page?: string,
     @Query('perPage') perPage?: string,
   ) {
@@ -46,6 +47,7 @@ export class CaisseController {
       cliniqueId,
       page ? Number(page) : 1,
       perPage ? Number(perPage) : 100,
+      jour,
     );
   }
 

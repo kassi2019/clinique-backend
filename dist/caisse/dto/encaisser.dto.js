@@ -25,6 +25,18 @@ __decorate([
     (0, class_validator_1.IsIn)(exports.MODES_PAIEMENT),
     __metadata("design:type", String)
 ], EncaisserDto.prototype, "modePaiement", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(100),
+    __metadata("design:type", Number)
+], EncaisserDto.prototype, "tauxApplique", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EncaisserDto.prototype, "motifTaux", void 0);
 class AnnulerPaiementDto {
 }
 exports.AnnulerPaiementDto = AnnulerPaiementDto;

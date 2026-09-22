@@ -361,6 +361,11 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         lignes.push(CMDS.BOLD_ON +
             deuxColonnes('TOTAL', `${Number(paiement.montantTotal)} FCFA`) +
             CMDS.BOLD_OFF);
+        if (paiement.partAssurance != null) {
+            lignes.push(deuxColonnes('Part assurance', `${Number(paiement.partAssurance)} FCFA`));
+            lignes.push(deuxColonnes('Part patient', `${Number(paiement.partPatient ?? 0)} FCFA`));
+            lignes.push(deuxColonnes('Taux applique', `${paiement.tauxApplique ?? paiement.tauxParametre ?? 0} %`));
+        }
         lignes.push(deuxColonnes('Mode', paiement.modePaiement));
         lignes.push(deuxColonnes('Caissier', `${paiement.caissier.personnel?.prenom ?? ''} ${paiement.caissier.personnel?.nom ?? ''}`.trim() ||
             paiement.caissier.matricule));

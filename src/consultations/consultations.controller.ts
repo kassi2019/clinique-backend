@@ -117,10 +117,10 @@ export class ConsultationsController {
     return this.consultationsService.ping(req.user.id);
   }
 
-  /** File d'attente du médecin connecté : patients en attente + terminés du jour. */
+  /** File d'attente du médecin connecté : patients en attente + terminés (jour courant par défaut). */
   @Get('moi')
-  maFile(@Req() req) {
-    return this.consultationsService.maFile(req.user.id);
+  maFile(@Req() req, @Query('jour') jour?: string) {
+    return this.consultationsService.maFile(req.user.id, jour);
   }
 
   /** Le médecin ouvre un dossier de sa file (EN_ATTENTE → EN_CONSULTATION). */

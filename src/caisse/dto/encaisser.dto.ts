@@ -1,4 +1,4 @@
-import { ArrayNotEmpty, IsArray, IsIn, IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export const MODES_PAIEMENT = ['ESPECES', 'MOBILE_MONEY', 'CARTE'] as const;
 
@@ -10,6 +10,17 @@ export class EncaisserDto {
 
   @IsIn(MODES_PAIEMENT)
   modePaiement: string;
+
+  /** Assurance : modification exceptionnelle du taux (sinon le taux paramétré s'applique). */
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  tauxApplique?: number;
+
+  @IsOptional()
+  @IsString()
+  motifTaux?: string;
 }
 
 export class AnnulerPaiementDto {

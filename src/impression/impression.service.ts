@@ -469,6 +469,17 @@ export class ImpressionService {
         deuxColonnes('TOTAL', `${Number(paiement.montantTotal)} FCFA`) +
         CMDS.BOLD_OFF,
     );
+    // Prise en charge assurance (reçu caisse)
+    if (paiement.partAssurance != null) {
+      lignes.push(deuxColonnes('Part assurance', `${Number(paiement.partAssurance)} FCFA`));
+      lignes.push(deuxColonnes('Part patient', `${Number(paiement.partPatient ?? 0)} FCFA`));
+      lignes.push(
+        deuxColonnes(
+          'Taux applique',
+          `${paiement.tauxApplique ?? paiement.tauxParametre ?? 0} %`,
+        ),
+      );
+    }
     lignes.push(deuxColonnes('Mode', paiement.modePaiement));
     lignes.push(
       deuxColonnes(

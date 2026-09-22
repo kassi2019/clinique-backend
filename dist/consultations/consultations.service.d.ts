@@ -504,7 +504,7 @@ export declare class ConsultationsService {
     ping(utilisateurId: number): Promise<{
         ok: boolean;
     }>;
-    maFile(utilisateurId: number): Promise<{
+    maFile(utilisateurId: number, jour?: string): Promise<{
         disponibilite: string;
         enAttente: ({
             passage: {

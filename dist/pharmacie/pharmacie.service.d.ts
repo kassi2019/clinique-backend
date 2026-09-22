@@ -376,10 +376,10 @@ export declare class PharmacieService {
         createdAt: Date;
         medicamentId: number;
         quantite: number;
+        utilisateurId: number | null;
         reference: string | null;
         commentaire: string | null;
         lotId: number | null;
-        utilisateurId: number | null;
     }[]>;
     alertes(cliniqueId: number): Promise<{
         stockBas: {
@@ -479,9 +479,9 @@ export declare class PharmacieService {
         id: number;
         createdAt: Date;
         quantite: number;
+        utilisateurId: number | null;
         reference: string | null;
         commentaire: string | null;
-        utilisateurId: number | null;
         consommableId: number;
     }[]>;
 }

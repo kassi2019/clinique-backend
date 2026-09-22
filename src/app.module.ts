@@ -7,6 +7,7 @@ import { ConsultationsModule } from './consultations/consultations.module';
 import { MedicamentsModule } from './medicaments/medicaments.module';
 import { PharmacieModule } from './pharmacie/pharmacie.module';
 import { AuthModule } from './auth/auth.module';
+import { AssurancesModule } from './assurances/assurances.module';
 import { CliniquesModule } from './cliniques/cliniques.module';
 import { ImpressionModule } from './impression/impression.module';
 import { ImagerieModule } from './imagerie/imagerie.module';
@@ -26,6 +27,7 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
   imports: [
     PrismaModule,
     AuthModule,
+    AssurancesModule,
     AccueilModule,
     CaisseModule,
     ConsultationsModule,

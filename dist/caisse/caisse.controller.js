@@ -28,8 +28,8 @@ let CaisseController = class CaisseController {
             return [];
         return this.caisseService.rechercher(search ?? '', cliniqueId);
     }
-    fileAttente(cliniqueId, page, perPage) {
-        return this.caisseService.fileAttente(cliniqueId, page ? Number(page) : 1, perPage ? Number(perPage) : 100);
+    fileAttente(cliniqueId, jour, page, perPage) {
+        return this.caisseService.fileAttente(cliniqueId, page ? Number(page) : 1, perPage ? Number(perPage) : 100, jour);
     }
     payesDuJour(cliniqueId, page, perPage) {
         return this.caisseService.payesDuJour(cliniqueId, page ? Number(page) : 1, perPage ? Number(perPage) : 100);
@@ -62,10 +62,11 @@ __decorate([
 __decorate([
     (0, common_1.Get)('file-attente'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
-    __param(1, (0, common_1.Query)('page')),
-    __param(2, (0, common_1.Query)('perPage')),
+    __param(1, (0, common_1.Query)('jour')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('perPage')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, String]),
+    __metadata("design:paramtypes", [Number, String, String, String]),
     __metadata("design:returntype", void 0)
 ], CaisseController.prototype, "fileAttente", null);
 __decorate([

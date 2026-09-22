@@ -1,9 +1,11 @@
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { AffectationService } from '../affectation/affectation.service';
 export declare class AuthService {
     private prisma;
     private jwt;
-    constructor(prisma: PrismaService, jwt: JwtService);
+    private affectationService;
+    constructor(prisma: PrismaService, jwt: JwtService, affectationService: AffectationService);
     private buildUser;
     login(matricule: string, motDePasse: string): Promise<{
         access_token: string;

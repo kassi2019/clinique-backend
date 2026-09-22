@@ -576,7 +576,7 @@ export declare class ConsultationsController {
     ping(req: any): Promise<{
         ok: boolean;
     }>;
-    maFile(req: any): Promise<{
+    maFile(req: any, jour?: string): Promise<{
         disponibilite: string;
         enAttente: ({
             passage: {
