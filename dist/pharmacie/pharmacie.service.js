@@ -505,6 +505,46 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             data: { stock: total._sum.quantiteRestante ?? 0 },
         });
     }
+    async inventaireMultiple(lignes, utilisateurId) {
+        let ajustes = 0;
+        const medicaments = new Set();
+        for (const l of lignes) {
+            const lot = await this.prisma.lot.findUnique({ where: { id: l.lotId } });
+            if (!lot)
+                continue;
+            const quantiteReelle = Number(l.quantiteReelle) || 0;
+            const ecart = quantiteReelle - lot.quantiteRestante;
+            if (ecart !== 0) {
+                await this.prisma.mouvementStock.create({
+                    data: {
+                        medicamentId: lot.medicamentId,
+                        type: 'INVENTAIRE',
+                        quantite: ecart,
+                        lotId: lot.id,
+                        reference: `Inventaire lot ${lot.numeroLot}`,
+                        utilisateurId,
+                    },
+                });
+                await this.prisma.lot.update({
+                    where: { id: lot.id },
+                    data: { quantiteRestante: quantiteReelle },
+                });
+                medicaments.add(lot.medicamentId);
+                ajustes++;
+            }
+        }
+        for (const medicamentId of medicaments) {
+            const total = await this.prisma.lot.aggregate({
+                where: { medicamentId },
+                _sum: { quantiteRestante: true },
+            });
+            await this.prisma.medicament.update({
+                where: { id: medicamentId },
+                data: { stock: total._sum.quantiteRestante ?? 0 },
+            });
+        }
+        return { ajustes, total: lignes.length };
+    }
     async mouvements(medicamentId) {
         const mouvements = await this.prisma.mouvementStock.findMany({
             where: { medicamentId },

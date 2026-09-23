@@ -357,6 +357,15 @@ export declare class PharmacieController {
         seuilAlerte: number;
         prixVente: import("@prisma/client/runtime/library").Decimal | null;
     }>;
+    inventaireMultiple(dto: {
+        lignes: {
+            lotId: number;
+            quantiteReelle: number;
+        }[];
+    }, req: any): Promise<{
+        ajustes: number;
+        total: number;
+    }>;
     lots(medicamentId: number): Promise<{
         fournisseur: string | null;
         id: number;

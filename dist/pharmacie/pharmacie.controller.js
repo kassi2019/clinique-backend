@@ -58,6 +58,9 @@ let PharmacieController = class PharmacieController {
     inventaire(dto, req) {
         return this.pharmacieService.inventaire(dto, req.user.id);
     }
+    inventaireMultiple(dto, req) {
+        return this.pharmacieService.inventaireMultiple(dto.lignes ?? [], req.user.id);
+    }
     lots(medicamentId) {
         return this.pharmacieService.lots(medicamentId);
     }
@@ -172,6 +175,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "inventaire", null);
+__decorate([
+    (0, common_1.Post)('lots/inventaire-multiple'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "inventaireMultiple", null);
 __decorate([
     (0, common_1.Get)('lots/:medicamentId'),
     __param(0, (0, common_1.Param)('medicamentId', common_1.ParseIntPipe)),

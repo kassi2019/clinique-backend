@@ -100,6 +100,15 @@ export class PharmacieController {
     return this.pharmacieService.inventaire(dto, req.user.id);
   }
 
+  /** Inventaire groupé : valide plusieurs lots en une seule fois. */
+  @Post('lots/inventaire-multiple')
+  inventaireMultiple(
+    @Body() dto: { lignes: { lotId: number; quantiteReelle: number }[] },
+    @Req() req,
+  ) {
+    return this.pharmacieService.inventaireMultiple(dto.lignes ?? [], req.user.id);
+  }
+
   /** Lots d'un médicament (sous-onglet Inventaire, stock réel par lot). */
   @Get('lots/:medicamentId')
   lots(@Param('medicamentId', ParseIntPipe) medicamentId: number) {
