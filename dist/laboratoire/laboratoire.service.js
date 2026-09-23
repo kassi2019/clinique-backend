@@ -38,6 +38,51 @@ let LaboratoireService = class LaboratoireService {
         });
         return lab?.id ?? null;
     }
+    async fileAttente(cliniqueId) {
+        const labId = await this.labServiceId(cliniqueId);
+        if (!labId)
+            return [];
+        const passages = await this.prisma.passage.findMany({
+            where: {
+                cliniqueId,
+                statut: 'ACTIF',
+                prestations: {
+                    some: {
+                        statut: 'PAYEE',
+                        OR: [{ serviceId: labId }, { prestation: { serviceId: labId } }],
+                    },
+                },
+            },
+            include: {
+                patient: true,
+                service: { select: { nom: true } },
+                prestations: {
+                    where: {
+                        statut: 'PAYEE',
+                        OR: [{ serviceId: labId }, { prestation: { serviceId: labId } }],
+                    },
+                },
+                examensLabo: { select: { passagePrestationId: true, statut: true } },
+            },
+            orderBy: { createdAt: 'asc' },
+        });
+        return passages
+            .filter((p) => p.prestations.some((l) => {
+            const examen = p.examensLabo.find((e) => e.passagePrestationId === l.id);
+            return !examen || examen.statut !== 'VALIDE';
+        }))
+            .map((p) => ({
+            id: p.id,
+            numeroOrdre: p.numeroOrdre,
+            patient: p.patient,
+            service: p.service,
+            createdAt: p.createdAt,
+            nbExamens: p.prestations.filter((l) => {
+                const examen = p.examensLabo.find((e) => e.passagePrestationId === l.id);
+                return !examen || examen.statut !== 'VALIDE';
+            }).length,
+        }));
+    }
     async rechercher(reference, cliniqueId) {
         const ref = reference.trim().toUpperCase();
         const refSans = ref.replace(/[\s-]/g, '');

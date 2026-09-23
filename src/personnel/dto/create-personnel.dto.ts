@@ -11,9 +11,10 @@ export class CreatePersonnelDto {
   @IsInt()
   cliniqueId: number;
 
+  /** Facultatif : généré automatiquement (3 lettres du service + 0001) si absent. */
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  matricule: string;
+  matricule?: string;
 
   @IsString()
   @IsNotEmpty()

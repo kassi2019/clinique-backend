@@ -58,6 +58,15 @@ let PharmacieController = class PharmacieController {
     inventaire(dto, req) {
         return this.pharmacieService.inventaire(dto, req.user.id);
     }
+    lots(medicamentId) {
+        return this.pharmacieService.lots(medicamentId);
+    }
+    lotsClinique(cliniqueId) {
+        return this.pharmacieService.lotsClinique(cliniqueId);
+    }
+    inventaireLot(id, dto, req) {
+        return this.pharmacieService.inventaireLot(id, Number(dto.quantiteReelle) || 0, dto.commentaire, req.user.id);
+    }
     mouvements(medicamentId) {
         return this.pharmacieService.mouvements(medicamentId);
     }
@@ -163,6 +172,29 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "inventaire", null);
+__decorate([
+    (0, common_1.Get)('lots/:medicamentId'),
+    __param(0, (0, common_1.Param)('medicamentId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "lots", null);
+__decorate([
+    (0, common_1.Get)('lots'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "lotsClinique", null);
+__decorate([
+    (0, common_1.Post)('lots/:id/inventaire'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object, Object]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "inventaireLot", null);
 __decorate([
     (0, common_1.Get)('mouvements/:medicamentId'),
     __param(0, (0, common_1.Param)('medicamentId', common_1.ParseIntPipe)),

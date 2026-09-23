@@ -7,6 +7,7 @@ export declare class UtilisateursController {
     findAll(page?: string, perPage?: string): Promise<{
         data: ({
             personnel: {
+                fonction: string;
                 service: {
                     id: number;
                     nom: string;
@@ -16,7 +17,6 @@ export declare class UtilisateursController {
                 statut: string;
                 matricule: string;
                 prenom: string;
-                fonction: string;
             };
             role: {
                 id: number;
@@ -43,6 +43,7 @@ export declare class UtilisateursController {
     }>;
     findOne(id: number): Promise<{
         personnel: {
+            fonction: string;
             service: {
                 id: number;
                 nom: string;
@@ -52,7 +53,6 @@ export declare class UtilisateursController {
             statut: string;
             matricule: string;
             prenom: string;
-            fonction: string;
         };
         role: {
             id: number;
@@ -74,6 +74,7 @@ export declare class UtilisateursController {
     }>;
     create(dto: CreateUtilisateurDto): Promise<{
         personnel: {
+            fonction: string;
             service: {
                 id: number;
                 nom: string;
@@ -83,7 +84,6 @@ export declare class UtilisateursController {
             statut: string;
             matricule: string;
             prenom: string;
-            fonction: string;
         };
         role: {
             id: number;
@@ -105,6 +105,7 @@ export declare class UtilisateursController {
     }>;
     update(id: number, dto: UpdateUtilisateurDto): Promise<{
         personnel: {
+            fonction: string;
             service: {
                 id: number;
                 nom: string;
@@ -114,7 +115,6 @@ export declare class UtilisateursController {
             statut: string;
             matricule: string;
             prenom: string;
-            fonction: string;
         };
         role: {
             id: number;
@@ -136,6 +136,7 @@ export declare class UtilisateursController {
     }>;
     resetMotDePasse(id: number, dto: ResetMotDePasseDto): Promise<{
         personnel: {
+            fonction: string;
             service: {
                 id: number;
                 nom: string;
@@ -145,7 +146,6 @@ export declare class UtilisateursController {
             statut: string;
             matricule: string;
             prenom: string;
-            fonction: string;
         };
         role: {
             id: number;
@@ -167,6 +167,7 @@ export declare class UtilisateursController {
     }>;
     remove(id: number): Promise<{
         personnel: {
+            fonction: string;
             service: {
                 id: number;
                 nom: string;
@@ -176,7 +177,6 @@ export declare class UtilisateursController {
             statut: string;
             matricule: string;
             prenom: string;
-            fonction: string;
         };
         role: {
             id: number;

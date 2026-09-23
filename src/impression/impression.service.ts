@@ -558,6 +558,10 @@ export class ImpressionService {
     if (p.sexe) {
       lignes.push(deuxColonnes('Sexe', p.sexe === 'M' ? 'Masculin' : 'Feminin'));
     }
+    // Poids du patient sur l'ordonnance (§ cahier des charges)
+    if (consultation.passage.poids != null) {
+      lignes.push(deuxColonnes('Poids', `${Number(consultation.passage.poids)} kg`));
+    }
     lignes.push(
       deuxColonnes(
         'Medecin',

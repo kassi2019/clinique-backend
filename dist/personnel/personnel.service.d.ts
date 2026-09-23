@@ -37,6 +37,7 @@ export declare class PersonnelService {
                 matricule: string;
             };
         } & {
+            fonction: string;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -48,7 +49,6 @@ export declare class PersonnelService {
             prenom: string;
             sexe: string | null;
             photo: string | null;
-            fonction: string;
             serviceId: number | null;
             email: string | null;
             dateEmbauche: Date | null;
@@ -84,6 +84,7 @@ export declare class PersonnelService {
             matricule: string;
         };
     } & {
+        fonction: string;
         id: number;
         cliniqueId: number;
         nom: string;
@@ -95,7 +96,6 @@ export declare class PersonnelService {
         prenom: string;
         sexe: string | null;
         photo: string | null;
-        fonction: string;
         serviceId: number | null;
         email: string | null;
         dateEmbauche: Date | null;
@@ -126,6 +126,7 @@ export declare class PersonnelService {
             matricule: string;
         };
     } & {
+        fonction: string;
         id: number;
         cliniqueId: number;
         nom: string;
@@ -137,11 +138,11 @@ export declare class PersonnelService {
         prenom: string;
         sexe: string | null;
         photo: string | null;
-        fonction: string;
         serviceId: number | null;
         email: string | null;
         dateEmbauche: Date | null;
     }>;
+    private genererMatricule;
     update(id: number, dto: UpdatePersonnelDto): Promise<{
         clinique: {
             id: number;
@@ -168,6 +169,7 @@ export declare class PersonnelService {
             matricule: string;
         };
     } & {
+        fonction: string;
         id: number;
         cliniqueId: number;
         nom: string;
@@ -179,7 +181,6 @@ export declare class PersonnelService {
         prenom: string;
         sexe: string | null;
         photo: string | null;
-        fonction: string;
         serviceId: number | null;
         email: string | null;
         dateEmbauche: Date | null;
@@ -210,6 +211,7 @@ export declare class PersonnelService {
             matricule: string;
         };
     } & {
+        fonction: string;
         id: number;
         cliniqueId: number;
         nom: string;
@@ -221,7 +223,6 @@ export declare class PersonnelService {
         prenom: string;
         sexe: string | null;
         photo: string | null;
-        fonction: string;
         serviceId: number | null;
         email: string | null;
         dateEmbauche: Date | null;

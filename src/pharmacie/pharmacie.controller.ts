@@ -100,6 +100,28 @@ export class PharmacieController {
     return this.pharmacieService.inventaire(dto, req.user.id);
   }
 
+  /** Lots d'un médicament (sous-onglet Inventaire, stock réel par lot). */
+  @Get('lots/:medicamentId')
+  lots(@Param('medicamentId', ParseIntPipe) medicamentId: number) {
+    return this.pharmacieService.lots(medicamentId);
+  }
+
+  /** Tous les lots de la clinique, groupés par médicament (sous-onglet Inventaire). */
+  @Get('lots')
+  lotsClinique(@Query('cliniqueId', ParseIntPipe) cliniqueId: number) {
+    return this.pharmacieService.lotsClinique(cliniqueId);
+  }
+
+  /** Inventaire par lot : le stock réel saisi devient le stock actuel du lot. */
+  @Post('lots/:id/inventaire')
+  inventaireLot(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { quantiteReelle: number; commentaire?: string },
+    @Req() req,
+  ) {
+    return this.pharmacieService.inventaireLot(id, Number(dto.quantiteReelle) || 0, dto.commentaire, req.user.id);
+  }
+
   @Get('mouvements/:medicamentId')
   mouvements(@Param('medicamentId', ParseIntPipe) medicamentId: number) {
     return this.pharmacieService.mouvements(medicamentId);

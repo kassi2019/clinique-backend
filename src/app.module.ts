@@ -22,6 +22,7 @@ import { RolesModule } from './roles/roles.module';
 import { ServicesModule } from './services/services.module';
 import { StatistiquesModule } from './statistiques/statistiques.module';
 import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
+import { ListesParametresModule } from './listes-parametres/listes-parametres.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
     ParametresModule,
     ImpressionModule,
     StatistiquesModule,
+    ListesParametresModule,
   ],
   controllers: [AppController],
   providers: [AppService],

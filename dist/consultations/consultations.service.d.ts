@@ -13,6 +13,7 @@ export declare class ConsultationsService {
         typePatient: string;
         createdAt: Date;
         patient: {
+            nationalite: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -27,7 +28,6 @@ export declare class ConsultationsService {
             ville: string | null;
             quartier: string | null;
             profession: string | null;
-            nationalite: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -59,6 +59,7 @@ export declare class ConsultationsService {
                 poids: number;
             };
             patient: {
+                nationalite: string | null;
                 id: number;
                 cliniqueId: number;
                 nom: string;
@@ -73,7 +74,6 @@ export declare class ConsultationsService {
                 ville: string | null;
                 quartier: string | null;
                 profession: string | null;
-                nationalite: string | null;
                 scolarisation: string | null;
                 statutConjugal: string | null;
                 typePopulation: string | null;
@@ -110,13 +110,13 @@ export declare class ConsultationsService {
             }[];
             consultation: {
                 medicaments: {
+                    posologie: string | null;
                     id: number;
                     createdAt: Date;
                     consultationId: number;
                     medicamentId: number | null;
                     medicamentNom: string;
                     forme: string | null;
-                    posologie: string | null;
                     quantite: string | null;
                     duree: string | null;
                 }[];
@@ -128,6 +128,7 @@ export declare class ConsultationsService {
                     matricule: string;
                 };
             } & {
+                diagnostic: string | null;
                 hospitalisation: boolean;
                 id: number;
                 createdAt: Date;
@@ -136,9 +137,10 @@ export declare class ConsultationsService {
                 statut: string;
                 patientId: number;
                 motif: string | null;
+                perimetreBrachial: string | null;
+                perimetreCranien: string | null;
                 medecinId: number;
                 observation: string | null;
-                diagnostic: string | null;
                 hospitalisationDuree: string | null;
                 typeHospitalisation: string | null;
                 hospitalisationDureeJours: number | null;
@@ -163,8 +165,6 @@ export declare class ConsultationsService {
                 imc: string | null;
                 zscore: string | null;
                 frequenceRespiratoire: string | null;
-                perimetreBrachial: string | null;
-                perimetreCranien: string | null;
                 rechercheTB: string | null;
                 pathologiesAssociees: string | null;
                 tdrPaludisme: string | null;
@@ -185,14 +185,63 @@ export declare class ConsultationsService {
                 moDebut: Date | null;
                 moFin: Date | null;
             };
-            examensLabo: {
+            examensLabo: ({
+                lignes: {
+                    parametre: string;
+                    id: number;
+                    examenLaboId: number;
+                    valeur: string | null;
+                    unite: string | null;
+                    normes: string | null;
+                }[];
+                validePar: {
+                    personnel: {
+                        nom: string;
+                        prenom: string;
+                    };
+                    matricule: string;
+                };
+            } & {
+                id: number;
+                cliniqueId: number;
+                libelle: string;
+                createdAt: Date;
+                updatedAt: Date;
+                passageId: number;
                 statut: string;
+                patientId: number;
                 passagePrestationId: number;
-            }[];
-            examensImagerie: {
+                preleveParId: number | null;
+                preleveLe: Date | null;
+                conclusion: string | null;
+                valideParId: number | null;
+                valideLe: Date | null;
+            })[];
+            examensImagerie: ({
+                validePar: {
+                    personnel: {
+                        nom: string;
+                        prenom: string;
+                    };
+                    matricule: string;
+                };
+            } & {
+                id: number;
+                cliniqueId: number;
+                libelle: string;
+                createdAt: Date;
+                updatedAt: Date;
+                passageId: number;
                 statut: string;
+                patientId: number;
                 passagePrestationId: number;
-            }[];
+                conclusion: string | null;
+                valideParId: number | null;
+                valideLe: Date | null;
+                indication: string | null;
+                technique: string | null;
+                resultat: string | null;
+            })[];
         };
         historique: ({
             passage: {
@@ -203,13 +252,13 @@ export declare class ConsultationsService {
                 numeroOrdre: string;
             };
             medicaments: {
+                posologie: string | null;
                 id: number;
                 createdAt: Date;
                 consultationId: number;
                 medicamentId: number | null;
                 medicamentNom: string;
                 forme: string | null;
-                posologie: string | null;
                 quantite: string | null;
                 duree: string | null;
             }[];
@@ -221,6 +270,7 @@ export declare class ConsultationsService {
                 matricule: string;
             };
         } & {
+            diagnostic: string | null;
             hospitalisation: boolean;
             id: number;
             createdAt: Date;
@@ -229,9 +279,10 @@ export declare class ConsultationsService {
             statut: string;
             patientId: number;
             motif: string | null;
+            perimetreBrachial: string | null;
+            perimetreCranien: string | null;
             medecinId: number;
             observation: string | null;
-            diagnostic: string | null;
             hospitalisationDuree: string | null;
             typeHospitalisation: string | null;
             hospitalisationDureeJours: number | null;
@@ -256,8 +307,6 @@ export declare class ConsultationsService {
             imc: string | null;
             zscore: string | null;
             frequenceRespiratoire: string | null;
-            perimetreBrachial: string | null;
-            perimetreCranien: string | null;
             rechercheTB: string | null;
             pathologiesAssociees: string | null;
             tdrPaludisme: string | null;
@@ -281,13 +330,13 @@ export declare class ConsultationsService {
     }>;
     creerOuMaj(passageId: number, medecinId: number, dto: CreerConsultationDto): Promise<{
         medicaments: {
+            posologie: string | null;
             id: number;
             createdAt: Date;
             consultationId: number;
             medicamentId: number | null;
             medicamentNom: string;
             forme: string | null;
-            posologie: string | null;
             quantite: string | null;
             duree: string | null;
         }[];
@@ -299,6 +348,7 @@ export declare class ConsultationsService {
             matricule: string;
         };
     } & {
+        diagnostic: string | null;
         hospitalisation: boolean;
         id: number;
         createdAt: Date;
@@ -307,9 +357,10 @@ export declare class ConsultationsService {
         statut: string;
         patientId: number;
         motif: string | null;
+        perimetreBrachial: string | null;
+        perimetreCranien: string | null;
         medecinId: number;
         observation: string | null;
-        diagnostic: string | null;
         hospitalisationDuree: string | null;
         typeHospitalisation: string | null;
         hospitalisationDureeJours: number | null;
@@ -334,8 +385,6 @@ export declare class ConsultationsService {
         imc: string | null;
         zscore: string | null;
         frequenceRespiratoire: string | null;
-        perimetreBrachial: string | null;
-        perimetreCranien: string | null;
         rechercheTB: string | null;
         pathologiesAssociees: string | null;
         tdrPaludisme: string | null;
@@ -358,24 +407,24 @@ export declare class ConsultationsService {
     }>;
     private synchroniserFactureHospitalisation;
     ajouterMedicament(consultationId: number, dto: PrescriptionDto): Promise<{
+        posologie: string | null;
         id: number;
         createdAt: Date;
         consultationId: number;
         medicamentId: number | null;
         medicamentNom: string;
         forme: string | null;
-        posologie: string | null;
         quantite: string | null;
         duree: string | null;
     }>;
     retirerMedicament(prescriptionId: number): Promise<{
+        posologie: string | null;
         id: number;
         createdAt: Date;
         consultationId: number;
         medicamentId: number | null;
         medicamentNom: string;
         forme: string | null;
-        posologie: string | null;
         quantite: string | null;
         duree: string | null;
     }>;
@@ -423,13 +472,13 @@ export declare class ConsultationsService {
     }>;
     sauvegarderOrdonnance(consultationId: number): Promise<{
         medicaments: {
+            posologie: string | null;
             id: number;
             createdAt: Date;
             consultationId: number;
             medicamentId: number | null;
             medicamentNom: string;
             forme: string | null;
-            posologie: string | null;
             quantite: string | null;
             duree: string | null;
         }[];
@@ -441,6 +490,7 @@ export declare class ConsultationsService {
             matricule: string;
         };
     } & {
+        diagnostic: string | null;
         hospitalisation: boolean;
         id: number;
         createdAt: Date;
@@ -449,9 +499,10 @@ export declare class ConsultationsService {
         statut: string;
         patientId: number;
         motif: string | null;
+        perimetreBrachial: string | null;
+        perimetreCranien: string | null;
         medecinId: number;
         observation: string | null;
-        diagnostic: string | null;
         hospitalisationDuree: string | null;
         typeHospitalisation: string | null;
         hospitalisationDureeJours: number | null;
@@ -476,8 +527,6 @@ export declare class ConsultationsService {
         imc: string | null;
         zscore: string | null;
         frequenceRespiratoire: string | null;
-        perimetreBrachial: string | null;
-        perimetreCranien: string | null;
         rechercheTB: string | null;
         pathologiesAssociees: string | null;
         tdrPaludisme: string | null;
@@ -582,13 +631,13 @@ export declare class ConsultationsService {
     }>;
     valider(consultationId: number): Promise<{
         medicaments: {
+            posologie: string | null;
             id: number;
             createdAt: Date;
             consultationId: number;
             medicamentId: number | null;
             medicamentNom: string;
             forme: string | null;
-            posologie: string | null;
             quantite: string | null;
             duree: string | null;
         }[];
@@ -600,6 +649,7 @@ export declare class ConsultationsService {
             matricule: string;
         };
     } & {
+        diagnostic: string | null;
         hospitalisation: boolean;
         id: number;
         createdAt: Date;
@@ -608,9 +658,10 @@ export declare class ConsultationsService {
         statut: string;
         patientId: number;
         motif: string | null;
+        perimetreBrachial: string | null;
+        perimetreCranien: string | null;
         medecinId: number;
         observation: string | null;
-        diagnostic: string | null;
         hospitalisationDuree: string | null;
         typeHospitalisation: string | null;
         hospitalisationDureeJours: number | null;
@@ -635,8 +686,6 @@ export declare class ConsultationsService {
         imc: string | null;
         zscore: string | null;
         frequenceRespiratoire: string | null;
-        perimetreBrachial: string | null;
-        perimetreCranien: string | null;
         rechercheTB: string | null;
         pathologiesAssociees: string | null;
         tdrPaludisme: string | null;

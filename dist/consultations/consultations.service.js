@@ -86,8 +86,27 @@ let ConsultationsService = class ConsultationsService {
                     },
                     orderBy: { createdAt: 'asc' },
                 },
-                examensLabo: { select: { passagePrestationId: true, statut: true } },
-                examensImagerie: { select: { passagePrestationId: true, statut: true } },
+                examensLabo: {
+                    include: {
+                        lignes: true,
+                        validePar: {
+                            select: {
+                                matricule: true,
+                                personnel: { select: { nom: true, prenom: true } },
+                            },
+                        },
+                    },
+                },
+                examensImagerie: {
+                    include: {
+                        validePar: {
+                            select: {
+                                matricule: true,
+                                personnel: { select: { nom: true, prenom: true } },
+                            },
+                        },
+                    },
+                },
                 consultations: { include: includeConsultation },
             },
         });

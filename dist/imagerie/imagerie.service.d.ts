@@ -4,12 +4,11 @@ export declare class ImagerieService {
     private prisma;
     constructor(prisma: PrismaService);
     private imaServiceId;
-    rechercher(reference: string, cliniqueId: number): Promise<{
+    fileAttente(cliniqueId: number): Promise<{
         id: number;
         numeroOrdre: string;
-        statut: string;
-        createdAt: Date;
         patient: {
+            nationalite: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -24,7 +23,41 @@ export declare class ImagerieService {
             ville: string | null;
             quartier: string | null;
             profession: string | null;
+            scolarisation: string | null;
+            statutConjugal: string | null;
+            typePopulation: string | null;
+            populationsRisque: string | null;
+            protectionSociale: string | null;
+            residenceHabituelle: string | null;
+            residenceActuelle: string | null;
+        };
+        service: {
+            nom: string;
+        };
+        createdAt: Date;
+        nbExamens: number;
+    }[]>;
+    rechercher(reference: string, cliniqueId: number): Promise<{
+        id: number;
+        numeroOrdre: string;
+        statut: string;
+        createdAt: Date;
+        patient: {
             nationalite: string | null;
+            id: number;
+            cliniqueId: number;
+            nom: string;
+            createdAt: Date;
+            updatedAt: Date;
+            code: string;
+            telephone: string | null;
+            prenom: string;
+            sexe: string | null;
+            numeroDossier: string;
+            age: string | null;
+            ville: string | null;
+            quartier: string | null;
+            profession: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -67,6 +100,7 @@ export declare class ImagerieService {
             prestationDemandee: string;
             createdAt: Date;
             patient: {
+                nationalite: string | null;
                 id: number;
                 cliniqueId: number;
                 nom: string;
@@ -81,7 +115,6 @@ export declare class ImagerieService {
                 ville: string | null;
                 quartier: string | null;
                 profession: string | null;
-                nationalite: string | null;
                 scolarisation: string | null;
                 statutConjugal: string | null;
                 typePopulation: string | null;

@@ -242,4 +242,14 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreatePassageDto.prototype, "poids", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePassageDto.prototype, "perimetreBrachial", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePassageDto.prototype, "perimetreCranien", void 0);
 //# sourceMappingURL=create-passage.dto.js.map

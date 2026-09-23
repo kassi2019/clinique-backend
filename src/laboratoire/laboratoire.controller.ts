@@ -29,6 +29,13 @@ export class LaboratoireController {
     return this.laboratoireService.rechercher(code ?? '', Number(cliniqueId));
   }
 
+  /** File d'attente : passages à examiner, triés par ordre d'arrivée. */
+  @Get('file')
+  fileAttente(@Query('cliniqueId') cliniqueId?: string) {
+    if (!cliniqueId) return [];
+    return this.laboratoireService.fileAttente(Number(cliniqueId));
+  }
+
   /** Détail d'un passage : fiche patient, prestations, examens et historique. */
   @Get('passages/:id')
   detailPassage(@Param('id', ParseIntPipe) id: number) {

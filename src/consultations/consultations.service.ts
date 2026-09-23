@@ -97,9 +97,29 @@ export class ConsultationsService {
           },
           orderBy: { createdAt: 'asc' },
         },
-        // Réalisations par les services (état « déjà fait » de l'ordonnance d'examens)
-        examensLabo: { select: { passagePrestationId: true, statut: true } },
-        examensImagerie: { select: { passagePrestationId: true, statut: true } },
+        // Réalisations par les services : le médecin doit voir non seulement
+        // l'état (« déjà fait ») mais aussi les RÉSULTATS de chaque examen.
+        examensLabo: {
+          include: {
+            lignes: true,
+            validePar: {
+              select: {
+                matricule: true,
+                personnel: { select: { nom: true, prenom: true } },
+              },
+            },
+          },
+        },
+        examensImagerie: {
+          include: {
+            validePar: {
+              select: {
+                matricule: true,
+                personnel: { select: { nom: true, prenom: true } },
+              },
+            },
+          },
+        },
         consultations: { include: includeConsultation },
       },
     });

@@ -198,4 +198,12 @@ export class CreatePassageDto {
   @IsOptional()
   @IsNumber()
   poids?: number;
+
+  @IsOptional()
+  @IsString()
+  perimetreBrachial?: string;
+
+  @IsOptional()
+  @IsString()
+  perimetreCranien?: string;
 }

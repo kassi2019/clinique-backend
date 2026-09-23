@@ -29,6 +29,13 @@ model Clinique {
   prestations Prestation[]
   parametre   Parametre?
   impressionFiles ImpressionFile[]
+  nationalites Nationalite[]
+  residences Residence[]
+  diagnostics Diagnostic[]
+  pathologies Pathologie[]
+  fournisseurs Fournisseur[]
+  fonctions Fonction[]
+  posologies Posologie[]
   patients    Patient[]
   passages    Passage[]
   paiements   Paiement[]
@@ -104,6 +111,8 @@ model Passage {
   tensionGauche     String? // ex. 12/8
   tensionDroite     String?
   poids             Decimal? @db.Decimal(5, 1)
+  perimetreBrachial String?  // cm — constante saisie à l'accueil
+  perimetreCranien  String?  // cm — constante saisie à l'accueil
   expireLe          DateTime // validité : 10 jours (§4.3)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -161,6 +170,7 @@ model Medicament {
   seuilAlerte Int      @default(0) // alerte de stock minimum (§9.2)
   prixVente   Decimal? @db.Decimal(18, 2) // prix de vente à l'unité de vente
   uniteVente  String   @default("BOITE") // BOITE / PLAQUE
+  consommable Boolean  @default(false) // consommable = non facturé en caisse pharmacie (montant 0)
   actif       Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -184,6 +194,7 @@ model Lot {
   quantiteRestante  Int
   datePeremption    DateTime @db.Date
   prixAchat         Decimal? @db.Decimal(18, 2)
+  fournisseur       String?  // fournisseur du lot (saisi à l'entrée de stock)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -511,6 +522,94 @@ model ImpressionFile {
 
   @@index([cliniqueId, poste, statut])
   @@map("impression_file")
+}
+
+// ─── Paramétrage : une table dédiée par type de liste ─────────
+// (même structure pour chacune ; utilisées en listes déroulantes
+// avec saisie libre auto-alimentée dans les formulaires)
+
+model Nationalite {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  libelle    String
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@unique([cliniqueId, libelle])
+  @@map("nationalites")
+}
+
+model Residence {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  libelle    String
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@unique([cliniqueId, libelle])
+  @@map("residences")
+}
+
+model Diagnostic {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  libelle    String
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@unique([cliniqueId, libelle])
+  @@map("diagnostics")
+}
+
+model Pathologie {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  libelle    String
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@unique([cliniqueId, libelle])
+  @@map("pathologies")
+}
+
+model Fournisseur {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  libelle    String
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@unique([cliniqueId, libelle])
+  @@map("fournisseurs")
+}
+
+model Fonction {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  libelle    String
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@unique([cliniqueId, libelle])
+  @@map("fonctions")
+}
+
+model Posologie {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  libelle    String
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@unique([cliniqueId, libelle])
+  @@map("posologies")
 }
 
 // ---------- Types de chambres (référentiel, §13) ----------

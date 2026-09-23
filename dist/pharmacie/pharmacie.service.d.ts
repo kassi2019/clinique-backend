@@ -16,6 +16,7 @@ export declare class PharmacieService {
         numeroOrdre: string;
         createdAt: Date;
         patient: {
+            nationalite: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -30,7 +31,6 @@ export declare class PharmacieService {
             ville: string | null;
             quartier: string | null;
             profession: string | null;
-            nationalite: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -46,13 +46,13 @@ export declare class PharmacieService {
             numeroOrdonnance: string;
             ordonnanceStatut: string;
             medicaments: {
+                posologie: string | null;
                 id: number;
                 createdAt: Date;
                 consultationId: number;
                 medicamentId: number | null;
                 medicamentNom: string;
                 forme: string | null;
-                posologie: string | null;
                 quantite: string | null;
                 duree: string | null;
             }[];
@@ -122,6 +122,7 @@ export declare class PharmacieService {
             statut: string;
             valideeLe: Date;
             patient: {
+                nationalite: string | null;
                 id: number;
                 cliniqueId: number;
                 nom: string;
@@ -136,7 +137,6 @@ export declare class PharmacieService {
                 ville: string | null;
                 quartier: string | null;
                 profession: string | null;
-                nationalite: string | null;
                 scolarisation: string | null;
                 statutConjugal: string | null;
                 typePopulation: string | null;
@@ -305,6 +305,7 @@ export declare class PharmacieService {
             datePeremption: Date;
             perime: boolean;
             peremptionProche: boolean;
+            fournisseur: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;
@@ -315,6 +316,7 @@ export declare class PharmacieService {
             prixAchat: import("@prisma/client/runtime/library").Decimal | null;
         }[];
         alerteStock: boolean;
+        consommable: boolean;
         id: number;
         cliniqueId: number;
         nom: string;
@@ -333,7 +335,9 @@ export declare class PharmacieService {
         quantite: number;
         datePeremption: string;
         prixAchat?: number;
+        fournisseur?: string;
     }, utilisateurId: number): Promise<{
+        fournisseur: string | null;
         id: number;
         createdAt: Date;
         updatedAt: Date;
@@ -349,6 +353,52 @@ export declare class PharmacieService {
         quantiteReelle: number;
         commentaire?: string;
     }, utilisateurId: number): Promise<{
+        consommable: boolean;
+        id: number;
+        cliniqueId: number;
+        nom: string;
+        actif: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        forme: string | null;
+        uniteVente: string;
+        dosage: string | null;
+        stock: number;
+        seuilAlerte: number;
+        prixVente: import("@prisma/client/runtime/library").Decimal | null;
+    }>;
+    lots(medicamentId: number): Promise<{
+        fournisseur: string | null;
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
+        medicamentId: number;
+        datePeremption: Date;
+        numeroLot: string;
+        quantiteInitiale: number;
+        quantiteRestante: number;
+        prixAchat: import("@prisma/client/runtime/library").Decimal | null;
+    }[]>;
+    lotsClinique(cliniqueId: number): Promise<({
+        medicament: {
+            id: number;
+            nom: string;
+            dosage: string;
+        };
+    } & {
+        fournisseur: string | null;
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
+        medicamentId: number;
+        datePeremption: Date;
+        numeroLot: string;
+        quantiteInitiale: number;
+        quantiteRestante: number;
+        prixAchat: import("@prisma/client/runtime/library").Decimal | null;
+    })[]>;
+    inventaireLot(lotId: number, quantiteReelle: number, commentaire: string | undefined, utilisateurId: number): Promise<{
+        consommable: boolean;
         id: number;
         cliniqueId: number;
         nom: string;
@@ -388,6 +438,7 @@ export declare class PharmacieService {
                 datePeremption: Date;
                 perime: boolean;
                 peremptionProche: boolean;
+                fournisseur: string | null;
                 id: number;
                 createdAt: Date;
                 updatedAt: Date;
@@ -398,6 +449,7 @@ export declare class PharmacieService {
                 prixAchat: import("@prisma/client/runtime/library").Decimal | null;
             }[];
             alerteStock: boolean;
+            consommable: boolean;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -414,6 +466,7 @@ export declare class PharmacieService {
             datePeremption: Date;
             perime: boolean;
             peremptionProche: boolean;
+            fournisseur: string | null;
             id: number;
             createdAt: Date;
             updatedAt: Date;

@@ -44,6 +44,7 @@ export class MedicamentsController {
         prixVente: dto.prixVente !== undefined ? Number(dto.prixVente) : undefined,
         seuilAlerte: dto.seuilAlerte !== undefined ? Number(dto.seuilAlerte) : 0,
         uniteVente: dto.uniteVente ?? 'BOITE',
+        consommable: dto.consommable === true || dto.consommable === 'true',
       },
     });
   }
@@ -63,6 +64,10 @@ export class MedicamentsController {
         seuilAlerte: dto.seuilAlerte !== undefined ? Number(dto.seuilAlerte) : undefined,
         uniteVente: dto.uniteVente,
         actif: dto.actif,
+        consommable:
+          dto.consommable !== undefined
+            ? dto.consommable === true || dto.consommable === 'true'
+            : undefined,
       },
     });
   }
@@ -75,5 +80,39 @@ export class MedicamentsController {
       where: { id },
       data: { actif: false },
     });
+  }
+
+  /** Import en masse depuis Excel (colonnes : nom, forme, dosage, prixVente, seuilAlerte, uniteVente, consommable). */
+  @UseGuards(RolesGuard)
+  @Roles('ADMINISTRATEUR')
+  @Post('import')
+  async importer(@Body() dto: any) {
+    const lignes: any[] = dto.lignes ?? [];
+    const cliniqueId = Number(dto.cliniqueId);
+    if (!cliniqueId) throw new Error('cliniqueId obligatoire.');
+    let ajoutes = 0;
+    for (const l of lignes) {
+      const nom = String(l.nom ?? '').trim();
+      if (!nom) continue;
+      const existe = await this.prisma.medicament.findUnique({
+        where: { cliniqueId_nom: { cliniqueId, nom } },
+      });
+      if (existe) continue;
+      await this.prisma.medicament.create({
+        data: {
+          cliniqueId,
+          nom,
+          forme: l.forme || undefined,
+          dosage: l.dosage || undefined,
+          stock: Number(l.stock) || 0,
+          prixVente: l.prixVente != null && l.prixVente !== '' ? Number(l.prixVente) : undefined,
+          seuilAlerte: Number(l.seuilAlerte) || 0,
+          uniteVente: l.uniteVente ?? 'BOITE',
+          consommable: l.consommable === true || l.consommable === 'true' || String(l.consommable).toLowerCase() === 'oui',
+        },
+      });
+      ajoutes++;
+    }
+    return { ajoutes, total: lignes.length };
   }
 }

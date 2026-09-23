@@ -19,8 +19,8 @@ __decorate([
     __metadata("design:type", Number)
 ], CreatePersonnelDto.prototype, "cliniqueId", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreatePersonnelDto.prototype, "matricule", void 0);
 __decorate([

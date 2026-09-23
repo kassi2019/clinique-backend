@@ -429,6 +429,9 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         if (p.sexe) {
             lignes.push(deuxColonnes('Sexe', p.sexe === 'M' ? 'Masculin' : 'Feminin'));
         }
+        if (consultation.passage.poids != null) {
+            lignes.push(deuxColonnes('Poids', `${Number(consultation.passage.poids)} kg`));
+        }
         lignes.push(deuxColonnes('Medecin', `Dr ${consultation.medecin.personnel?.nom ?? ''} ${consultation.medecin.personnel?.prenom ?? ''}`.trim()));
         lignes.push(deuxColonnes('Date', dateHeure));
         lignes.push(trait());

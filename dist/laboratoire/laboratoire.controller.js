@@ -26,6 +26,11 @@ let LaboratoireController = class LaboratoireController {
             return [];
         return this.laboratoireService.rechercher(code ?? '', Number(cliniqueId));
     }
+    fileAttente(cliniqueId) {
+        if (!cliniqueId)
+            return [];
+        return this.laboratoireService.fileAttente(Number(cliniqueId));
+    }
     detailPassage(id) {
         return this.laboratoireService.detailPassage(id);
     }
@@ -59,6 +64,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], LaboratoireController.prototype, "rechercher", null);
+__decorate([
+    (0, common_1.Get)('file'),
+    __param(0, (0, common_1.Query)('cliniqueId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], LaboratoireController.prototype, "fileAttente", null);
 __decorate([
     (0, common_1.Get)('passages/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),

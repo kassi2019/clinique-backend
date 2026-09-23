@@ -77,7 +77,18 @@ let PersonnelService = class PersonnelService {
         try {
             return await this.prisma.personnel.create({
                 data: {
-                    ...dto,
+                    cliniqueId: dto.cliniqueId,
+                    matricule: dto.matricule?.trim() ||
+                        (await this.genererMatricule(dto.cliniqueId, dto.serviceId)),
+                    nom: dto.nom,
+                    prenom: dto.prenom,
+                    sexe: dto.sexe,
+                    photo: dto.photo,
+                    fonction: dto.fonction,
+                    serviceId: dto.serviceId,
+                    telephone: dto.telephone,
+                    email: dto.email,
+                    statut: dto.statut,
                     dateEmbauche: dto.dateEmbauche ? new Date(dto.dateEmbauche) : undefined,
                 },
                 include: includeBase,
@@ -89,6 +100,26 @@ let PersonnelService = class PersonnelService {
             }
             throw e;
         }
+    }
+    async genererMatricule(cliniqueId, serviceId) {
+        let prefixe = 'PER';
+        if (serviceId) {
+            const service = await this.prisma.service.findUnique({ where: { id: serviceId } });
+            if (service?.code) {
+                prefixe = service.code.trim().toUpperCase().slice(0, 3) || 'PER';
+            }
+        }
+        const existants = await this.prisma.personnel.findMany({
+            where: { cliniqueId, matricule: { startsWith: prefixe } },
+            select: { matricule: true },
+        });
+        let max = 0;
+        for (const p of existants) {
+            const n = parseInt(p.matricule.replace(prefixe, ''), 10);
+            if (!isNaN(n) && n > max)
+                max = n;
+        }
+        return `${prefixe}${String(max + 1).padStart(4, '0')}`;
     }
     async update(id, dto) {
         await this.findOne(id);

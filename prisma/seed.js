@@ -329,6 +329,25 @@ async function main() {
     }
   }
 
+  // ---------- Listes paramétrables par défaut (tables dédiées) ----------
+  const LISTES = [
+    { table: 'nationalite', valeurs: ['Ivoirienne', 'Burkinabè', 'Malienne', 'Guinéenne', 'Ghanéenne', 'Nigériane', 'Sénégalaise', 'Libérienne', 'Togolaise', 'Béninoise'] },
+    { table: 'residence', valeurs: ['Abidjan', 'Yamoussoukro', 'Bouaké', 'San-Pédro', 'Daloa', 'Korhogo', 'Man', 'Gagnoa'] },
+    { table: 'diagnostic', valeurs: ['Paludisme simple', 'Paludisme grave', 'Infection respiratoire aiguë', 'Gastro-entérite', 'Hypertension artérielle', 'Diabète', 'Anémie', 'Infection urinaire', 'Fièvre typhoïde', 'Dermatose', 'Traumatisme', 'Grossesse normale', 'CPN'] },
+    { table: 'pathologie', valeurs: ['Drépanocytose', 'Asthme', 'Ulcère gastro-duodénal', 'VIH/SIDA', 'Tuberculose', 'Hépatite B', 'Épilepsie', 'Cardiopathie'] },
+    { table: 'fonction', valeurs: ['Médecin généraliste', 'Pédiatre', 'Gynécologue-obstétricien', 'Sage-femme', 'Infirmier', 'Aide-soignant', "Agent d'accueil", 'Caissier', 'Pharmacien', 'Technicien de laboratoire', 'Manipulateur en imagerie', 'Agent de surface', 'Comptable'] },
+    { table: 'posologie', valeurs: ['1 comprimé matin et soir', '1 comprimé le matin', '1 comprimé le soir', '2 comprimés matin, midi et soir', '1 cuillère à café matin et soir', '1 cuillère à soupe matin et soir', '1 injection par jour', '2 injections par jour', '1 sachet matin, midi et soir', '1 comprimé par jour pendant 3 jours', '1 comprimé par jour pendant 5 jours', '1 suppositoire matin et soir'] },
+  ];
+  for (const { table, valeurs } of LISTES) {
+    for (const libelle of valeurs) {
+      await prisma[table].upsert({
+        where: { cliniqueId_libelle: { cliniqueId: clinique.id, libelle } },
+        update: {},
+        create: { cliniqueId: clinique.id, libelle },
+      });
+    }
+  }
+
   console.log('Seed terminé avec succès.');
   console.log('Connexion admin : matricule "admin" / mot de passe "admin123"');
 }

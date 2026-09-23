@@ -194,6 +194,7 @@ export declare class HospitalisationController {
         statut: string;
         createdAt: Date;
         patient: {
+            nationalite: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -208,7 +209,6 @@ export declare class HospitalisationController {
             ville: string | null;
             quartier: string | null;
             profession: string | null;
-            nationalite: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -223,6 +223,7 @@ export declare class HospitalisationController {
             code: string;
         };
         consultation: {
+            diagnostic: string | null;
             hospitalisation: boolean;
             id: number;
             createdAt: Date;
@@ -231,9 +232,10 @@ export declare class HospitalisationController {
             statut: string;
             patientId: number;
             motif: string | null;
+            perimetreBrachial: string | null;
+            perimetreCranien: string | null;
             medecinId: number;
             observation: string | null;
-            diagnostic: string | null;
             hospitalisationDuree: string | null;
             typeHospitalisation: string | null;
             hospitalisationDureeJours: number | null;
@@ -258,8 +260,6 @@ export declare class HospitalisationController {
             imc: string | null;
             zscore: string | null;
             frequenceRespiratoire: string | null;
-            perimetreBrachial: string | null;
-            perimetreCranien: string | null;
             rechercheTB: string | null;
             pathologiesAssociees: string | null;
             tdrPaludisme: string | null;
@@ -309,6 +309,7 @@ export declare class HospitalisationController {
             typePatient: string;
             createdAt: Date;
             patient: {
+                nationalite: string | null;
                 id: number;
                 cliniqueId: number;
                 nom: string;
@@ -323,7 +324,6 @@ export declare class HospitalisationController {
                 ville: string | null;
                 quartier: string | null;
                 profession: string | null;
-                nationalite: string | null;
                 scolarisation: string | null;
                 statutConjugal: string | null;
                 typePopulation: string | null;
@@ -345,6 +345,7 @@ export declare class HospitalisationController {
                     };
                 };
             } & {
+                diagnostic: string | null;
                 hospitalisation: boolean;
                 id: number;
                 createdAt: Date;
@@ -353,9 +354,10 @@ export declare class HospitalisationController {
                 statut: string;
                 patientId: number;
                 motif: string | null;
+                perimetreBrachial: string | null;
+                perimetreCranien: string | null;
                 medecinId: number;
                 observation: string | null;
-                diagnostic: string | null;
                 hospitalisationDuree: string | null;
                 typeHospitalisation: string | null;
                 hospitalisationDureeJours: number | null;
@@ -380,8 +382,6 @@ export declare class HospitalisationController {
                 imc: string | null;
                 zscore: string | null;
                 frequenceRespiratoire: string | null;
-                perimetreBrachial: string | null;
-                perimetreCranien: string | null;
                 rechercheTB: string | null;
                 pathologiesAssociees: string | null;
                 tdrPaludisme: string | null;

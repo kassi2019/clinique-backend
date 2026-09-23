@@ -37,6 +37,54 @@ export class LaboratoireService {
    * Recherche des passages dont le code est actif et qui portent des examens LAB payés (§11).
    * Recherche par N° d'ordre (tirets conservés), code patient (sans séparateurs), nom ou prénom.
    */
+  async fileAttente(cliniqueId: number) {
+    const labId = await this.labServiceId(cliniqueId);
+    if (!labId) return [];
+    const passages = await this.prisma.passage.findMany({
+      where: {
+        cliniqueId,
+        statut: 'ACTIF',
+        prestations: {
+          some: {
+            statut: 'PAYEE',
+            OR: [{ serviceId: labId }, { prestation: { serviceId: labId } }],
+          },
+        },
+      },
+      include: {
+        patient: true,
+        service: { select: { nom: true } },
+        prestations: {
+          where: {
+            statut: 'PAYEE',
+            OR: [{ serviceId: labId }, { prestation: { serviceId: labId } }],
+          },
+        },
+        examensLabo: { select: { passagePrestationId: true, statut: true } },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+    // Ne garder que les passages ayant au moins un examen encore à traiter (non validé)
+    return passages
+      .filter((p) =>
+        p.prestations.some((l) => {
+          const examen = p.examensLabo.find((e) => e.passagePrestationId === l.id);
+          return !examen || examen.statut !== 'VALIDE';
+        }),
+      )
+      .map((p) => ({
+        id: p.id,
+        numeroOrdre: p.numeroOrdre,
+        patient: p.patient,
+        service: p.service,
+        createdAt: p.createdAt,
+        nbExamens: p.prestations.filter((l) => {
+          const examen = p.examensLabo.find((e) => e.passagePrestationId === l.id);
+          return !examen || examen.statut !== 'VALIDE';
+        }).length,
+      }));
+  }
+
   async rechercher(reference: string, cliniqueId: number) {
     const ref = reference.trim().toUpperCase();
     const refSans = ref.replace(/[\s-]/g, '');

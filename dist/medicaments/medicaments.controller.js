@@ -40,6 +40,7 @@ let MedicamentsController = class MedicamentsController {
                 prixVente: dto.prixVente !== undefined ? Number(dto.prixVente) : undefined,
                 seuilAlerte: dto.seuilAlerte !== undefined ? Number(dto.seuilAlerte) : 0,
                 uniteVente: dto.uniteVente ?? 'BOITE',
+                consommable: dto.consommable === true || dto.consommable === 'true',
             },
         });
     }
@@ -55,6 +56,9 @@ let MedicamentsController = class MedicamentsController {
                 seuilAlerte: dto.seuilAlerte !== undefined ? Number(dto.seuilAlerte) : undefined,
                 uniteVente: dto.uniteVente,
                 actif: dto.actif,
+                consommable: dto.consommable !== undefined
+                    ? dto.consommable === true || dto.consommable === 'true'
+                    : undefined,
             },
         });
     }
@@ -63,6 +67,38 @@ let MedicamentsController = class MedicamentsController {
             where: { id },
             data: { actif: false },
         });
+    }
+    async importer(dto) {
+        const lignes = dto.lignes ?? [];
+        const cliniqueId = Number(dto.cliniqueId);
+        if (!cliniqueId)
+            throw new Error('cliniqueId obligatoire.');
+        let ajoutes = 0;
+        for (const l of lignes) {
+            const nom = String(l.nom ?? '').trim();
+            if (!nom)
+                continue;
+            const existe = await this.prisma.medicament.findUnique({
+                where: { cliniqueId_nom: { cliniqueId, nom } },
+            });
+            if (existe)
+                continue;
+            await this.prisma.medicament.create({
+                data: {
+                    cliniqueId,
+                    nom,
+                    forme: l.forme || undefined,
+                    dosage: l.dosage || undefined,
+                    stock: Number(l.stock) || 0,
+                    prixVente: l.prixVente != null && l.prixVente !== '' ? Number(l.prixVente) : undefined,
+                    seuilAlerte: Number(l.seuilAlerte) || 0,
+                    uniteVente: l.uniteVente ?? 'BOITE',
+                    consommable: l.consommable === true || l.consommable === 'true' || String(l.consommable).toLowerCase() === 'oui',
+                },
+            });
+            ajoutes++;
+        }
+        return { ajoutes, total: lignes.length };
     }
 };
 exports.MedicamentsController = MedicamentsController;
@@ -101,6 +137,15 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], MedicamentsController.prototype, "remove", null);
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Post)('import'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MedicamentsController.prototype, "importer", null);
 exports.MedicamentsController = MedicamentsController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('medicaments'),

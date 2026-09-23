@@ -1,6 +1,6 @@
 export declare class CreatePersonnelDto {
     cliniqueId: number;
-    matricule: string;
+    matricule?: string;
     nom: string;
     prenom: string;
     sexe?: string;

@@ -9,6 +9,7 @@ export declare class LaboratoireController {
         statut: string;
         createdAt: Date;
         patient: {
+            nationalite: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -23,7 +24,6 @@ export declare class LaboratoireController {
             ville: string | null;
             quartier: string | null;
             profession: string | null;
-            nationalite: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -56,6 +56,39 @@ export declare class LaboratoireController {
         nbExamensLab: number;
         nbExamensTraites: number;
     }[]>;
+    fileAttente(cliniqueId?: string): any[] | Promise<{
+        id: number;
+        numeroOrdre: string;
+        patient: {
+            nationalite: string | null;
+            id: number;
+            cliniqueId: number;
+            nom: string;
+            createdAt: Date;
+            updatedAt: Date;
+            code: string;
+            telephone: string | null;
+            prenom: string;
+            sexe: string | null;
+            numeroDossier: string;
+            age: string | null;
+            ville: string | null;
+            quartier: string | null;
+            profession: string | null;
+            scolarisation: string | null;
+            statutConjugal: string | null;
+            typePopulation: string | null;
+            populationsRisque: string | null;
+            protectionSociale: string | null;
+            residenceHabituelle: string | null;
+            residenceActuelle: string | null;
+        };
+        service: {
+            nom: string;
+        };
+        createdAt: Date;
+        nbExamens: number;
+    }[]>;
     detailPassage(id: number): Promise<{
         passage: {
             id: number;
@@ -74,6 +107,7 @@ export declare class LaboratoireController {
                 poids: number;
             };
             patient: {
+                nationalite: string | null;
                 id: number;
                 cliniqueId: number;
                 nom: string;
@@ -88,7 +122,6 @@ export declare class LaboratoireController {
                 ville: string | null;
                 quartier: string | null;
                 profession: string | null;
-                nationalite: string | null;
                 scolarisation: string | null;
                 statutConjugal: string | null;
                 typePopulation: string | null;
@@ -127,10 +160,10 @@ export declare class LaboratoireController {
                 lignes: {
                     parametre: string;
                     id: number;
-                    unite: string | null;
-                    valeur: string | null;
-                    normes: string | null;
                     examenLaboId: number;
+                    valeur: string | null;
+                    unite: string | null;
+                    normes: string | null;
                 }[];
                 prelevePar: {
                     personnel: {
@@ -174,10 +207,10 @@ export declare class LaboratoireController {
             lignes: {
                 parametre: string;
                 id: number;
-                unite: string | null;
-                valeur: string | null;
-                normes: string | null;
                 examenLaboId: number;
+                valeur: string | null;
+                unite: string | null;
+                normes: string | null;
             }[];
         } & {
             id: number;
@@ -200,10 +233,10 @@ export declare class LaboratoireController {
         lignes: {
             parametre: string;
             id: number;
-            unite: string | null;
-            valeur: string | null;
-            normes: string | null;
             examenLaboId: number;
+            valeur: string | null;
+            unite: string | null;
+            normes: string | null;
         }[];
         prelevePar: {
             personnel: {
@@ -239,10 +272,10 @@ export declare class LaboratoireController {
         lignes: {
             parametre: string;
             id: number;
-            unite: string | null;
-            valeur: string | null;
-            normes: string | null;
             examenLaboId: number;
+            valeur: string | null;
+            unite: string | null;
+            normes: string | null;
         }[];
         prelevePar: {
             personnel: {
@@ -278,10 +311,10 @@ export declare class LaboratoireController {
         lignes: {
             parametre: string;
             id: number;
-            unite: string | null;
-            valeur: string | null;
-            normes: string | null;
             examenLaboId: number;
+            valeur: string | null;
+            unite: string | null;
+            normes: string | null;
         }[];
         prelevePar: {
             personnel: {
@@ -329,10 +362,10 @@ export declare class LaboratoireController {
             lignes: {
                 parametre: string;
                 id: number;
-                unite: string | null;
-                valeur: string | null;
-                normes: string | null;
                 examenLaboId: number;
+                valeur: string | null;
+                unite: string | null;
+                normes: string | null;
             }[];
             prelevePar: {
                 personnel: {

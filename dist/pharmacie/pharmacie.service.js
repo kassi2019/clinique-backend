@@ -262,7 +262,11 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 where: { id: medicament.id },
                 data: { stock: { decrement: ligne.quantiteDelivree } },
             });
-            const prixUnitaire = medicament.prixVente ? N(medicament.prixVente) : 0;
+            const prixUnitaire = medicament.consommable
+                ? 0
+                : medicament.prixVente
+                    ? N(medicament.prixVente)
+                    : 0;
             const montant = prixUnitaire * ligne.quantiteDelivree;
             await this.prisma.ligneDispensation.create({
                 data: {
@@ -409,6 +413,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 quantiteRestante: dto.quantite,
                 datePeremption: new Date(dto.datePeremption),
                 prixAchat: dto.prixAchat,
+                fournisseur: dto.fournisseur?.trim() || null,
             },
         });
         await this.prisma.mouvementStock.create({
@@ -450,6 +455,54 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         return this.prisma.medicament.update({
             where: { id: dto.medicamentId },
             data: { stock: dto.quantiteReelle },
+        });
+    }
+    async lots(medicamentId) {
+        return this.prisma.lot.findMany({
+            where: { medicamentId },
+            orderBy: [{ datePeremption: 'asc' }, { createdAt: 'asc' }],
+        });
+    }
+    async lotsClinique(cliniqueId) {
+        return this.prisma.lot.findMany({
+            where: { medicament: { cliniqueId } },
+            include: { medicament: { select: { id: true, nom: true, dosage: true } } },
+            orderBy: [
+                { medicament: { nom: 'asc' } },
+                { datePeremption: 'asc' },
+                { createdAt: 'asc' },
+            ],
+        });
+    }
+    async inventaireLot(lotId, quantiteReelle, commentaire, utilisateurId) {
+        const lot = await this.prisma.lot.findUnique({ where: { id: lotId } });
+        if (!lot)
+            throw new common_1.NotFoundException('Lot introuvable.');
+        const ecart = quantiteReelle - lot.quantiteRestante;
+        if (ecart !== 0) {
+            await this.prisma.mouvementStock.create({
+                data: {
+                    medicamentId: lot.medicamentId,
+                    type: 'INVENTAIRE',
+                    quantite: ecart,
+                    lotId,
+                    reference: `Inventaire lot ${lot.numeroLot}`,
+                    utilisateurId,
+                    commentaire,
+                },
+            });
+        }
+        await this.prisma.lot.update({
+            where: { id: lotId },
+            data: { quantiteRestante: quantiteReelle },
+        });
+        const total = await this.prisma.lot.aggregate({
+            where: { medicamentId: lot.medicamentId },
+            _sum: { quantiteRestante: true },
+        });
+        return this.prisma.medicament.update({
+            where: { id: lot.medicamentId },
+            data: { stock: total._sum.quantiteRestante ?? 0 },
         });
     }
     async mouvements(medicamentId) {

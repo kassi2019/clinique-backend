@@ -31,6 +31,51 @@ let ImagerieService = class ImagerieService {
         });
         return ima?.id ?? null;
     }
+    async fileAttente(cliniqueId) {
+        const imaId = await this.imaServiceId(cliniqueId);
+        if (!imaId)
+            return [];
+        const passages = await this.prisma.passage.findMany({
+            where: {
+                cliniqueId,
+                statut: 'ACTIF',
+                prestations: {
+                    some: {
+                        statut: 'PAYEE',
+                        OR: [{ serviceId: imaId }, { prestation: { serviceId: imaId } }],
+                    },
+                },
+            },
+            include: {
+                patient: true,
+                service: { select: { nom: true } },
+                prestations: {
+                    where: {
+                        statut: 'PAYEE',
+                        OR: [{ serviceId: imaId }, { prestation: { serviceId: imaId } }],
+                    },
+                },
+                examensImagerie: { select: { passagePrestationId: true, statut: true } },
+            },
+            orderBy: { createdAt: 'asc' },
+        });
+        return passages
+            .filter((p) => p.prestations.some((l) => {
+            const examen = p.examensImagerie.find((e) => e.passagePrestationId === l.id);
+            return !examen || examen.statut !== 'VALIDE';
+        }))
+            .map((p) => ({
+            id: p.id,
+            numeroOrdre: p.numeroOrdre,
+            patient: p.patient,
+            service: p.service,
+            createdAt: p.createdAt,
+            nbExamens: p.prestations.filter((l) => {
+                const examen = p.examensImagerie.find((e) => e.passagePrestationId === l.id);
+                return !examen || examen.statut !== 'VALIDE';
+            }).length,
+        }));
+    }
     async rechercher(reference, cliniqueId) {
         const ref = reference.trim().toUpperCase();
         const refSans = ref.replace(/[\s-]/g, '');

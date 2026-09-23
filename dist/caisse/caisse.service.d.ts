@@ -16,6 +16,7 @@ export declare class CaisseService {
         statut: string;
         createdAt: Date;
         patient: {
+            nationalite: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -30,7 +31,6 @@ export declare class CaisseService {
             ville: string | null;
             quartier: string | null;
             profession: string | null;
-            nationalite: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -117,6 +117,7 @@ export declare class CaisseService {
             motifTaux: string | null;
         }[];
         patient: {
+            nationalite: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -131,7 +132,6 @@ export declare class CaisseService {
             ville: string | null;
             quartier: string | null;
             profession: string | null;
-            nationalite: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -163,6 +163,8 @@ export declare class CaisseService {
         tensionGauche: string | null;
         tensionDroite: string | null;
         poids: import("@prisma/client/runtime/library").Decimal | null;
+        perimetreBrachial: string | null;
+        perimetreCranien: string | null;
         expireLe: Date;
     }>;
     ajouterPrestation(passageId: number, prestationId: number): Promise<{

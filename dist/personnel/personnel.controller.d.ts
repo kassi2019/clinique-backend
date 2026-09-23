@@ -31,6 +31,7 @@ export declare class PersonnelController {
                 matricule: string;
             };
         } & {
+            fonction: string;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -42,7 +43,6 @@ export declare class PersonnelController {
             prenom: string;
             sexe: string | null;
             photo: string | null;
-            fonction: string;
             serviceId: number | null;
             email: string | null;
             dateEmbauche: Date | null;
@@ -78,6 +78,7 @@ export declare class PersonnelController {
             matricule: string;
         };
     } & {
+        fonction: string;
         id: number;
         cliniqueId: number;
         nom: string;
@@ -89,7 +90,6 @@ export declare class PersonnelController {
         prenom: string;
         sexe: string | null;
         photo: string | null;
-        fonction: string;
         serviceId: number | null;
         email: string | null;
         dateEmbauche: Date | null;
@@ -120,6 +120,7 @@ export declare class PersonnelController {
             matricule: string;
         };
     } & {
+        fonction: string;
         id: number;
         cliniqueId: number;
         nom: string;
@@ -131,7 +132,6 @@ export declare class PersonnelController {
         prenom: string;
         sexe: string | null;
         photo: string | null;
-        fonction: string;
         serviceId: number | null;
         email: string | null;
         dateEmbauche: Date | null;
@@ -162,6 +162,7 @@ export declare class PersonnelController {
             matricule: string;
         };
     } & {
+        fonction: string;
         id: number;
         cliniqueId: number;
         nom: string;
@@ -173,7 +174,6 @@ export declare class PersonnelController {
         prenom: string;
         sexe: string | null;
         photo: string | null;
-        fonction: string;
         serviceId: number | null;
         email: string | null;
         dateEmbauche: Date | null;
@@ -204,6 +204,7 @@ export declare class PersonnelController {
             matricule: string;
         };
     } & {
+        fonction: string;
         id: number;
         cliniqueId: number;
         nom: string;
@@ -215,7 +216,6 @@ export declare class PersonnelController {
         prenom: string;
         sexe: string | null;
         photo: string | null;
-        fonction: string;
         serviceId: number | null;
         email: string | null;
         dateEmbauche: Date | null;

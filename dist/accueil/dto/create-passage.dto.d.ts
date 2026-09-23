@@ -49,4 +49,6 @@ export declare class CreatePassageDto {
     tensionGauche?: string;
     tensionDroite?: string;
     poids?: number;
+    perimetreBrachial?: string;
+    perimetreCranien?: string;
 }
