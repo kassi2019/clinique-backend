@@ -20,8 +20,9 @@ async function bootstrap() {
         transform: true,
         forbidNonWhitelisted: true,
     }));
-    await app.listen(process.env.PORT ?? 3000);
-    console.log(`Backend démarré sur http://localhost:${process.env.PORT ?? 3000}/api`);
+    const host = process.env.HOST ?? '0.0.0.0';
+    await app.listen(process.env.PORT ?? 3000, host);
+    console.log(`Backend démarré sur http://${host}:${process.env.PORT ?? 3000}/api`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

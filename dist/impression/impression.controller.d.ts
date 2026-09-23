@@ -24,6 +24,31 @@ export declare class ImpressionController {
     listPrinters(): Promise<{
         printers: string[];
     }>;
+    getFile(poste?: string, cliniqueId?: string): Promise<{
+        id: number;
+        poste: string;
+        libelle: string;
+        contenu: string;
+        partage: string;
+        nom: string;
+        createdAt: Date;
+    }[]>;
+    updateStatut(id: number, body: {
+        statut: 'IMPRIMEE' | 'ECHEC';
+        erreur?: string;
+    }): Promise<{
+        id: number;
+        cliniqueId: number;
+        poste: string;
+        libelle: string | null;
+        nom: string | null;
+        partage: string | null;
+        createdAt: Date;
+        statut: string;
+        contenu: string;
+        erreur: string | null;
+        printedAt: Date | null;
+    }>;
     updateConfig(body: any): Promise<{
         type: string;
         id: number;

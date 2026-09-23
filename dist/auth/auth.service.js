@@ -105,6 +105,21 @@ let AuthService = class AuthService {
         }
         return this.buildUser(utilisateur);
     }
+    async changerMotDePasse(userId, motDePasseActuel, nouveauMotDePasse) {
+        const utilisateur = await this.prisma.utilisateur.findUnique({ where: { id: userId } });
+        if (!utilisateur) {
+            throw new common_1.UnauthorizedException('Utilisateur introuvable.');
+        }
+        const valide = await bcrypt.compare(motDePasseActuel, utilisateur.motDePasse);
+        if (!valide) {
+            throw new common_1.UnauthorizedException('Mot de passe actuel incorrect.');
+        }
+        await this.prisma.utilisateur.update({
+            where: { id: userId },
+            data: { motDePasse: await bcrypt.hash(nouveauMotDePasse, 10) },
+        });
+        return { message: 'Mot de passe modifié avec succès.' };
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([

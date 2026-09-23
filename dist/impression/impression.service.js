@@ -373,7 +373,11 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         lignes.push(centrer(`${COEUR} Merci de votre visite ${COEUR}`));
         lignes.push('');
         const texte = normalizeText(lignes.join('\n'));
-        return this.imprimer(texte, config);
+        return this.imprimer(texte, config, {
+            poste: 'RECU',
+            cliniqueId: paiement.cliniqueId,
+            libelle: `Reçu de paiement ${paiement.numeroRecu}`,
+        });
     }
     async imprimerOrdonnance(consultationId) {
         const consultation = await this.prisma.consultation.findUnique({
@@ -462,7 +466,11 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         lignes.push(centrer(`${COEUR} Merci de votre visite ${COEUR}`));
         lignes.push('');
         const texte = normalizeText(lignes.join('\n'));
-        return this.imprimer(texte, config);
+        return this.imprimer(texte, config, {
+            poste: 'ORDONNANCE',
+            cliniqueId: consultation.passage.cliniqueId,
+            libelle: `Ordonnance consultation #${consultation.id}`,
+        });
     }
     async imprimerRecuPharmacie(paiementId) {
         const paiement = await this.prisma.pharmaciePaiement.findUnique({
@@ -523,7 +531,11 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         lignes.push(centrer(`${COEUR} Merci de votre visite ${COEUR}`));
         lignes.push('');
         const texte = normalizeText(lignes.join('\n'));
-        return this.imprimer(texte, config);
+        return this.imprimer(texte, config, {
+            poste: 'PHARMACIE',
+            cliniqueId: paiement.dispensation.consultation.passage.cliniqueId,
+            libelle: `Reçu pharmacie ${paiement.numeroRecu}`,
+        });
     }
     async imprimerTicketPassage(passageId) {
         const passage = await this.prisma.passage.findUnique({
@@ -538,9 +550,35 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
             throw new common_1.NotFoundException('Passage introuvable.');
         const config = await this.getConfigPoste(passage.cliniqueId, 'TICKET');
         const texte = normalizeText(this.genererTicketPassage(passage, config.largeur));
-        return this.imprimer(texte, config);
+        return this.imprimer(texte, config, {
+            poste: 'TICKET',
+            cliniqueId: passage.cliniqueId,
+            libelle: `Ticket de passage #${passageId}`,
+        });
     }
-    async imprimer(texte, config) {
+    async imprimer(texte, config, infos) {
+        if (config.type === 'AGENT') {
+            try {
+                await this.prisma.impressionFile.create({
+                    data: {
+                        cliniqueId: infos?.cliniqueId ?? 0,
+                        poste: infos?.poste ?? 'TICKET',
+                        libelle: infos?.libelle ?? `Impression ${infos?.poste ?? ''}`.trim(),
+                        contenu: texte,
+                        partage: config.partage,
+                        nom: config.nom,
+                    },
+                });
+                return {
+                    ok: true,
+                    message: "Envoyé à la file d'impression (l'agent local imprimera)",
+                };
+            }
+            catch (err) {
+                this.logger.error(`Erreur file d'impression: ${err.message}`);
+                return { ok: false, message: `Erreur file d'impression: ${err.message}` };
+            }
+        }
         if (config.type === 'NONE') {
             return {
                 ok: false,
@@ -577,6 +615,51 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
             this.logger.error(`Erreur impression: ${err.message}`);
             return { ok: false, message: `Erreur impression: ${err.message}` };
         }
+    }
+    async getFileAttente(poste, cliniqueId) {
+        await this.prisma.impressionFile.updateMany({
+            where: {
+                poste,
+                statut: 'EN_COURS',
+                createdAt: { lt: new Date(Date.now() - 5 * 60 * 1000) },
+                ...(cliniqueId ? { cliniqueId } : {}),
+            },
+            data: { statut: 'EN_ATTENTE' },
+        });
+        const jobs = await this.prisma.impressionFile.findMany({
+            where: {
+                statut: 'EN_ATTENTE',
+                poste,
+                ...(cliniqueId ? { cliniqueId } : {}),
+            },
+            orderBy: { createdAt: 'asc' },
+            take: 50,
+        });
+        if (jobs.length > 0) {
+            await this.prisma.impressionFile.updateMany({
+                where: { id: { in: jobs.map((j) => j.id) }, statut: 'EN_ATTENTE' },
+                data: { statut: 'EN_COURS' },
+            });
+        }
+        return jobs.map((j) => ({
+            id: j.id,
+            poste: j.poste,
+            libelle: j.libelle,
+            contenu: j.contenu,
+            partage: j.partage,
+            nom: j.nom,
+            createdAt: j.createdAt,
+        }));
+    }
+    async updateStatutFile(id, statut, erreur) {
+        return this.prisma.impressionFile.update({
+            where: { id },
+            data: {
+                statut,
+                erreur: statut === 'ECHEC' ? erreur ?? 'Échec impression' : null,
+                printedAt: statut === 'IMPRIMEE' ? new Date() : undefined,
+            },
+        });
     }
     sendRawToNetwork(config, data) {
         return new Promise((resolve, reject) => {

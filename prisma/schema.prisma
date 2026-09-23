@@ -28,6 +28,7 @@ model Clinique {
   personnel   Personnel[]
   prestations Prestation[]
   parametre   Parametre?
+  impressionFiles ImpressionFile[]
   patients    Patient[]
   passages    Passage[]
   paiements   Paiement[]
@@ -487,6 +488,29 @@ model Imprimante {
 
   @@unique([cliniqueId, poste])
   @@map("imprimantes")
+}
+
+// File d'attente d'impression : quand le backend tourne sur le VPS,
+// il ne peut pas atteindre les imprimantes de la clinique. Les tickets
+// sont donc déposés ici et un « agent » installé à la clinique les
+// récupère et les imprime (type AGENT dans la config des imprimantes).
+model ImpressionFile {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  poste      String   // TICKET / RECU / PHARMACIE / ORDONNANCE / IMAGERIE
+  libelle    String?  // description (ex. « Reçu de paiement REC-0001 »)
+  contenu    String   @db.NVarChar(Max) // texte ESC/POS à imprimer (encodage latin1) — peut dépasser 1000 caractères
+  partage    String?  // nom du partage Windows cible (snapshot au moment de l'ajout)
+  nom        String?  // nom Windows de l'imprimante cible (snapshot)
+  statut     String   @default("EN_ATTENTE") // EN_ATTENTE / EN_COURS (pris par l'agent) / IMPRIMEE / ECHEC
+  erreur     String?
+  createdAt  DateTime @default(now())
+  printedAt  DateTime?
+
+  clinique Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([cliniqueId, poste, statut])
+  @@map("impression_file")
 }
 
 // ---------- Types de chambres (référentiel, §13) ----------

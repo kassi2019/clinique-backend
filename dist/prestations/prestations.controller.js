@@ -65,6 +65,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PrestationsController.prototype, "findOne", null);
 __decorate([
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -72,6 +73,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PrestationsController.prototype, "create", null);
 __decorate([
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -80,6 +82,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PrestationsController.prototype, "update", null);
 __decorate([
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -88,7 +91,6 @@ __decorate([
 ], PrestationsController.prototype, "remove", null);
 exports.PrestationsController = PrestationsController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
     (0, common_1.Controller)('prestations'),
     __metadata("design:paramtypes", [prestations_service_1.PrestationsService])
 ], PrestationsController);

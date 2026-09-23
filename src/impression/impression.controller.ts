@@ -64,6 +64,26 @@ export class ImpressionController {
     return { printers };
   }
 
+  /** File d'attente d'impression — consommée par l'agent local de la clinique. */
+  @UseGuards(JwtAuthGuard)
+  @Get('file')
+  getFile(@Query('poste') poste?: string, @Query('cliniqueId') cliniqueId?: string) {
+    return this.impressionService.getFileAttente(
+      poste ?? 'TICKET',
+      cliniqueId ? Number(cliniqueId) : undefined,
+    );
+  }
+
+  /** L'agent local confirme le résultat d'une impression (IMPRIMEE / ECHEC). */
+  @UseGuards(JwtAuthGuard)
+  @Post('file/:id/statut')
+  updateStatut(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { statut: 'IMPRIMEE' | 'ECHEC'; erreur?: string },
+  ) {
+    return this.impressionService.updateStatutFile(id, body.statut, body.erreur);
+  }
+
   /** Enregistre la configuration d'une imprimante (par poste, en base). */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMINISTRATEUR')

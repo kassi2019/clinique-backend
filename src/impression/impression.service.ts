@@ -28,7 +28,7 @@ const CMDS = {
 };
 
 export interface ConfigImprimante {
-  type: 'WINDOWS' | 'NETWORK' | 'BLUETOOTH' | 'NONE';
+  type: 'WINDOWS' | 'NETWORK' | 'BLUETOOTH' | 'AGENT' | 'NONE';
   ip: string;
   port: number;
   nom: string;
@@ -493,7 +493,11 @@ export class ImpressionService {
     lignes.push('');
 
     const texte = normalizeText(lignes.join('\n'));
-    return this.imprimer(texte, config);
+    return this.imprimer(texte, config, {
+      poste: 'RECU',
+      cliniqueId: paiement.cliniqueId,
+      libelle: `Reçu de paiement ${paiement.numeroRecu}`,
+    });
   }
 
   /** Imprime l'ordonnance d'une consultation (§7). */
@@ -599,7 +603,11 @@ export class ImpressionService {
     lignes.push('');
 
     const texte = normalizeText(lignes.join('\n'));
-    return this.imprimer(texte, config);
+    return this.imprimer(texte, config, {
+      poste: 'ORDONNANCE',
+      cliniqueId: consultation.passage.cliniqueId,
+      libelle: `Ordonnance consultation #${consultation.id}`,
+    });
   }
 
   /** Imprime le reçu de la caisse pharmacie. */
@@ -678,7 +686,11 @@ export class ImpressionService {
     lignes.push('');
 
     const texte = normalizeText(lignes.join('\n'));
-    return this.imprimer(texte, config);
+    return this.imprimer(texte, config, {
+      poste: 'PHARMACIE',
+      cliniqueId: paiement.dispensation.consultation.passage.cliniqueId,
+      libelle: `Reçu pharmacie ${paiement.numeroRecu}`,
+    });
   }
 
   /** Imprime le ticket d'un passage (données récupérées en base). */
@@ -695,11 +707,46 @@ export class ImpressionService {
 
     const config = await this.getConfigPoste(passage.cliniqueId, 'TICKET');
     const texte = normalizeText(this.genererTicketPassage(passage, config.largeur));
-    return this.imprimer(texte, config);
+    return this.imprimer(texte, config, {
+      poste: 'TICKET',
+      cliniqueId: passage.cliniqueId,
+      libelle: `Ticket de passage #${passageId}`,
+    });
   }
 
   /** Envoie le texte à l'imprimante selon la configuration fournie. */
-  async imprimer(texte: string, config: ConfigImprimante): Promise<ResultatImpression> {
+  async imprimer(
+    texte: string,
+    config: ConfigImprimante,
+    infos?: { poste?: string; cliniqueId?: number; libelle?: string },
+  ): Promise<ResultatImpression> {
+
+    if (config.type === 'AGENT') {
+      // Site en ligne (VPS) : le backend ne peut pas atteindre les
+      // imprimantes de la clinique. Le ticket est déposé dans la file
+      // d'attente ; un « agent » local (PC de la clinique) le récupère
+      // et l'imprime. Le partage/nom sont figés au moment de l'ajout
+      // pour que l'agent imprime sur la bonne imprimante.
+      try {
+        await this.prisma.impressionFile.create({
+          data: {
+            cliniqueId: infos?.cliniqueId ?? 0,
+            poste: infos?.poste ?? 'TICKET',
+            libelle: infos?.libelle ?? `Impression ${infos?.poste ?? ''}`.trim(),
+            contenu: texte,
+            partage: config.partage,
+            nom: config.nom,
+          },
+        });
+        return {
+          ok: true,
+          message: "Envoyé à la file d'impression (l'agent local imprimera)",
+        };
+      } catch (err: any) {
+        this.logger.error(`Erreur file d'impression: ${err.message}`);
+        return { ok: false, message: `Erreur file d'impression: ${err.message}` };
+      }
+    }
 
     if (config.type === 'NONE') {
       return {
@@ -745,6 +792,65 @@ export class ImpressionService {
       this.logger.error(`Erreur impression: ${err.message}`);
       return { ok: false, message: `Erreur impression: ${err.message}` };
     }
+  }
+
+  // ─── File d'attente (agent local, site en ligne) ────────────────
+
+  /** Prochains tickets en attente pour un poste (consommés par l'agent). */
+  async getFileAttente(poste: string, cliniqueId?: number) {
+    // Repêchage : si un agent précédent a planté après avoir pris des
+    // tickets (EN_COURS depuis plus de 5 minutes), on les remet en attente.
+    await this.prisma.impressionFile.updateMany({
+      where: {
+        poste,
+        statut: 'EN_COURS',
+        createdAt: { lt: new Date(Date.now() - 5 * 60 * 1000) },
+        ...(cliniqueId ? { cliniqueId } : {}),
+      },
+      data: { statut: 'EN_ATTENTE' },
+    });
+
+    const jobs = await this.prisma.impressionFile.findMany({
+      where: {
+        statut: 'EN_ATTENTE',
+        poste,
+        ...(cliniqueId ? { cliniqueId } : {}),
+      },
+      orderBy: { createdAt: 'asc' },
+      take: 50,
+    });
+
+    // Verrouillage : on marque immédiatement les tickets comme « pris »
+    // pour qu'un autre agent (ou le même après un redémarrage) ne les
+    // imprime pas une seconde fois.
+    if (jobs.length > 0) {
+      await this.prisma.impressionFile.updateMany({
+        where: { id: { in: jobs.map((j) => j.id) }, statut: 'EN_ATTENTE' },
+        data: { statut: 'EN_COURS' },
+      });
+    }
+
+    return jobs.map((j) => ({
+      id: j.id,
+      poste: j.poste,
+      libelle: j.libelle,
+      contenu: j.contenu,
+      partage: j.partage,
+      nom: j.nom,
+      createdAt: j.createdAt,
+    }));
+  }
+
+  /** L'agent local confirme le résultat d'une impression. */
+  async updateStatutFile(id: number, statut: 'IMPRIMEE' | 'ECHEC', erreur?: string) {
+    return this.prisma.impressionFile.update({
+      where: { id },
+      data: {
+        statut,
+        erreur: statut === 'ECHEC' ? erreur ?? 'Échec impression' : null,
+        printedAt: statut === 'IMPRIMEE' ? new Date() : undefined,
+      },
+    });
   }
 
   // ─── Envoi réseau TCP brut ───────────────────────────────────────

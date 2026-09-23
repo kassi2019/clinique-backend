@@ -1,6 +1,6 @@
 import { PrismaService } from '../prisma/prisma.service';
 export interface ConfigImprimante {
-    type: 'WINDOWS' | 'NETWORK' | 'BLUETOOTH' | 'NONE';
+    type: 'WINDOWS' | 'NETWORK' | 'BLUETOOTH' | 'AGENT' | 'NONE';
     ip: string;
     port: number;
     nom: string;
@@ -92,7 +92,33 @@ export declare class ImpressionService {
     imprimerOrdonnance(consultationId: number): Promise<ResultatImpression>;
     imprimerRecuPharmacie(paiementId: number): Promise<ResultatImpression>;
     imprimerTicketPassage(passageId: number): Promise<ResultatImpression>;
-    imprimer(texte: string, config: ConfigImprimante): Promise<ResultatImpression>;
+    imprimer(texte: string, config: ConfigImprimante, infos?: {
+        poste?: string;
+        cliniqueId?: number;
+        libelle?: string;
+    }): Promise<ResultatImpression>;
+    getFileAttente(poste: string, cliniqueId?: number): Promise<{
+        id: number;
+        poste: string;
+        libelle: string;
+        contenu: string;
+        partage: string;
+        nom: string;
+        createdAt: Date;
+    }[]>;
+    updateStatutFile(id: number, statut: 'IMPRIMEE' | 'ECHEC', erreur?: string): Promise<{
+        id: number;
+        cliniqueId: number;
+        poste: string;
+        libelle: string | null;
+        nom: string | null;
+        partage: string | null;
+        createdAt: Date;
+        statut: string;
+        contenu: string;
+        erreur: string | null;
+        printedAt: Date | null;
+    }>;
     private sendRawToNetwork;
     private sendTextToWindowsPrinter;
 }

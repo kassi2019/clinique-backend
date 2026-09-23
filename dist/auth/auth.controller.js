@@ -16,6 +16,7 @@ exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const auth_service_1 = require("./auth.service");
+const changer_mot_de_passe_dto_1 = require("./dto/changer-mot-de-passe.dto");
 const login_dto_1 = require("./dto/login.dto");
 const jwt_auth_guard_1 = require("./jwt-auth.guard");
 let AuthController = class AuthController {
@@ -28,6 +29,9 @@ let AuthController = class AuthController {
     }
     me(req) {
         return this.authService.me(req.user.id);
+    }
+    changerMotDePasse(req, dto) {
+        return this.authService.changerMotDePasse(req.user.id, dto.motDePasseActuel, dto.nouveauMotDePasse);
     }
     async configPublic() {
         const clinique = await this.prisma.clinique.findFirst({
@@ -60,6 +64,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "me", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('changer-mot-de-passe'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, changer_mot_de_passe_dto_1.ChangerMotDePasseDto]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "changerMotDePasse", null);
 __decorate([
     (0, common_1.Get)('config-public'),
     __metadata("design:type", Function),

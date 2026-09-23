@@ -1,5 +1,6 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthService } from './auth.service';
+import { ChangerMotDePasseDto } from './dto/changer-mot-de-passe.dto';
 import { LoginDto } from './dto/login.dto';
 export declare class AuthController {
     private authService;
@@ -71,6 +72,9 @@ export declare class AuthController {
             code: string;
             nom: string;
         };
+    }>;
+    changerMotDePasse(req: any, dto: ChangerMotDePasseDto): Promise<{
+        message: string;
     }>;
     configPublic(): Promise<{
         clinique: {

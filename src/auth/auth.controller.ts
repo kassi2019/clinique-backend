@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthService } from './auth.service';
+import { ChangerMotDePasseDto } from './dto/changer-mot-de-passe.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
@@ -21,6 +22,17 @@ export class AuthController {
   @Get('me')
   me(@Req() req) {
     return this.authService.me(req.user.id);
+  }
+
+  /** L'utilisateur connecté change son propre mot de passe. */
+  @UseGuards(JwtAuthGuard)
+  @Post('changer-mot-de-passe')
+  changerMotDePasse(@Req() req, @Body() dto: ChangerMotDePasseDto) {
+    return this.authService.changerMotDePasse(
+      req.user.id,
+      dto.motDePasseActuel,
+      dto.nouveauMotDePasse,
+    );
   }
 
   /**

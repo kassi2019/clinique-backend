@@ -31,7 +31,11 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
-  console.log(`Backend démarré sur http://localhost:${process.env.PORT ?? 3000}/api`);
+  // HOST : interface d'écoute du backend.
+  // - local (défaut) : 0.0.0.0 = accessible depuis le réseau local (mobile...)
+  // - production VPS : HOST=127.0.0.1 dans le .env = seul Nginx (même machine) accède au backend
+  const host = process.env.HOST ?? '0.0.0.0';
+  await app.listen(process.env.PORT ?? 3000, host);
+  console.log(`Backend démarré sur http://${host}:${process.env.PORT ?? 3000}/api`);
 }
 bootstrap();

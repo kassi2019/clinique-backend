@@ -44,6 +44,12 @@ let ImpressionController = class ImpressionController {
         const printers = await this.impressionService.listWindowsPrinters();
         return { printers };
     }
+    getFile(poste, cliniqueId) {
+        return this.impressionService.getFileAttente(poste ?? 'TICKET', cliniqueId ? Number(cliniqueId) : undefined);
+    }
+    updateStatut(id, body) {
+        return this.impressionService.updateStatutFile(id, body.statut, body.erreur);
+    }
     updateConfig(body) {
         return this.impressionService.updateConfig(Number(body.cliniqueId), body.poste, {
             type: body.type,
@@ -108,6 +114,24 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ImpressionController.prototype, "listPrinters", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('file'),
+    __param(0, (0, common_1.Query)('poste')),
+    __param(1, (0, common_1.Query)('cliniqueId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], ImpressionController.prototype, "getFile", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('file/:id/statut'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], ImpressionController.prototype, "updateStatut", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),

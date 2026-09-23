@@ -147,4 +147,21 @@ export class AuthService {
     }
     return this.buildUser(utilisateur);
   }
+
+  /** L'utilisateur connecté change son propre mot de passe (vérifie l'actuel). */
+  async changerMotDePasse(userId: number, motDePasseActuel: string, nouveauMotDePasse: string) {
+    const utilisateur = await this.prisma.utilisateur.findUnique({ where: { id: userId } });
+    if (!utilisateur) {
+      throw new UnauthorizedException('Utilisateur introuvable.');
+    }
+    const valide = await bcrypt.compare(motDePasseActuel, utilisateur.motDePasse);
+    if (!valide) {
+      throw new UnauthorizedException('Mot de passe actuel incorrect.');
+    }
+    await this.prisma.utilisateur.update({
+      where: { id: userId },
+      data: { motDePasse: await bcrypt.hash(nouveauMotDePasse, 10) },
+    });
+    return { message: 'Mot de passe modifié avec succès.' };
+  }
 }

@@ -74,4 +74,7 @@ export declare class AuthService {
             nom: string;
         };
     }>;
+    changerMotDePasse(userId: number, motDePasseActuel: string, nouveauMotDePasse: string): Promise<{
+        message: string;
+    }>;
 }
