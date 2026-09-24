@@ -109,6 +109,10 @@ export declare class AssurancesController {
         email: string | null;
         numeroAgrement: string | null;
     }>;
+    importer(cliniqueId: string, dto: any): Promise<{
+        ajoutes: number;
+        total: number;
+    }>;
     modifier(id: number, dto: any): Promise<{
         id: number;
         cliniqueId: number;

@@ -298,6 +298,9 @@ export class PharmacieService {
         data: { stock: { decrement: ligne.quantiteDelivree } },
       });
 
+      // Seuil automatique : consommation des 60 derniers jours ÷ 120
+      this.recalculerSeuil(medicament.id).catch(() => undefined);
+
       // Les consommables ne sont pas facturés en caisse pharmacie (montant = 0).
       const prixUnitaire = medicament.consommable
         ? 0
@@ -533,9 +536,39 @@ export class PharmacieService {
     });
   }
 
+  /**
+   * Seuil automatique : consommation des 60 derniers jours ÷ 120.
+   * La consommation = quantités SORTIES (dispensations) sur 60 jours.
+   */
+  async recalculerSeuil(medicamentId: number) {
+    const depuis = new Date(Date.now() - 60 * 24 * 3600 * 1000);
+    const agg = await this.prisma.mouvementStock.aggregate({
+      where: { medicamentId, type: 'SORTIE', createdAt: { gte: depuis } },
+      _sum: { quantite: true },
+    });
+    const consommation = Math.abs(agg._sum.quantite ?? 0);
+    const seuil = Math.round(consommation / 120);
+    await this.prisma.medicament.update({
+      where: { id: medicamentId },
+      data: { seuilAlerte: seuil },
+    });
+    return { consommation60j: consommation, seuil };
+  }
+
+  /** Recalcule le seuil de tous les médicaments de la clinique. */
+  async recalculerTousSeuils(cliniqueId: number) {
+    const medicaments = await this.prisma.medicament.findMany({
+      where: { cliniqueId },
+      select: { id: true },
+    });
+    for (const m of medicaments) {
+      await this.recalculerSeuil(m.id);
+    }
+    return { recalcules: medicaments.length };
+  }
+
   /** Lots d'un médicament (sous-onglet Inventaire : stock réel par lot). */
-  async lots(medicamentId: number) {
-    return this.prisma.lot.findMany({
+  async lots(medicamentId: number) {    return this.prisma.lot.findMany({
       where: { medicamentId },
       orderBy: [{ datePeremption: 'asc' }, { createdAt: 'asc' }],
     });

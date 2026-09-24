@@ -186,10 +186,10 @@ export declare class ConsultationsController {
                 lignes: {
                     parametre: string;
                     id: number;
-                    examenLaboId: number;
-                    valeur: string | null;
                     unite: string | null;
+                    valeur: string | null;
                     normes: string | null;
+                    examenLaboId: number;
                 }[];
                 validePar: {
                     personnel: {

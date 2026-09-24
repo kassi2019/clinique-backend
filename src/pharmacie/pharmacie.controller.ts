@@ -142,6 +142,12 @@ export class PharmacieController {
     return this.pharmacieService.alertes(cliniqueId);
   }
 
+  /** Recalcule les seuils automatiques (consommation 60 j ÷ 120) de tous les médicaments. */
+  @Post('seuils/recalculer')
+  recalculerSeuils(@Query('cliniqueId', ParseIntPipe) cliniqueId: number) {
+    return this.pharmacieService.recalculerTousSeuils(cliniqueId);
+  }
+
   // ── Consommables (§9.3) ──
 
   @Get('consommables')

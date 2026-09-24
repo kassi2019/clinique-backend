@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const impression_module_1 = require("../impression/impression.module");
 const pharmacie_controller_1 = require("./pharmacie.controller");
 const pharmacie_service_1 = require("./pharmacie.service");
+const taches_seuils_service_1 = require("./taches-seuils.service");
 let PharmacieModule = class PharmacieModule {
 };
 exports.PharmacieModule = PharmacieModule;
@@ -18,7 +19,8 @@ exports.PharmacieModule = PharmacieModule = __decorate([
     (0, common_1.Module)({
         imports: [impression_module_1.ImpressionModule],
         controllers: [pharmacie_controller_1.PharmacieController],
-        providers: [pharmacie_service_1.PharmacieService],
+        providers: [pharmacie_service_1.PharmacieService, taches_seuils_service_1.TachesSeuilsService],
+        exports: [pharmacie_service_1.PharmacieService],
     })
 ], PharmacieModule);
 //# sourceMappingURL=pharmacie.module.js.map

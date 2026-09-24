@@ -367,6 +367,13 @@ export declare class PharmacieService {
         seuilAlerte: number;
         prixVente: import("@prisma/client/runtime/library").Decimal | null;
     }>;
+    recalculerSeuil(medicamentId: number): Promise<{
+        consommation60j: number;
+        seuil: number;
+    }>;
+    recalculerTousSeuils(cliniqueId: number): Promise<{
+        recalcules: number;
+    }>;
     lots(medicamentId: number): Promise<{
         fournisseur: string | null;
         id: number;

@@ -47,6 +47,33 @@ let AssurancesService = class AssurancesService {
             },
         });
     }
+    async importerAssurances(cliniqueId, lignes) {
+        let ajoutes = 0;
+        for (const l of lignes) {
+            const code = String(l.code ?? '').trim().toUpperCase();
+            const libelle = String(l.libelle ?? '').trim();
+            if (!code || !libelle)
+                continue;
+            const existe = await this.prisma.assurance.findUnique({
+                where: { cliniqueId_code: { cliniqueId, code } },
+            });
+            if (existe)
+                continue;
+            await this.prisma.assurance.create({
+                data: {
+                    cliniqueId,
+                    code,
+                    libelle,
+                    telephone: l.telephone ?? null,
+                    email: l.email ?? null,
+                    adresse: l.adresse ?? null,
+                    numeroAgrement: l.numeroAgrement ?? null,
+                },
+            });
+            ajoutes++;
+        }
+        return { ajoutes, total: lignes.length };
+    }
     async modifierAssurance(id, dto) {
         const a = await this.prisma.assurance.findUnique({ where: { id } });
         if (!a)

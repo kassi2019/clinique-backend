@@ -483,6 +483,9 @@ export declare class PharmacieController {
         stockBas: any[];
         peremptions: any[];
     };
+    recalculerSeuils(cliniqueId: number): Promise<{
+        recalcules: number;
+    }>;
     consommables(cliniqueId?: number): any[] | Promise<{
         alerte: boolean;
         id: number;

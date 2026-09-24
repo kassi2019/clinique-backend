@@ -55,6 +55,12 @@ export class AssurancesController {
     return this.assurancesService.creerAssurance(Number(cliniqueId), dto);
   }
 
+  /** Import en masse depuis Excel : colonnes Code, Libellé, Téléphone, Email, Adresse, Agrément. */
+  @Post('import')
+  importer(@Query('cliniqueId') cliniqueId: string, @Body() dto: any) {
+    return this.assurancesService.importerAssurances(Number(cliniqueId), dto.lignes ?? []);
+  }
+
   @UseGuards(RolesGuard)
   @Roles('ADMINISTRATEUR')
   @Patch(':id')

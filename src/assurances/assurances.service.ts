@@ -41,6 +41,36 @@ export class AssurancesService {
     });
   }
 
+  /** Import Excel : ajoute les assurances manquantes (clé = code par clinique). */
+  async importerAssurances(
+    cliniqueId: number,
+    lignes: { code: string; libelle: string; telephone?: string; email?: string; adresse?: string; numeroAgrement?: string }[],
+  ) {
+    let ajoutes = 0;
+    for (const l of lignes) {
+      const code = String(l.code ?? '').trim().toUpperCase();
+      const libelle = String(l.libelle ?? '').trim();
+      if (!code || !libelle) continue;
+      const existe = await this.prisma.assurance.findUnique({
+        where: { cliniqueId_code: { cliniqueId, code } },
+      });
+      if (existe) continue;
+      await this.prisma.assurance.create({
+        data: {
+          cliniqueId,
+          code,
+          libelle,
+          telephone: l.telephone ?? null,
+          email: l.email ?? null,
+          adresse: l.adresse ?? null,
+          numeroAgrement: l.numeroAgrement ?? null,
+        },
+      });
+      ajoutes++;
+    }
+    return { ajoutes, total: lignes.length };
+  }
+
   async modifierAssurance(id: number, dto: any) {
     const a = await this.prisma.assurance.findUnique({ where: { id } });
     if (!a) throw new NotFoundException('Assurance introuvable.');

@@ -62,6 +62,17 @@ export declare class AssurancesService {
         email: string | null;
         numeroAgrement: string | null;
     }>;
+    importerAssurances(cliniqueId: number, lignes: {
+        code: string;
+        libelle: string;
+        telephone?: string;
+        email?: string;
+        adresse?: string;
+        numeroAgrement?: string;
+    }[]): Promise<{
+        ajoutes: number;
+        total: number;
+    }>;
     modifierAssurance(id: number, dto: any): Promise<{
         id: number;
         cliniqueId: number;

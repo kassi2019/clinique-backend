@@ -160,10 +160,10 @@ export declare class LaboratoireController {
                 lignes: {
                     parametre: string;
                     id: number;
-                    examenLaboId: number;
-                    valeur: string | null;
                     unite: string | null;
+                    valeur: string | null;
                     normes: string | null;
+                    examenLaboId: number;
                 }[];
                 prelevePar: {
                     personnel: {
@@ -207,10 +207,10 @@ export declare class LaboratoireController {
             lignes: {
                 parametre: string;
                 id: number;
-                examenLaboId: number;
-                valeur: string | null;
                 unite: string | null;
+                valeur: string | null;
                 normes: string | null;
+                examenLaboId: number;
             }[];
         } & {
             id: number;
@@ -233,10 +233,10 @@ export declare class LaboratoireController {
         lignes: {
             parametre: string;
             id: number;
-            examenLaboId: number;
-            valeur: string | null;
             unite: string | null;
+            valeur: string | null;
             normes: string | null;
+            examenLaboId: number;
         }[];
         prelevePar: {
             personnel: {
@@ -272,10 +272,10 @@ export declare class LaboratoireController {
         lignes: {
             parametre: string;
             id: number;
-            examenLaboId: number;
-            valeur: string | null;
             unite: string | null;
+            valeur: string | null;
             normes: string | null;
+            examenLaboId: number;
         }[];
         prelevePar: {
             personnel: {
@@ -311,10 +311,10 @@ export declare class LaboratoireController {
         lignes: {
             parametre: string;
             id: number;
-            examenLaboId: number;
-            valeur: string | null;
             unite: string | null;
+            valeur: string | null;
             normes: string | null;
+            examenLaboId: number;
         }[];
         prelevePar: {
             personnel: {
@@ -362,10 +362,10 @@ export declare class LaboratoireController {
             lignes: {
                 parametre: string;
                 id: number;
-                examenLaboId: number;
-                valeur: string | null;
                 unite: string | null;
+                valeur: string | null;
                 normes: string | null;
+                examenLaboId: number;
             }[];
             prelevePar: {
                 personnel: {

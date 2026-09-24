@@ -262,6 +262,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 where: { id: medicament.id },
                 data: { stock: { decrement: ligne.quantiteDelivree } },
             });
+            this.recalculerSeuil(medicament.id).catch(() => undefined);
             const prixUnitaire = medicament.consommable
                 ? 0
                 : medicament.prixVente
@@ -456,6 +457,30 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             where: { id: dto.medicamentId },
             data: { stock: dto.quantiteReelle },
         });
+    }
+    async recalculerSeuil(medicamentId) {
+        const depuis = new Date(Date.now() - 60 * 24 * 3600 * 1000);
+        const agg = await this.prisma.mouvementStock.aggregate({
+            where: { medicamentId, type: 'SORTIE', createdAt: { gte: depuis } },
+            _sum: { quantite: true },
+        });
+        const consommation = Math.abs(agg._sum.quantite ?? 0);
+        const seuil = Math.round(consommation / 120);
+        await this.prisma.medicament.update({
+            where: { id: medicamentId },
+            data: { seuilAlerte: seuil },
+        });
+        return { consommation60j: consommation, seuil };
+    }
+    async recalculerTousSeuils(cliniqueId) {
+        const medicaments = await this.prisma.medicament.findMany({
+            where: { cliniqueId },
+            select: { id: true },
+        });
+        for (const m of medicaments) {
+            await this.recalculerSeuil(m.id);
+        }
+        return { recalcules: medicaments.length };
     }
     async lots(medicamentId) {
         return this.prisma.lot.findMany({

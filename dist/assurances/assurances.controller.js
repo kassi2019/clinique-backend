@@ -41,6 +41,9 @@ let AssurancesController = class AssurancesController {
     creer(cliniqueId, dto) {
         return this.assurancesService.creerAssurance(Number(cliniqueId), dto);
     }
+    importer(cliniqueId, dto) {
+        return this.assurancesService.importerAssurances(Number(cliniqueId), dto.lignes ?? []);
+    }
     modifier(id, dto) {
         return this.assurancesService.modifierAssurance(id, dto);
     }
@@ -105,6 +108,14 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], AssurancesController.prototype, "creer", null);
+__decorate([
+    (0, common_1.Post)('import'),
+    __param(0, (0, common_1.Query)('cliniqueId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], AssurancesController.prototype, "importer", null);
 __decorate([
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
