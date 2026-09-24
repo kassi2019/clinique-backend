@@ -49,6 +49,8 @@ model Clinique {
   imprimantes Imprimante[]
   affectations Affectation[]
   assurances Assurance[]
+  grossesses Grossesse[]
+  soins Soin[]
 
   @@map("cliniques")
 }
@@ -87,6 +89,8 @@ model Patient {
   examensImagerie ExamenImagerie[]
   hospitalisations Hospitalisation[]
   assurances   PatientAssurance[]
+  grossesses   Grossesse[]
+  soins        Soin[]
 
   @@unique([cliniqueId, numeroDossier])
   @@map("patients")
@@ -128,6 +132,7 @@ model Passage {
   examensImagerie ExamenImagerie[]
   hospitalisation Hospitalisation?
   affectation Affectation?
+  soins Soin[]
 
   @@unique([cliniqueId, numeroOrdre])
   @@map("passages")
@@ -155,6 +160,7 @@ model PassagePrestation {
   examenLabo ExamenLabo?
   examenImagerie ExamenImagerie?
   hospitalisation Hospitalisation? @relation("LignesHospitalisation")
+  soin Soin?
 
   @@map("passages_prestations")
 }
@@ -808,6 +814,9 @@ model Utilisateur {
   dispensations Dispensation[]
   paiementsPharma PharmaciePaiement[]
   mouvementsStock MouvementStock[]
+  visitesCpn VisiteCpn[] @relation("VisitesCpn")
+  accouchements Accouchement[] @relation("Accouchements")
+  realisationsSoins RealisationSoin[] @relation("RealisationsSoins")
   mouvementsConsommables MouvementConsommable[]
   prelevements  ExamenLabo[] @relation("Prelevements")
   validations   ExamenLabo[] @relation("Validations")
@@ -1009,4 +1018,123 @@ model Prestation {
 
   @@unique([cliniqueId, code])
   @@map("prestations")
+}
+
+// ─── Maternité (CPN, accouchements et suivi) ───────────────────
+// Même logique que les autres modules : une grossesse appartient à une
+// clinique et à une patiente ; les visites CPN et l'accouchement y sont
+// rattachés, avec traçabilité de l'agent.
+
+model Grossesse {
+  id                      Int       @id @default(autoincrement())
+  cliniqueId              Int
+  patientId               Int
+  numero                  String    @unique // GRO-0001… généré automatiquement
+  ddr                     DateTime  @db.Date // date des dernières règles
+  dpa                     DateTime  @db.Date // date prévue d'accouchement (DDR + 280 j)
+  gravidite               Int?      // nombre de grossesses (y compris celle-ci)
+  parite                  Int?      // nombre d'accouchements antérieurs
+  antecedentsObstetricaux String?   // césarienne, HTA gravidique, fausses couches…
+  facteursRisque          String?
+  statut                  String    @default("EN_COURS") // EN_COURS / ACCOUCHEE / TERMINEE
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  clinique     Clinique      @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  patient      Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  visites      VisiteCpn[]
+  accouchement Accouchement?
+
+  @@map("grossesses")
+}
+
+model VisiteCpn {
+  id                Int       @id @default(autoincrement())
+  grossesseId       Int
+  numero            Int       // CPN1, CPN2…
+  date              DateTime  @db.Date
+  ageGestationnelSA String?   // ex. « 16 SA + 3 j »
+  poids             Decimal?  @db.Decimal(5, 1)
+  tensionGauche     String?
+  tensionDroite     String?
+  hauteurUterine    String?
+  bcf               String?   // bruits du cœur fœtal
+  mouvementsActifs  String?   // Oui / Non
+  oedemes           String?   // Oui / Non
+  albumine          String?
+  sucre             String?
+  presentation      String?
+  tv                String?   // toucher vaginal
+  conseils          String?   // fer, acide folique, MILDA, VAT…
+  prochaineVisite   DateTime? @db.Date
+  agentId           Int?      // sage-femme ayant réalisé la visite
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  grossesse Grossesse    @relation(fields: [grossesseId], references: [id], onDelete: Cascade)
+  agent     Utilisateur? @relation("VisitesCpn", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("visites_cpn")
+}
+
+model Accouchement {
+  id            Int       @id @default(autoincrement())
+  grossesseId   Int       @unique
+  dateHeure     DateTime
+  voie          String    @default("VOIE_BASSE") // VOIE_BASSE / CESARIENNE
+  termeSA       String?
+  sexeEnfant    String?   // M / F
+  poidsEnfant   Decimal?  @db.Decimal(5, 2) // en kg
+  apgar         String?   // ex. « 8/10 à 5 min »
+  issueMere     String?   // Vivante / Décédée / Transférée
+  issueEnfant   String?   // Né vivant / Mort-né / Transféré
+  complications String?
+  lieu          String?   // salle d'accouchement, bloc opératoire…
+  agentId       Int?      // sage-femme/médecin ayant accouché
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  grossesse Grossesse    @relation(fields: [grossesseId], references: [id], onDelete: Cascade)
+  agent     Utilisateur? @relation("Accouchements", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("accouchements")
+}
+
+// ─── Soins (prescriptions et réalisation, §14) ──────────────────
+// Même logique que le laboratoire : le soin est rattaché à la ligne de
+// prestation SOIN payée à la caisse ; l'agent enregistre chaque
+// réalisation (date, observations, agent tracé).
+
+model Soin {
+  id                  Int      @id @default(autoincrement())
+  passageId           Int
+  passagePrestationId Int      @unique // ligne de prestation SOIN payée
+  cliniqueId          Int
+  patientId           Int
+  libelle             String   // copie du libellé de la prestation
+  statut              String   @default("EN_ATTENTE") // EN_ATTENTE / REALISE
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  passage           Passage           @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  passagePrestation PassagePrestation @relation(fields: [passagePrestationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique          Clinique          @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  patient           Patient           @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  realisations      RealisationSoin[]
+
+  @@map("soins")
+}
+
+model RealisationSoin {
+  id           Int      @id @default(autoincrement())
+  soinId       Int
+  date         DateTime
+  observations String?
+  agentId      Int?     // agent ayant réalisé le soin
+  createdAt    DateTime @default(now())
+
+  soin  Soin          @relation(fields: [soinId], references: [id], onDelete: Cascade)
+  agent Utilisateur?  @relation("RealisationsSoins", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("realisations_soins")
 }

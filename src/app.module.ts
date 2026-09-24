@@ -24,6 +24,8 @@ import { ServicesModule } from './services/services.module';
 import { StatistiquesModule } from './statistiques/statistiques.module';
 import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
 import { ListesParametresModule } from './listes-parametres/listes-parametres.module';
+import { MaterniteModule } from './maternite/maternite.module';
+import { SoinsModule } from './soins/soins.module';
 
 @Module({
   imports: [
@@ -50,6 +52,8 @@ import { ListesParametresModule } from './listes-parametres/listes-parametres.mo
     ImpressionModule,
     StatistiquesModule,
     ListesParametresModule,
+    MaterniteModule,
+    SoinsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

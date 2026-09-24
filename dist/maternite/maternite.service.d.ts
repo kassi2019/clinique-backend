@@ -1,0 +1,444 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateAccouchementDto, CreateGrossesseDto, CreateVisiteCpnDto, UpdateAccouchementDto, UpdateGrossesseDto, UpdateVisiteCpnDto } from './dto/maternite.dto';
+export declare class MaterniteService {
+    private prisma;
+    constructor(prisma: PrismaService);
+    private prochainNumero;
+    private calculerDpa;
+    creerGrossesse(dto: CreateGrossesseDto): Promise<{
+        patient: {
+            nationalite: string | null;
+            id: number;
+            cliniqueId: number;
+            nom: string;
+            createdAt: Date;
+            updatedAt: Date;
+            code: string;
+            telephone: string | null;
+            prenom: string;
+            sexe: string | null;
+            numeroDossier: string;
+            age: string | null;
+            ville: string | null;
+            quartier: string | null;
+            profession: string | null;
+            scolarisation: string | null;
+            statutConjugal: string | null;
+            typePopulation: string | null;
+            populationsRisque: string | null;
+            protectionSociale: string | null;
+            residenceHabituelle: string | null;
+            residenceActuelle: string | null;
+        };
+    } & {
+        id: number;
+        cliniqueId: number;
+        createdAt: Date;
+        updatedAt: Date;
+        statut: string;
+        patientId: number;
+        ddr: Date;
+        numero: string;
+        gravidite: number | null;
+        parite: number | null;
+        antecedentsObstetricaux: string | null;
+        facteursRisque: string | null;
+        dpa: Date;
+    }>;
+    modifierGrossesse(id: number, dto: UpdateGrossesseDto): Promise<{
+        patient: {
+            nationalite: string | null;
+            id: number;
+            cliniqueId: number;
+            nom: string;
+            createdAt: Date;
+            updatedAt: Date;
+            code: string;
+            telephone: string | null;
+            prenom: string;
+            sexe: string | null;
+            numeroDossier: string;
+            age: string | null;
+            ville: string | null;
+            quartier: string | null;
+            profession: string | null;
+            scolarisation: string | null;
+            statutConjugal: string | null;
+            typePopulation: string | null;
+            populationsRisque: string | null;
+            protectionSociale: string | null;
+            residenceHabituelle: string | null;
+            residenceActuelle: string | null;
+        };
+    } & {
+        id: number;
+        cliniqueId: number;
+        createdAt: Date;
+        updatedAt: Date;
+        statut: string;
+        patientId: number;
+        ddr: Date;
+        numero: string;
+        gravidite: number | null;
+        parite: number | null;
+        antecedentsObstetricaux: string | null;
+        facteursRisque: string | null;
+        dpa: Date;
+    }>;
+    grossesses(query: {
+        cliniqueId: number;
+        search?: string;
+        statut?: string;
+        page?: number;
+        perPage?: number;
+    }): Promise<{
+        data: {
+            prochaineVisite: Date;
+            patient: {
+                nationalite: string | null;
+                id: number;
+                cliniqueId: number;
+                nom: string;
+                createdAt: Date;
+                updatedAt: Date;
+                code: string;
+                telephone: string | null;
+                prenom: string;
+                sexe: string | null;
+                numeroDossier: string;
+                age: string | null;
+                ville: string | null;
+                quartier: string | null;
+                profession: string | null;
+                scolarisation: string | null;
+                statutConjugal: string | null;
+                typePopulation: string | null;
+                populationsRisque: string | null;
+                protectionSociale: string | null;
+                residenceHabituelle: string | null;
+                residenceActuelle: string | null;
+            };
+            accouchement: {
+                id: number;
+                createdAt: Date;
+                updatedAt: Date;
+                dateHeure: Date;
+                voie: string;
+                termeSA: string | null;
+                sexeEnfant: string | null;
+                poidsEnfant: import("@prisma/client/runtime/library").Decimal | null;
+                apgar: string | null;
+                issueMere: string | null;
+                issueEnfant: string | null;
+                complications: string | null;
+                lieu: string | null;
+                grossesseId: number;
+                agentId: number | null;
+            };
+            _count: {
+                visites: number;
+            };
+            visites: {
+                id: number;
+                createdAt: Date;
+                updatedAt: Date;
+                tensionGauche: string | null;
+                tensionDroite: string | null;
+                poids: import("@prisma/client/runtime/library").Decimal | null;
+                date: Date;
+                numero: number;
+                ageGestationnelSA: string | null;
+                hauteurUterine: string | null;
+                bcf: string | null;
+                mouvementsActifs: string | null;
+                oedemes: string | null;
+                albumine: string | null;
+                sucre: string | null;
+                presentation: string | null;
+                tv: string | null;
+                conseils: string | null;
+                prochaineVisite: Date | null;
+                grossesseId: number;
+                agentId: number | null;
+            }[];
+            id: number;
+            cliniqueId: number;
+            createdAt: Date;
+            updatedAt: Date;
+            statut: string;
+            patientId: number;
+            ddr: Date;
+            numero: string;
+            gravidite: number | null;
+            parite: number | null;
+            antecedentsObstetricaux: string | null;
+            facteursRisque: string | null;
+            dpa: Date;
+        }[];
+        total: number;
+        page: number;
+        perPage: number;
+        totalPages: number;
+    }>;
+    detailGrossesse(id: number): Promise<{
+        patient: {
+            nationalite: string | null;
+            id: number;
+            cliniqueId: number;
+            nom: string;
+            createdAt: Date;
+            updatedAt: Date;
+            code: string;
+            telephone: string | null;
+            prenom: string;
+            sexe: string | null;
+            numeroDossier: string;
+            age: string | null;
+            ville: string | null;
+            quartier: string | null;
+            profession: string | null;
+            scolarisation: string | null;
+            statutConjugal: string | null;
+            typePopulation: string | null;
+            populationsRisque: string | null;
+            protectionSociale: string | null;
+            residenceHabituelle: string | null;
+            residenceActuelle: string | null;
+        };
+        accouchement: {
+            agent: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+        } & {
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+            dateHeure: Date;
+            voie: string;
+            termeSA: string | null;
+            sexeEnfant: string | null;
+            poidsEnfant: import("@prisma/client/runtime/library").Decimal | null;
+            apgar: string | null;
+            issueMere: string | null;
+            issueEnfant: string | null;
+            complications: string | null;
+            lieu: string | null;
+            grossesseId: number;
+            agentId: number | null;
+        };
+        visites: ({
+            agent: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+        } & {
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+            tensionGauche: string | null;
+            tensionDroite: string | null;
+            poids: import("@prisma/client/runtime/library").Decimal | null;
+            date: Date;
+            numero: number;
+            ageGestationnelSA: string | null;
+            hauteurUterine: string | null;
+            bcf: string | null;
+            mouvementsActifs: string | null;
+            oedemes: string | null;
+            albumine: string | null;
+            sucre: string | null;
+            presentation: string | null;
+            tv: string | null;
+            conseils: string | null;
+            prochaineVisite: Date | null;
+            grossesseId: number;
+            agentId: number | null;
+        })[];
+    } & {
+        id: number;
+        cliniqueId: number;
+        createdAt: Date;
+        updatedAt: Date;
+        statut: string;
+        patientId: number;
+        ddr: Date;
+        numero: string;
+        gravidite: number | null;
+        parite: number | null;
+        antecedentsObstetricaux: string | null;
+        facteursRisque: string | null;
+        dpa: Date;
+    }>;
+    creerVisite(grossesseId: number, dto: CreateVisiteCpnDto, agentId: number): Promise<{
+        agent: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+    } & {
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
+        tensionGauche: string | null;
+        tensionDroite: string | null;
+        poids: import("@prisma/client/runtime/library").Decimal | null;
+        date: Date;
+        numero: number;
+        ageGestationnelSA: string | null;
+        hauteurUterine: string | null;
+        bcf: string | null;
+        mouvementsActifs: string | null;
+        oedemes: string | null;
+        albumine: string | null;
+        sucre: string | null;
+        presentation: string | null;
+        tv: string | null;
+        conseils: string | null;
+        prochaineVisite: Date | null;
+        grossesseId: number;
+        agentId: number | null;
+    }>;
+    modifierVisite(id: number, dto: UpdateVisiteCpnDto): Promise<{
+        agent: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+    } & {
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
+        tensionGauche: string | null;
+        tensionDroite: string | null;
+        poids: import("@prisma/client/runtime/library").Decimal | null;
+        date: Date;
+        numero: number;
+        ageGestationnelSA: string | null;
+        hauteurUterine: string | null;
+        bcf: string | null;
+        mouvementsActifs: string | null;
+        oedemes: string | null;
+        albumine: string | null;
+        sucre: string | null;
+        presentation: string | null;
+        tv: string | null;
+        conseils: string | null;
+        prochaineVisite: Date | null;
+        grossesseId: number;
+        agentId: number | null;
+    }>;
+    creerAccouchement(grossesseId: number, dto: CreateAccouchementDto, agentId: number): Promise<{
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
+        dateHeure: Date;
+        voie: string;
+        termeSA: string | null;
+        sexeEnfant: string | null;
+        poidsEnfant: import("@prisma/client/runtime/library").Decimal | null;
+        apgar: string | null;
+        issueMere: string | null;
+        issueEnfant: string | null;
+        complications: string | null;
+        lieu: string | null;
+        grossesseId: number;
+        agentId: number | null;
+    }>;
+    modifierAccouchement(id: number, dto: UpdateAccouchementDto): Promise<{
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
+        dateHeure: Date;
+        voie: string;
+        termeSA: string | null;
+        sexeEnfant: string | null;
+        poidsEnfant: import("@prisma/client/runtime/library").Decimal | null;
+        apgar: string | null;
+        issueMere: string | null;
+        issueEnfant: string | null;
+        complications: string | null;
+        lieu: string | null;
+        grossesseId: number;
+        agentId: number | null;
+    }>;
+    accouchements(query: {
+        cliniqueId: number;
+        search?: string;
+        page?: number;
+        perPage?: number;
+    }): Promise<{
+        data: ({
+            grossesse: {
+                patient: {
+                    nationalite: string | null;
+                    id: number;
+                    cliniqueId: number;
+                    nom: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    code: string;
+                    telephone: string | null;
+                    prenom: string;
+                    sexe: string | null;
+                    numeroDossier: string;
+                    age: string | null;
+                    ville: string | null;
+                    quartier: string | null;
+                    profession: string | null;
+                    scolarisation: string | null;
+                    statutConjugal: string | null;
+                    typePopulation: string | null;
+                    populationsRisque: string | null;
+                    protectionSociale: string | null;
+                    residenceHabituelle: string | null;
+                    residenceActuelle: string | null;
+                };
+            } & {
+                id: number;
+                cliniqueId: number;
+                createdAt: Date;
+                updatedAt: Date;
+                statut: string;
+                patientId: number;
+                ddr: Date;
+                numero: string;
+                gravidite: number | null;
+                parite: number | null;
+                antecedentsObstetricaux: string | null;
+                facteursRisque: string | null;
+                dpa: Date;
+            };
+        } & {
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+            dateHeure: Date;
+            voie: string;
+            termeSA: string | null;
+            sexeEnfant: string | null;
+            poidsEnfant: import("@prisma/client/runtime/library").Decimal | null;
+            apgar: string | null;
+            issueMere: string | null;
+            issueEnfant: string | null;
+            complications: string | null;
+            lieu: string | null;
+            grossesseId: number;
+            agentId: number | null;
+        })[];
+        total: number;
+        page: number;
+        perPage: number;
+        totalPages: number;
+    }>;
+}

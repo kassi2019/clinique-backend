@@ -33,6 +33,8 @@ const services_module_1 = require("./services/services.module");
 const statistiques_module_1 = require("./statistiques/statistiques.module");
 const utilisateurs_module_1 = require("./utilisateurs/utilisateurs.module");
 const listes_parametres_module_1 = require("./listes-parametres/listes-parametres.module");
+const maternite_module_1 = require("./maternite/maternite.module");
+const soins_module_1 = require("./soins/soins.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -62,6 +64,8 @@ exports.AppModule = AppModule = __decorate([
             impression_module_1.ImpressionModule,
             statistiques_module_1.StatistiquesModule,
             listes_parametres_module_1.ListesParametresModule,
+            maternite_module_1.MaterniteModule,
+            soins_module_1.SoinsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
