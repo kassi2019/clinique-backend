@@ -10,6 +10,8 @@ export declare class CaisseController {
         createdAt: Date;
         patient: {
             nationalite: string | null;
+            profession: string | null;
+            quartier: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -22,8 +24,6 @@ export declare class CaisseController {
             numeroDossier: string;
             age: string | null;
             ville: string | null;
-            quartier: string | null;
-            profession: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -149,6 +149,8 @@ export declare class CaisseController {
         }[];
         patient: {
             nationalite: string | null;
+            profession: string | null;
+            quartier: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -161,8 +163,6 @@ export declare class CaisseController {
             numeroDossier: string;
             age: string | null;
             ville: string | null;
-            quartier: string | null;
-            profession: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -196,6 +196,7 @@ export declare class CaisseController {
         poids: import("@prisma/client/runtime/library").Decimal | null;
         perimetreBrachial: string | null;
         perimetreCranien: string | null;
+        materniteTraiteLe: Date | null;
         expireLe: Date;
     }>;
     ajouterPrestation(id: number, dto: AjouterPrestationDto): Promise<{

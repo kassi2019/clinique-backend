@@ -35,6 +35,7 @@ const utilisateurs_module_1 = require("./utilisateurs/utilisateurs.module");
 const listes_parametres_module_1 = require("./listes-parametres/listes-parametres.module");
 const maternite_module_1 = require("./maternite/maternite.module");
 const soins_module_1 = require("./soins/soins.module");
+const rapports_module_1 = require("./rapports/rapports.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -66,6 +67,7 @@ exports.AppModule = AppModule = __decorate([
             listes_parametres_module_1.ListesParametresModule,
             maternite_module_1.MaterniteModule,
             soins_module_1.SoinsModule,
+            rapports_module_1.RapportsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

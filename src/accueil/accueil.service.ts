@@ -328,6 +328,13 @@ export class AccueilService {
     const lignes = prestationsService.filter(
       (p) => p.type !== 'CONSULTATION' || p.id === consultationChoisie?.id,
     );
+    // Service sans prestation de consultation (maternité, laboratoire, imagerie,
+    // soins, hospitalisation…) : pour un patient interne, les actes du service
+    // sont payables directement à la caisse (EN_ATTENTE), sans attendre une
+    // prescription médicale. Patient externe : seul l'acte choisi à l'accueil
+    // est payable (les autres restent NON_PRESCRITE).
+    const serviceSansConsultation = consultations.length === 0;
+    const typePatient = dto.typePatient ?? 'INTERNE';
     if (lignes.length > 0) {
       await this.prisma.passagePrestation.createMany({
         data: lignes.map((p) => ({
@@ -338,7 +345,9 @@ export class AccueilService {
           serviceId: p.serviceId,
           source: 'ACCUEIL',
           statut:
-            p.id === consultationChoisie?.id || p.id === acteChoisi?.id
+            p.id === consultationChoisie?.id ||
+            p.id === acteChoisi?.id ||
+            (typePatient === 'INTERNE' && serviceSansConsultation)
               ? 'EN_ATTENTE'
               : 'NON_PRESCRITE',
         })),
@@ -385,6 +394,11 @@ export class AccueilService {
           quartier: dto.patient.quartier,
           profession: dto.patient.profession,
           telephone: dto.patient.telephone,
+          nationalite: dto.patient.nationalite,
+          statutConjugal: dto.patient.statutConjugal,
+          scolarisation: dto.patient.scolarisation,
+          residenceHabituelle: dto.patient.residenceHabituelle,
+          residenceActuelle: dto.patient.residenceActuelle,
         },
       });
     }

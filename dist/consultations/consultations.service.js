@@ -32,10 +32,14 @@ let ConsultationsService = class ConsultationsService {
         const refSansTiret = ref.replace(/[\s-]/g, '');
         if (!ref)
             return [];
+        const estConsultation = {
+            prestations: { some: { prestation: { type: 'CONSULTATION' } } },
+        };
         let passage = await this.prisma.passage.findFirst({
             where: {
                 cliniqueId,
                 numeroOrdre: { contains: ref },
+                ...estConsultation,
             },
             include: {
                 patient: true,
@@ -49,7 +53,7 @@ let ConsultationsService = class ConsultationsService {
             });
             if (patient) {
                 passage = await this.prisma.passage.findFirst({
-                    where: { patientId: patient.id },
+                    where: { patientId: patient.id, ...estConsultation },
                     include: {
                         patient: true,
                         service: { select: { id: true, code: true, nom: true } },
@@ -164,6 +168,12 @@ let ConsultationsService = class ConsultationsService {
             throw new common_1.NotFoundException('Passage introuvable.');
         if (passage.statut !== 'ACTIF') {
             throw new common_1.BadRequestException('Ce passage n\'est pas activé : le paiement à la caisse est requis avant la consultation.');
+        }
+        const estConsultation = await this.prisma.passagePrestation.findFirst({
+            where: { passageId, prestation: { type: 'CONSULTATION' } },
+        });
+        if (!estConsultation) {
+            throw new common_1.BadRequestException('Cette patiente ne relève pas de la consultation médicale : utilisez le module de son service (Maternité, Laboratoire, Imagerie, Soins…).');
         }
         if (dto.patient) {
             await this.prisma.patient.update({

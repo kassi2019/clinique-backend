@@ -26,6 +26,7 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
 import { ListesParametresModule } from './listes-parametres/listes-parametres.module';
 import { MaterniteModule } from './maternite/maternite.module';
 import { SoinsModule } from './soins/soins.module';
+import { RapportsModule } from './rapports/rapports.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { SoinsModule } from './soins/soins.module';
     ListesParametresModule,
     MaterniteModule,
     SoinsModule,
+    RapportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -7,6 +7,11 @@ export declare class UpdatePatientDto {
     quartier?: string;
     profession?: string;
     telephone?: string;
+    nationalite?: string;
+    statutConjugal?: string;
+    scolarisation?: string;
+    residenceHabituelle?: string;
+    residenceActuelle?: string;
 }
 export declare class UpdatePassageDto {
     serviceId?: number;
@@ -20,6 +25,8 @@ export declare class UpdatePassageDto {
     tensionGauche?: string;
     tensionDroite?: string;
     poids?: number;
+    perimetreBrachial?: string;
+    perimetreCranien?: string;
     patient?: UpdatePatientDto;
 }
 export declare class NouveauPatientDto {

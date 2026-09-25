@@ -37,11 +37,19 @@ export class ConsultationsService {
     const refSansTiret = ref.replace(/[\s-]/g, '');
     if (!ref) return [];
 
+    // Seuls les passages relevant de la consultation médicale (prestation de
+    // type CONSULTATION) sont ouverts ici : une patiente maternité, labo,
+    // imagerie ou soins se gère dans son propre module.
+    const estConsultation = {
+      prestations: { some: { prestation: { type: 'CONSULTATION' } } },
+    };
+
     // 1. N° d'ordre (les tirets sont conservés pour la correspondance)
     let passage = await this.prisma.passage.findFirst({
       where: {
         cliniqueId,
         numeroOrdre: { contains: ref },
+        ...estConsultation,
       },
       include: {
         patient: true,
@@ -50,14 +58,14 @@ export class ConsultationsService {
       orderBy: { createdAt: 'desc' },
     });
 
-    // 2. Code patient → dernier passage
+    // 2. Code patient → dernier passage de consultation
     if (!passage) {
       const patient = await this.prisma.patient.findFirst({
         where: { cliniqueId, code: refSansTiret },
       });
       if (patient) {
         passage = await this.prisma.passage.findFirst({
-          where: { patientId: patient.id },
+          where: { patientId: patient.id, ...estConsultation },
           include: {
             patient: true,
             service: { select: { id: true, code: true, nom: true } },
@@ -185,6 +193,16 @@ export class ConsultationsService {
     if (passage.statut !== 'ACTIF') {
       throw new BadRequestException(
         'Ce passage n\'est pas activé : le paiement à la caisse est requis avant la consultation.',
+      );
+    }
+    // Une patiente maternité (ou labo/imagerie/soins) se gère dans son module :
+    // la consultation médicale n'ouvre que les passages avec prestation CONSULTATION.
+    const estConsultation = await this.prisma.passagePrestation.findFirst({
+      where: { passageId, prestation: { type: 'CONSULTATION' } },
+    });
+    if (!estConsultation) {
+      throw new BadRequestException(
+        'Cette patiente ne relève pas de la consultation médicale : utilisez le module de son service (Maternité, Laboratoire, Imagerie, Soins…).',
       );
     }
 

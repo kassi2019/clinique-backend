@@ -18,6 +18,7 @@ const MODULES = [
   { code: 'MATERNITE', nom: 'Maternité', description: 'CPN, accouchements et suivi' },
   { code: 'HOSPITALISATION', nom: 'Hospitalisation', description: 'Chambres, lits et séjours' },
   { code: 'SOINS', nom: 'Soins', description: 'Prescriptions et réalisation des soins' },
+  { code: 'RAPPORTS', nom: 'Rapports', description: 'Rapports officiels mensuels (SIG)' },
   { code: 'STATISTIQUES', nom: 'Statistiques', description: 'Tableaux de bord et rapports' },
   { code: 'PARAMETRAGE', nom: 'Paramétrage', description: 'Personnel, utilisateurs, rôles et référentiels' },
 ];
@@ -337,6 +338,9 @@ async function main() {
     { table: 'pathologie', valeurs: ['Drépanocytose', 'Asthme', 'Ulcère gastro-duodénal', 'VIH/SIDA', 'Tuberculose', 'Hépatite B', 'Épilepsie', 'Cardiopathie'] },
     { table: 'fonction', valeurs: ['Médecin généraliste', 'Pédiatre', 'Gynécologue-obstétricien', 'Sage-femme', 'Infirmier', 'Aide-soignant', "Agent d'accueil", 'Caissier', 'Pharmacien', 'Technicien de laboratoire', 'Manipulateur en imagerie', 'Agent de surface', 'Comptable'] },
     { table: 'posologie', valeurs: ['1 comprimé matin et soir', '1 comprimé le matin', '1 comprimé le soir', '2 comprimés matin, midi et soir', '1 cuillère à café matin et soir', '1 cuillère à soupe matin et soir', '1 injection par jour', '2 injections par jour', '1 sachet matin, midi et soir', '1 comprimé par jour pendant 3 jours', '1 comprimé par jour pendant 5 jours', '1 suppositoire matin et soir'] },
+    { table: 'profession', valeurs: ['Commerçant', 'Commerçante', 'Cultivateur', 'Cultivatrice', 'Ménagère', 'Élève', 'Étudiant', 'Étudiante', 'Enseignant', 'Chauffeur', 'Couturière', 'Coiffeuse', 'Mécanicien', 'Ouvrier', 'Fonctionnaire', 'Sans emploi', 'Bébé', 'Retraité'] },
+    { table: 'motifConsultation', valeurs: ['Fièvre', 'Paludisme', 'Toux', 'Douleur abdominale', 'Céphalées', 'Diarrhée', 'Vomissements', 'Consultation de suivi', 'Suivi grossesse (CPN)', 'Traumatisme', 'Douleur thoracique', 'Asthénie', 'Vertiges', 'Contrôle tension artérielle', 'Contrôle diabète', 'Douleur articulaire', 'Éruption cutanée', 'Bilan de santé'] },
+    { table: 'quartier', valeurs: ['Yopougon', 'Abobo', 'Cocody', 'Adjamé', 'Treichville', 'Marcory', 'Koumassi', 'Plateau', 'Port-Bouët', 'Attécoubé', 'Anyama', 'Bingerville', 'Songon'] },
   ];
   for (const { table, valeurs } of LISTES) {
     for (const libelle of valeurs) {

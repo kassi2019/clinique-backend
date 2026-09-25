@@ -1,5 +1,6 @@
 import {
   IsIn,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -25,6 +26,43 @@ export class CreateCliniqueDto {
   @IsOptional()
   @IsIn(['ACTIF', 'INACTIF'])
   statut?: string;
+
+  // ── Rapport SIG mensuel (en-tête officielle, paramétrable) ──
+  @IsOptional()
+  @IsString()
+  immatriculation?: string;
+
+  @IsOptional()
+  @IsString()
+  districtNom?: string;
+
+  @IsOptional()
+  @IsString()
+  districtCode?: string;
+
+  @IsOptional()
+  @IsString()
+  regionNom?: string;
+
+  @IsOptional()
+  @IsString()
+  regionCode?: string;
+
+  @IsOptional()
+  @IsInt()
+  populationDesservie?: number;
+
+  @IsOptional()
+  @IsString()
+  responsableRapportNom?: string;
+
+  @IsOptional()
+  @IsString()
+  responsableRapportFonction?: string;
+
+  @IsOptional()
+  @IsString()
+  responsableRapportContact?: string;
 }
 
 export class UpdateCliniqueDto {
@@ -47,4 +85,41 @@ export class UpdateCliniqueDto {
   @IsOptional()
   @IsIn(['ACTIF', 'INACTIF'])
   statut?: string;
+
+  // ── Rapport SIG mensuel (en-tête officielle, paramétrable) ──
+  @IsOptional()
+  @IsString()
+  immatriculation?: string;
+
+  @IsOptional()
+  @IsString()
+  districtNom?: string;
+
+  @IsOptional()
+  @IsString()
+  districtCode?: string;
+
+  @IsOptional()
+  @IsString()
+  regionNom?: string;
+
+  @IsOptional()
+  @IsString()
+  regionCode?: string;
+
+  @IsOptional()
+  @IsInt()
+  populationDesservie?: number;
+
+  @IsOptional()
+  @IsString()
+  responsableRapportNom?: string;
+
+  @IsOptional()
+  @IsString()
+  responsableRapportFonction?: string;
+
+  @IsOptional()
+  @IsString()
+  responsableRapportContact?: string;
 }

@@ -9,6 +9,8 @@ export declare class ImagerieService {
         numeroOrdre: string;
         patient: {
             nationalite: string | null;
+            profession: string | null;
+            quartier: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -21,8 +23,6 @@ export declare class ImagerieService {
             numeroDossier: string;
             age: string | null;
             ville: string | null;
-            quartier: string | null;
-            profession: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -44,6 +44,8 @@ export declare class ImagerieService {
         createdAt: Date;
         patient: {
             nationalite: string | null;
+            profession: string | null;
+            quartier: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -56,8 +58,6 @@ export declare class ImagerieService {
             numeroDossier: string;
             age: string | null;
             ville: string | null;
-            quartier: string | null;
-            profession: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -101,6 +101,8 @@ export declare class ImagerieService {
             createdAt: Date;
             patient: {
                 nationalite: string | null;
+                profession: string | null;
+                quartier: string | null;
                 id: number;
                 cliniqueId: number;
                 nom: string;
@@ -113,8 +115,6 @@ export declare class ImagerieService {
                 numeroDossier: string;
                 age: string | null;
                 ville: string | null;
-                quartier: string | null;
-                profession: string | null;
                 scolarisation: string | null;
                 statutConjugal: string | null;
                 typePopulation: string | null;

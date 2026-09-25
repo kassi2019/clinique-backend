@@ -22,6 +22,9 @@ export class ListesParametresService {
       case 'FOURNISSEUR': return this.prisma.fournisseur;
       case 'FONCTION': return this.prisma.fonction;
       case 'POSOLOGIE': return this.prisma.posologie;
+      case 'PROFESSION': return this.prisma.profession;
+      case 'MOTIF': return this.prisma.motifConsultation;
+      case 'QUARTIER': return this.prisma.quartier;
       default: throw new BadRequestException(`Code de liste inconnu : ${code}`);
     }
   }

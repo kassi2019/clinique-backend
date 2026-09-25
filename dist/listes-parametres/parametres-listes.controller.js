@@ -106,6 +106,42 @@ let ParametresListesController = class ParametresListesController {
     basculerFournisseur(id) {
         return this.listes.desactiver(id, 'FOURNISSEUR');
     }
+    professions(cliniqueId, tous, page, perPage) {
+        return this.listes.findAll(cliniqueId, 'PROFESSION', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+    }
+    creerProfession(b) {
+        return this.listes.creer(Number(b.cliniqueId), 'PROFESSION', b.libelle);
+    }
+    modifierProfession(id, b) {
+        return this.listes.modifier(id, 'PROFESSION', b.libelle ?? '');
+    }
+    basculerProfession(id) {
+        return this.listes.desactiver(id, 'PROFESSION');
+    }
+    motifs(cliniqueId, tous, page, perPage) {
+        return this.listes.findAll(cliniqueId, 'MOTIF', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+    }
+    creerMotif(b) {
+        return this.listes.creer(Number(b.cliniqueId), 'MOTIF', b.libelle);
+    }
+    modifierMotif(id, b) {
+        return this.listes.modifier(id, 'MOTIF', b.libelle ?? '');
+    }
+    basculerMotif(id) {
+        return this.listes.desactiver(id, 'MOTIF');
+    }
+    quartiers(cliniqueId, tous, page, perPage) {
+        return this.listes.findAll(cliniqueId, 'QUARTIER', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+    }
+    creerQuartier(b) {
+        return this.listes.creer(Number(b.cliniqueId), 'QUARTIER', b.libelle);
+    }
+    modifierQuartier(id, b) {
+        return this.listes.modifier(id, 'QUARTIER', b.libelle ?? '');
+    }
+    basculerQuartier(id) {
+        return this.listes.desactiver(id, 'QUARTIER');
+    }
 };
 exports.ParametresListesController = ParametresListesController;
 __decorate([
@@ -381,6 +417,120 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], ParametresListesController.prototype, "basculerFournisseur", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('professions'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('tous')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('perPage')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String, String]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "professions", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('professions'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "creerProfession", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Patch)('professions/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "modifierProfession", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Delete)('professions/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "basculerProfession", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('motifs'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('tous')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('perPage')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String, String]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "motifs", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('motifs'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "creerMotif", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Patch)('motifs/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "modifierMotif", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Delete)('motifs/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "basculerMotif", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('quartiers'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('tous')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('perPage')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String, String]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "quartiers", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('quartiers'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "creerQuartier", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Patch)('quartiers/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "modifierQuartier", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Delete)('quartiers/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "basculerQuartier", null);
 exports.ParametresListesController = ParametresListesController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [listes_parametres_service_1.ListesParametresService])

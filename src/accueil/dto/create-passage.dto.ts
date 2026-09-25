@@ -41,6 +41,26 @@ export class UpdatePatientDto {
   @IsOptional()
   @IsString()
   telephone?: string;
+
+  @IsOptional()
+  @IsString()
+  nationalite?: string;
+
+  @IsOptional()
+  @IsString()
+  statutConjugal?: string;
+
+  @IsOptional()
+  @IsString()
+  scolarisation?: string;
+
+  @IsOptional()
+  @IsString()
+  residenceHabituelle?: string;
+
+  @IsOptional()
+  @IsString()
+  residenceActuelle?: string;
 }
 
 export class UpdatePassageDto {
@@ -87,6 +107,14 @@ export class UpdatePassageDto {
   @IsOptional()
   @IsNumber()
   poids?: number;
+
+  @IsOptional()
+  @IsString()
+  perimetreBrachial?: string;
+
+  @IsOptional()
+  @IsString()
+  perimetreCranien?: string;
 
   /** Champs du patient à mettre à jour. */
   @IsOptional()

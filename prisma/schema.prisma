@@ -21,6 +21,16 @@ model Clinique {
   adresse   String?
   telephone String?
   statut    String   @default("ACTIF") // ACTIF / INACTIF
+  // ── Rapport SIG mensuel (en-tête officielle, paramétrable) ──
+  immatriculation         String? // n° d'immatriculation de l'établissement
+  districtNom             String? // district sanitaire
+  districtCode            String?
+  regionNom               String? // région sanitaire
+  regionCode              String?
+  populationDesservie     Int?
+  responsableRapportNom      String? // « rapport réalisé par »
+  responsableRapportFonction String?
+  responsableRapportContact  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -51,6 +61,12 @@ model Clinique {
   assurances Assurance[]
   grossesses Grossesse[]
   soins Soin[]
+  rapportsSig RapportSig[]
+  professions Profession[]
+  motifsConsultation MotifConsultation[]
+  quartiers Quartier[]
+  cpons ConsultationPostnatale[]
+  consultationsPf ConsultationPf[]
 
   @@map("cliniques")
 }
@@ -91,6 +107,8 @@ model Patient {
   assurances   PatientAssurance[]
   grossesses   Grossesse[]
   soins        Soin[]
+  cpons        ConsultationPostnatale[]
+  consultationsPf ConsultationPf[]
 
   @@unique([cliniqueId, numeroDossier])
   @@map("patients")
@@ -117,6 +135,7 @@ model Passage {
   poids             Decimal? @db.Decimal(5, 1)
   perimetreBrachial String?  // cm — constante saisie à l'accueil
   perimetreCranien  String?  // cm — constante saisie à l'accueil
+  materniteTraiteLe DateTime? // module maternité : date de fin de prise en charge (« patients terminés »)
   expireLe          DateTime // validité : 10 jours (§4.3)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -133,6 +152,8 @@ model Passage {
   hospitalisation Hospitalisation?
   affectation Affectation?
   soins Soin[]
+  cpons ConsultationPostnatale[]
+  consultationsPf ConsultationPf[]
 
   @@unique([cliniqueId, numeroOrdre])
   @@map("passages")
@@ -738,6 +759,11 @@ model Parametre {
   id         Int      @id @default(autoincrement())
   cliniqueId Int      @unique
   loginImage String?  @db.NVarChar(Max) // image au format data URL (base64)
+  // ── Rapport SIG : logos de la page de garde (data URL, paramétrables) ──
+  logoRapportGauche String? @db.NVarChar(Max) // logo en haut à gauche (armoiries…)
+  logoRapportCentre String? @db.NVarChar(Max) // emblème au centre, entre DIIS et SIG
+  logoRapportDroit  String? @db.NVarChar(Max) // logo en haut à droite
+  sigVersion        String? @default("A")     // lettre de version du rapport (A)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -817,6 +843,8 @@ model Utilisateur {
   visitesCpn VisiteCpn[] @relation("VisitesCpn")
   accouchements Accouchement[] @relation("Accouchements")
   realisationsSoins RealisationSoin[] @relation("RealisationsSoins")
+  cpons ConsultationPostnatale[] @relation("Cpons")
+  consultationsPf ConsultationPf[] @relation("Cpf")
   mouvementsConsommables MouvementConsommable[]
   prelevements  ExamenLabo[] @relation("Prelevements")
   validations   ExamenLabo[] @relation("Validations")
@@ -1030,6 +1058,7 @@ model Grossesse {
   cliniqueId              Int
   patientId               Int
   numero                  String    @unique // GRO-0001… généré automatiquement
+  numeroGestante          String?   // N° gestante du registre CPN (ex : 08/B/2026/CPN1/R1/P10)
   ddr                     DateTime  @db.Date // date des dernières règles
   dpa                     DateTime  @db.Date // date prévue d'accouchement (DDR + 280 j)
   gravidite               Int?      // nombre de grossesses (y compris celle-ci)
@@ -1037,6 +1066,20 @@ model Grossesse {
   antecedentsObstetricaux String?   // césarienne, HTA gravidique, fausses couches…
   facteursRisque          String?
   statut                  String    @default("EN_COURS") // EN_COURS / ACCOUCHEE / TERMINEE
+  // ── Registre CPN officiel (version août 2020) ──
+  modeEntree             String?   // VENUE_DIRECTE / REFERE_CENTRE / REFERE_TRADIPRATICIEN / AUTRE
+  antecedentsMedicaux    String?   // pathologies chroniques, HTA, diabète…
+  antecedentsChirurgicaux String?
+  enfantsVivants         Int?
+  enfantsDecedes         Int?
+  cesariennes            Int?
+  avortements            Int?
+  toxemie                String?   // OUI / NON
+  vatStatut              String?   // NON_VACCINEE / INCOMPLETEMENT_VACCINEE / CORRECTEMENT_VACCINEE
+  vat1                   DateTime? @db.Date
+  vat2                   DateTime? @db.Date
+  vatRappel              DateTime? @db.Date
+  statutVih              String?   // POSITIF / NEGATIF / INCONNU
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
 
@@ -1055,6 +1098,7 @@ model VisiteCpn {
   date              DateTime  @db.Date
   ageGestationnelSA String?   // ex. « 16 SA + 3 j »
   poids             Decimal?  @db.Decimal(5, 1)
+  taille            String?   // cm — examen du registre CPN
   tensionGauche     String?
   tensionDroite     String?
   hauteurUterine    String?
@@ -1068,6 +1112,17 @@ model VisiteCpn {
   conseils          String?   // fer, acide folique, MILDA, VAT…
   prochaineVisite   DateTime? @db.Date
   agentId           Int?      // sage-femme ayant réalisé la visite
+  // ── Registre CPN — données du rapport SIG mensuel (T4 et T5) ──
+  risqueDepiste       Boolean? // grossesse à risque dépistée en CPN1
+  malnutrition        Boolean? // femme enceinte malnutrie dépistée en CPN
+  anemie              Boolean? // femme enceinte anémiée dépistée en CPN
+  syphilisPositif     Boolean? // dépistée positive à la syphilis en CPN
+  agHbsPositif        Boolean? // dépistée positive à l'AgHBs en CPN
+  spDose              Int?     // n° de dose de SP donnée à cette visite (1-5)
+  mildaRemise         Boolean? // MILDA remise à cette visite
+  ferFolate           Boolean? // mise sous Fer + Folate à cette visite
+  deparasitee         Boolean? // déparasitée à cette visite
+  counselingPfppi     Boolean? // counseling PFPPI + conseils nutritionnels
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -1091,6 +1146,54 @@ model Accouchement {
   complications String?
   lieu          String?   // salle d'accouchement, bloc opératoire…
   agentId       Int?      // sage-femme/médecin ayant accouché
+  // ── Registre d'accouchement — données du rapport SIG mensuel (T7 à T10) ──
+  vatStatut                     String? // CORRECTEMENT_VACCINEE / INCOMPLETEMENT_VACCINEE / NON_VACCINEE
+  mortNeType                    String? // FRAIS / MACERE (si mort-né)
+  declarationNaissanceRenseignee Boolean? // fiche de déclaration de naissance renseignée
+  declarationNaissanceComplete   Boolean? // fiche avec les « informations nécessaires »
+  evacueeAvant                  Boolean? // mère évacuée avant l'accouchement
+  evacueeApres                  Boolean? // mère évacuée après l'accouchement
+  nouveauNeEvacue               Boolean? // nouveau-né évacué
+  nouveauNeProtegeTetanos       Boolean? // nouveau-né protégé à la naissance contre le tétanos
+  accouchementMultiple          Boolean? // naissance multiple (jumeaux…)
+  // ── Registre d'accouchement officiel (version août 2020, 12 pages) ──
+  modeEntree                String?  // VENUE_DIRECTE / REFERE_CENTRE / REFERE_TRADIPRATICIEN / AUTRE
+  numeroAccouchement        Int?     // numéro d'ordre annuel dans la structure
+  heureArrivee              DateTime? // date + heure d'arrivée de la parturiente
+  motifAdmission            String?
+  enTravail                 Boolean?
+  contractions              String?  // OUI_REGULIERES / OUI_IRREGULIERES / NON
+  pocheEauxIntacte          Boolean?
+  ruptureHeures             Int?     // heures écoulées depuis la rupture des membranes
+  liquideAspect             String?  // CLAIR / TEINTE / MECONIAL
+  antecedentsMedicaux       String?
+  htaConnue                 Boolean?
+  diabeteConnu              Boolean?
+  antecedentsChirurgicaux   String?
+  gemellite                 Int?     // nombre d'accouchements gémellaires antérieurs
+  prematurite               Int?     // nombre d'accouchements prématurés antérieurs
+  enfantsVivants            Int?
+  enfantsDecedes            Int?
+  cesariennes               Int?
+  avortements               Int?
+  toxemie                   String?  // OUI / NON
+  statutVihAccueil          String?  // POSITIF / NEGATIF / INCONNU
+  sousTarvCpn               Boolean? // femme VIH+ sous TARV pendant la grossesse
+  numeroPec                 String?  // numéro de prise en charge VIH
+  ageGrossessePremiereCpn   String?  // ex. « 3 mois » ou « 14 SA »
+  nombreCpn                 Int?
+  offreTestVih              Boolean? // proposition de test VIH
+  resultatTestVih           String?  // POSITIF / NEGATIF
+  delivranceLe              DateTime? // heure de la délivrance
+  revisionUterine           Boolean?
+  ubt                       Boolean? // hémorragie traitée avec ballonnet UBT
+  hppi                      Boolean? // hémorragie du post-partum immédiat
+  perimetreCranienEnfant    String?  // cm
+  reanimationNn             Boolean? // réanimation du nouveau-né
+  decedeMaternite           Boolean? // enfant décédé à la maternité
+  interventionMedecin       String?  // motif/description de l'intervention du médecin
+  sortieMereLe              DateTime? // date de sortie de la mère
+  sortieMereMode            String?  // NORMALE / TRANSFERT / DECES…
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -1137,4 +1240,156 @@ model RealisationSoin {
   agent Utilisateur?  @relation("RealisationsSoins", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("realisations_soins")
+}
+
+// ─── Rapport mensuel SIG (formulaire officiel DIIS, ~47 tableaux) ──────────
+// Un rapport par clinique et par mois. L'en-tête est copiée depuis la fiche
+// clinique à la création (paramétrable et modifiable sur chaque rapport).
+// Les valeurs des tableaux sont stockées ligne/colonne par tableau.
+model RapportSig {
+  id          Int    @id @default(autoincrement())
+  cliniqueId  Int
+  mois        Int    // 1-12
+  annee       Int    // ex. 2026
+  statut      String @default("BROUILLON") // BROUILLON / VALIDE
+  // En-tête (préremplie depuis la clinique, modifiable)
+  etablissement         String?
+  immatriculation       String?
+  districtNom           String?
+  districtCode          String?
+  regionNom             String?
+  regionCode            String?
+  populationDesservie   Int?
+  realiseParNom         String?
+  realiseParFonction    String?
+  realiseParContact     String?
+  observations          String?
+  // Portes Oui/Non des sections (null = non renseignée)
+  portes                String? // JSON { ACTIVITES:true, CPN:true, ... }
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  clinique Clinique          @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  valeurs  RapportSigValeur[]
+
+  @@unique([cliniqueId, mois, annee])
+  @@map("rapports_sig")
+}
+
+model RapportSigValeur {
+  id        Int     @id @default(autoincrement())
+  rapportId Int
+  tableau   String  // code du tableau : T1…T47
+  ligne     Int     // index de ligne (0-based)
+  colonne   Int     // index de colonne (0-based)
+  valeur    Int?    // toutes les valeurs du SIG sont des nombres entiers
+
+  rapport RapportSig @relation(fields: [rapportId], references: [id], onDelete: Cascade)
+
+  @@unique([rapportId, tableau, ligne, colonne])
+  @@map("rapports_sig_valeurs")
+}
+
+model Profession {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  libelle    String
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@unique([cliniqueId, libelle])
+  @@map("professions")
+}
+
+model MotifConsultation {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  libelle    String
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@unique([cliniqueId, libelle])
+  @@map("motifs_consultation")
+}
+
+model Quartier {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  libelle    String
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@unique([cliniqueId, libelle])
+  @@map("quartiers")
+}
+
+// ─── Registre CPoN (consultations postnatales, version août 2020) ──────────
+// Une consultation postnatale est rattachée à un passage (prise en charge
+// maternité) et, si elle est connue, à la grossesse (report du N° gestante).
+model ConsultationPostnatale {
+  id                Int       @id @default(autoincrement())
+  cliniqueId        Int
+  passageId         Int
+  patientId         Int
+  grossesseId       Int?      // dossier grossesse (colonne simple : pas de FK pour éviter les cascades multiples)
+  date              DateTime  @db.Date
+  modeEntree        String?   // VENUE_DIRECTE / REFERE_CENTRE / REFERE_TRADIPRATICIEN / AUTRE
+  numeroGestanteReport String? // N° gestante de la dernière CPN (R/D selon l'origine)
+  typeCpon          String?   // IMMEDIATE_6_72H / 6_10_JOURS / AUTRES_PERIODES / 6_8_SEMAINES
+  dateAccouchement  DateTime? @db.Date
+  lieuAccouchement  String?   // ETABLISSEMENT / DOMICILE
+  modeAccouchement  String?   // VOIE_BASSE / CESARIENNE
+  numeroDepistagePec String?  // n° de dépistage ou de PEC VIH
+  statutVih         String?   // POSITIF / NEGATIF / INCONNU
+  examenMere        String?   // examen clinique de la mère
+  examenEnfant      String?   // examen du nouveau-né
+  conseils          String?
+  observations      String?
+  agentId           Int?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  clinique  Clinique          @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  passage   Passage           @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  patient   Patient           @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agent     Utilisateur?      @relation("Cpons", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("consultations_postnatales")
+}
+
+// ─── Registre PF (consultations de planification familiale) ────────────────
+model ConsultationPf {
+  id                 Int       @id @default(autoincrement())
+  cliniqueId         Int
+  passageId          Int
+  patientId          Int
+  date               DateTime  @db.Date
+  methode            String    // méthode contraceptive (libellé)
+  nouvelleUtilisatrice Boolean  @default(true)
+  protégée           Boolean   @default(false)
+  perdueDeVue        Boolean   @default(false)
+  abandon            Boolean   @default(false)
+  arretRetrait       Boolean   @default(false)
+  conseilPostpartum  Boolean   @default(false) // counseling PF dans le post-partum
+  produitPostpartumImmediat Boolean @default(false)
+  produitPostAbortum Boolean   @default(false)
+  femmesFormeesAutoInjection Boolean @default(false)
+  istPresente        Boolean   @default(false)
+  seropositive       Boolean   @default(false) // femme VIH+ sous contraception moderne
+  nourrisson0_6      Boolean   @default(false) // nourrisson 0-6 mois, conseils nutritionnels
+  nourrisson6        Boolean   @default(false) // nourrisson 6 mois, alimentation complémentaire
+  observations       String?
+  agentId            Int?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  clinique Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  passage  Passage      @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  patient  Patient      @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agent    Utilisateur? @relation("Cpf", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("consultations_pf")
 }

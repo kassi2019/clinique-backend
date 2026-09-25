@@ -10,6 +10,8 @@ export declare class LaboratoireController {
         createdAt: Date;
         patient: {
             nationalite: string | null;
+            profession: string | null;
+            quartier: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -22,8 +24,6 @@ export declare class LaboratoireController {
             numeroDossier: string;
             age: string | null;
             ville: string | null;
-            quartier: string | null;
-            profession: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -61,6 +61,8 @@ export declare class LaboratoireController {
         numeroOrdre: string;
         patient: {
             nationalite: string | null;
+            profession: string | null;
+            quartier: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -73,8 +75,6 @@ export declare class LaboratoireController {
             numeroDossier: string;
             age: string | null;
             ville: string | null;
-            quartier: string | null;
-            profession: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -108,6 +108,8 @@ export declare class LaboratoireController {
             };
             patient: {
                 nationalite: string | null;
+                profession: string | null;
+                quartier: string | null;
                 id: number;
                 cliniqueId: number;
                 nom: string;
@@ -120,8 +122,6 @@ export declare class LaboratoireController {
                 numeroDossier: string;
                 age: string | null;
                 ville: string | null;
-                quartier: string | null;
-                profession: string | null;
                 scolarisation: string | null;
                 statutConjugal: string | null;
                 typePopulation: string | null;

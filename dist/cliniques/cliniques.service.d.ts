@@ -13,6 +13,15 @@ export declare class CliniquesService {
         code: string;
         adresse: string | null;
         telephone: string | null;
+        immatriculation: string | null;
+        districtNom: string | null;
+        districtCode: string | null;
+        regionNom: string | null;
+        regionCode: string | null;
+        populationDesservie: number | null;
+        responsableRapportNom: string | null;
+        responsableRapportFonction: string | null;
+        responsableRapportContact: string | null;
     }[]>;
     findOne(id: number): Promise<{
         _count: {
@@ -28,6 +37,15 @@ export declare class CliniquesService {
         code: string;
         adresse: string | null;
         telephone: string | null;
+        immatriculation: string | null;
+        districtNom: string | null;
+        districtCode: string | null;
+        regionNom: string | null;
+        regionCode: string | null;
+        populationDesservie: number | null;
+        responsableRapportNom: string | null;
+        responsableRapportFonction: string | null;
+        responsableRapportContact: string | null;
     }>;
     create(dto: CreateCliniqueDto): Promise<{
         id: number;
@@ -38,6 +56,15 @@ export declare class CliniquesService {
         code: string;
         adresse: string | null;
         telephone: string | null;
+        immatriculation: string | null;
+        districtNom: string | null;
+        districtCode: string | null;
+        regionNom: string | null;
+        regionCode: string | null;
+        populationDesservie: number | null;
+        responsableRapportNom: string | null;
+        responsableRapportFonction: string | null;
+        responsableRapportContact: string | null;
     }>;
     update(id: number, dto: UpdateCliniqueDto): Promise<{
         id: number;
@@ -48,6 +75,15 @@ export declare class CliniquesService {
         code: string;
         adresse: string | null;
         telephone: string | null;
+        immatriculation: string | null;
+        districtNom: string | null;
+        districtCode: string | null;
+        regionNom: string | null;
+        regionCode: string | null;
+        populationDesservie: number | null;
+        responsableRapportNom: string | null;
+        responsableRapportFonction: string | null;
+        responsableRapportContact: string | null;
     }>;
     remove(id: number): Promise<{
         id: number;
@@ -58,5 +94,14 @@ export declare class CliniquesService {
         code: string;
         adresse: string | null;
         telephone: string | null;
+        immatriculation: string | null;
+        districtNom: string | null;
+        districtCode: string | null;
+        regionNom: string | null;
+        regionCode: string | null;
+        populationDesservie: number | null;
+        responsableRapportNom: string | null;
+        responsableRapportFonction: string | null;
+        responsableRapportContact: string | null;
     }>;
 }

@@ -13,10 +13,14 @@ import {
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   CreateAccouchementDto,
+  CreateCponDto,
   CreateGrossesseDto,
+  CreatePfDto,
   CreateVisiteCpnDto,
   UpdateAccouchementDto,
+  UpdateCponDto,
   UpdateGrossesseDto,
+  UpdatePfDto,
   UpdateVisiteCpnDto,
 } from './dto/maternite.dto';
 import { MaterniteService } from './maternite.service';
@@ -25,6 +29,99 @@ import { MaterniteService } from './maternite.service';
 @Controller('maternite')
 export class MaterniteController {
   constructor(private materniteService: MaterniteService) {}
+
+  /** File d'attente : patientes avec prestation MATERNITE payée, non traitées. */
+  @Get('file')
+  fileAttente(@Query('cliniqueId', ParseIntPipe) cliniqueId: number) {
+    return this.materniteService.fileAttente(cliniqueId);
+  }
+
+  /** Recherche d'une patiente (code patient, N° d'ordre, nom ou prénom). */
+  @Get('recherche')
+  rechercher(
+    @Query('code') code?: string,
+    @Query('cliniqueId', ParseIntPipe) cliniqueId?: number,
+  ) {
+    if (!cliniqueId) return [];
+    return this.materniteService.rechercher(code ?? '', cliniqueId);
+  }
+
+  /** Patientes traitées (prise en charge terminée), filtrables par jour. */
+  @Get('traites')
+  traites(
+    @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
+    @Query('jour') jour?: string,
+    @Query('page') page?: string,
+    @Query('perPage') perPage?: string,
+  ) {
+    return this.materniteService.traites(
+      cliniqueId,
+      jour,
+      page ? Number(page) : 1,
+      perPage ? Number(perPage) : 10,
+    );
+  }
+
+  /** Détail complet d'un passage maternité (dossier, CPON, PF, consultation…). */
+  @Get('passages/:id')
+  detailPassage(@Param('id', ParseIntPipe) id: number) {
+    return this.materniteService.detailPassage(id);
+  }
+
+  /** Termine la prise en charge (la patiente passe dans « terminés »). */
+  @Patch('passages/:id/terminer')
+  terminer(@Param('id', ParseIntPipe) id: number) {
+    return this.materniteService.terminerPassage(id);
+  }
+
+  /**
+   * Consultation du passage (pour les onglets Ordonnance et Examens) :
+   * créée à la volée par le module Maternité, sans passer par la garde du
+   * module Consultation (qui n'accepte que les prestations CONSULTATION).
+   */
+  @Post('passages/:id/consultation')
+  assurerConsultation(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req,
+  ) {
+    return this.materniteService.assurerConsultation(id, req.user.id);
+  }
+
+  /** Dernier dossier grossesse de la patiente (CPN1 crée le dossier sinon). */
+  @Get('grossesses/patient/:patientId')
+  dossierPatient(@Param('patientId', ParseIntPipe) patientId: number) {
+    return this.materniteService.dossierPatient(patientId);
+  }
+
+  /** Consultation postnatale (registre CPoN). */
+  @Post('passages/:id/cpon')
+  creerCpon(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateCponDto,
+    @Req() req,
+  ) {
+    return this.materniteService.creerCpon(id, dto, req.user.id);
+  }
+
+  @Patch('cpon/:id')
+  modifierCpon(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCponDto) {
+    return this.materniteService.modifierCpon(id, dto);
+  }
+
+  /** Consultation de planification familiale (registre PF). */
+  @Post('passages/:id/pf')
+  creerPf(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreatePfDto,
+    @Req() req,
+  ) {
+    return this.materniteService.creerPf(id, dto, req.user.id);
+  }
+
+  @Patch('pf/:id')
+  modifierPf(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdatePfDto) {
+    return this.materniteService.modifierPf(id, dto);
+  }
 
   /** Liste des grossesses (recherche par nom, code patient ou numéro). */
   @Get('grossesses')

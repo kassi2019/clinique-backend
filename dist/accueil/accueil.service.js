@@ -261,6 +261,8 @@ let AccueilService = AccueilService_1 = class AccueilService {
             }
         }
         const lignes = prestationsService.filter((p) => p.type !== 'CONSULTATION' || p.id === consultationChoisie?.id);
+        const serviceSansConsultation = consultations.length === 0;
+        const typePatient = dto.typePatient ?? 'INTERNE';
         if (lignes.length > 0) {
             await this.prisma.passagePrestation.createMany({
                 data: lignes.map((p) => ({
@@ -270,7 +272,9 @@ let AccueilService = AccueilService_1 = class AccueilService {
                     montant: p.montant,
                     serviceId: p.serviceId,
                     source: 'ACCUEIL',
-                    statut: p.id === consultationChoisie?.id || p.id === acteChoisi?.id
+                    statut: p.id === consultationChoisie?.id ||
+                        p.id === acteChoisi?.id ||
+                        (typePatient === 'INTERNE' && serviceSansConsultation)
                         ? 'EN_ATTENTE'
                         : 'NON_PRESCRITE',
                 })),
@@ -307,6 +311,11 @@ let AccueilService = AccueilService_1 = class AccueilService {
                     quartier: dto.patient.quartier,
                     profession: dto.patient.profession,
                     telephone: dto.patient.telephone,
+                    nationalite: dto.patient.nationalite,
+                    statutConjugal: dto.patient.statutConjugal,
+                    scolarisation: dto.patient.scolarisation,
+                    residenceHabituelle: dto.patient.residenceHabituelle,
+                    residenceActuelle: dto.patient.residenceActuelle,
                 },
             });
         }

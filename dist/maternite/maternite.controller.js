@@ -21,6 +21,41 @@ let MaterniteController = class MaterniteController {
     constructor(materniteService) {
         this.materniteService = materniteService;
     }
+    fileAttente(cliniqueId) {
+        return this.materniteService.fileAttente(cliniqueId);
+    }
+    rechercher(code, cliniqueId) {
+        if (!cliniqueId)
+            return [];
+        return this.materniteService.rechercher(code ?? '', cliniqueId);
+    }
+    traites(cliniqueId, jour, page, perPage) {
+        return this.materniteService.traites(cliniqueId, jour, page ? Number(page) : 1, perPage ? Number(perPage) : 10);
+    }
+    detailPassage(id) {
+        return this.materniteService.detailPassage(id);
+    }
+    terminer(id) {
+        return this.materniteService.terminerPassage(id);
+    }
+    assurerConsultation(id, req) {
+        return this.materniteService.assurerConsultation(id, req.user.id);
+    }
+    dossierPatient(patientId) {
+        return this.materniteService.dossierPatient(patientId);
+    }
+    creerCpon(id, dto, req) {
+        return this.materniteService.creerCpon(id, dto, req.user.id);
+    }
+    modifierCpon(id, dto) {
+        return this.materniteService.modifierCpon(id, dto);
+    }
+    creerPf(id, dto, req) {
+        return this.materniteService.creerPf(id, dto, req.user.id);
+    }
+    modifierPf(id, dto) {
+        return this.materniteService.modifierPf(id, dto);
+    }
     grossesses(cliniqueId, search, statut, page, perPage) {
         return this.materniteService.grossesses({
             cliniqueId,
@@ -61,6 +96,94 @@ let MaterniteController = class MaterniteController {
     }
 };
 exports.MaterniteController = MaterniteController;
+__decorate([
+    (0, common_1.Get)('file'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "fileAttente", null);
+__decorate([
+    (0, common_1.Get)('recherche'),
+    __param(0, (0, common_1.Query)('code')),
+    __param(1, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "rechercher", null);
+__decorate([
+    (0, common_1.Get)('traites'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('jour')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('perPage')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String, String]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "traites", null);
+__decorate([
+    (0, common_1.Get)('passages/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "detailPassage", null);
+__decorate([
+    (0, common_1.Patch)('passages/:id/terminer'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "terminer", null);
+__decorate([
+    (0, common_1.Post)('passages/:id/consultation'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "assurerConsultation", null);
+__decorate([
+    (0, common_1.Get)('grossesses/patient/:patientId'),
+    __param(0, (0, common_1.Param)('patientId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "dossierPatient", null);
+__decorate([
+    (0, common_1.Post)('passages/:id/cpon'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, maternite_dto_1.CreateCponDto, Object]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "creerCpon", null);
+__decorate([
+    (0, common_1.Patch)('cpon/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, maternite_dto_1.UpdateCponDto]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "modifierCpon", null);
+__decorate([
+    (0, common_1.Post)('passages/:id/pf'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, maternite_dto_1.CreatePfDto, Object]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "creerPf", null);
+__decorate([
+    (0, common_1.Patch)('pf/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, maternite_dto_1.UpdatePfDto]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "modifierPf", null);
 __decorate([
     (0, common_1.Get)('grossesses'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),

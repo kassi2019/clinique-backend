@@ -9,6 +9,10 @@ export declare class ParametresService {
         createdAt: Date;
         updatedAt: Date;
         loginImage: string | null;
+        logoRapportGauche: string | null;
+        logoRapportCentre: string | null;
+        logoRapportDroit: string | null;
+        sigVersion: string | null;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
     update(cliniqueId: number, dto: UpdateParametreDto): Promise<{
         id: number;
@@ -16,5 +20,9 @@ export declare class ParametresService {
         createdAt: Date;
         updatedAt: Date;
         loginImage: string | null;
+        logoRapportGauche: string | null;
+        logoRapportCentre: string | null;
+        logoRapportDroit: string | null;
+        sigVersion: string | null;
     }>;
 }

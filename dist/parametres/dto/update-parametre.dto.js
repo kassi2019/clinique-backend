@@ -20,4 +20,27 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateParametreDto.prototype, "loginImage", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateIf)((o) => o.logoRapportGauche !== null && o.logoRapportGauche !== undefined),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateParametreDto.prototype, "logoRapportGauche", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateIf)((o) => o.logoRapportCentre !== null && o.logoRapportCentre !== undefined),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateParametreDto.prototype, "logoRapportCentre", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateIf)((o) => o.logoRapportDroit !== null && o.logoRapportDroit !== undefined),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateParametreDto.prototype, "logoRapportDroit", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateParametreDto.prototype, "sigVersion", void 0);
 //# sourceMappingURL=update-parametre.dto.js.map

@@ -48,6 +48,20 @@ let MaterniteService = class MaterniteService {
                 parite: dto.parite,
                 antecedentsObstetricaux: dto.antecedentsObstetricaux,
                 facteursRisque: dto.facteursRisque,
+                numeroGestante: dto.numeroGestante,
+                modeEntree: dto.modeEntree,
+                antecedentsMedicaux: dto.antecedentsMedicaux,
+                antecedentsChirurgicaux: dto.antecedentsChirurgicaux,
+                enfantsVivants: dto.enfantsVivants,
+                enfantsDecedes: dto.enfantsDecedes,
+                cesariennes: dto.cesariennes,
+                avortements: dto.avortements,
+                toxemie: dto.toxemie,
+                vatStatut: dto.vatStatut,
+                vat1: dto.vat1 ? new Date(dto.vat1) : undefined,
+                vat2: dto.vat2 ? new Date(dto.vat2) : undefined,
+                vatRappel: dto.vatRappel ? new Date(dto.vatRappel) : undefined,
+                statutVih: dto.statutVih,
             },
             include: { patient: true },
         });
@@ -62,6 +76,20 @@ let MaterniteService = class MaterniteService {
             antecedentsObstetricaux: dto.antecedentsObstetricaux,
             facteursRisque: dto.facteursRisque,
             statut: dto.statut,
+            numeroGestante: dto.numeroGestante,
+            modeEntree: dto.modeEntree,
+            antecedentsMedicaux: dto.antecedentsMedicaux,
+            antecedentsChirurgicaux: dto.antecedentsChirurgicaux,
+            enfantsVivants: dto.enfantsVivants,
+            enfantsDecedes: dto.enfantsDecedes,
+            cesariennes: dto.cesariennes,
+            avortements: dto.avortements,
+            toxemie: dto.toxemie,
+            vatStatut: dto.vatStatut,
+            vat1: dto.vat1 ? new Date(dto.vat1) : undefined,
+            vat2: dto.vat2 ? new Date(dto.vat2) : undefined,
+            vatRappel: dto.vatRappel ? new Date(dto.vatRappel) : undefined,
+            statutVih: dto.statutVih,
         };
         if (dto.ddr) {
             data.ddr = new Date(dto.ddr);
@@ -149,6 +177,7 @@ let MaterniteService = class MaterniteService {
                 date: new Date(dto.date),
                 ageGestationnelSA: dto.ageGestationnelSA,
                 poids: dto.poids,
+                taille: dto.taille,
                 tensionGauche: dto.tensionGauche,
                 tensionDroite: dto.tensionDroite,
                 hauteurUterine: dto.hauteurUterine,
@@ -162,6 +191,16 @@ let MaterniteService = class MaterniteService {
                 conseils: dto.conseils,
                 prochaineVisite: dto.prochaineVisite ? new Date(dto.prochaineVisite) : null,
                 agentId,
+                risqueDepiste: dto.risqueDepiste,
+                malnutrition: dto.malnutrition,
+                anemie: dto.anemie,
+                syphilisPositif: dto.syphilisPositif,
+                agHbsPositif: dto.agHbsPositif,
+                spDose: dto.spDose,
+                mildaRemise: dto.mildaRemise,
+                ferFolate: dto.ferFolate,
+                deparasitee: dto.deparasitee,
+                counselingPfppi: dto.counselingPfppi,
             },
             include: includeVisite,
         });
@@ -176,6 +215,7 @@ let MaterniteService = class MaterniteService {
                 date: dto.date ? new Date(dto.date) : undefined,
                 ageGestationnelSA: dto.ageGestationnelSA,
                 poids: dto.poids,
+                taille: dto.taille,
                 tensionGauche: dto.tensionGauche,
                 tensionDroite: dto.tensionDroite,
                 hauteurUterine: dto.hauteurUterine,
@@ -188,9 +228,60 @@ let MaterniteService = class MaterniteService {
                 tv: dto.tv,
                 conseils: dto.conseils,
                 prochaineVisite: dto.prochaineVisite ? new Date(dto.prochaineVisite) : undefined,
+                risqueDepiste: dto.risqueDepiste,
+                malnutrition: dto.malnutrition,
+                anemie: dto.anemie,
+                syphilisPositif: dto.syphilisPositif,
+                agHbsPositif: dto.agHbsPositif,
+                spDose: dto.spDose,
+                mildaRemise: dto.mildaRemise,
+                ferFolate: dto.ferFolate,
+                deparasitee: dto.deparasitee,
+                counselingPfppi: dto.counselingPfppi,
             },
             include: includeVisite,
         });
+    }
+    champsRegistreAccouchement(dto) {
+        return {
+            modeEntree: dto.modeEntree,
+            numeroAccouchement: dto.numeroAccouchement,
+            heureArrivee: dto.heureArrivee ? new Date(dto.heureArrivee) : undefined,
+            motifAdmission: dto.motifAdmission,
+            enTravail: dto.enTravail,
+            contractions: dto.contractions,
+            pocheEauxIntacte: dto.pocheEauxIntacte,
+            ruptureHeures: dto.ruptureHeures,
+            liquideAspect: dto.liquideAspect,
+            antecedentsMedicaux: dto.antecedentsMedicaux,
+            htaConnue: dto.htaConnue,
+            diabeteConnu: dto.diabeteConnu,
+            antecedentsChirurgicaux: dto.antecedentsChirurgicaux,
+            gemellite: dto.gemellite,
+            prematurite: dto.prematurite,
+            enfantsVivants: dto.enfantsVivants,
+            enfantsDecedes: dto.enfantsDecedes,
+            cesariennes: dto.cesariennes,
+            avortements: dto.avortements,
+            toxemie: dto.toxemie,
+            statutVihAccueil: dto.statutVihAccueil,
+            sousTarvCpn: dto.sousTarvCpn,
+            numeroPec: dto.numeroPec,
+            ageGrossessePremiereCpn: dto.ageGrossessePremiereCpn,
+            nombreCpn: dto.nombreCpn,
+            offreTestVih: dto.offreTestVih,
+            resultatTestVih: dto.resultatTestVih,
+            delivranceLe: dto.delivranceLe ? new Date(dto.delivranceLe) : undefined,
+            revisionUterine: dto.revisionUterine,
+            ubt: dto.ubt,
+            hppi: dto.hppi,
+            perimetreCranienEnfant: dto.perimetreCranienEnfant,
+            reanimationNn: dto.reanimationNn,
+            decedeMaternite: dto.decedeMaternite,
+            interventionMedecin: dto.interventionMedecin,
+            sortieMereLe: dto.sortieMereLe ? new Date(dto.sortieMereLe) : undefined,
+            sortieMereMode: dto.sortieMereMode,
+        };
     }
     async creerAccouchement(grossesseId, dto, agentId) {
         const g = await this.prisma.grossesse.findUnique({ where: { id: grossesseId } });
@@ -210,6 +301,16 @@ let MaterniteService = class MaterniteService {
                 complications: dto.complications,
                 lieu: dto.lieu,
                 agentId,
+                vatStatut: dto.vatStatut,
+                mortNeType: dto.mortNeType,
+                declarationNaissanceRenseignee: dto.declarationNaissanceRenseignee,
+                declarationNaissanceComplete: dto.declarationNaissanceComplete,
+                evacueeAvant: dto.evacueeAvant,
+                evacueeApres: dto.evacueeApres,
+                nouveauNeEvacue: dto.nouveauNeEvacue,
+                nouveauNeProtegeTetanos: dto.nouveauNeProtegeTetanos,
+                accouchementMultiple: dto.accouchementMultiple,
+                ...this.champsRegistreAccouchement(dto),
             },
             create: {
                 grossesseId,
@@ -224,6 +325,16 @@ let MaterniteService = class MaterniteService {
                 complications: dto.complications,
                 lieu: dto.lieu,
                 agentId,
+                vatStatut: dto.vatStatut,
+                mortNeType: dto.mortNeType,
+                declarationNaissanceRenseignee: dto.declarationNaissanceRenseignee,
+                declarationNaissanceComplete: dto.declarationNaissanceComplete,
+                evacueeAvant: dto.evacueeAvant,
+                evacueeApres: dto.evacueeApres,
+                nouveauNeEvacue: dto.nouveauNeEvacue,
+                nouveauNeProtegeTetanos: dto.nouveauNeProtegeTetanos,
+                accouchementMultiple: dto.accouchementMultiple,
+                ...this.champsRegistreAccouchement(dto),
             },
         });
         await this.prisma.grossesse.update({
@@ -249,6 +360,16 @@ let MaterniteService = class MaterniteService {
                 issueEnfant: dto.issueEnfant,
                 complications: dto.complications,
                 lieu: dto.lieu,
+                vatStatut: dto.vatStatut,
+                mortNeType: dto.mortNeType,
+                declarationNaissanceRenseignee: dto.declarationNaissanceRenseignee,
+                declarationNaissanceComplete: dto.declarationNaissanceComplete,
+                evacueeAvant: dto.evacueeAvant,
+                evacueeApres: dto.evacueeApres,
+                nouveauNeEvacue: dto.nouveauNeEvacue,
+                nouveauNeProtegeTetanos: dto.nouveauNeProtegeTetanos,
+                accouchementMultiple: dto.accouchementMultiple,
+                ...this.champsRegistreAccouchement(dto),
             },
         });
     }
@@ -279,6 +400,282 @@ let MaterniteService = class MaterniteService {
             this.prisma.accouchement.count({ where }),
         ]);
         return { data, total, page, perPage, totalPages: Math.ceil(total / perPage) };
+    }
+    async fileAttente(cliniqueId) {
+        const passages = await this.prisma.passage.findMany({
+            where: {
+                cliniqueId,
+                statut: 'ACTIF',
+                materniteTraiteLe: null,
+                prestations: {
+                    some: { statut: 'PAYEE', prestation: { type: 'MATERNITE' } },
+                },
+            },
+            include: {
+                patient: true,
+                service: { select: { nom: true } },
+                prestations: {
+                    where: { statut: 'PAYEE', prestation: { type: 'MATERNITE' } },
+                    select: { libelle: true },
+                },
+            },
+            orderBy: { createdAt: 'asc' },
+        });
+        return passages.map((p) => ({
+            id: p.id,
+            numeroOrdre: p.numeroOrdre,
+            patient: p.patient,
+            service: p.service,
+            createdAt: p.createdAt,
+            actes: p.prestations.map((l) => l.libelle),
+        }));
+    }
+    async rechercher(reference, cliniqueId) {
+        const ref = reference.trim().toUpperCase();
+        if (!ref)
+            return [];
+        const refSans = ref.replace(/[\s-]/g, '');
+        const passages = await this.prisma.passage.findMany({
+            where: {
+                cliniqueId,
+                statut: 'ACTIF',
+                prestations: { some: { statut: 'PAYEE', prestation: { type: 'MATERNITE' } } },
+                OR: [
+                    { numeroOrdre: { contains: ref } },
+                    { patient: { is: { code: refSans } } },
+                    { patient: { is: { nom: { contains: ref } } } },
+                    { patient: { is: { prenom: { contains: ref } } } },
+                ],
+            },
+            include: {
+                patient: true,
+                service: { select: { nom: true } },
+                prestations: {
+                    where: { statut: 'PAYEE', prestation: { type: 'MATERNITE' } },
+                    select: { libelle: true },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 20,
+        });
+        return passages.map((p) => ({
+            id: p.id,
+            numeroOrdre: p.numeroOrdre,
+            patient: p.patient,
+            service: p.service,
+            createdAt: p.createdAt,
+            actes: p.prestations.map((l) => l.libelle),
+            traite: p.materniteTraiteLe !== null,
+        }));
+    }
+    async traites(cliniqueId, jour, page = 1, perPage = 10) {
+        const debut = jour ? new Date(`${jour}T00:00:00`) : undefined;
+        const fin = jour ? new Date(`${jour}T23:59:59.999`) : undefined;
+        const where = {
+            cliniqueId,
+            materniteTraiteLe: { not: null },
+            ...(debut ? { materniteTraiteLe: { gte: debut, lte: fin } } : {}),
+        };
+        const [data, total] = await Promise.all([
+            this.prisma.passage.findMany({
+                where,
+                include: { patient: true, service: { select: { nom: true } } },
+                orderBy: { materniteTraiteLe: 'desc' },
+                skip: (page - 1) * perPage,
+                take: perPage,
+            }),
+            this.prisma.passage.count({ where }),
+        ]);
+        return { data, total, page, perPage, totalPages: Math.ceil(total / perPage) };
+    }
+    async detailPassage(passageId) {
+        const passage = await this.prisma.passage.findUnique({
+            where: { id: passageId },
+            include: {
+                patient: true,
+                service: { select: { nom: true } },
+                prestations: {
+                    where: { statut: 'PAYEE' },
+                    include: { prestation: true },
+                },
+                consultations: {
+                    take: 1,
+                    orderBy: { id: 'desc' },
+                    include: { medicaments: true },
+                },
+            },
+        });
+        if (!passage)
+            throw new common_1.NotFoundException('Passage introuvable.');
+        const { consultations, ...reste } = passage;
+        const passageReponse = { ...reste, consultation: consultations?.[0] ?? null };
+        const dossier = await this.prisma.grossesse.findFirst({
+            where: { patientId: passage.patientId },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                visites: { include: includeVisite, orderBy: { numero: 'asc' } },
+                accouchement: true,
+            },
+        });
+        const [cpons, pfs] = await Promise.all([
+            this.prisma.consultationPostnatale.findMany({
+                where: { passageId },
+                include: { agent: { select: { matricule: true, personnel: { select: { nom: true, prenom: true } } } } },
+                orderBy: { date: 'desc' },
+            }),
+            this.prisma.consultationPf.findMany({
+                where: { passageId },
+                include: { agent: { select: { matricule: true, personnel: { select: { nom: true, prenom: true } } } } },
+                orderBy: { date: 'desc' },
+            }),
+        ]);
+        return { passage: passageReponse, dossier, cpons, pfs };
+    }
+    async terminerPassage(passageId) {
+        const passage = await this.prisma.passage.findUnique({ where: { id: passageId } });
+        if (!passage)
+            throw new common_1.NotFoundException('Passage introuvable.');
+        return this.prisma.passage.update({
+            where: { id: passageId },
+            data: { materniteTraiteLe: new Date() },
+        });
+    }
+    async assurerConsultation(passageId, agentId) {
+        const passage = await this.prisma.passage.findUnique({ where: { id: passageId } });
+        if (!passage)
+            throw new common_1.NotFoundException('Passage introuvable.');
+        const existante = await this.prisma.consultation.findUnique({
+            where: { passageId },
+        });
+        if (existante)
+            return existante;
+        return this.prisma.consultation.create({
+            data: {
+                passageId,
+                patientId: passage.patientId,
+                medecinId: agentId,
+                motif: passage.motif ?? 'Consultation maternité',
+            },
+        });
+    }
+    async dossierPatient(patientId) {
+        const dossier = await this.prisma.grossesse.findFirst({
+            where: { patientId },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                visites: { include: includeVisite, orderBy: { numero: 'asc' } },
+                accouchement: true,
+            },
+        });
+        if (!dossier)
+            throw new common_1.NotFoundException('Aucun dossier de grossesse pour cette patiente.');
+        return dossier;
+    }
+    async creerCpon(passageId, dto, agentId) {
+        const passage = await this.prisma.passage.findUnique({ where: { id: passageId } });
+        if (!passage)
+            throw new common_1.NotFoundException('Passage introuvable.');
+        return this.prisma.consultationPostnatale.create({
+            data: {
+                cliniqueId: passage.cliniqueId,
+                passageId,
+                patientId: passage.patientId,
+                grossesseId: dto.grossesseId ?? undefined,
+                date: new Date(dto.date),
+                modeEntree: dto.modeEntree,
+                numeroGestanteReport: dto.numeroGestanteReport,
+                typeCpon: dto.typeCpon,
+                dateAccouchement: dto.dateAccouchement ? new Date(dto.dateAccouchement) : undefined,
+                lieuAccouchement: dto.lieuAccouchement,
+                modeAccouchement: dto.modeAccouchement,
+                numeroDepistagePec: dto.numeroDepistagePec,
+                statutVih: dto.statutVih,
+                examenMere: dto.examenMere,
+                examenEnfant: dto.examenEnfant,
+                conseils: dto.conseils,
+                observations: dto.observations,
+                agentId,
+            },
+        });
+    }
+    async modifierCpon(id, dto) {
+        const c = await this.prisma.consultationPostnatale.findUnique({ where: { id } });
+        if (!c)
+            throw new common_1.NotFoundException('Consultation postnatale introuvable.');
+        return this.prisma.consultationPostnatale.update({
+            where: { id },
+            data: {
+                date: dto.date ? new Date(dto.date) : undefined,
+                modeEntree: dto.modeEntree,
+                grossesseId: dto.grossesseId,
+                numeroGestanteReport: dto.numeroGestanteReport,
+                typeCpon: dto.typeCpon,
+                dateAccouchement: dto.dateAccouchement ? new Date(dto.dateAccouchement) : undefined,
+                lieuAccouchement: dto.lieuAccouchement,
+                modeAccouchement: dto.modeAccouchement,
+                numeroDepistagePec: dto.numeroDepistagePec,
+                statutVih: dto.statutVih,
+                examenMere: dto.examenMere,
+                examenEnfant: dto.examenEnfant,
+                conseils: dto.conseils,
+                observations: dto.observations,
+            },
+        });
+    }
+    async creerPf(passageId, dto, agentId) {
+        const passage = await this.prisma.passage.findUnique({ where: { id: passageId } });
+        if (!passage)
+            throw new common_1.NotFoundException('Passage introuvable.');
+        return this.prisma.consultationPf.create({
+            data: {
+                cliniqueId: passage.cliniqueId,
+                passageId,
+                patientId: passage.patientId,
+                date: new Date(dto.date),
+                methode: dto.methode,
+                nouvelleUtilisatrice: dto.nouvelleUtilisatrice ?? true,
+                protégée: dto.protégée ?? false,
+                perdueDeVue: dto.perdueDeVue ?? false,
+                abandon: dto.abandon ?? false,
+                arretRetrait: dto.arretRetrait ?? false,
+                conseilPostpartum: dto.conseilPostpartum ?? false,
+                produitPostpartumImmediat: dto.produitPostpartumImmediat ?? false,
+                produitPostAbortum: dto.produitPostAbortum ?? false,
+                femmesFormeesAutoInjection: dto.femmesFormeesAutoInjection ?? false,
+                istPresente: dto.istPresente ?? false,
+                seropositive: dto.seropositive ?? false,
+                nourrisson0_6: dto.nourrisson0_6 ?? false,
+                nourrisson6: dto.nourrisson6 ?? false,
+                observations: dto.observations,
+                agentId,
+            },
+        });
+    }
+    async modifierPf(id, dto) {
+        const p = await this.prisma.consultationPf.findUnique({ where: { id } });
+        if (!p)
+            throw new common_1.NotFoundException('Consultation PF introuvable.');
+        return this.prisma.consultationPf.update({
+            where: { id },
+            data: {
+                date: dto.date ? new Date(dto.date) : undefined,
+                methode: dto.methode,
+                nouvelleUtilisatrice: dto.nouvelleUtilisatrice,
+                protégée: dto.protégée,
+                perdueDeVue: dto.perdueDeVue,
+                abandon: dto.abandon,
+                arretRetrait: dto.arretRetrait,
+                conseilPostpartum: dto.conseilPostpartum,
+                produitPostpartumImmediat: dto.produitPostpartumImmediat,
+                produitPostAbortum: dto.produitPostAbortum,
+                femmesFormeesAutoInjection: dto.femmesFormeesAutoInjection,
+                istPresente: dto.istPresente,
+                seropositive: dto.seropositive,
+                nourrisson0_6: dto.nourrisson0_6,
+                nourrisson6: dto.nourrisson6,
+                observations: dto.observations,
+            },
+        });
     }
 };
 exports.MaterniteService = MaterniteService;

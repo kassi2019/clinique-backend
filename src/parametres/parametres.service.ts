@@ -19,7 +19,13 @@ export class ParametresService {
     await this.getOrCreate(cliniqueId);
     return this.prisma.parametre.update({
       where: { cliniqueId },
-      data: { loginImage: dto.loginImage },
+      data: {
+        loginImage: dto.loginImage,
+        logoRapportGauche: dto.logoRapportGauche,
+        logoRapportCentre: dto.logoRapportCentre,
+        logoRapportDroit: dto.logoRapportDroit,
+        sigVersion: dto.sigVersion,
+      },
     });
   }
 }

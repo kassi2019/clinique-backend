@@ -19,6 +19,8 @@ export declare class AccueilService {
         }[];
     } & {
         nationalite: string | null;
+        profession: string | null;
+        quartier: string | null;
         id: number;
         cliniqueId: number;
         nom: string;
@@ -31,8 +33,6 @@ export declare class AccueilService {
         numeroDossier: string;
         age: string | null;
         ville: string | null;
-        quartier: string | null;
-        profession: string | null;
         scolarisation: string | null;
         statutConjugal: string | null;
         typePopulation: string | null;
@@ -60,6 +60,8 @@ export declare class AccueilService {
             };
             patient: {
                 nationalite: string | null;
+                profession: string | null;
+                quartier: string | null;
                 id: number;
                 cliniqueId: number;
                 nom: string;
@@ -72,8 +74,6 @@ export declare class AccueilService {
                 numeroDossier: string;
                 age: string | null;
                 ville: string | null;
-                quartier: string | null;
-                profession: string | null;
                 scolarisation: string | null;
                 statutConjugal: string | null;
                 typePopulation: string | null;
@@ -108,6 +108,7 @@ export declare class AccueilService {
             poids: Prisma.Decimal | null;
             perimetreBrachial: string | null;
             perimetreCranien: string | null;
+            materniteTraiteLe: Date | null;
             expireLe: Date;
         })[];
         total: number;
@@ -124,6 +125,8 @@ export declare class AccueilService {
         };
         patient: {
             nationalite: string | null;
+            profession: string | null;
+            quartier: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -136,8 +139,6 @@ export declare class AccueilService {
             numeroDossier: string;
             age: string | null;
             ville: string | null;
-            quartier: string | null;
-            profession: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -172,6 +173,7 @@ export declare class AccueilService {
         poids: Prisma.Decimal | null;
         perimetreBrachial: string | null;
         perimetreCranien: string | null;
+        materniteTraiteLe: Date | null;
         expireLe: Date;
     }>;
     findOne(id: number): Promise<{
@@ -183,6 +185,8 @@ export declare class AccueilService {
         };
         patient: {
             nationalite: string | null;
+            profession: string | null;
+            quartier: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -195,8 +199,6 @@ export declare class AccueilService {
             numeroDossier: string;
             age: string | null;
             ville: string | null;
-            quartier: string | null;
-            profession: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -231,6 +233,7 @@ export declare class AccueilService {
         poids: Prisma.Decimal | null;
         perimetreBrachial: string | null;
         perimetreCranien: string | null;
+        materniteTraiteLe: Date | null;
         expireLe: Date;
     }>;
     creerPassage(dto: CreatePassageDto): Promise<{
@@ -243,6 +246,8 @@ export declare class AccueilService {
         };
         patient: {
             nationalite: string | null;
+            profession: string | null;
+            quartier: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -255,8 +260,6 @@ export declare class AccueilService {
             numeroDossier: string;
             age: string | null;
             ville: string | null;
-            quartier: string | null;
-            profession: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -290,6 +293,7 @@ export declare class AccueilService {
         poids: Prisma.Decimal | null;
         perimetreBrachial: string | null;
         perimetreCranien: string | null;
+        materniteTraiteLe: Date | null;
         expireLe: Date;
     }>;
     modifierPassage(id: number, dto: UpdatePassageDto): Promise<{
@@ -301,6 +305,8 @@ export declare class AccueilService {
         };
         patient: {
             nationalite: string | null;
+            profession: string | null;
+            quartier: string | null;
             id: number;
             cliniqueId: number;
             nom: string;
@@ -313,8 +319,6 @@ export declare class AccueilService {
             numeroDossier: string;
             age: string | null;
             ville: string | null;
-            quartier: string | null;
-            profession: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -349,6 +353,7 @@ export declare class AccueilService {
         poids: Prisma.Decimal | null;
         perimetreBrachial: string | null;
         perimetreCranien: string | null;
+        materniteTraiteLe: Date | null;
         expireLe: Date;
     }>;
     private prochainNumeroOrdre;

@@ -178,4 +178,70 @@ export class ParametresListesController {
   basculerFournisseur(@Param('id', ParseIntPipe) id: number) {
     return this.listes.desactiver(id, 'FOURNISSEUR');
   }
+
+  // ── PROFESSIONS ──
+  @UseGuards(JwtAuthGuard)
+  @Get('professions')
+  professions(@Query('cliniqueId', ParseIntPipe) cliniqueId: number, @Query('tous') tous?: string, @Query('page') page?: string, @Query('perPage') perPage?: string) {
+    return this.listes.findAll(cliniqueId, 'PROFESSION', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('professions')
+  creerProfession(@Body() b: { cliniqueId: number; libelle: string }) {
+    return this.listes.creer(Number(b.cliniqueId), 'PROFESSION', b.libelle);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Patch('professions/:id')
+  modifierProfession(@Param('id', ParseIntPipe) id: number, @Body() b: { libelle: string }) {
+    return this.listes.modifier(id, 'PROFESSION', b.libelle ?? '');
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Delete('professions/:id')
+  basculerProfession(@Param('id', ParseIntPipe) id: number) {
+    return this.listes.desactiver(id, 'PROFESSION');
+  }
+
+  // ── MOTIFS DE CONSULTATION ──
+  @UseGuards(JwtAuthGuard)
+  @Get('motifs')
+  motifs(@Query('cliniqueId', ParseIntPipe) cliniqueId: number, @Query('tous') tous?: string, @Query('page') page?: string, @Query('perPage') perPage?: string) {
+    return this.listes.findAll(cliniqueId, 'MOTIF', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('motifs')
+  creerMotif(@Body() b: { cliniqueId: number; libelle: string }) {
+    return this.listes.creer(Number(b.cliniqueId), 'MOTIF', b.libelle);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Patch('motifs/:id')
+  modifierMotif(@Param('id', ParseIntPipe) id: number, @Body() b: { libelle: string }) {
+    return this.listes.modifier(id, 'MOTIF', b.libelle ?? '');
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Delete('motifs/:id')
+  basculerMotif(@Param('id', ParseIntPipe) id: number) {
+    return this.listes.desactiver(id, 'MOTIF');
+  }
+
+  // ── QUARTIERS ──
+  @UseGuards(JwtAuthGuard)
+  @Get('quartiers')
+  quartiers(@Query('cliniqueId', ParseIntPipe) cliniqueId: number, @Query('tous') tous?: string, @Query('page') page?: string, @Query('perPage') perPage?: string) {
+    return this.listes.findAll(cliniqueId, 'QUARTIER', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('quartiers')
+  creerQuartier(@Body() b: { cliniqueId: number; libelle: string }) {
+    return this.listes.creer(Number(b.cliniqueId), 'QUARTIER', b.libelle);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Patch('quartiers/:id')
+  modifierQuartier(@Param('id', ParseIntPipe) id: number, @Body() b: { libelle: string }) {
+    return this.listes.modifier(id, 'QUARTIER', b.libelle ?? '');
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Delete('quartiers/:id')
+  basculerQuartier(@Param('id', ParseIntPipe) id: number) {
+    return this.listes.desactiver(id, 'QUARTIER');
+  }
 }

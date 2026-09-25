@@ -65,4 +65,31 @@ export declare class ParametresListesController {
         libelle: string;
     }): Promise<any>;
     basculerFournisseur(id: number): Promise<any>;
+    professions(cliniqueId: number, tous?: string, page?: string, perPage?: string): Promise<any>;
+    creerProfession(b: {
+        cliniqueId: number;
+        libelle: string;
+    }): Promise<any>;
+    modifierProfession(id: number, b: {
+        libelle: string;
+    }): Promise<any>;
+    basculerProfession(id: number): Promise<any>;
+    motifs(cliniqueId: number, tous?: string, page?: string, perPage?: string): Promise<any>;
+    creerMotif(b: {
+        cliniqueId: number;
+        libelle: string;
+    }): Promise<any>;
+    modifierMotif(id: number, b: {
+        libelle: string;
+    }): Promise<any>;
+    basculerMotif(id: number): Promise<any>;
+    quartiers(cliniqueId: number, tous?: string, page?: string, perPage?: string): Promise<any>;
+    creerQuartier(b: {
+        cliniqueId: number;
+        libelle: string;
+    }): Promise<any>;
+    modifierQuartier(id: number, b: {
+        libelle: string;
+    }): Promise<any>;
+    basculerQuartier(id: number): Promise<any>;
 }
