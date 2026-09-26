@@ -30,14 +30,30 @@ let AccueilService = AccueilService_1 = class AccueilService {
     async rechercherPatients(search, cliniqueId) {
         if (!search || search.trim().length < 2)
             return [];
+        const criteres = [
+            { nom: { contains: search } },
+            { prenom: { contains: search } },
+            { numeroDossier: { contains: search } },
+            { code: { contains: search.replace(/[\s-]/g, '') } },
+            { code: { contains: search } },
+            { telephone: { contains: search } },
+            { numeroCni: { contains: search } },
+            { numeroCmu: { contains: search } },
+            { passages: { some: { numeroOrdre: { contains: search } } } },
+        ];
+        const iso = search.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        const fr = search.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (iso || fr) {
+            const d = iso
+                ? new Date(`${iso[1]}-${iso[2]}-${iso[3]}T00:00:00`)
+                : new Date(`${fr[3]}-${fr[2]}-${fr[1]}T00:00:00`);
+            if (!isNaN(d.getTime())) {
+                criteres.push({ dateNaissance: d });
+            }
+        }
         const where = {
             ...(cliniqueId ? { cliniqueId } : {}),
-            OR: [
-                { nom: { contains: search } },
-                { prenom: { contains: search } },
-                { numeroDossier: { contains: search } },
-                { passages: { some: { numeroOrdre: { contains: search } } } },
-            ],
+            OR: criteres,
         };
         return this.prisma.patient.findMany({
             where,
@@ -190,6 +206,22 @@ let AccueilService = AccueilService_1 = class AccueilService {
             patient = existant;
         }
         else if (dto.nouveauPatient) {
+            const cni = dto.nouveauPatient.numeroCni?.trim();
+            const cmu = dto.nouveauPatient.numeroCmu?.trim();
+            if (cni || cmu) {
+                const doublon = await this.prisma.patient.findFirst({
+                    where: {
+                        cliniqueId: dto.cliniqueId,
+                        OR: [
+                            ...(cni ? [{ numeroCni: cni }] : []),
+                            ...(cmu ? [{ numeroCmu: cmu }] : []),
+                        ],
+                    },
+                });
+                if (doublon) {
+                    throw new common_1.BadRequestException(`Ce patient existe déjà : ${doublon.nom} ${doublon.prenom} (code ${doublon.code}). Utilisez la recherche « Patient existant » pour créer son passage.`);
+                }
+            }
             const codePatient = await this.genererCodeUnique();
             patient = await this.prisma.patient.create({
                 data: {
@@ -201,6 +233,11 @@ let AccueilService = AccueilService_1 = class AccueilService {
                     age: dto.nouveauPatient.age != null
                         ? String(dto.nouveauPatient.age)
                         : undefined,
+                    dateNaissance: dto.nouveauPatient.dateNaissance
+                        ? new Date(dto.nouveauPatient.dateNaissance)
+                        : undefined,
+                    numeroCni: dto.nouveauPatient.numeroCni,
+                    numeroCmu: dto.nouveauPatient.numeroCmu,
                     sexe: dto.nouveauPatient.sexe,
                     ville: dto.nouveauPatient.ville,
                     quartier: dto.nouveauPatient.quartier,
@@ -306,6 +343,11 @@ let AccueilService = AccueilService_1 = class AccueilService {
                     nom: dto.patient.nom,
                     prenom: dto.patient.prenom,
                     age: dto.patient.age != null ? String(dto.patient.age) : undefined,
+                    dateNaissance: dto.patient.dateNaissance
+                        ? new Date(dto.patient.dateNaissance)
+                        : undefined,
+                    numeroCni: dto.patient.numeroCni,
+                    numeroCmu: dto.patient.numeroCmu,
                     sexe: dto.patient.sexe,
                     ville: dto.patient.ville,
                     quartier: dto.patient.quartier,

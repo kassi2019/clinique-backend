@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsDateString,
   IsIn,
   IsInt,
   IsNotEmpty,
@@ -21,6 +22,18 @@ export class UpdatePatientDto {
   /** Âge : accepte chaîne ou nombre (le frontend envoie un nombre). */
   @IsOptional()
   age?: string | number;
+
+  @IsOptional()
+  @IsDateString()
+  dateNaissance?: string;
+
+  @IsOptional()
+  @IsString()
+  numeroCni?: string;
+
+  @IsOptional()
+  @IsString()
+  numeroCmu?: string;
 
   @IsOptional()
   @IsIn(['M', 'F'])
@@ -135,6 +148,18 @@ export class NouveauPatientDto {
   /** Âge : accepte chaîne ou nombre (le frontend envoie un nombre). */
   @IsOptional()
   age?: string | number;
+
+  @IsOptional()
+  @IsDateString()
+  dateNaissance?: string;
+
+  @IsOptional()
+  @IsString()
+  numeroCni?: string;
+
+  @IsOptional()
+  @IsString()
+  numeroCmu?: string;
 
   @IsOptional()
   @IsIn(['M', 'F'])

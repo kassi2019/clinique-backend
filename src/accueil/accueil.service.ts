@@ -34,15 +34,34 @@ export class AccueilService {
   /** Recherche un patient par nom, prénom, n° de dossier ou n° d'ordre. */
   async rechercherPatients(search: string, cliniqueId?: number) {
     if (!search || search.trim().length < 2) return [];
+    const criteres: Prisma.PatientWhereInput[] = [
+      { nom: { contains: search } },
+      { prenom: { contains: search } },
+      { numeroDossier: { contains: search } },
+      // Code patient PERMANENT (ex. P-9N7Z5A) : on tolère la saisie sans tirets
+      { code: { contains: search.replace(/[\s-]/g, '') } },
+      { code: { contains: search } },
+      // Téléphone, N° CNI et N° CMU : retrouvés même si le code est oublié
+      { telephone: { contains: search } },
+      { numeroCni: { contains: search } },
+      { numeroCmu: { contains: search } },
+      // N° d'ordre d'un passage (ex. MED-004092026)
+      { passages: { some: { numeroOrdre: { contains: search } } } },
+    ];
+    // Date de naissance : formats AAAA-MM-JJ ou JJ/MM/AAAA
+    const iso = search.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const fr = search.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (iso || fr) {
+      const d = iso
+        ? new Date(`${iso[1]}-${iso[2]}-${iso[3]}T00:00:00`)
+        : new Date(`${fr![3]}-${fr![2]}-${fr![1]}T00:00:00`);
+      if (!isNaN(d.getTime())) {
+        criteres.push({ dateNaissance: d });
+      }
+    }
     const where: Prisma.PatientWhereInput = {
       ...(cliniqueId ? { cliniqueId } : {}),
-      OR: [
-        { nom: { contains: search } },
-        { prenom: { contains: search } },
-        { numeroDossier: { contains: search } },
-        // N° d'ordre d'un passage (ex. MED-004092026)
-        { passages: { some: { numeroOrdre: { contains: search } } } },
-      ],
+      OR: criteres,
     };
     return this.prisma.patient.findMany({
       where,
@@ -229,6 +248,27 @@ export class AccueilService {
       if (!existant) throw new BadRequestException('Patient introuvable.');
       patient = existant;
     } else if (dto.nouveauPatient) {
+      // Garde anti-doublon : le N° CNI et le N° CMU sont uniques —
+      // si un patient existe déjà avec l'un de ces numéros, on refuse la
+      // création et on indique le dossier existant.
+      const cni = dto.nouveauPatient.numeroCni?.trim();
+      const cmu = dto.nouveauPatient.numeroCmu?.trim();
+      if (cni || cmu) {
+        const doublon = await this.prisma.patient.findFirst({
+          where: {
+            cliniqueId: dto.cliniqueId,
+            OR: [
+              ...(cni ? [{ numeroCni: cni }] : []),
+              ...(cmu ? [{ numeroCmu: cmu }] : []),
+            ],
+          },
+        });
+        if (doublon) {
+          throw new BadRequestException(
+            `Ce patient existe déjà : ${doublon.nom} ${doublon.prenom} (code ${doublon.code}). Utilisez la recherche « Patient existant » pour créer son passage.`,
+          );
+        }
+      }
       // Code unique PERMANENT généré à la première inscription du patient
       const codePatient = await this.genererCodeUnique();
       patient = await this.prisma.patient.create({
@@ -243,6 +283,11 @@ export class AccueilService {
             dto.nouveauPatient.age != null
               ? String(dto.nouveauPatient.age)
               : undefined,
+          dateNaissance: dto.nouveauPatient.dateNaissance
+            ? new Date(dto.nouveauPatient.dateNaissance)
+            : undefined,
+          numeroCni: dto.nouveauPatient.numeroCni,
+          numeroCmu: dto.nouveauPatient.numeroCmu,
           sexe: dto.nouveauPatient.sexe,
           ville: dto.nouveauPatient.ville,
           quartier: dto.nouveauPatient.quartier,
@@ -389,6 +434,11 @@ export class AccueilService {
           prenom: dto.patient.prenom,
           // l'âge arrive en nombre depuis le frontend : stocké en chaîne
           age: dto.patient.age != null ? String(dto.patient.age) : undefined,
+          dateNaissance: dto.patient.dateNaissance
+            ? new Date(dto.patient.dateNaissance)
+            : undefined,
+          numeroCni: dto.patient.numeroCni,
+          numeroCmu: dto.patient.numeroCmu,
           sexe: dto.patient.sexe,
           ville: dto.patient.ville,
           quartier: dto.patient.quartier,

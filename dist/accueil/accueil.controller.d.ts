@@ -28,6 +28,9 @@ export declare class AccueilController {
         sexe: string | null;
         numeroDossier: string;
         age: string | null;
+        dateNaissance: Date | null;
+        numeroCni: string | null;
+        numeroCmu: string | null;
         ville: string | null;
         scolarisation: string | null;
         statutConjugal: string | null;
@@ -60,6 +63,9 @@ export declare class AccueilController {
                 sexe: string | null;
                 numeroDossier: string;
                 age: string | null;
+                dateNaissance: Date | null;
+                numeroCni: string | null;
+                numeroCmu: string | null;
                 ville: string | null;
                 scolarisation: string | null;
                 statutConjugal: string | null;
@@ -125,6 +131,9 @@ export declare class AccueilController {
             sexe: string | null;
             numeroDossier: string;
             age: string | null;
+            dateNaissance: Date | null;
+            numeroCni: string | null;
+            numeroCmu: string | null;
             ville: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
@@ -185,6 +194,9 @@ export declare class AccueilController {
             sexe: string | null;
             numeroDossier: string;
             age: string | null;
+            dateNaissance: Date | null;
+            numeroCni: string | null;
+            numeroCmu: string | null;
             ville: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
@@ -246,6 +258,9 @@ export declare class AccueilController {
             sexe: string | null;
             numeroDossier: string;
             age: string | null;
+            dateNaissance: Date | null;
+            numeroCni: string | null;
+            numeroCmu: string | null;
             ville: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
@@ -305,6 +320,9 @@ export declare class AccueilController {
             sexe: string | null;
             numeroDossier: string;
             age: string | null;
+            dateNaissance: Date | null;
+            numeroCni: string | null;
+            numeroCmu: string | null;
             ville: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;

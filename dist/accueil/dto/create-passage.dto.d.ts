@@ -2,6 +2,9 @@ export declare class UpdatePatientDto {
     nom?: string;
     prenom?: string;
     age?: string | number;
+    dateNaissance?: string;
+    numeroCni?: string;
+    numeroCmu?: string;
     sexe?: string;
     ville?: string;
     quartier?: string;
@@ -33,6 +36,9 @@ export declare class NouveauPatientDto {
     nom: string;
     prenom: string;
     age?: string | number;
+    dateNaissance?: string;
+    numeroCni?: string;
+    numeroCmu?: string;
     sexe?: string;
     ville?: string;
     quartier?: string;

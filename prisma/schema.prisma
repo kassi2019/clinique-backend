@@ -80,6 +80,9 @@ model Patient {
   nom           String
   prenom        String
   age           String?
+  dateNaissance DateTime? @db.Date // date de naissance (calculée depuis l'âge et inversement)
+  numeroCni     String?  // numéro de la carte nationale d'identité
+  numeroCmu     String?  // numéro CMU (couverture maladie universelle)
   sexe          String? // M / F
   ville         String?
   quartier      String?
