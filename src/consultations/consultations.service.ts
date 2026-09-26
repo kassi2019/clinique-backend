@@ -542,6 +542,67 @@ export class ConsultationsService {
     });
   }
 
+  /** Enregistre un certificat d'arrêt (numéro CERT-0001… séquentiel annuel). */
+  async enregistrerCertificat(
+    consultationId: number,
+    dto: {
+      civilite: string;
+      nomPatient: string;
+      dateNaissance?: string;
+      profession?: string;
+      dureeJours: number;
+      debut: string;
+      fin: string;
+      medecin: string;
+      lieu?: string;
+    },
+    medecinId: number,
+  ) {
+    const consultation = await this.prisma.consultation.findUnique({
+      where: { id: consultationId },
+    });
+    if (!consultation) throw new NotFoundException('Consultation introuvable.');
+    const passage = await this.prisma.passage.findUnique({
+      where: { id: consultation.passageId },
+    });
+    if (!passage) throw new NotFoundException('Passage introuvable.');
+
+    // Numéro séquentiel annuel : CERT-0001, CERT-0002…
+    const annee = new Date().getFullYear();
+    const totalAnnee = await this.prisma.certificatArret.count({
+      where: { cliniqueId: passage.cliniqueId, createdAt: { gte: new Date(annee, 0, 1) } },
+    });
+    const numero = `CERT-${String(totalAnnee + 1).padStart(4, '0')}`;
+
+    return this.prisma.certificatArret.create({
+      data: {
+        cliniqueId: passage.cliniqueId,
+        consultationId,
+        passageId: consultation.passageId,
+        patientId: consultation.patientId,
+        numero,
+        civilite: dto.civilite,
+        nomPatient: dto.nomPatient,
+        dateNaissance: dto.dateNaissance,
+        profession: dto.profession,
+        dureeJours: dto.dureeJours,
+        debut: new Date(dto.debut),
+        fin: new Date(dto.fin),
+        medecin: dto.medecin,
+        lieu: dto.lieu,
+        medecinId,
+      },
+    });
+  }
+
+  /** Liste des certificats d'arrêt d'une consultation. */
+  async certificatsArret(consultationId: number) {
+    return this.prisma.certificatArret.findMany({
+      where: { consultationId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   // ─────────── Affectation automatique (file d'attente médecins) ───────────
 
   /** Change la disponibilité du médecin connecté ; DISPONIBLE → redistribution des non affectés. */

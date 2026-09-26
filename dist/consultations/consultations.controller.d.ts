@@ -546,6 +546,54 @@ export declare class ConsultationsController {
         moDebut: Date | null;
         moFin: Date | null;
     }>;
+    enregistrerCertificat(id: number, dto: {
+        civilite: string;
+        nomPatient: string;
+        dateNaissance?: string;
+        profession?: string;
+        dureeJours: number;
+        debut: string;
+        fin: string;
+        medecin: string;
+        lieu?: string;
+    }, req: any): Promise<{
+        profession: string | null;
+        id: number;
+        cliniqueId: number;
+        createdAt: Date;
+        passageId: number;
+        patientId: number;
+        dateNaissance: string | null;
+        medecinId: number | null;
+        medecin: string;
+        consultationId: number;
+        debut: Date;
+        fin: Date;
+        numero: string;
+        civilite: string;
+        nomPatient: string;
+        dureeJours: number;
+        lieu: string | null;
+    }>;
+    certificatsArret(id: number): Promise<{
+        profession: string | null;
+        id: number;
+        cliniqueId: number;
+        createdAt: Date;
+        passageId: number;
+        patientId: number;
+        dateNaissance: string | null;
+        medecinId: number | null;
+        medecin: string;
+        consultationId: number;
+        debut: Date;
+        fin: Date;
+        numero: string;
+        civilite: string;
+        nomPatient: string;
+        dureeJours: number;
+        lieu: string | null;
+    }[]>;
     valider(id: number): Promise<{
         medicaments: {
             posologie: string | null;

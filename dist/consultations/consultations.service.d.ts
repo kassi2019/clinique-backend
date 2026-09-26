@@ -553,6 +553,54 @@ export declare class ConsultationsService {
         moDebut: Date | null;
         moFin: Date | null;
     }>;
+    enregistrerCertificat(consultationId: number, dto: {
+        civilite: string;
+        nomPatient: string;
+        dateNaissance?: string;
+        profession?: string;
+        dureeJours: number;
+        debut: string;
+        fin: string;
+        medecin: string;
+        lieu?: string;
+    }, medecinId: number): Promise<{
+        profession: string | null;
+        id: number;
+        cliniqueId: number;
+        createdAt: Date;
+        passageId: number;
+        patientId: number;
+        dateNaissance: string | null;
+        medecinId: number | null;
+        medecin: string;
+        consultationId: number;
+        debut: Date;
+        fin: Date;
+        numero: string;
+        civilite: string;
+        nomPatient: string;
+        dureeJours: number;
+        lieu: string | null;
+    }>;
+    certificatsArret(consultationId: number): Promise<{
+        profession: string | null;
+        id: number;
+        cliniqueId: number;
+        createdAt: Date;
+        passageId: number;
+        patientId: number;
+        dateNaissance: string | null;
+        medecinId: number | null;
+        medecin: string;
+        consultationId: number;
+        debut: Date;
+        fin: Date;
+        numero: string;
+        civilite: string;
+        nomPatient: string;
+        dureeJours: number;
+        lieu: string | null;
+    }[]>;
     changerDisponibilite(utilisateurId: number, disponibilite: 'DISPONIBLE' | 'INDISPONIBLE'): Promise<{
         disponibilite: string;
     }>;

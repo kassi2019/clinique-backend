@@ -52,8 +52,7 @@ export class ConsultationsController {
   }
 
   /** Ajoute une prescription de médicament. */
-  @Post(':id/medicaments')
-  ajouterMedicament(
+  @Post(':id/medicaments')  ajouterMedicament(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: PrescriptionDto,
   ) {
@@ -92,6 +91,32 @@ export class ConsultationsController {
   @Post(':id/ordonnance-sauvegarder')
   sauvegarderOrdonnance(@Param('id', ParseIntPipe) id: number) {
     return this.consultationsService.sauvegarderOrdonnance(id);
+  }
+
+  /** Enregistre un certificat d'arrêt de travail (numéro séquentiel annuel). */
+  @Post(':id/certificat-arret')
+  enregistrerCertificat(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: {
+      civilite: string;
+      nomPatient: string;
+      dateNaissance?: string;
+      profession?: string;
+      dureeJours: number;
+      debut: string;
+      fin: string;
+      medecin: string;
+      lieu?: string;
+    },
+    @Req() req,
+  ) {
+    return this.consultationsService.enregistrerCertificat(id, dto, req.user.id);
+  }
+
+  /** Liste des certificats d'arrêt établis pour une consultation. */
+  @Get(':id/certificats-arret')
+  certificatsArret(@Param('id', ParseIntPipe) id: number) {
+    return this.consultationsService.certificatsArret(id);
   }
 
   /** Valide la consultation. */

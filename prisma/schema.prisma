@@ -67,6 +67,7 @@ model Clinique {
   quartiers Quartier[]
   cpons ConsultationPostnatale[]
   consultationsPf ConsultationPf[]
+  certificatsArret CertificatArret[]
 
   @@map("cliniques")
 }
@@ -112,6 +113,7 @@ model Patient {
   soins        Soin[]
   cpons        ConsultationPostnatale[]
   consultationsPf ConsultationPf[]
+  certificatsArret CertificatArret[]
 
   @@unique([cliniqueId, numeroDossier])
   @@map("patients")
@@ -157,6 +159,7 @@ model Passage {
   soins Soin[]
   cpons ConsultationPostnatale[]
   consultationsPf ConsultationPf[]
+  certificatsArret CertificatArret[]
 
   @@unique([cliniqueId, numeroOrdre])
   @@map("passages")
@@ -414,6 +417,7 @@ model Consultation {
   lit         Lit?          @relation(fields: [litId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   medicaments Prescription[]
   dispensations Dispensation[]
+  certificatsArret CertificatArret[]
 
   @@map("consultations")
 }
@@ -848,6 +852,7 @@ model Utilisateur {
   realisationsSoins RealisationSoin[] @relation("RealisationsSoins")
   cpons ConsultationPostnatale[] @relation("Cpons")
   consultationsPf ConsultationPf[] @relation("Cpf")
+  certificatsArret CertificatArret[] @relation("CertificatsArret")
   mouvementsConsommables MouvementConsommable[]
   prelevements  ExamenLabo[] @relation("Prelevements")
   validations   ExamenLabo[] @relation("Validations")
@@ -1395,4 +1400,35 @@ model ConsultationPf {
   agent    Utilisateur? @relation("Cpf", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("consultations_pf")
+}
+
+// ─── Certificat d'arrêt de travail (consultation) ──────────────────────────
+// Chaque impression enregistre le certificat (numéro séquentiel annuel),
+// horodaté et rattaché au médecin : on peut le réimprimer plus tard.
+model CertificatArret {
+  id             Int      @id @default(autoincrement())
+  cliniqueId     Int
+  consultationId Int
+  passageId      Int
+  patientId      Int
+  numero         String   @unique // CERT-0001… (séquentiel annuel)
+  civilite       String   // Mme / Mlle / M.
+  nomPatient     String
+  dateNaissance  String?
+  profession     String?
+  dureeJours     Int
+  debut          DateTime @db.Date
+  fin            DateTime @db.Date
+  medecin        String
+  lieu           String?
+  medecinId      Int?     // utilisateur ayant établi le certificat
+  createdAt      DateTime @default(now())
+
+  clinique     Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  passage      Passage      @relation(fields: [passageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  patient      Patient      @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  medecinUser  Utilisateur? @relation("CertificatsArret", fields: [medecinId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("certificats_arret")
 }

@@ -50,6 +50,12 @@ let ConsultationsController = class ConsultationsController {
     sauvegarderOrdonnance(id) {
         return this.consultationsService.sauvegarderOrdonnance(id);
     }
+    enregistrerCertificat(id, dto, req) {
+        return this.consultationsService.enregistrerCertificat(id, dto, req.user.id);
+    }
+    certificatsArret(id) {
+        return this.consultationsService.certificatsArret(id);
+    }
     valider(id) {
         return this.consultationsService.valider(id);
     }
@@ -139,6 +145,22 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "sauvegarderOrdonnance", null);
+__decorate([
+    (0, common_1.Post)(':id/certificat-arret'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object, Object]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "enregistrerCertificat", null);
+__decorate([
+    (0, common_1.Get)(':id/certificats-arret'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "certificatsArret", null);
 __decorate([
     (0, common_1.Post)(':id/valider'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),

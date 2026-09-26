@@ -447,6 +447,48 @@ let ConsultationsService = class ConsultationsService {
             include: includeConsultation,
         });
     }
+    async enregistrerCertificat(consultationId, dto, medecinId) {
+        const consultation = await this.prisma.consultation.findUnique({
+            where: { id: consultationId },
+        });
+        if (!consultation)
+            throw new common_1.NotFoundException('Consultation introuvable.');
+        const passage = await this.prisma.passage.findUnique({
+            where: { id: consultation.passageId },
+        });
+        if (!passage)
+            throw new common_1.NotFoundException('Passage introuvable.');
+        const annee = new Date().getFullYear();
+        const totalAnnee = await this.prisma.certificatArret.count({
+            where: { cliniqueId: passage.cliniqueId, createdAt: { gte: new Date(annee, 0, 1) } },
+        });
+        const numero = `CERT-${String(totalAnnee + 1).padStart(4, '0')}`;
+        return this.prisma.certificatArret.create({
+            data: {
+                cliniqueId: passage.cliniqueId,
+                consultationId,
+                passageId: consultation.passageId,
+                patientId: consultation.patientId,
+                numero,
+                civilite: dto.civilite,
+                nomPatient: dto.nomPatient,
+                dateNaissance: dto.dateNaissance,
+                profession: dto.profession,
+                dureeJours: dto.dureeJours,
+                debut: new Date(dto.debut),
+                fin: new Date(dto.fin),
+                medecin: dto.medecin,
+                lieu: dto.lieu,
+                medecinId,
+            },
+        });
+    }
+    async certificatsArret(consultationId) {
+        return this.prisma.certificatArret.findMany({
+            where: { consultationId },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
     async changerDisponibilite(utilisateurId, disponibilite) {
         const utilisateur = await this.prisma.utilisateur.update({
             where: { id: utilisateurId },

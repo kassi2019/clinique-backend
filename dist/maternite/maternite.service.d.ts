@@ -162,6 +162,7 @@ export declare class MaterniteService {
                 modeEntree: string | null;
                 antecedentsMedicaux: string | null;
                 antecedentsChirurgicaux: string | null;
+                lieu: string | null;
                 enfantsVivants: number | null;
                 enfantsDecedes: number | null;
                 cesariennes: number | null;
@@ -177,7 +178,6 @@ export declare class MaterniteService {
                 issueMere: string | null;
                 issueEnfant: string | null;
                 complications: string | null;
-                lieu: string | null;
                 mortNeType: string | null;
                 declarationNaissanceRenseignee: boolean | null;
                 declarationNaissanceComplete: boolean | null;
@@ -331,6 +331,7 @@ export declare class MaterniteService {
             modeEntree: string | null;
             antecedentsMedicaux: string | null;
             antecedentsChirurgicaux: string | null;
+            lieu: string | null;
             enfantsVivants: number | null;
             enfantsDecedes: number | null;
             cesariennes: number | null;
@@ -346,7 +347,6 @@ export declare class MaterniteService {
             issueMere: string | null;
             issueEnfant: string | null;
             complications: string | null;
-            lieu: string | null;
             mortNeType: string | null;
             declarationNaissanceRenseignee: boolean | null;
             declarationNaissanceComplete: boolean | null;
@@ -550,6 +550,7 @@ export declare class MaterniteService {
         modeEntree: string | null;
         antecedentsMedicaux: string | null;
         antecedentsChirurgicaux: string | null;
+        lieu: string | null;
         enfantsVivants: number | null;
         enfantsDecedes: number | null;
         cesariennes: number | null;
@@ -565,7 +566,6 @@ export declare class MaterniteService {
         issueMere: string | null;
         issueEnfant: string | null;
         complications: string | null;
-        lieu: string | null;
         mortNeType: string | null;
         declarationNaissanceRenseignee: boolean | null;
         declarationNaissanceComplete: boolean | null;
@@ -613,6 +613,7 @@ export declare class MaterniteService {
         modeEntree: string | null;
         antecedentsMedicaux: string | null;
         antecedentsChirurgicaux: string | null;
+        lieu: string | null;
         enfantsVivants: number | null;
         enfantsDecedes: number | null;
         cesariennes: number | null;
@@ -628,7 +629,6 @@ export declare class MaterniteService {
         issueMere: string | null;
         issueEnfant: string | null;
         complications: string | null;
-        lieu: string | null;
         mortNeType: string | null;
         declarationNaissanceRenseignee: boolean | null;
         declarationNaissanceComplete: boolean | null;
@@ -740,6 +740,7 @@ export declare class MaterniteService {
             modeEntree: string | null;
             antecedentsMedicaux: string | null;
             antecedentsChirurgicaux: string | null;
+            lieu: string | null;
             enfantsVivants: number | null;
             enfantsDecedes: number | null;
             cesariennes: number | null;
@@ -755,7 +756,6 @@ export declare class MaterniteService {
             issueMere: string | null;
             issueEnfant: string | null;
             complications: string | null;
-            lieu: string | null;
             mortNeType: string | null;
             declarationNaissanceRenseignee: boolean | null;
             declarationNaissanceComplete: boolean | null;
@@ -1094,6 +1094,7 @@ export declare class MaterniteService {
                 modeEntree: string | null;
                 antecedentsMedicaux: string | null;
                 antecedentsChirurgicaux: string | null;
+                lieu: string | null;
                 enfantsVivants: number | null;
                 enfantsDecedes: number | null;
                 cesariennes: number | null;
@@ -1109,7 +1110,6 @@ export declare class MaterniteService {
                 issueMere: string | null;
                 issueEnfant: string | null;
                 complications: string | null;
-                lieu: string | null;
                 mortNeType: string | null;
                 declarationNaissanceRenseignee: boolean | null;
                 declarationNaissanceComplete: boolean | null;
@@ -1376,6 +1376,7 @@ export declare class MaterniteService {
             modeEntree: string | null;
             antecedentsMedicaux: string | null;
             antecedentsChirurgicaux: string | null;
+            lieu: string | null;
             enfantsVivants: number | null;
             enfantsDecedes: number | null;
             cesariennes: number | null;
@@ -1391,7 +1392,6 @@ export declare class MaterniteService {
             issueMere: string | null;
             issueEnfant: string | null;
             complications: string | null;
-            lieu: string | null;
             mortNeType: string | null;
             declarationNaissanceRenseignee: boolean | null;
             declarationNaissanceComplete: boolean | null;
