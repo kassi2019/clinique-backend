@@ -388,17 +388,21 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             orderBy: { nom: 'asc' },
         });
         const dans90Jours = new Date(Date.now() + 90 * 24 * 3600 * 1000);
-        return medicaments.map((m) => ({
-            ...m,
-            prixVente: m.prixVente ? N(m.prixVente) : null,
-            lots: m.lots.map((l) => ({
-                ...l,
-                datePeremption: l.datePeremption,
-                perime: new Date(l.datePeremption).getTime() < Date.now(),
-                peremptionProche: new Date(l.datePeremption).getTime() < dans90Jours.getTime(),
-            })),
-            alerteStock: m.seuilAlerte > 0 && m.stock <= m.seuilAlerte,
-        }));
+        return medicaments.map((m) => {
+            const statut = this.statutStock(m.stock, m.seuilAlerte);
+            return {
+                ...m,
+                prixVente: m.prixVente ? N(m.prixVente) : null,
+                lots: m.lots.map((l) => ({
+                    ...l,
+                    datePeremption: l.datePeremption,
+                    perime: new Date(l.datePeremption).getTime() < Date.now(),
+                    peremptionProche: new Date(l.datePeremption).getTime() < dans90Jours.getTime(),
+                })),
+                alerteStock: statut.code === 'SOUS_STOCK' || statut.code === 'RUPTURE',
+                statutStock: statut,
+            };
+        });
     }
     async entrerStock(dto, utilisateurId) {
         const medicament = await this.prisma.medicament.findUnique({
@@ -459,18 +463,30 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         });
     }
     async recalculerSeuil(medicamentId) {
-        const depuis = new Date(Date.now() - 60 * 24 * 3600 * 1000);
+        const depuis = new Date(Date.now() - 30 * 24 * 3600 * 1000);
         const agg = await this.prisma.mouvementStock.aggregate({
             where: { medicamentId, type: 'SORTIE', createdAt: { gte: depuis } },
             _sum: { quantite: true },
         });
         const consommation = Math.abs(agg._sum.quantite ?? 0);
-        const seuil = Math.round(consommation / 120);
+        const qs = Math.round(consommation / 30);
         await this.prisma.medicament.update({
             where: { id: medicamentId },
-            data: { seuilAlerte: seuil },
+            data: { seuilAlerte: qs },
         });
-        return { consommation60j: consommation, seuil };
+        return { consommation30j: consommation, qs };
+    }
+    statutStock(stockDisponible, qs) {
+        if (stockDisponible <= 0)
+            return { code: 'RUPTURE', libelle: 'Rupture', couleur: '#dc2626' };
+        if (qs === 0)
+            return { code: 'SANS_CONSOMMATION', libelle: 'Sans consommation', couleur: '#111827' };
+        const ratio = stockDisponible / qs;
+        if (ratio > 20)
+            return { code: 'SURSTOCK', libelle: 'Surstock', couleur: '#2563eb' };
+        if (ratio > 5)
+            return { code: 'BIEN_STOCKE', libelle: 'Bien stocké', couleur: '#16a34a' };
+        return { code: 'SOUS_STOCK', libelle: 'Sous stock', couleur: '#eab308' };
     }
     async recalculerTousSeuils(cliniqueId) {
         const medicaments = await this.prisma.medicament.findMany({

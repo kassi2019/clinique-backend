@@ -322,6 +322,11 @@ export declare class PharmacieService {
             prixAchat: import("@prisma/client/runtime/library").Decimal | null;
         }[];
         alerteStock: boolean;
+        statutStock: {
+            code: string;
+            libelle: string;
+            couleur: string;
+        };
         consommable: boolean;
         id: number;
         cliniqueId: number;
@@ -374,9 +379,14 @@ export declare class PharmacieService {
         prixVente: import("@prisma/client/runtime/library").Decimal | null;
     }>;
     recalculerSeuil(medicamentId: number): Promise<{
-        consommation60j: number;
-        seuil: number;
+        consommation30j: number;
+        qs: number;
     }>;
+    statutStock(stockDisponible: number, qs: number): {
+        code: string;
+        libelle: string;
+        couleur: string;
+    };
     recalculerTousSeuils(cliniqueId: number): Promise<{
         recalcules: number;
     }>;
@@ -469,6 +479,11 @@ export declare class PharmacieService {
                 prixAchat: import("@prisma/client/runtime/library").Decimal | null;
             }[];
             alerteStock: boolean;
+            statutStock: {
+                code: string;
+                libelle: string;
+                couleur: string;
+            };
             consommable: boolean;
             id: number;
             cliniqueId: number;

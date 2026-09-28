@@ -449,17 +449,22 @@ export class PharmacieService {
       orderBy: { nom: 'asc' },
     });
     const dans90Jours = new Date(Date.now() + 90 * 24 * 3600 * 1000);
-    return medicaments.map((m) => ({
-      ...m,
-      prixVente: m.prixVente ? N(m.prixVente) : null,
-      lots: m.lots.map((l) => ({
-        ...l,
-        datePeremption: l.datePeremption,
-        perime: new Date(l.datePeremption).getTime() < Date.now(),
-        peremptionProche: new Date(l.datePeremption).getTime() < dans90Jours.getTime(),
-      })),
-      alerteStock: m.seuilAlerte > 0 && m.stock <= m.seuilAlerte,
-    }));
+    return medicaments.map((m) => {
+      const statut = this.statutStock(m.stock, m.seuilAlerte);
+      return {
+        ...m,
+        prixVente: m.prixVente ? N(m.prixVente) : null,
+        lots: m.lots.map((l) => ({
+          ...l,
+          datePeremption: l.datePeremption,
+          perime: new Date(l.datePeremption).getTime() < Date.now(),
+          peremptionProche: new Date(l.datePeremption).getTime() < dans90Jours.getTime(),
+        })),
+        alerteStock: statut.code === 'SOUS_STOCK' || statut.code === 'RUPTURE',
+        // État SD/Qs (nouvelle règle) : code, libellé et couleur pour l'affichage
+        statutStock: statut,
+      };
+    });
   }
 
   /** Entrée de stock avec lot + péremption + fournisseur. */
@@ -537,22 +542,41 @@ export class PharmacieService {
   }
 
   /**
-   * Seuil automatique : consommation des 60 derniers jours ÷ 120.
-   * La consommation = quantités SORTIES (dispensations) sur 60 jours.
+   * Seuil dynamique PAR PRODUIT (nouvelle formule) :
+   *   Qs = (somme des consommations des 30 derniers jours) ÷ 30
+   * La consommation = quantités SORTIES (dispensations) sur 30 jours.
+   * Qs est stocké dans `seuilAlerte` ; l'état (couleur) se calcule depuis SD/Qs.
    */
   async recalculerSeuil(medicamentId: number) {
-    const depuis = new Date(Date.now() - 60 * 24 * 3600 * 1000);
+    const depuis = new Date(Date.now() - 30 * 24 * 3600 * 1000);
     const agg = await this.prisma.mouvementStock.aggregate({
       where: { medicamentId, type: 'SORTIE', createdAt: { gte: depuis } },
       _sum: { quantite: true },
     });
     const consommation = Math.abs(agg._sum.quantite ?? 0);
-    const seuil = Math.round(consommation / 120);
+    const qs = Math.round(consommation / 30);
     await this.prisma.medicament.update({
       where: { id: medicamentId },
-      data: { seuilAlerte: seuil },
+      data: { seuilAlerte: qs },
     });
-    return { consommation60j: consommation, seuil };
+    return { consommation30j: consommation, qs };
+  }
+
+  /**
+   * État de stock selon la règle SD/Qs :
+   *   Rupture (rouge)         : SD/Qs = 0          (SD = 0)
+   *   Sans consommation (noir): Qs = 0 et SD > 0
+   *   Surstock (bleu)         : SD/Qs > 20
+   *   Bien stocké (vert)      : 5 < SD/Qs ≤ 20
+   *   Sous stock (jaune)      : 0 < SD/Qs < 5
+   */
+  statutStock(stockDisponible: number, qs: number) {
+    if (stockDisponible <= 0) return { code: 'RUPTURE', libelle: 'Rupture', couleur: '#dc2626' };
+    if (qs === 0) return { code: 'SANS_CONSOMMATION', libelle: 'Sans consommation', couleur: '#111827' };
+    const ratio = stockDisponible / qs;
+    if (ratio > 20) return { code: 'SURSTOCK', libelle: 'Surstock', couleur: '#2563eb' };
+    if (ratio > 5) return { code: 'BIEN_STOCKE', libelle: 'Bien stocké', couleur: '#16a34a' };
+    return { code: 'SOUS_STOCK', libelle: 'Sous stock', couleur: '#eab308' };
   }
 
   /** Recalcule le seuil de tous les médicaments de la clinique. */

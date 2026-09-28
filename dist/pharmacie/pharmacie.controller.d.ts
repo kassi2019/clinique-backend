@@ -323,6 +323,11 @@ export declare class PharmacieController {
             prixAchat: import("@prisma/client/runtime/library").Decimal | null;
         }[];
         alerteStock: boolean;
+        statutStock: {
+            code: string;
+            libelle: string;
+            couleur: string;
+        };
         consommable: boolean;
         id: number;
         cliniqueId: number;
@@ -457,6 +462,11 @@ export declare class PharmacieController {
                 prixAchat: import("@prisma/client/runtime/library").Decimal | null;
             }[];
             alerteStock: boolean;
+            statutStock: {
+                code: string;
+                libelle: string;
+                couleur: string;
+            };
             consommable: boolean;
             id: number;
             cliniqueId: number;
