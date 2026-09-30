@@ -48,7 +48,7 @@ let LaboratoireService = class LaboratoireService {
                 statut: 'ACTIF',
                 prestations: {
                     some: {
-                        statut: 'PAYEE',
+                        statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] },
                         OR: [{ serviceId: labId }, { prestation: { serviceId: labId } }],
                     },
                 },
@@ -58,7 +58,7 @@ let LaboratoireService = class LaboratoireService {
                 service: { select: { nom: true } },
                 prestations: {
                     where: {
-                        statut: 'PAYEE',
+                        statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] },
                         OR: [{ serviceId: labId }, { prestation: { serviceId: labId } }],
                     },
                 },
@@ -92,7 +92,7 @@ let LaboratoireService = class LaboratoireService {
         if (!labId)
             return [];
         const filtreLabPayees = {
-            statut: 'PAYEE',
+            statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] },
             OR: [{ serviceId: labId }, { prestation: { serviceId: labId } }],
         };
         const passages = await this.prisma.passage.findMany({
@@ -199,7 +199,7 @@ let LaboratoireService = class LaboratoireService {
         if (!labId)
             throw new common_1.BadRequestException('Aucun service de laboratoire configuré.');
         const ligne = await this.prisma.passagePrestation.findFirst({
-            where: { id: passagePrestationId, passageId, statut: 'PAYEE' },
+            where: { id: passagePrestationId, passageId, statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] } },
             include: { prestation: true },
         });
         if (!ligne)

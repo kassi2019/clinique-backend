@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { AccueilService } from '../accueil/accueil.service';
 import {
   CreateAccouchementDto,
   CreateCponDto,
@@ -29,7 +30,10 @@ const includeVisite = {
  */
 @Injectable()
 export class MaterniteService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private accueil: AccueilService,
+  ) {}
 
   /** Numéro de grossesse : GRO-0001, GRO-0002… */
   private async prochainNumero(cliniqueId: number): Promise<string> {
@@ -73,6 +77,7 @@ export class MaterniteService {
         vat2: dto.vat2 ? new Date(dto.vat2) : undefined,
         vatRappel: dto.vatRappel ? new Date(dto.vatRappel) : undefined,
         statutVih: dto.statutVih,
+        dateDerniereCpn: dto.dateDerniereCpn ? new Date(dto.dateDerniereCpn) : undefined,
       },
       include: { patient: true },
     });
@@ -102,6 +107,7 @@ export class MaterniteService {
       vat2: dto.vat2 ? new Date(dto.vat2) : undefined,
       vatRappel: dto.vatRappel ? new Date(dto.vatRappel) : undefined,
       statutVih: dto.statutVih,
+      dateDerniereCpn: dto.dateDerniereCpn ? new Date(dto.dateDerniereCpn) : undefined,
     };
     if (dto.ddr) {
       data.ddr = new Date(dto.ddr);
@@ -188,11 +194,19 @@ export class MaterniteService {
   async creerVisite(grossesseId: number, dto: CreateVisiteCpnDto, agentId: number) {
     const g = await this.prisma.grossesse.findUnique({ where: { id: grossesseId } });
     if (!g) throw new NotFoundException('Grossesse introuvable.');
+    // Rang choisi par l'agent (liste CPN1..CPN8) sinon rang suivant
     const nb = await this.prisma.visiteCpn.count({ where: { grossesseId } });
+    const numero = dto.numero ?? nb + 1;
+    const doublon = await this.prisma.visiteCpn.findFirst({
+      where: { grossesseId, numero },
+    });
+    if (doublon) {
+      throw new BadRequestException(`La CPN${numero} existe déjà pour cette grossesse.`);
+    }
     return this.prisma.visiteCpn.create({
       data: {
         grossesseId,
-        numero: nb + 1,
+        numero,
         date: new Date(dto.date),
         ageGestationnelSA: dto.ageGestationnelSA,
         poids: dto.poids,
@@ -229,10 +243,19 @@ export class MaterniteService {
   async modifierVisite(id: number, dto: UpdateVisiteCpnDto) {
     const v = await this.prisma.visiteCpn.findUnique({ where: { id } });
     if (!v) throw new NotFoundException('Visite introuvable.');
+    if (dto.numero != null && dto.numero !== v.numero) {
+      const doublon = await this.prisma.visiteCpn.findFirst({
+        where: { grossesseId: v.grossesseId, numero: dto.numero, NOT: { id } },
+      });
+      if (doublon) {
+        throw new BadRequestException(`La CPN${dto.numero} existe déjà pour cette grossesse.`);
+      }
+    }
     return this.prisma.visiteCpn.update({
       where: { id },
       data: {
         date: dto.date ? new Date(dto.date) : undefined,
+        numero: dto.numero,
         ageGestationnelSA: dto.ageGestationnelSA,
         poids: dto.poids,
         taille: dto.taille,
@@ -436,18 +459,20 @@ export class MaterniteService {
     const passages = await this.prisma.passage.findMany({
       where: {
         cliniqueId,
-        statut: 'ACTIF',
+        statut: { in: ['ACTIF', 'EN_ATTENTE_PAIEMENT'] },
         materniteTraiteLe: null,
         prestations: {
-          some: { statut: 'PAYEE', prestation: { type: 'MATERNITE' } },
+          // Payées (flux normal) OU à payer (accouchement en urgence :
+          // le paiement se fait après l'accouchement, à la caisse)
+          some: { prestation: { type: 'MATERNITE' }, statut: { in: ['PAYEE', 'EN_ATTENTE', 'CREDIT', 'CAS_SOCIAL'] } },
         },
       },
       include: {
         patient: true,
         service: { select: { nom: true } },
         prestations: {
-          where: { statut: 'PAYEE', prestation: { type: 'MATERNITE' } },
-          select: { libelle: true },
+          where: { prestation: { type: 'MATERNITE' }, statut: { in: ['PAYEE', 'EN_ATTENTE', 'CREDIT', 'CAS_SOCIAL'] } },
+          select: { libelle: true, statut: true },
         },
       },
       orderBy: { createdAt: 'asc' },
@@ -459,6 +484,8 @@ export class MaterniteService {
       service: p.service,
       createdAt: p.createdAt,
       actes: p.prestations.map((l) => l.libelle),
+      paye: p.prestations.some((l) => l.statut === 'PAYEE'),
+      credit: p.prestations.some((l) => l.statut === 'CREDIT' || l.statut === 'CAS_SOCIAL'),
     }));
   }
 
@@ -470,8 +497,8 @@ export class MaterniteService {
     const passages = await this.prisma.passage.findMany({
       where: {
         cliniqueId,
-        statut: 'ACTIF',
-        prestations: { some: { statut: 'PAYEE', prestation: { type: 'MATERNITE' } } },
+        statut: { in: ['ACTIF', 'EN_ATTENTE_PAIEMENT'] },
+        prestations: { some: { prestation: { type: 'MATERNITE' }, statut: { in: ['PAYEE', 'EN_ATTENTE'] } } },
         OR: [
           { numeroOrdre: { contains: ref } },
           { patient: { is: { code: refSans } } },
@@ -483,8 +510,8 @@ export class MaterniteService {
         patient: true,
         service: { select: { nom: true } },
         prestations: {
-          where: { statut: 'PAYEE', prestation: { type: 'MATERNITE' } },
-          select: { libelle: true },
+          where: { prestation: { type: 'MATERNITE' }, statut: { in: ['PAYEE', 'EN_ATTENTE', 'CREDIT', 'CAS_SOCIAL'] } },
+          select: { libelle: true, statut: true },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -498,6 +525,8 @@ export class MaterniteService {
       createdAt: p.createdAt,
       actes: p.prestations.map((l) => l.libelle),
       traite: p.materniteTraiteLe !== null,
+      paye: p.prestations.some((l) => l.statut === 'PAYEE'),
+      credit: p.prestations.some((l) => l.statut === 'CREDIT' || l.statut === 'CAS_SOCIAL'),
     }));
   }
 
@@ -531,7 +560,7 @@ export class MaterniteService {
         patient: true,
         service: { select: { nom: true } },
         prestations: {
-          where: { statut: 'PAYEE' },
+          where: { statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] } },
           include: { prestation: true },
         },
         consultations: {
@@ -717,5 +746,113 @@ export class MaterniteService {
         observations: dto.observations,
       },
     });
+  }
+
+  // ─────────────────── Accouchement en urgence ───────────────────
+  // La patiente arrive en travail : impossible de l'enregistrer et de payer
+  // d'abord. Le passage est créé SANS paiement (prestations EN_ATTENTE :
+  // la caisse encaisse APRÈS l'accouchement) et le dossier grossesse est
+  // créé à la volée pour permettre l'enregistrement immédiat.
+
+  /** Service de maternité de la clinique (porteur des prestations MATERNITE). */
+  async urgenceActes(cliniqueId: number) {
+    const service = await this.prisma.service.findFirst({
+      where: { cliniqueId, prestations: { some: { type: 'MATERNITE', actif: true } } },
+      select: { id: true, nom: true },
+    });
+    if (!service) throw new BadRequestException('Aucun service de maternité configuré.');
+    const actes = await this.prisma.prestation.findMany({
+      where: { cliniqueId, serviceId: service.id, type: 'MATERNITE', actif: true },
+      select: { id: true, libelle: true, montant: true },
+      orderBy: { libelle: 'asc' },
+    });
+    return { serviceId: service.id, serviceNom: service.nom, actes };
+  }
+
+  /** Recherche rapide de patientes (toutes, pas seulement les passages payés). */
+  async urgencePatients(recherche: string, cliniqueId: number) {
+    const ref = recherche.trim().toUpperCase();
+    if (!ref) return [];
+    const refSans = ref.replace(/[\s-]/g, '');
+    return this.prisma.patient.findMany({
+      where: {
+        cliniqueId,
+        OR: [
+          { code: { contains: refSans } },
+          { nom: { contains: ref } },
+          { prenom: { contains: ref } },
+        ],
+      },
+      select: { id: true, code: true, nom: true, prenom: true, age: true, sexe: true, telephone: true },
+      orderBy: { nom: 'asc' },
+      take: 15,
+    });
+  }
+
+  /** Dossier grossesse de la patiente : existant sinon créé (accouchement sans CPN). */
+  private async obtenirOuCreerDossier(patientId: number, cliniqueId: number) {
+    const existant = await this.prisma.grossesse.findFirst({
+      where: { patientId },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (existant) return existant;
+    return this.prisma.grossesse.create({
+      data: {
+        cliniqueId,
+        patientId,
+        numero: await this.prochainNumero(cliniqueId),
+      },
+    });
+  }
+
+  /**
+   * Crée le dossier de grossesse du passage à la demande : une patiente peut
+   * venir uniquement pour l'accouchement, sans avoir fait de CPN au préalable.
+   */
+  async creerDossierPassage(passageId: number) {
+    const passage = await this.prisma.passage.findUnique({ where: { id: passageId } });
+    if (!passage) throw new NotFoundException('Passage introuvable.');
+    return this.obtenirOuCreerDossier(passage.patientId, passage.cliniqueId);
+  }
+
+  /**
+   * Crée le passage en urgence : patient existant ou nouvelle patiente,
+   * prestations MATERNITE EN_ATTENTE (payables après à la caisse),
+   * dossier grossesse créé si absent.
+   */
+  async creerUrgence(dto: {
+    cliniqueId: number;
+    patientId?: number;
+    nouveauPatient?: { nom: string; prenom: string; age?: number | string; sexe?: string; telephone?: string };
+  }) {
+    const { serviceId } = await this.urgenceActes(dto.cliniqueId);
+
+    // Passage via l'accueil : même numérotation, mêmes règles de prestations.
+    // Service sans consultation (maternité) + patiente interne → tous les actes
+    // MATERNITE sont EN_ATTENTE (payables à la caisse après l'accouchement).
+    const passage = await this.accueil.creerPassage({
+      cliniqueId: dto.cliniqueId,
+      serviceId,
+      patientId: dto.patientId,
+      nouveauPatient: dto.nouveauPatient
+        ? {
+            nom: dto.nouveauPatient.nom,
+            prenom: dto.nouveauPatient.prenom,
+            age: dto.nouveauPatient.age,
+            sexe: dto.nouveauPatient.sexe ?? 'F',
+            telephone: dto.nouveauPatient.telephone,
+          }
+        : undefined,
+      typePatient: 'INTERNE',
+      motif: 'Accouchement (urgence)',
+    } as any);
+
+    // Dossier grossesse obligatoire pour l'enregistrement de l'accouchement
+    const dossier = await this.obtenirOuCreerDossier(passage.patientId, dto.cliniqueId);
+
+    return {
+      passage: { id: passage.id, numeroOrdre: passage.numeroOrdre, patientId: passage.patientId },
+      dossier: { id: dossier.id, numero: dossier.numero },
+    };
   }
 }

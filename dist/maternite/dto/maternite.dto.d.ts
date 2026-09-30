@@ -20,6 +20,7 @@ export declare class CreateGrossesseDto {
     vat2?: string;
     vatRappel?: string;
     statutVih?: string;
+    dateDerniereCpn?: string;
 }
 export declare class UpdateGrossesseDto {
     ddr?: string;
@@ -42,9 +43,11 @@ export declare class UpdateGrossesseDto {
     vat2?: string;
     vatRappel?: string;
     statutVih?: string;
+    dateDerniereCpn?: string;
 }
 export declare class CreateVisiteCpnDto {
     date: string;
+    numero?: number;
     ageGestationnelSA?: string;
     poids?: number;
     taille?: string;
@@ -73,6 +76,7 @@ export declare class CreateVisiteCpnDto {
 }
 export declare class UpdateVisiteCpnDto {
     date?: string;
+    numero?: number;
     ageGestationnelSA?: string;
     poids?: number;
     taille?: string;

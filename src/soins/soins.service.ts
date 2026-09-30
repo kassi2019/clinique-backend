@@ -21,7 +21,7 @@ export class SoinsService {
   /** Lignes de prestations SOIN d'un passage (payées uniquement). */
   private lignesSoins(passageId: number) {
     return this.prisma.passagePrestation.findMany({
-      where: { passageId, statut: 'PAYEE', prestation: { type: 'SOIN' } },
+      where: { passageId, statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] }, prestation: { type: 'SOIN' } },
       include: { service: { select: { nom: true } } },
       orderBy: { createdAt: 'asc' },
     });
@@ -34,14 +34,14 @@ export class SoinsService {
         cliniqueId,
         statut: 'ACTIF',
         prestations: {
-          some: { statut: 'PAYEE', prestation: { type: 'SOIN' } },
+          some: { statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] }, prestation: { type: 'SOIN' } },
         },
       },
       include: {
         patient: true,
         service: { select: { nom: true } },
         prestations: {
-          where: { statut: 'PAYEE', prestation: { type: 'SOIN' } },
+          where: { statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] }, prestation: { type: 'SOIN' } },
           include: { soin: { select: { statut: true } } },
         },
       },
@@ -68,7 +68,7 @@ export class SoinsService {
       where: {
         cliniqueId,
         statut: 'ACTIF',
-        prestations: { some: { statut: 'PAYEE', prestation: { type: 'SOIN' } } },
+        prestations: { some: { statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] }, prestation: { type: 'SOIN' } } },
         OR: [
           { numeroOrdre: { contains: ref } },
           { patient: { is: { code: refSans } } },
@@ -80,7 +80,7 @@ export class SoinsService {
         patient: true,
         service: { select: { nom: true } },
         prestations: {
-          where: { statut: 'PAYEE', prestation: { type: 'SOIN' } },
+          where: { statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] }, prestation: { type: 'SOIN' } },
           include: { soin: { select: { statut: true } } },
         },
       },

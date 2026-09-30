@@ -30,10 +30,46 @@ import { MaterniteService } from './maternite.service';
 export class MaterniteController {
   constructor(private materniteService: MaterniteService) {}
 
-  /** File d'attente : patientes avec prestation MATERNITE payée, non traitées. */
+  /** File d'attente : patientes payées OU en urgence (paiement après accouchement). */
   @Get('file')
   fileAttente(@Query('cliniqueId', ParseIntPipe) cliniqueId: number) {
     return this.materniteService.fileAttente(cliniqueId);
+  }
+
+  // ─── Accouchement en urgence (patiente non enregistrée / non payée) ─────────
+
+  /** Actes MATERNITE facturables à la caisse après l'accouchement. */
+  @Get('urgences/actes')
+  urgenceActes(@Query('cliniqueId', ParseIntPipe) cliniqueId: number) {
+    return this.materniteService.urgenceActes(cliniqueId);
+  }
+
+  /** Recherche rapide de patientes (toutes, pour l'accouchement en urgence). */
+  @Get('urgences/patients')
+  urgencePatients(
+    @Query('recherche') recherche?: string,
+    @Query('cliniqueId', ParseIntPipe) cliniqueId?: number,
+  ) {
+    if (!cliniqueId) return [];
+    return this.materniteService.urgencePatients(recherche ?? '', cliniqueId);
+  }
+
+  /** Crée le passage en urgence (sans paiement) + dossier grossesse. */
+  @Post('urgences')
+  creerUrgence(
+    @Body() dto: {
+      cliniqueId: number;
+      patientId?: number;
+      nouveauPatient?: { nom: string; prenom: string; age?: number | string; sexe?: string; telephone?: string };
+    },
+  ) {
+    return this.materniteService.creerUrgence(dto);
+  }
+
+  /** Crée le dossier grossesse du passage à la demande (accouchement sans CPN). */
+  @Post('passages/:id/dossier')
+  creerDossierPassage(@Param('id', ParseIntPipe) id: number) {
+    return this.materniteService.creerDossierPassage(id);
   }
 
   /** Recherche d'une patiente (code patient, N° d'ordre, nom ou prénom). */

@@ -77,6 +77,7 @@ export declare class CaisseService {
             prestationId: number | null;
             source: string;
             paiementId: number | null;
+            creditId: number | null;
         }[];
         paiements: {
             montantTotal: number;
@@ -94,6 +95,7 @@ export declare class CaisseService {
                 prestationId: number | null;
                 source: string;
                 paiementId: number | null;
+                creditId: number | null;
             }[];
             caissier: {
                 personnel: {
@@ -186,6 +188,7 @@ export declare class CaisseService {
         prestationId: number | null;
         source: string;
         paiementId: number | null;
+        creditId: number | null;
     }>;
     retirerPrestation(ligneId: number): Promise<{
         id: number;
@@ -199,6 +202,120 @@ export declare class CaisseService {
         montant: import("@prisma/client/runtime/library").Decimal;
         source: string;
         paiementId: number | null;
+        creditId: number | null;
+    }>;
+    detailPaiement(paiementId: number): Promise<{
+        montantTotal: number;
+        partAssurance: number;
+        partPatient: number;
+        lignes: {
+            montant: number;
+            id: number;
+            libelle: string;
+            createdAt: Date;
+            updatedAt: Date;
+            passageId: number;
+            statut: string;
+            serviceId: number | null;
+            prestationId: number | null;
+            source: string;
+            paiementId: number | null;
+            creditId: number | null;
+        }[];
+        clinique: {
+            id: number;
+            nom: string;
+            createdAt: Date;
+            updatedAt: Date;
+            statut: string;
+            code: string;
+            adresse: string | null;
+            telephone: string | null;
+            immatriculation: string | null;
+            districtNom: string | null;
+            districtCode: string | null;
+            regionNom: string | null;
+            regionCode: string | null;
+            populationDesservie: number | null;
+            responsableRapportNom: string | null;
+            responsableRapportFonction: string | null;
+            responsableRapportContact: string | null;
+        };
+        passage: {
+            patient: {
+                nationalite: string | null;
+                profession: string | null;
+                quartier: string | null;
+                id: number;
+                cliniqueId: number;
+                nom: string;
+                createdAt: Date;
+                updatedAt: Date;
+                code: string;
+                telephone: string | null;
+                prenom: string;
+                sexe: string | null;
+                numeroDossier: string;
+                age: string | null;
+                dateNaissance: Date | null;
+                numeroCni: string | null;
+                numeroCmu: string | null;
+                ville: string | null;
+                scolarisation: string | null;
+                statutConjugal: string | null;
+                typePopulation: string | null;
+                populationsRisque: string | null;
+                protectionSociale: string | null;
+                residenceHabituelle: string | null;
+                residenceActuelle: string | null;
+            };
+        } & {
+            id: number;
+            cliniqueId: number;
+            createdAt: Date;
+            updatedAt: Date;
+            statut: string;
+            serviceId: number;
+            patientId: number;
+            numeroOrdre: string;
+            typePatient: string;
+            motif: string | null;
+            referent: string | null;
+            prestationDemandee: string | null;
+            taille: string | null;
+            temperature: import("@prisma/client/runtime/library").Decimal | null;
+            pouls: number | null;
+            tensionGauche: string | null;
+            tensionDroite: string | null;
+            poids: import("@prisma/client/runtime/library").Decimal | null;
+            perimetreBrachial: string | null;
+            perimetreCranien: string | null;
+            materniteTraiteLe: Date | null;
+            expireLe: Date;
+        };
+        caissier: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+        id: number;
+        cliniqueId: number;
+        createdAt: Date;
+        updatedAt: Date;
+        passageId: number;
+        caissierId: number;
+        numeroRecu: string;
+        modePaiement: string;
+        statut: string;
+        motifAnnulation: string | null;
+        dateAnnulation: Date | null;
+        assuranceId: number | null;
+        formuleLibelle: string | null;
+        tauxParametre: number | null;
+        tauxApplique: number | null;
+        motifTaux: string | null;
     }>;
     encaisser(passageId: number, dto: EncaisserDto, utilisateurId: number): Promise<{
         paiement: {
@@ -297,5 +414,75 @@ export declare class CaisseService {
         partAssurance: import("@prisma/client/runtime/library").Decimal | null;
         partPatient: import("@prisma/client/runtime/library").Decimal | null;
         motifTaux: string | null;
+    }>;
+    creerCredit(passageId: number, dto: {
+        lignesIds: number[];
+        type: 'CREDIT' | 'CAS_SOCIAL';
+        motif?: string;
+    }, utilisateurId: number): Promise<{
+        type: string;
+        id: number;
+        cliniqueId: number;
+        createdAt: Date;
+        updatedAt: Date;
+        passageId: number;
+        montantTotal: import("@prisma/client/runtime/library").Decimal;
+        statut: string;
+        motif: string | null;
+        numero: string;
+        agentId: number | null;
+    }>;
+    credits(cliniqueId: number, page?: number, perPage?: number): Promise<{
+        data: ({
+            passage: {
+                patient: {
+                    nom: string;
+                    code: string;
+                    prenom: string;
+                };
+                numeroOrdre: string;
+            };
+            lignes: {
+                libelle: string;
+                statut: string;
+                montant: import("@prisma/client/runtime/library").Decimal;
+            }[];
+            agent: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+        } & {
+            type: string;
+            id: number;
+            cliniqueId: number;
+            createdAt: Date;
+            updatedAt: Date;
+            passageId: number;
+            montantTotal: import("@prisma/client/runtime/library").Decimal;
+            statut: string;
+            motif: string | null;
+            numero: string;
+            agentId: number | null;
+        })[];
+        total: number;
+        page: number;
+        perPage: number;
+        totalPages: number;
+    }>;
+    annulerCredit(id: number): Promise<{
+        type: string;
+        id: number;
+        cliniqueId: number;
+        createdAt: Date;
+        updatedAt: Date;
+        passageId: number;
+        montantTotal: import("@prisma/client/runtime/library").Decimal;
+        statut: string;
+        motif: string | null;
+        numero: string;
+        agentId: number | null;
     }>;
 }

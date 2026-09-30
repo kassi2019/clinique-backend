@@ -145,6 +145,7 @@ export declare class SoinsController {
             montant: import("@prisma/client/runtime/library").Decimal;
             source: string;
             paiementId: number | null;
+            creditId: number | null;
         })[];
         soins: ({
             realisations: ({
@@ -159,8 +160,8 @@ export declare class SoinsController {
                 id: number;
                 createdAt: Date;
                 date: Date;
-                observations: string | null;
                 agentId: number | null;
+                observations: string | null;
                 soinId: number;
             })[];
         } & {
@@ -192,8 +193,8 @@ export declare class SoinsController {
             id: number;
             createdAt: Date;
             date: Date;
-            observations: string | null;
             agentId: number | null;
+            observations: string | null;
             soinId: number;
         })[];
     } & {
@@ -240,8 +241,8 @@ export declare class SoinsController {
             id: number;
             createdAt: Date;
             date: Date;
-            observations: string | null;
             agentId: number | null;
+            observations: string | null;
             soinId: number;
         })[];
         total: number;

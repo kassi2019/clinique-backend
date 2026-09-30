@@ -116,6 +116,7 @@ export declare class ImpressionService {
         createdAt: Date;
         statut: string;
         contenu: string;
+        format: string;
         erreur: string | null;
         printedAt: Date | null;
     }>;

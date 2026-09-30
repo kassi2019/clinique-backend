@@ -52,8 +52,8 @@ export declare class HospitalisationService {
         lits: {
             id: number;
             actif: boolean;
-            chambreId: number;
             numero: string;
+            chambreId: number;
         }[];
     } & {
         id: number;
@@ -77,8 +77,8 @@ export declare class HospitalisationService {
         lits: {
             id: number;
             actif: boolean;
-            chambreId: number;
             numero: string;
+            chambreId: number;
         }[];
     } & {
         id: number;
@@ -102,8 +102,8 @@ export declare class HospitalisationService {
         lits: {
             id: number;
             actif: boolean;
-            chambreId: number;
             numero: string;
+            chambreId: number;
         }[];
     } & {
         id: number;
@@ -128,14 +128,14 @@ export declare class HospitalisationService {
     creerLit(chambreId: number, dto: CreerLitDto): Promise<{
         id: number;
         actif: boolean;
-        chambreId: number;
         numero: string;
+        chambreId: number;
     }>;
     desactiverLit(id: number): Promise<{
         id: number;
         actif: boolean;
-        chambreId: number;
         numero: string;
+        chambreId: number;
     }>;
     listerLits(cliniqueId: number): Promise<{
         id: number;
@@ -445,8 +445,8 @@ export declare class HospitalisationService {
                 } & {
                     id: number;
                     actif: boolean;
-                    chambreId: number;
                     numero: string;
+                    chambreId: number;
                 };
                 sortiePar: {
                     personnel: {
@@ -501,8 +501,8 @@ export declare class HospitalisationService {
             } & {
                 id: number;
                 actif: boolean;
-                chambreId: number;
                 numero: string;
+                chambreId: number;
             };
         } & {
             id: number;
@@ -561,8 +561,8 @@ export declare class HospitalisationService {
         } & {
             id: number;
             actif: boolean;
-            chambreId: number;
             numero: string;
+            chambreId: number;
         };
         sortiePar: {
             personnel: {
@@ -633,8 +633,8 @@ export declare class HospitalisationService {
         } & {
             id: number;
             actif: boolean;
-            chambreId: number;
             numero: string;
+            chambreId: number;
         };
         sortiePar: {
             personnel: {
@@ -705,8 +705,8 @@ export declare class HospitalisationService {
         } & {
             id: number;
             actif: boolean;
-            chambreId: number;
             numero: string;
+            chambreId: number;
         };
         sortiePar: {
             personnel: {
@@ -786,8 +786,8 @@ export declare class HospitalisationService {
             } & {
                 id: number;
                 actif: boolean;
-                chambreId: number;
                 numero: string;
+                chambreId: number;
             };
             sortiePar: {
                 personnel: {

@@ -7,6 +7,8 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Max,
+  Min,
 } from 'class-validator';
 
 export class CreateGrossesseDto {
@@ -91,6 +93,10 @@ export class CreateGrossesseDto {
   @IsOptional()
   @IsIn(['POSITIF', 'NEGATIF', 'INCONNU'])
   statutVih?: string;
+
+  @IsOptional()
+  @IsDateString()
+  dateDerniereCpn?: string;
 }
 
 export class UpdateGrossesseDto {
@@ -174,11 +180,22 @@ export class UpdateGrossesseDto {
   @IsOptional()
   @IsIn(['POSITIF', 'NEGATIF', 'INCONNU'])
   statutVih?: string;
+
+  @IsOptional()
+  @IsDateString()
+  dateDerniereCpn?: string;
 }
 
 export class CreateVisiteCpnDto {
   @IsDateString()
   date: string;
+
+  /** Rang de la visite (1 à 8) : choisi par l'agent, défaut = suivant. */
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(8)
+  numero?: number;
 
   @IsOptional()
   @IsString()
@@ -286,6 +303,13 @@ export class UpdateVisiteCpnDto {
   @IsOptional()
   @IsDateString()
   date?: string;
+
+  /** Rang de la visite (1 à 8) : permet de corriger le rang saisi. */
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(8)
+  numero?: number;
 
   @IsOptional()
   @IsString()

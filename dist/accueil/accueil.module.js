@@ -19,6 +19,7 @@ exports.AccueilModule = AccueilModule = __decorate([
         imports: [impression_module_1.ImpressionModule],
         controllers: [accueil_controller_1.AccueilController],
         providers: [accueil_service_1.AccueilService],
+        exports: [accueil_service_1.AccueilService],
     })
 ], AccueilModule);
 //# sourceMappingURL=accueil.module.js.map

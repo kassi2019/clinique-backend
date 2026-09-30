@@ -46,6 +46,7 @@ export declare class ImpressionController {
         createdAt: Date;
         statut: string;
         contenu: string;
+        format: string;
         erreur: string | null;
         printedAt: Date | null;
     }>;

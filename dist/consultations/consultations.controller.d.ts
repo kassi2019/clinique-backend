@@ -110,6 +110,7 @@ export declare class ConsultationsController {
                 prestationId: number | null;
                 source: string;
                 paiementId: number | null;
+                creditId: number | null;
             }[];
             consultation: {
                 medicaments: {
@@ -237,14 +238,28 @@ export declare class ConsultationsController {
                 passageId: number;
                 statut: string;
                 patientId: number;
+                indication: string | null;
                 passagePrestationId: number;
                 conclusion: string | null;
                 valideParId: number | null;
                 valideLe: Date | null;
-                indication: string | null;
                 technique: string | null;
                 resultat: string | null;
             })[];
+            fiches: {
+                id: number;
+                createdAt: Date;
+                medecin: {
+                    personnel: {
+                        nom: string;
+                        prenom: string;
+                    };
+                };
+                libelleType: string;
+                texte: string;
+                indication: string;
+                prescripteur: string;
+            }[];
         };
         historique: ({
             passage: {
@@ -442,6 +457,7 @@ export declare class ConsultationsController {
         montant: import("@prisma/client/runtime/library").Decimal;
         source: string;
         paiementId: number | null;
+        creditId: number | null;
     }[]>;
     ajouterExamen(id: number, dto: PrescrireExamenDto): Promise<{
         id: number;
@@ -455,6 +471,7 @@ export declare class ConsultationsController {
         montant: import("@prisma/client/runtime/library").Decimal;
         source: string;
         paiementId: number | null;
+        creditId: number | null;
     }>;
     retirerExamen(id: number): Promise<{
         id: number;
@@ -468,6 +485,7 @@ export declare class ConsultationsController {
         montant: import("@prisma/client/runtime/library").Decimal;
         source: string;
         paiementId: number | null;
+        creditId: number | null;
     }>;
     sauvegarderOrdonnance(id: number): Promise<{
         medicaments: {

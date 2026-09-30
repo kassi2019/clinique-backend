@@ -37,6 +37,9 @@ let CaisseController = class CaisseController {
     detail(id) {
         return this.caisseService.detailPassage(id);
     }
+    detailPaiement(id) {
+        return this.caisseService.detailPaiement(id);
+    }
     ajouterPrestation(id, dto) {
         return this.caisseService.ajouterPrestation(id, dto.prestationId);
     }
@@ -48,6 +51,15 @@ let CaisseController = class CaisseController {
     }
     annuler(id, dto) {
         return this.caisseService.annulerPaiement(id, dto.motif);
+    }
+    creerCredit(id, dto, req) {
+        return this.caisseService.creerCredit(id, dto, req.user.id);
+    }
+    credits(cliniqueId, page, perPage) {
+        return this.caisseService.credits(cliniqueId, page ? Number(page) : 1, perPage ? Number(perPage) : 20);
+    }
+    annulerCredit(id) {
+        return this.caisseService.annulerCredit(id);
     }
 };
 exports.CaisseController = CaisseController;
@@ -86,6 +98,13 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CaisseController.prototype, "detail", null);
 __decorate([
+    (0, common_1.Get)('paiements/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], CaisseController.prototype, "detailPaiement", null);
+__decorate([
     (0, common_1.Post)('passages/:id/prestations'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -119,6 +138,31 @@ __decorate([
     __metadata("design:paramtypes", [Number, encaisser_dto_1.AnnulerPaiementDto]),
     __metadata("design:returntype", void 0)
 ], CaisseController.prototype, "annuler", null);
+__decorate([
+    (0, common_1.Post)('passages/:id/credits'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object, Object]),
+    __metadata("design:returntype", void 0)
+], CaisseController.prototype, "creerCredit", null);
+__decorate([
+    (0, common_1.Get)('credits'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('perPage')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String]),
+    __metadata("design:returntype", void 0)
+], CaisseController.prototype, "credits", null);
+__decorate([
+    (0, common_1.Post)('credits/:id/annuler'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], CaisseController.prototype, "annulerCredit", null);
 exports.CaisseController = CaisseController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('caisse'),

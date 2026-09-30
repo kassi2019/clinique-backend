@@ -7,5 +7,6 @@ import { AccueilService } from './accueil.service';
   imports: [ImpressionModule],
   controllers: [AccueilController],
   providers: [AccueilService],
+  exports: [AccueilService], // réutilisé par la maternité (accouchement en urgence)
 })
 export class AccueilModule {}

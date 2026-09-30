@@ -170,6 +170,31 @@ let CaisseService = CaisseService_1 = class CaisseService {
         }
         return this.prisma.passagePrestation.delete({ where: { id: ligneId } });
     }
+    async detailPaiement(paiementId) {
+        const paiement = await this.prisma.paiement.findUnique({
+            where: { id: paiementId },
+            include: {
+                passage: { include: { patient: true } },
+                clinique: true,
+                caissier: {
+                    select: {
+                        matricule: true,
+                        personnel: { select: { nom: true, prenom: true } },
+                    },
+                },
+                lignes: true,
+            },
+        });
+        if (!paiement)
+            throw new common_1.NotFoundException('Paiement introuvable.');
+        return {
+            ...paiement,
+            montantTotal: formatMontant(paiement.montantTotal),
+            partAssurance: paiement.partAssurance != null ? formatMontant(paiement.partAssurance) : null,
+            partPatient: paiement.partPatient != null ? formatMontant(paiement.partPatient) : null,
+            lignes: paiement.lignes.map((l) => ({ ...l, montant: formatMontant(l.montant) })),
+        };
+    }
     async encaisser(passageId, dto, utilisateurId) {
         const passage = await this.prisma.passage.findUnique({
             where: { id: passageId },
@@ -184,7 +209,7 @@ let CaisseService = CaisseService_1 = class CaisseService {
             where: {
                 id: { in: dto.lignesIds },
                 passageId,
-                statut: 'EN_ATTENTE',
+                statut: { in: ['EN_ATTENTE', 'CREDIT'] },
             },
         });
         if (lignes.length !== dto.lignesIds.length) {
@@ -214,8 +239,20 @@ let CaisseService = CaisseService_1 = class CaisseService {
         });
         await this.prisma.passagePrestation.updateMany({
             where: { id: { in: lignes.map((l) => l.id) } },
-            data: { statut: 'PAYEE', paiementId: paiement.id },
+            data: { statut: 'PAYEE', paiementId: paiement.id, creditId: null },
         });
+        const ticketsIds = [...new Set(lignes.map((l) => l.creditId).filter(Boolean))];
+        for (const tid of ticketsIds) {
+            const reste = await this.prisma.passagePrestation.count({
+                where: { creditId: tid, statut: 'CREDIT' },
+            });
+            if (reste === 0) {
+                await this.prisma.creditTicket.update({
+                    where: { id: tid },
+                    data: { statut: 'SOLDEE' },
+                });
+            }
+        }
         let partAssurance = 0;
         let partPatient = montantTotal;
         let assuranceInfo = null;
@@ -416,6 +453,84 @@ let CaisseService = CaisseService_1 = class CaisseService {
             await this.affectationService.annulerAffectation(paiement.passageId);
         }
         return this.prisma.paiement.findUnique({ where: { id: paiementId } });
+    }
+    async creerCredit(passageId, dto, utilisateurId) {
+        const passage = await this.prisma.passage.findUnique({ where: { id: passageId } });
+        if (!passage)
+            throw new common_1.NotFoundException('Passage introuvable.');
+        const lignes = await this.prisma.passagePrestation.findMany({
+            where: { id: { in: dto.lignesIds }, passageId, statut: 'EN_ATTENTE' },
+        });
+        if (lignes.length !== dto.lignesIds.length) {
+            throw new common_1.BadRequestException('Certaines prestations ne sont pas en attente de paiement.');
+        }
+        const montantTotal = lignes.reduce((s, l) => s + Number(l.montant), 0);
+        const prefixe = dto.type === 'CAS_SOCIAL' ? 'SOC' : 'CRE';
+        const nb = await this.prisma.creditTicket.count({
+            where: { cliniqueId: passage.cliniqueId, numero: { contains: `${prefixe}-` } },
+        });
+        const numero = `${prefixe}-${String(nb + 1).padStart(4, '0')}`;
+        const ticket = await this.prisma.creditTicket.create({
+            data: {
+                cliniqueId: passage.cliniqueId,
+                passageId,
+                numero,
+                type: dto.type,
+                motif: dto.motif,
+                montantTotal,
+                agentId: utilisateurId,
+            },
+        });
+        await this.prisma.passagePrestation.updateMany({
+            where: { id: { in: lignes.map((l) => l.id) } },
+            data: { statut: dto.type, creditId: ticket.id },
+        });
+        await this.prisma.passage.update({
+            where: { id: passage.id },
+            data: { statut: 'ACTIF' },
+        });
+        return ticket;
+    }
+    async credits(cliniqueId, page = 1, perPage = 20) {
+        const where = { cliniqueId, statut: 'EN_COURS' };
+        const [data, total] = await Promise.all([
+            this.prisma.creditTicket.findMany({
+                where,
+                include: {
+                    passage: {
+                        select: {
+                            numeroOrdre: true,
+                            patient: { select: { nom: true, prenom: true, code: true } },
+                        },
+                    },
+                    agent: {
+                        select: { matricule: true, personnel: { select: { nom: true, prenom: true } } },
+                    },
+                    lignes: { select: { libelle: true, montant: true, statut: true } },
+                },
+                orderBy: { createdAt: 'desc' },
+                skip: (page - 1) * perPage,
+                take: perPage,
+            }),
+            this.prisma.creditTicket.count({ where }),
+        ]);
+        return { data, total, page, perPage, totalPages: Math.ceil(total / perPage) };
+    }
+    async annulerCredit(id) {
+        const ticket = await this.prisma.creditTicket.findUnique({ where: { id } });
+        if (!ticket)
+            throw new common_1.NotFoundException('Ticket introuvable.');
+        if (ticket.statut !== 'EN_COURS') {
+            throw new common_1.BadRequestException('Seul un ticket en cours peut être annulé.');
+        }
+        await this.prisma.passagePrestation.updateMany({
+            where: { creditId: id, statut: { in: ['CREDIT', 'CAS_SOCIAL'] } },
+            data: { statut: 'EN_ATTENTE', creditId: null },
+        });
+        return this.prisma.creditTicket.update({
+            where: { id },
+            data: { statut: 'ANNULEE' },
+        });
     }
 };
 exports.CaisseService = CaisseService;

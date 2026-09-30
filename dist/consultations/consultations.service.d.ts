@@ -113,6 +113,7 @@ export declare class ConsultationsService {
                 prestationId: number | null;
                 source: string;
                 paiementId: number | null;
+                creditId: number | null;
             }[];
             consultation: {
                 medicaments: {
@@ -240,14 +241,28 @@ export declare class ConsultationsService {
                 passageId: number;
                 statut: string;
                 patientId: number;
+                indication: string | null;
                 passagePrestationId: number;
                 conclusion: string | null;
                 valideParId: number | null;
                 valideLe: Date | null;
-                indication: string | null;
                 technique: string | null;
                 resultat: string | null;
             })[];
+            fiches: {
+                id: number;
+                createdAt: Date;
+                medecin: {
+                    personnel: {
+                        nom: string;
+                        prenom: string;
+                    };
+                };
+                libelleType: string;
+                texte: string;
+                indication: string;
+                prescripteur: string;
+            }[];
         };
         historique: ({
             passage: {
@@ -446,6 +461,7 @@ export declare class ConsultationsService {
         montant: Prisma.Decimal;
         source: string;
         paiementId: number | null;
+        creditId: number | null;
     }[]>;
     ajouterExamen(consultationId: number, dto: {
         prestationId?: number;
@@ -462,6 +478,7 @@ export declare class ConsultationsService {
         montant: Prisma.Decimal;
         source: string;
         paiementId: number | null;
+        creditId: number | null;
     }>;
     retirerExamen(ligneId: number): Promise<{
         id: number;
@@ -475,6 +492,7 @@ export declare class ConsultationsService {
         montant: Prisma.Decimal;
         source: string;
         paiementId: number | null;
+        creditId: number | null;
     }>;
     sauvegarderOrdonnance(consultationId: number): Promise<{
         medicaments: {

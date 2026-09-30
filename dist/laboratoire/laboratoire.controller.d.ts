@@ -55,6 +55,7 @@ export declare class LaboratoireController {
             prestationId: number | null;
             source: string;
             paiementId: number | null;
+            creditId: number | null;
         }[];
         nbExamensLab: number;
         nbExamensTraites: number;
@@ -164,6 +165,7 @@ export declare class LaboratoireController {
                 prestationId: number | null;
                 source: string;
                 paiementId: number | null;
+                creditId: number | null;
             }[];
             examens: ({
                 lignes: {

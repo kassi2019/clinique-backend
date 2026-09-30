@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MaterniteService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const accueil_service_1 = require("../accueil/accueil.service");
 const includeVisite = {
     agent: {
         select: {
@@ -21,8 +22,9 @@ const includeVisite = {
     },
 };
 let MaterniteService = class MaterniteService {
-    constructor(prisma) {
+    constructor(prisma, accueil) {
         this.prisma = prisma;
+        this.accueil = accueil;
     }
     async prochainNumero(cliniqueId) {
         const nb = await this.prisma.grossesse.count({ where: { cliniqueId } });
@@ -62,6 +64,7 @@ let MaterniteService = class MaterniteService {
                 vat2: dto.vat2 ? new Date(dto.vat2) : undefined,
                 vatRappel: dto.vatRappel ? new Date(dto.vatRappel) : undefined,
                 statutVih: dto.statutVih,
+                dateDerniereCpn: dto.dateDerniereCpn ? new Date(dto.dateDerniereCpn) : undefined,
             },
             include: { patient: true },
         });
@@ -90,6 +93,7 @@ let MaterniteService = class MaterniteService {
             vat2: dto.vat2 ? new Date(dto.vat2) : undefined,
             vatRappel: dto.vatRappel ? new Date(dto.vatRappel) : undefined,
             statutVih: dto.statutVih,
+            dateDerniereCpn: dto.dateDerniereCpn ? new Date(dto.dateDerniereCpn) : undefined,
         };
         if (dto.ddr) {
             data.ddr = new Date(dto.ddr);
@@ -170,10 +174,17 @@ let MaterniteService = class MaterniteService {
         if (!g)
             throw new common_1.NotFoundException('Grossesse introuvable.');
         const nb = await this.prisma.visiteCpn.count({ where: { grossesseId } });
+        const numero = dto.numero ?? nb + 1;
+        const doublon = await this.prisma.visiteCpn.findFirst({
+            where: { grossesseId, numero },
+        });
+        if (doublon) {
+            throw new common_1.BadRequestException(`La CPN${numero} existe déjà pour cette grossesse.`);
+        }
         return this.prisma.visiteCpn.create({
             data: {
                 grossesseId,
-                numero: nb + 1,
+                numero,
                 date: new Date(dto.date),
                 ageGestationnelSA: dto.ageGestationnelSA,
                 poids: dto.poids,
@@ -209,10 +220,19 @@ let MaterniteService = class MaterniteService {
         const v = await this.prisma.visiteCpn.findUnique({ where: { id } });
         if (!v)
             throw new common_1.NotFoundException('Visite introuvable.');
+        if (dto.numero != null && dto.numero !== v.numero) {
+            const doublon = await this.prisma.visiteCpn.findFirst({
+                where: { grossesseId: v.grossesseId, numero: dto.numero, NOT: { id } },
+            });
+            if (doublon) {
+                throw new common_1.BadRequestException(`La CPN${dto.numero} existe déjà pour cette grossesse.`);
+            }
+        }
         return this.prisma.visiteCpn.update({
             where: { id },
             data: {
                 date: dto.date ? new Date(dto.date) : undefined,
+                numero: dto.numero,
                 ageGestationnelSA: dto.ageGestationnelSA,
                 poids: dto.poids,
                 taille: dto.taille,
@@ -405,18 +425,18 @@ let MaterniteService = class MaterniteService {
         const passages = await this.prisma.passage.findMany({
             where: {
                 cliniqueId,
-                statut: 'ACTIF',
+                statut: { in: ['ACTIF', 'EN_ATTENTE_PAIEMENT'] },
                 materniteTraiteLe: null,
                 prestations: {
-                    some: { statut: 'PAYEE', prestation: { type: 'MATERNITE' } },
+                    some: { prestation: { type: 'MATERNITE' }, statut: { in: ['PAYEE', 'EN_ATTENTE', 'CREDIT', 'CAS_SOCIAL'] } },
                 },
             },
             include: {
                 patient: true,
                 service: { select: { nom: true } },
                 prestations: {
-                    where: { statut: 'PAYEE', prestation: { type: 'MATERNITE' } },
-                    select: { libelle: true },
+                    where: { prestation: { type: 'MATERNITE' }, statut: { in: ['PAYEE', 'EN_ATTENTE', 'CREDIT', 'CAS_SOCIAL'] } },
+                    select: { libelle: true, statut: true },
                 },
             },
             orderBy: { createdAt: 'asc' },
@@ -428,6 +448,8 @@ let MaterniteService = class MaterniteService {
             service: p.service,
             createdAt: p.createdAt,
             actes: p.prestations.map((l) => l.libelle),
+            paye: p.prestations.some((l) => l.statut === 'PAYEE'),
+            credit: p.prestations.some((l) => l.statut === 'CREDIT' || l.statut === 'CAS_SOCIAL'),
         }));
     }
     async rechercher(reference, cliniqueId) {
@@ -438,8 +460,8 @@ let MaterniteService = class MaterniteService {
         const passages = await this.prisma.passage.findMany({
             where: {
                 cliniqueId,
-                statut: 'ACTIF',
-                prestations: { some: { statut: 'PAYEE', prestation: { type: 'MATERNITE' } } },
+                statut: { in: ['ACTIF', 'EN_ATTENTE_PAIEMENT'] },
+                prestations: { some: { prestation: { type: 'MATERNITE' }, statut: { in: ['PAYEE', 'EN_ATTENTE'] } } },
                 OR: [
                     { numeroOrdre: { contains: ref } },
                     { patient: { is: { code: refSans } } },
@@ -451,8 +473,8 @@ let MaterniteService = class MaterniteService {
                 patient: true,
                 service: { select: { nom: true } },
                 prestations: {
-                    where: { statut: 'PAYEE', prestation: { type: 'MATERNITE' } },
-                    select: { libelle: true },
+                    where: { prestation: { type: 'MATERNITE' }, statut: { in: ['PAYEE', 'EN_ATTENTE', 'CREDIT', 'CAS_SOCIAL'] } },
+                    select: { libelle: true, statut: true },
                 },
             },
             orderBy: { createdAt: 'desc' },
@@ -466,6 +488,8 @@ let MaterniteService = class MaterniteService {
             createdAt: p.createdAt,
             actes: p.prestations.map((l) => l.libelle),
             traite: p.materniteTraiteLe !== null,
+            paye: p.prestations.some((l) => l.statut === 'PAYEE'),
+            credit: p.prestations.some((l) => l.statut === 'CREDIT' || l.statut === 'CAS_SOCIAL'),
         }));
     }
     async traites(cliniqueId, jour, page = 1, perPage = 10) {
@@ -495,7 +519,7 @@ let MaterniteService = class MaterniteService {
                 patient: true,
                 service: { select: { nom: true } },
                 prestations: {
-                    where: { statut: 'PAYEE' },
+                    where: { statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] } },
                     include: { prestation: true },
                 },
                 consultations: {
@@ -677,10 +701,89 @@ let MaterniteService = class MaterniteService {
             },
         });
     }
+    async urgenceActes(cliniqueId) {
+        const service = await this.prisma.service.findFirst({
+            where: { cliniqueId, prestations: { some: { type: 'MATERNITE', actif: true } } },
+            select: { id: true, nom: true },
+        });
+        if (!service)
+            throw new common_1.BadRequestException('Aucun service de maternité configuré.');
+        const actes = await this.prisma.prestation.findMany({
+            where: { cliniqueId, serviceId: service.id, type: 'MATERNITE', actif: true },
+            select: { id: true, libelle: true, montant: true },
+            orderBy: { libelle: 'asc' },
+        });
+        return { serviceId: service.id, serviceNom: service.nom, actes };
+    }
+    async urgencePatients(recherche, cliniqueId) {
+        const ref = recherche.trim().toUpperCase();
+        if (!ref)
+            return [];
+        const refSans = ref.replace(/[\s-]/g, '');
+        return this.prisma.patient.findMany({
+            where: {
+                cliniqueId,
+                OR: [
+                    { code: { contains: refSans } },
+                    { nom: { contains: ref } },
+                    { prenom: { contains: ref } },
+                ],
+            },
+            select: { id: true, code: true, nom: true, prenom: true, age: true, sexe: true, telephone: true },
+            orderBy: { nom: 'asc' },
+            take: 15,
+        });
+    }
+    async obtenirOuCreerDossier(patientId, cliniqueId) {
+        const existant = await this.prisma.grossesse.findFirst({
+            where: { patientId },
+            orderBy: { createdAt: 'desc' },
+        });
+        if (existant)
+            return existant;
+        return this.prisma.grossesse.create({
+            data: {
+                cliniqueId,
+                patientId,
+                numero: await this.prochainNumero(cliniqueId),
+            },
+        });
+    }
+    async creerDossierPassage(passageId) {
+        const passage = await this.prisma.passage.findUnique({ where: { id: passageId } });
+        if (!passage)
+            throw new common_1.NotFoundException('Passage introuvable.');
+        return this.obtenirOuCreerDossier(passage.patientId, passage.cliniqueId);
+    }
+    async creerUrgence(dto) {
+        const { serviceId } = await this.urgenceActes(dto.cliniqueId);
+        const passage = await this.accueil.creerPassage({
+            cliniqueId: dto.cliniqueId,
+            serviceId,
+            patientId: dto.patientId,
+            nouveauPatient: dto.nouveauPatient
+                ? {
+                    nom: dto.nouveauPatient.nom,
+                    prenom: dto.nouveauPatient.prenom,
+                    age: dto.nouveauPatient.age,
+                    sexe: dto.nouveauPatient.sexe ?? 'F',
+                    telephone: dto.nouveauPatient.telephone,
+                }
+                : undefined,
+            typePatient: 'INTERNE',
+            motif: 'Accouchement (urgence)',
+        });
+        const dossier = await this.obtenirOuCreerDossier(passage.patientId, dto.cliniqueId);
+        return {
+            passage: { id: passage.id, numeroOrdre: passage.numeroOrdre, patientId: passage.patientId },
+            dossier: { id: dossier.id, numero: dossier.numero },
+        };
+    }
 };
 exports.MaterniteService = MaterniteService;
 exports.MaterniteService = MaterniteService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        accueil_service_1.AccueilService])
 ], MaterniteService);
 //# sourceMappingURL=maternite.service.js.map

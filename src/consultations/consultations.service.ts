@@ -128,6 +128,20 @@ export class ConsultationsService {
             },
           },
         },
+        // Fiches d'échographie du passage : le médecin voit aussi les comptes
+        // rendus détaillés établis par l'imagerie (texte complet + valeurs).
+        fichesExamenImagerie: {
+          select: {
+            id: true,
+            libelleType: true,
+            texte: true,
+            indication: true,
+            prescripteur: true,
+            createdAt: true,
+            medecin: { select: { personnel: { select: { nom: true, prenom: true } } } },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
         consultations: { include: includeConsultation },
       },
     });
@@ -176,6 +190,7 @@ export class ConsultationsService {
         consultation: passage.consultations[0] ?? null,
         examensLabo: passage.examensLabo,
         examensImagerie: passage.examensImagerie,
+        fiches: passage.fichesExamenImagerie,
       },
       historique,
     };

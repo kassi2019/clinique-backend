@@ -24,6 +24,20 @@ let MaterniteController = class MaterniteController {
     fileAttente(cliniqueId) {
         return this.materniteService.fileAttente(cliniqueId);
     }
+    urgenceActes(cliniqueId) {
+        return this.materniteService.urgenceActes(cliniqueId);
+    }
+    urgencePatients(recherche, cliniqueId) {
+        if (!cliniqueId)
+            return [];
+        return this.materniteService.urgencePatients(recherche ?? '', cliniqueId);
+    }
+    creerUrgence(dto) {
+        return this.materniteService.creerUrgence(dto);
+    }
+    creerDossierPassage(id) {
+        return this.materniteService.creerDossierPassage(id);
+    }
     rechercher(code, cliniqueId) {
         if (!cliniqueId)
             return [];
@@ -103,6 +117,35 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], MaterniteController.prototype, "fileAttente", null);
+__decorate([
+    (0, common_1.Get)('urgences/actes'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "urgenceActes", null);
+__decorate([
+    (0, common_1.Get)('urgences/patients'),
+    __param(0, (0, common_1.Query)('recherche')),
+    __param(1, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "urgencePatients", null);
+__decorate([
+    (0, common_1.Post)('urgences'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "creerUrgence", null);
+__decorate([
+    (0, common_1.Post)('passages/:id/dossier'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], MaterniteController.prototype, "creerDossierPassage", null);
 __decorate([
     (0, common_1.Get)('recherche'),
     __param(0, (0, common_1.Query)('code')),

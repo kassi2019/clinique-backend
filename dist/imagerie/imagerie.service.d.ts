@@ -92,6 +92,7 @@ export declare class ImagerieService {
             prestationId: number | null;
             source: string;
             paiementId: number | null;
+            creditId: number | null;
         }[];
         nbExamensIma: number;
         nbExamensTraites: number;
@@ -157,6 +158,7 @@ export declare class ImagerieService {
                 prestationId: number | null;
                 source: string;
                 paiementId: number | null;
+                creditId: number | null;
             }[];
             examens: ({
                 validePar: {
@@ -175,11 +177,11 @@ export declare class ImagerieService {
                 passageId: number;
                 statut: string;
                 patientId: number;
+                indication: string | null;
                 passagePrestationId: number;
                 conclusion: string | null;
                 valideParId: number | null;
                 valideLe: Date | null;
-                indication: string | null;
                 technique: string | null;
                 resultat: string | null;
             })[];
@@ -201,11 +203,11 @@ export declare class ImagerieService {
             passageId: number;
             statut: string;
             patientId: number;
+            indication: string | null;
             passagePrestationId: number;
             conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;
-            indication: string | null;
             technique: string | null;
             resultat: string | null;
         })[];
@@ -227,11 +229,11 @@ export declare class ImagerieService {
         passageId: number;
         statut: string;
         patientId: number;
+        indication: string | null;
         passagePrestationId: number;
         conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
-        indication: string | null;
         technique: string | null;
         resultat: string | null;
     }>;
@@ -252,11 +254,11 @@ export declare class ImagerieService {
         passageId: number;
         statut: string;
         patientId: number;
+        indication: string | null;
         passagePrestationId: number;
         conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
-        indication: string | null;
         technique: string | null;
         resultat: string | null;
     }>;
@@ -294,11 +296,11 @@ export declare class ImagerieService {
             passageId: number;
             statut: string;
             patientId: number;
+            indication: string | null;
             passagePrestationId: number;
             conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;
-            indication: string | null;
             technique: string | null;
             resultat: string | null;
         })[];
@@ -306,5 +308,127 @@ export declare class ImagerieService {
         page: number;
         perPage: number;
         totalPages: number;
+    }>;
+    private parseChamps;
+    private genererTexte;
+    fichesTypes(cliniqueId: number): Promise<{
+        id: number;
+        cliniqueId: number;
+        libelle: string;
+        actif: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        texte: string;
+        titre: string | null;
+        titre2: string | null;
+        champs: string | null;
+    }[]>;
+    creerFicheType(dto: {
+        cliniqueId: number;
+        libelle: string;
+        titre?: string;
+        texte: string;
+        champs?: string;
+    }): Promise<{
+        id: number;
+        cliniqueId: number;
+        libelle: string;
+        actif: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        texte: string;
+        titre: string | null;
+        titre2: string | null;
+        champs: string | null;
+    }>;
+    modifierFicheType(id: number, dto: {
+        libelle?: string;
+        titre?: string;
+        texte?: string;
+        champs?: string;
+        actif?: boolean;
+    }): Promise<{
+        id: number;
+        cliniqueId: number;
+        libelle: string;
+        actif: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        texte: string;
+        titre: string | null;
+        titre2: string | null;
+        champs: string | null;
+    }>;
+    basculerFicheType(id: number): Promise<{
+        id: number;
+        cliniqueId: number;
+        libelle: string;
+        actif: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        texte: string;
+        titre: string | null;
+        titre2: string | null;
+        champs: string | null;
+    }>;
+    fichesPassage(passageId: number): Promise<{
+        id: number;
+        cliniqueId: number;
+        createdAt: Date;
+        updatedAt: Date;
+        passageId: number;
+        patientId: number;
+        medecinId: number | null;
+        typeFicheId: number;
+        libelleType: string;
+        texte: string;
+        valeurs: string | null;
+        indication: string | null;
+        prescripteur: string | null;
+    }[]>;
+    creerFiche(passageId: number, dto: {
+        typeFicheId: number;
+        texte?: string;
+        valeurs?: Record<string, any>;
+        indication?: string;
+        prescripteur?: string;
+    }, medecinId: number): Promise<{
+        id: number;
+        cliniqueId: number;
+        createdAt: Date;
+        updatedAt: Date;
+        passageId: number;
+        patientId: number;
+        medecinId: number | null;
+        typeFicheId: number;
+        libelleType: string;
+        texte: string;
+        valeurs: string | null;
+        indication: string | null;
+        prescripteur: string | null;
+    }>;
+    modifierFiche(id: number, dto: {
+        texte?: string;
+        valeurs?: Record<string, any>;
+        indication?: string;
+        prescripteur?: string;
+    }): Promise<{
+        id: number;
+        cliniqueId: number;
+        createdAt: Date;
+        updatedAt: Date;
+        passageId: number;
+        patientId: number;
+        medecinId: number | null;
+        typeFicheId: number;
+        libelleType: string;
+        texte: string;
+        valeurs: string | null;
+        indication: string | null;
+        prescripteur: string | null;
+    }>;
+    imprimerFiche(ficheId: number): Promise<{
+        ok: boolean;
+        message: string;
     }>;
 }

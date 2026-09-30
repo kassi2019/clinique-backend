@@ -116,6 +116,11 @@ __decorate([
     (0, class_validator_1.IsIn)(['POSITIF', 'NEGATIF', 'INCONNU']),
     __metadata("design:type", String)
 ], CreateGrossesseDto.prototype, "statutVih", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateGrossesseDto.prototype, "dateDerniereCpn", void 0);
 class UpdateGrossesseDto {
 }
 exports.UpdateGrossesseDto = UpdateGrossesseDto;
@@ -219,6 +224,11 @@ __decorate([
     (0, class_validator_1.IsIn)(['POSITIF', 'NEGATIF', 'INCONNU']),
     __metadata("design:type", String)
 ], UpdateGrossesseDto.prototype, "statutVih", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], UpdateGrossesseDto.prototype, "dateDerniereCpn", void 0);
 class CreateVisiteCpnDto {
 }
 exports.CreateVisiteCpnDto = CreateVisiteCpnDto;
@@ -226,6 +236,13 @@ __decorate([
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], CreateVisiteCpnDto.prototype, "date", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(8),
+    __metadata("design:type", Number)
+], CreateVisiteCpnDto.prototype, "numero", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
@@ -359,6 +376,13 @@ __decorate([
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], UpdateVisiteCpnDto.prototype, "date", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(8),
+    __metadata("design:type", Number)
+], UpdateVisiteCpnDto.prototype, "numero", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

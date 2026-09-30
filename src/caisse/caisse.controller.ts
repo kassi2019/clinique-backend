@@ -71,6 +71,12 @@ export class CaisseController {
     return this.caisseService.detailPassage(id);
   }
 
+  /** Détail complet d'un paiement (reçu A4 : clinique, patient, lignes, caissier). */
+  @Get('paiements/:id')
+  detailPaiement(@Param('id', ParseIntPipe) id: number) {
+    return this.caisseService.detailPaiement(id);
+  }
+
   /** Ajout manuel d'une prestation à régler. */
   @Post('passages/:id/prestations')
   ajouterPrestation(
@@ -105,5 +111,37 @@ export class CaisseController {
     @Body() dto: AnnulerPaiementDto,
   ) {
     return this.caisseService.annulerPaiement(id, dto.motif);
+  }
+
+  // ─── Tickets de crédit / cas sociaux ───
+
+  /** Crée un ticket de crédit ou cas social (prise en charge sans paiement). */
+  @Post('passages/:id/credits')
+  creerCredit(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { lignesIds: number[]; type: 'CREDIT' | 'CAS_SOCIAL'; motif?: string },
+    @Req() req,
+  ) {
+    return this.caisseService.creerCredit(id, dto, req.user.id);
+  }
+
+  /** Tickets en cours (impayés) de la clinique. */
+  @Get('credits')
+  credits(
+    @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
+    @Query('page') page?: string,
+    @Query('perPage') perPage?: string,
+  ) {
+    return this.caisseService.credits(
+      cliniqueId,
+      page ? Number(page) : 1,
+      perPage ? Number(perPage) : 20,
+    );
+  }
+
+  /** Annule un ticket : les lignes repassent en attente de paiement. */
+  @Post('credits/:id/annuler')
+  annulerCredit(@Param('id', ParseIntPipe) id: number) {
+    return this.caisseService.annulerCredit(id);
   }
 }

@@ -41,7 +41,7 @@ let ImagerieService = class ImagerieService {
                 statut: 'ACTIF',
                 prestations: {
                     some: {
-                        statut: 'PAYEE',
+                        statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] },
                         OR: [{ serviceId: imaId }, { prestation: { serviceId: imaId } }],
                     },
                 },
@@ -51,7 +51,7 @@ let ImagerieService = class ImagerieService {
                 service: { select: { nom: true } },
                 prestations: {
                     where: {
-                        statut: 'PAYEE',
+                        statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] },
                         OR: [{ serviceId: imaId }, { prestation: { serviceId: imaId } }],
                     },
                 },
@@ -85,7 +85,7 @@ let ImagerieService = class ImagerieService {
         if (!imaId)
             return [];
         const filtreImaPayes = {
-            statut: 'PAYEE',
+            statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] },
             OR: [{ serviceId: imaId }, { prestation: { serviceId: imaId } }],
         };
         const passages = await this.prisma.passage.findMany({
@@ -183,7 +183,7 @@ let ImagerieService = class ImagerieService {
         if (!imaId)
             throw new common_1.BadRequestException('Aucun service d\'imagerie configuré.');
         const ligne = await this.prisma.passagePrestation.findFirst({
-            where: { id: dto.passagePrestationId, passageId, statut: 'PAYEE' },
+            where: { id: dto.passagePrestationId, passageId, statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] } },
             include: { prestation: true },
         });
         if (!ligne)
@@ -272,6 +272,203 @@ let ImagerieService = class ImagerieService {
             this.prisma.examenImagerie.count({ where }),
         ]);
         return { data, total, page, perPage, totalPages: Math.ceil(total / perPage) };
+    }
+    parseChamps(champsJson) {
+        if (!champsJson)
+            return [];
+        try {
+            const v = JSON.parse(champsJson);
+            return Array.isArray(v) ? v : [];
+        }
+        catch {
+            return [];
+        }
+    }
+    genererTexte(texte, champs, valeurs) {
+        return String(texte ?? '').replace(/\{(\w+)\}/g, (tout, code) => {
+            const champ = (champs ?? []).find((c) => c.code === code);
+            const v = valeurs && valeurs[code] != null ? String(valeurs[code]).trim() : '';
+            if (v) {
+                if (champ?.type === 'date' && /^\d{4}-\d{2}-\d{2}$/.test(v)) {
+                    const [a, m, j] = v.split('-');
+                    return `${j}/${m}/${a}`;
+                }
+                return v;
+            }
+            return champ?.defaut ?? '......';
+        });
+    }
+    async fichesTypes(cliniqueId) {
+        return this.prisma.ficheEchographie.findMany({
+            where: { cliniqueId, actif: true },
+            orderBy: { libelle: 'asc' },
+        });
+    }
+    async creerFicheType(dto) {
+        return this.prisma.ficheEchographie.create({
+            data: {
+                cliniqueId: dto.cliniqueId,
+                libelle: dto.libelle,
+                titre: dto.titre,
+                texte: dto.texte,
+                champs: dto.champs,
+            },
+        });
+    }
+    async modifierFicheType(id, dto) {
+        return this.prisma.ficheEchographie.update({
+            where: { id },
+            data: {
+                libelle: dto.libelle,
+                titre: dto.titre,
+                texte: dto.texte,
+                champs: dto.champs,
+                actif: dto.actif,
+            },
+        });
+    }
+    async basculerFicheType(id) {
+        const t = await this.prisma.ficheEchographie.findUnique({ where: { id } });
+        if (!t)
+            throw new common_1.NotFoundException('Type de fiche introuvable.');
+        return this.prisma.ficheEchographie.update({
+            where: { id },
+            data: { actif: !t.actif },
+        });
+    }
+    async fichesPassage(passageId) {
+        return this.prisma.ficheExamenImagerie.findMany({
+            where: { passageId },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+    async creerFiche(passageId, dto, medecinId) {
+        const passage = await this.prisma.passage.findUnique({ where: { id: passageId } });
+        if (!passage)
+            throw new common_1.NotFoundException('Passage introuvable.');
+        const type = await this.prisma.ficheEchographie.findUnique({ where: { id: dto.typeFicheId } });
+        if (!type)
+            throw new common_1.NotFoundException('Type de fiche introuvable.');
+        const champs = this.parseChamps(type.champs);
+        const valeurs = dto.valeurs ?? {};
+        const texte = dto.texte?.trim()
+            ? dto.texte
+            : this.genererTexte(type.texte, champs, valeurs);
+        if (!texte.trim())
+            throw new common_1.BadRequestException('Le texte du compte rendu est vide.');
+        return this.prisma.ficheExamenImagerie.create({
+            data: {
+                cliniqueId: passage.cliniqueId,
+                passageId,
+                patientId: passage.patientId,
+                typeFicheId: type.id,
+                libelleType: type.libelle,
+                texte,
+                valeurs: Object.keys(valeurs).length ? JSON.stringify(valeurs) : null,
+                indication: dto.indication,
+                prescripteur: dto.prescripteur,
+                medecinId,
+            },
+        });
+    }
+    async modifierFiche(id, dto) {
+        const fiche = await this.prisma.ficheExamenImagerie.findUnique({
+            where: { id },
+            include: { typeFiche: { select: { texte: true, champs: true } } },
+        });
+        if (!fiche)
+            throw new common_1.NotFoundException('Fiche introuvable.');
+        let texte = dto.texte ?? undefined;
+        let valeurs = fiche.valeurs;
+        if (dto.valeurs) {
+            valeurs = JSON.stringify(dto.valeurs);
+            if (!texte?.trim()) {
+                texte = this.genererTexte(fiche.typeFiche.texte, this.parseChamps(fiche.typeFiche.champs), dto.valeurs);
+            }
+        }
+        return this.prisma.ficheExamenImagerie.update({
+            where: { id },
+            data: {
+                texte,
+                valeurs,
+                indication: dto.indication,
+                prescripteur: dto.prescripteur,
+            },
+        });
+    }
+    async imprimerFiche(ficheId) {
+        const fiche = await this.prisma.ficheExamenImagerie.findUnique({
+            where: { id: ficheId },
+            include: {
+                patient: true,
+                passage: { select: { numeroOrdre: true } },
+                clinique: { select: { nom: true, adresse: true, telephone: true } },
+                typeFiche: { select: { titre: true, titre2: true, libelle: true } },
+                medecin: { select: { personnel: { select: { nom: true, prenom: true } } } },
+            },
+        });
+        if (!fiche)
+            throw new common_1.NotFoundException('Fiche introuvable.');
+        const nomMedecin = fiche.medecin?.personnel
+            ? `Dr ${fiche.medecin.personnel.nom} ${fiche.medecin.personnel.prenom}`
+            : '';
+        const date = new Date(fiche.createdAt).toLocaleDateString('fr-FR');
+        const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #000; margin: 14mm; }
+  .entete { text-align: center; margin-bottom: 6mm; }
+  .entete .img { font-size: 15px; font-weight: 800; letter-spacing: 1px; }
+  .entete .rep { font-size: 12px; font-weight: 700; margin-top: 2px; }
+  .entete .dev { font-style: italic; font-size: 11px; margin-top: 1px; }
+  .regle { border-bottom: 1.2px solid #000; margin: 4mm 0; }
+  .titre { text-align: center; font-size: 15px; font-weight: 800; text-decoration: underline; letter-spacing: 1px; margin: 4mm 0; }
+  .champs { display: flex; flex-wrap: wrap; gap: 3mm 10mm; margin-bottom: 4mm; }
+  .champ { font-size: 12px; }
+  .champ b { display: inline-block; min-width: 90px; }
+  .corps { white-space: pre-wrap; line-height: 1.55; margin-top: 3mm; }
+  .signature { margin-top: 22mm; display: flex; justify-content: space-between; align-items: flex-end; }
+  .cachet { border: 1px solid #000; border-radius: 6px; width: 52mm; height: 26mm; text-align: center; font-size: 11px; color: #555; font-style: italic; display: flex; align-items: center; justify-content: center; }
+  .medecin { font-weight: 800; text-align: right; }
+</style></head><body>
+  <div class="entete">
+    <div class="img">IMAGERIE MÉDICALE</div>
+    <div class="rep">RÉPUBLIQUE DE CÔTE D'IVOIRE</div>
+    <div class="dev">Union - Discipline - Travail</div>
+  </div>
+  <div class="regle"></div>
+  <div class="titre">${(fiche.typeFiche?.titre || fiche.typeFiche?.libelle || '').toUpperCase()}</div>
+  ${fiche.typeFiche?.titre2 ? `<div class="titre">${fiche.typeFiche.titre2.toUpperCase()}</div>` : ''}
+  <div class="champs">
+    <span class="champ"><b>Date :</b> ${date}</span>
+    <span class="champ"><b>Nom :</b> ${fiche.patient.nom}</span>
+    <span class="champ"><b>Prénom(s) :</b> ${fiche.patient.prenom}</span>
+    <span class="champ"><b>Âge :</b> ${fiche.patient.age ?? ''}</span>
+    <span class="champ"><b>Indication :</b> ${fiche.indication ?? ''}</span>
+    <span class="champ"><b>Prescripteur :</b> ${fiche.prescripteur ?? ''}</span>
+  </div>
+  <div class="regle"></div>
+  <div class="corps">${fiche.texte.replace(/</g, '&lt;')}</div>
+  <div class="signature">
+    <div class="cachet">Signature et cachet</div>
+    <div class="medecin">${nomMedecin}<br>Le Médecin</div>
+  </div>
+</body></html>`;
+        const config = await this.prisma.imprimante.findFirst({
+            where: { cliniqueId: fiche.cliniqueId, poste: 'A4', actif: true },
+        });
+        await this.prisma.impressionFile.create({
+            data: {
+                cliniqueId: fiche.cliniqueId,
+                poste: 'A4',
+                libelle: `Fiche échographie ${fiche.libelleType} — ${fiche.patient.nom} ${fiche.patient.prenom}`,
+                contenu: html,
+                format: 'A4',
+                partage: config?.nom ?? null,
+                nom: config?.nom ?? null,
+                statut: 'EN_ATTENTE',
+            },
+        });
+        return { ok: true, message: 'Fiche envoyée à l’imprimante A4 du poste.' };
     }
 };
 exports.ImagerieService = ImagerieService;

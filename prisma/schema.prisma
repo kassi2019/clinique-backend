@@ -49,6 +49,7 @@ model Clinique {
   patients    Patient[]
   passages    Passage[]
   paiements   Paiement[]
+  creditTickets CreditTicket[]
   medicaments Medicament[]
   consommables Consommable[]
   examensLabo ExamenLabo[]
@@ -68,6 +69,8 @@ model Clinique {
   cpons ConsultationPostnatale[]
   consultationsPf ConsultationPf[]
   certificatsArret CertificatArret[]
+  fichesEchographie FicheEchographie[]
+  fichesExamenImagerie FicheExamenImagerie[]
 
   @@map("cliniques")
 }
@@ -114,6 +117,7 @@ model Patient {
   cpons        ConsultationPostnatale[]
   consultationsPf ConsultationPf[]
   certificatsArret CertificatArret[]
+  fichesExamenImagerie FicheExamenImagerie[]
 
   @@unique([cliniqueId, numeroDossier])
   @@map("patients")
@@ -160,6 +164,8 @@ model Passage {
   cpons ConsultationPostnatale[]
   consultationsPf ConsultationPf[]
   certificatsArret CertificatArret[]
+  fichesExamenImagerie FicheExamenImagerie[]
+  credits CreditTicket[]
 
   @@unique([cliniqueId, numeroOrdre])
   @@map("passages")
@@ -174,14 +180,16 @@ model PassagePrestation {
   montant      Decimal  @db.Decimal(18, 2)
   serviceId    Int?
   source       String   @default("ACCUEIL") // ACCUEIL / MANUEL / PRESCRIPTION
-  statut       String   @default("EN_ATTENTE") // EN_ATTENTE / PAYEE / ANNULEE
+  statut       String   @default("EN_ATTENTE") // EN_ATTENTE / PAYEE / CREDIT / CAS_SOCIAL / ANNULEE
   paiementId   Int?
+  creditId     Int? // ticket de crédit ou cas social rattaché (paiement différé)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   passage    Passage    @relation(fields: [passageId], references: [id], onDelete: Cascade)
   // NoAction : évite les chemins de cascade multiples (l'annulation d'un paiement est douce)
   paiement   Paiement?  @relation(fields: [paiementId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  credit     CreditTicket? @relation(fields: [creditId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   prestation Prestation? @relation(fields: [prestationId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   service    Service?   @relation(fields: [serviceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   examenLabo ExamenLabo?
@@ -190,6 +198,30 @@ model PassagePrestation {
   soin Soin?
 
   @@map("passages_prestations")
+}
+
+// ---------- Ticket de crédit / cas social (caisse §6) ----------
+// Prestations prises en charge sans paiement immédiat : crédit remboursable
+// (la famille payera plus tard) ou cas social (indigent, non remboursable).
+model CreditTicket {
+  id           Int      @id @default(autoincrement())
+  cliniqueId   Int
+  passageId    Int
+  numero       String   @unique @db.NVarChar(100) // CRE-0001 (crédit) / SOC-0001 (cas social)
+  type         String   // CREDIT / CAS_SOCIAL
+  motif        String?  // ex. « Argent pas encore disponible », « Indigent »…
+  montantTotal Decimal  @db.Decimal(18, 2)
+  statut       String   @default("EN_COURS") // EN_COURS / SOLDEE / ANNULEE
+  agentId      Int? // utilisateur ayant émis le ticket
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  clinique Clinique          @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  passage  Passage           @relation(fields: [passageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agent    Utilisateur?      @relation("CreditAgent", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lignes   PassagePrestation[]
+
+  @@map("credit_tickets")
 }
 
 // ---------- Médicaments (catalogue, prescrits en consultation §7) ----------
@@ -544,7 +576,8 @@ model ImpressionFile {
   cliniqueId Int
   poste      String   // TICKET / RECU / PHARMACIE / ORDONNANCE / IMAGERIE
   libelle    String?  // description (ex. « Reçu de paiement REC-0001 »)
-  contenu    String   @db.NVarChar(Max) // texte ESC/POS à imprimer (encodage latin1) — peut dépasser 1000 caractères
+  contenu    String   @db.NVarChar(Max) // texte ESC/POS (thermique) ou HTML (A4) à imprimer
+  format     String   @default("THERMIQUE") // THERMIQUE / A4
   partage    String?  // nom du partage Windows cible (snapshot au moment de l'ajout)
   nom        String?  // nom Windows de l'imprimante cible (snapshot)
   statut     String   @default("EN_ATTENTE") // EN_ATTENTE / EN_COURS (pris par l'agent) / IMPRIMEE / ECHEC
@@ -853,12 +886,14 @@ model Utilisateur {
   cpons ConsultationPostnatale[] @relation("Cpons")
   consultationsPf ConsultationPf[] @relation("Cpf")
   certificatsArret CertificatArret[] @relation("CertificatsArret")
+  fichesExamenImagerie FicheExamenImagerie[] @relation("FichesEcho")
   mouvementsConsommables MouvementConsommable[]
   prelevements  ExamenLabo[] @relation("Prelevements")
   validations   ExamenLabo[] @relation("Validations")
   validationsImagerie ExamenImagerie[] @relation("ValidationsImagerie")
   sortiesHospitalisations Hospitalisation[] @relation("SortiesHospitalisations")
   affectations  Affectation[] @relation("AffectationsMedecin")
+  creditsEtablis CreditTicket[] @relation("CreditAgent")
   disponibilite String @default("INDISPONIBLE") // DISPONIBLE / INDISPONIBLE (médecins)
   derniereActivite DateTime? // signal de vie : le poste du médecin est allumé (heartbeat)
 
@@ -1067,8 +1102,9 @@ model Grossesse {
   patientId               Int
   numero                  String    @unique // GRO-0001… généré automatiquement
   numeroGestante          String?   // N° gestante du registre CPN (ex : 08/B/2026/CPN1/R1/P10)
-  ddr                     DateTime  @db.Date // date des dernières règles
-  dpa                     DateTime  @db.Date // date prévue d'accouchement (DDR + 280 j)
+  ddr                     DateTime? @db.Date // date des dernières règles (inconnue pour un accouchement en urgence)
+  dpa                     DateTime? @db.Date // date prévue d'accouchement (DDR + 280 j)
+  dateDerniereCpn         DateTime? @db.Date // dernière CPN connue (saisie au calendrier, suivie ailleurs éventuellement)
   gravidite               Int?      // nombre de grossesses (y compris celle-ci)
   parite                  Int?      // nombre d'accouchements antérieurs
   antecedentsObstetricaux String?   // césarienne, HTA gravidique, fausses couches…
@@ -1431,4 +1467,52 @@ model CertificatArret {
   medecinUser  Utilisateur? @relation("CertificatsArret", fields: [medecinId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("certificats_arret")
+}
+
+// ─── Fiches d'échographie (module Imagerie) ────────────────────────────────
+// Types de fiches paramétrés par la clinique (libellé + texte prérempli du
+// compte rendu, ex. « Echo abdominale », « Pelvis normal »…), puis fiches
+// enregistrées par patient/passage (historique réimprimable).
+
+model FicheEchographie {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  libelle    String
+  titre      String?  // titre de l'examen imprimé (ex. « ECHOGRAPHIE ABDOMINALE »)
+  titre2     String?  // seconde ligne de titre (affichée sous le titre à l'impression)
+  texte      String   @db.NVarChar(Max) // texte prérempli du compte rendu (marqueurs {code})
+  champs     String?  @db.NVarChar(Max) // JSON : champs de saisie [{code, libelle, type, unite?, options?, defaut?, multiligne?}]
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  clinique Clinique           @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  fiches   FicheExamenImagerie[]
+
+  @@unique([cliniqueId, libelle])
+  @@map("fiches_echographie")
+}
+
+model FicheExamenImagerie {
+  id          Int      @id @default(autoincrement())
+  cliniqueId  Int
+  passageId   Int
+  patientId   Int
+  typeFicheId Int      // type de fiche utilisé (paramétré)
+  libelleType String   // copie du libellé au moment de l'enregistrement
+  texte       String   @db.NVarChar(Max) // texte du compte rendu (généré puis modifié)
+  valeurs     String?  @db.NVarChar(Max) // JSON : valeurs saisies des champs {code: valeur}
+  indication  String?
+  prescripteur String?
+  medecinId   Int?     // utilisateur ayant établi la fiche
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  clinique  Clinique         @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  passage   Passage          @relation(fields: [passageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  patient   Patient          @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  typeFiche FicheEchographie @relation(fields: [typeFicheId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  medecin   Utilisateur?     @relation("FichesEcho", fields: [medecinId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("fiches_examen_imagerie")
 }
