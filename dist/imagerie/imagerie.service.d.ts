@@ -427,6 +427,7 @@ export declare class ImagerieService {
         indication: string | null;
         prescripteur: string | null;
     }>;
+    private marquerValeurs;
     imprimerFiche(ficheId: number): Promise<{
         ok: boolean;
         message: string;

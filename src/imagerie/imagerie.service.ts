@@ -454,6 +454,52 @@ export class ImagerieService {
     });
   }
 
+  /**
+   * Encadre les valeurs saisies dans le texte final (HTML) : elles ressortent
+   * en gras et dans une police différente à l'impression, comme à la main.
+   * Les occurrences « autonomes » seulement (une valeur à 1 chiffre n'est pas
+   * marquée quand elle est collée à un autre chiffre/lettre).
+   */
+  private marquerValeurs(texte: string, valeursJson?: string | null): string {
+    const vals: string[] = [];
+    if (valeursJson) {
+      try {
+        const v = JSON.parse(valeursJson);
+        if (v && typeof v === 'object') {
+          for (const x of Object.values(v)) {
+            const s = x != null ? String(x).trim() : '';
+            if (s.length >= 1) vals.push(s);
+          }
+        }
+      } catch {
+        /* valeurs illisibles : texte brut */
+      }
+    }
+    // Tri par longueur décroissante pour éviter les chevauchements de valeurs
+    vals.sort((a, b) => b.length - a.length);
+    const CAR = '0-9A-Za-zÀ-ÖØ-öø-ÿ';
+    const echapperRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const marqueurs: { token: string; html: string }[] = [];
+    let texte2 = texte ?? '';
+    vals.forEach((val, i) => {
+      if (!texte2.includes(val)) return;
+      const token = `\u0000V${i}\u0000`;
+      // Garde : la valeur doit être entourée de caractères non alphanumériques
+      const regex = new RegExp(`(^|[^${CAR}])(${echapperRegex(val)})(?![${CAR}])`, 'g');
+      let trouve = false;
+      texte2 = texte2.replace(regex, (tout, avant) => {
+        trouve = true;
+        return avant + token;
+      });
+      if (!trouve) return;
+      const esc = val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      marqueurs.push({ token, html: `<b class="val">${esc}</b>` });
+    });
+    let html = texte2.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    for (const m of marqueurs) html = html.split(m.token).join(m.html);
+    return html;
+  }
+
   /** Imprime la fiche en A4 : dépôt dans la file d'impression (agent local). */
   async imprimerFiche(ficheId: number) {
     const fiche = await this.prisma.ficheExamenImagerie.findUnique({
@@ -486,6 +532,7 @@ export class ImagerieService {
   .champ { font-size: 12px; }
   .champ b { display: inline-block; min-width: 90px; }
   .corps { white-space: pre-wrap; line-height: 1.55; margin-top: 3mm; }
+  .corps .val { font-weight: 800; font-family: 'Georgia', 'Times New Roman', serif; }
   .signature { margin-top: 22mm; display: flex; justify-content: space-between; align-items: flex-end; }
   .cachet { border: 1px solid #000; border-radius: 6px; width: 52mm; height: 26mm; text-align: center; font-size: 11px; color: #555; font-style: italic; display: flex; align-items: center; justify-content: center; }
   .medecin { font-weight: 800; text-align: right; }
@@ -507,7 +554,7 @@ export class ImagerieService {
     <span class="champ"><b>Prescripteur :</b> ${fiche.prescripteur ?? ''}</span>
   </div>
   <div class="regle"></div>
-  <div class="corps">${fiche.texte.replace(/</g, '&lt;')}</div>
+  <div class="corps">${this.marquerValeurs(fiche.texte, fiche.valeurs)}</div>
   <div class="signature">
     <div class="cachet">Signature et cachet</div>
     <div class="medecin">${nomMedecin}<br>Le Médecin</div>
