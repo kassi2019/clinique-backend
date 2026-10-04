@@ -39,6 +39,7 @@ const listes_parametres_module_1 = require("./listes-parametres/listes-parametre
 const maternite_module_1 = require("./maternite/maternite.module");
 const soins_module_1 = require("./soins/soins.module");
 const rapports_module_1 = require("./rapports/rapports.module");
+const references_module_1 = require("./references/references.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -71,6 +72,7 @@ exports.AppModule = AppModule = __decorate([
             maternite_module_1.MaterniteModule,
             soins_module_1.SoinsModule,
             rapports_module_1.RapportsModule,
+            references_module_1.ReferencesModule,
         ],
         controllers: [app_controller_1.AppController, audit_controller_1.AuditController],
         providers: [

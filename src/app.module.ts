@@ -30,6 +30,7 @@ import { ListesParametresModule } from './listes-parametres/listes-parametres.mo
 import { MaterniteModule } from './maternite/maternite.module';
 import { SoinsModule } from './soins/soins.module';
 import { RapportsModule } from './rapports/rapports.module';
+import { ReferencesModule } from './references/references.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { RapportsModule } from './rapports/rapports.module';
     MaterniteModule,
     SoinsModule,
     RapportsModule,
+    ReferencesModule,
   ],
   controllers: [AppController, AuditController],
   providers: [
