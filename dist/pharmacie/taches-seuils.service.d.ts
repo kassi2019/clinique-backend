@@ -6,4 +6,5 @@ export declare class TachesSeuilsService {
     private readonly logger;
     constructor(prisma: PrismaService, pharmacie: PharmacieService);
     recalculerSeuilsQuotidien(): Promise<void>;
+    retirerPerimesQuotidien(): Promise<void>;
 }

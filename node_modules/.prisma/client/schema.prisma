@@ -186,6 +186,7 @@ model PassagePrestation {
   serviceId    Int?
   source       String   @default("ACCUEIL") // ACCUEIL / MANUEL / PRESCRIPTION
   statut       String   @default("EN_ATTENTE") // EN_ATTENTE / PAYEE / CREDIT / CAS_SOCIAL / ANNULEE
+  gratuit      Boolean  @default(false) // consultation de contrôle ≤ 10 jours (montant 0)
   agentId      Int? // utilisateur ayant ajouté la ligne (accueil, caisse, prescription)
   paiementId   Int?
   creditId     Int? // ticket de crédit ou cas social rattaché (paiement différé)

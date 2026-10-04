@@ -81,6 +81,32 @@ let PharmacieController = class PharmacieController {
     recalculerSeuils(cliniqueId) {
         return this.pharmacieService.recalculerTousSeuils(cliniqueId);
     }
+    retirerLot(id, dto, req) {
+        return this.pharmacieService.retirerLot(id, dto, req.user.id);
+    }
+    peremptionsProches(cliniqueId, jours) {
+        if (!cliniqueId)
+            return [];
+        return this.pharmacieService.peremptionsProches(cliniqueId, jours ? Number(jours) : 30);
+    }
+    retirerPerimesAuto(cliniqueId) {
+        return this.pharmacieService.retirerPerimesAuto(cliniqueId);
+    }
+    retraits(cliniqueId, debut, fin) {
+        if (!cliniqueId)
+            return [];
+        return this.pharmacieService.retraits(cliniqueId, debut, fin);
+    }
+    pointsFinanciers(cliniqueId, debut, fin) {
+        if (!cliniqueId)
+            return { recus: 0, vendus: 0, perdus: 0, correctifs: 0, restants: 0, periode: {} };
+        return this.pharmacieService.pointsFinanciers(cliniqueId, debut, fin);
+    }
+    detailFinancier(cliniqueId, type, debut, fin) {
+        if (!cliniqueId || !type)
+            return [];
+        return this.pharmacieService.detailFinancier(cliniqueId, type, debut, fin);
+    }
     consommables(cliniqueId) {
         if (!cliniqueId)
             return [];
@@ -230,6 +256,58 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "recalculerSeuils", null);
+__decorate([
+    (0, common_1.Post)('lots/:id/retrait'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object, Object]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "retirerLot", null);
+__decorate([
+    (0, common_1.Get)('peremptions'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('jours')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "peremptionsProches", null);
+__decorate([
+    (0, common_1.Post)('perimes/retirer-auto'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "retirerPerimesAuto", null);
+__decorate([
+    (0, common_1.Get)('retraits'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('debut')),
+    __param(2, (0, common_1.Query)('fin')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "retraits", null);
+__decorate([
+    (0, common_1.Get)('financier'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('debut')),
+    __param(2, (0, common_1.Query)('fin')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "pointsFinanciers", null);
+__decorate([
+    (0, common_1.Get)('financier/detail'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('type')),
+    __param(2, (0, common_1.Query)('debut')),
+    __param(3, (0, common_1.Query)('fin')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String, String]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "detailFinancier", null);
 __decorate([
     (0, common_1.Get)('consommables'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),

@@ -18,6 +18,7 @@ export class AuditController {
     @Query('utilisateurId') utilisateurId?: string,
     @Query('cliniqueId') cliniqueId?: string,
     @Query('jour') jour?: string,
+    @Query('entite') entite?: string,
   ) {
     const p = page ? Number(page) : 1;
     const pp = perPage ? Number(perPage) : 50;
@@ -26,6 +27,7 @@ export class AuditController {
     const where: any = {
       ...(cid ? { cliniqueId: cid } : {}),
       ...(uid ? { utilisateurId: uid } : {}),
+      ...(entite && entite.trim() ? { entite: entite.trim() } : {}),
       ...(jour && /^\d{4}-\d{2}-\d{2}$/.test(jour)
         ? { createdAt: { gte: new Date(`${jour}T00:00:00`), lte: new Date(`${jour}T23:59:59.999`) } }
         : {}),

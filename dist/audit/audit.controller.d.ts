@@ -2,7 +2,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export declare class AuditController {
     private prisma;
     constructor(prisma: PrismaService);
-    lister(page?: string, perPage?: string, utilisateurId?: string, cliniqueId?: string, jour?: string): Promise<{
+    lister(page?: string, perPage?: string, utilisateurId?: string, cliniqueId?: string, jour?: string, entite?: string): Promise<{
         data: ({
             utilisateur: {
                 personnel: {

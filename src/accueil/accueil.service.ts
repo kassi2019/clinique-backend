@@ -375,6 +375,27 @@ export class AccueilService {
     const lignes = prestationsService.filter(
       (p) => p.type !== 'CONSULTATION' || p.id === consultationChoisie?.id,
     );
+
+    // ── Consultation de contrôle : patient revenu dans les 10 jours pour le
+    // MÊME service → la consultation est GRATUITE (montant 0). Les autres
+    // actes (médicaments, examens…) restent payants normalement.
+    const controleGratuit = await this.prisma.passage.findFirst({
+      where: {
+        cliniqueId: dto.cliniqueId,
+        patientId: patient.id,
+        serviceId: dto.serviceId,
+        createdAt: { gte: new Date(Date.now() - 10 * 24 * 3600 * 1000) },
+        prestations: {
+          some: {
+            prestation: { type: 'CONSULTATION' },
+            statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, numeroOrdre: true },
+    });
+
     // Service sans prestation de consultation (maternité, laboratoire, imagerie,
     // soins, hospitalisation…) : pour un patient interne, les actes du service
     // sont payables directement à la caisse (EN_ATTENTE), sans attendre une
@@ -388,7 +409,9 @@ export class AccueilService {
           passageId: passage.id,
           prestationId: p.id,
           libelle: p.libelle,
-          montant: p.montant,
+          montant:
+            p.type === 'CONSULTATION' && controleGratuit ? 0 : p.montant,
+          gratuit: p.type === 'CONSULTATION' && !!controleGratuit,
           serviceId: p.serviceId,
           agentId: utilisateurId ?? null,
           source: 'ACCUEIL',
@@ -421,7 +444,14 @@ export class AccueilService {
       }
     }
 
-    return { ...resultat, impression };
+    return {
+      ...resultat,
+      impression,
+      // Informe l'accueil que la consultation est gratuite (contrôle ≤ 10 jours)
+      controleGratuit: controleGratuit
+        ? { passageId: controleGratuit.id, numeroOrdre: controleGratuit.numeroOrdre }
+        : null,
+    };
   }
 
   /** Modifie un passage (et les données du patient si fournies). */

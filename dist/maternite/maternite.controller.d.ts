@@ -342,6 +342,7 @@ export declare class MaterniteController {
                 prestationId: number | null;
                 montant: import("@prisma/client/runtime/library").Decimal;
                 source: string;
+                gratuit: boolean;
                 paiementId: number | null;
                 creditId: number | null;
             })[];

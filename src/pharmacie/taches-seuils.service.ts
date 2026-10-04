@@ -36,4 +36,29 @@ export class TachesSeuilsService {
       this.logger.error(`Échec du recalcul des seuils : ${e.message}`);
     }
   }
+
+  /** Tous les jours à 02:00 : retire automatiquement les lots périmés du stock. */
+  @Cron('0 2 * * *')
+  async retirerPerimesQuotidien() {
+    try {
+      const cliniques = await this.prisma.clinique.findMany({
+        where: { statut: 'ACTIF' },
+        select: { id: true },
+      });
+      let lotsRetires = 0;
+      let quantite = 0;
+      for (const c of cliniques) {
+        const r = await this.pharmacie.retirerPerimesAuto(c.id);
+        lotsRetires += r.lotsRetires;
+        quantite += r.quantiteRetiree;
+      }
+      if (lotsRetires > 0) {
+        this.logger.log(
+          `Péremptions auto : ${lotsRetires} lot(s) retiré(s), ${quantite} unité(s), sur ${cliniques.length} clinique(s).`,
+        );
+      }
+    } catch (e) {
+      this.logger.error(`Échec du retrait automatique des périmés : ${e.message}`);
+    }
+  }
 }

@@ -94,6 +94,7 @@ export declare class ImagerieService {
             agentId: number | null;
             prestationId: number | null;
             source: string;
+            gratuit: boolean;
             paiementId: number | null;
             creditId: number | null;
         }[];
@@ -162,6 +163,7 @@ export declare class ImagerieService {
                 agentId: number | null;
                 prestationId: number | null;
                 source: string;
+                gratuit: boolean;
                 paiementId: number | null;
                 creditId: number | null;
             }[];

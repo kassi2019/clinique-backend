@@ -22,7 +22,7 @@ let AuditController = class AuditController {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async lister(page, perPage, utilisateurId, cliniqueId, jour) {
+    async lister(page, perPage, utilisateurId, cliniqueId, jour, entite) {
         const p = page ? Number(page) : 1;
         const pp = perPage ? Number(perPage) : 50;
         const uid = utilisateurId ? Number(utilisateurId) : undefined;
@@ -30,6 +30,7 @@ let AuditController = class AuditController {
         const where = {
             ...(cid ? { cliniqueId: cid } : {}),
             ...(uid ? { utilisateurId: uid } : {}),
+            ...(entite && entite.trim() ? { entite: entite.trim() } : {}),
             ...(jour && /^\d{4}-\d{2}-\d{2}$/.test(jour)
                 ? { createdAt: { gte: new Date(`${jour}T00:00:00`), lte: new Date(`${jour}T23:59:59.999`) } }
                 : {}),
@@ -60,8 +61,9 @@ __decorate([
     __param(2, (0, common_1.Query)('utilisateurId')),
     __param(3, (0, common_1.Query)('cliniqueId')),
     __param(4, (0, common_1.Query)('jour')),
+    __param(5, (0, common_1.Query)('entite')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], AuditController.prototype, "lister", null);
 exports.AuditController = AuditController = __decorate([

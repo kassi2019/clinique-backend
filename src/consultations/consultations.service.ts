@@ -148,6 +148,8 @@ export class ConsultationsService {
     if (!passage) throw new NotFoundException('Passage introuvable.');
 
     // Historique médical du patient (consultations validées, tous passages)
+    // Enrichi : examens de laboratoire avec lignes + résultats, examens
+    // d'imagerie et fiches d'échographie de chaque passage antérieur.
     const historique = await this.prisma.consultation.findMany({
       where: { patientId: passage.patientId },
       include: {
@@ -159,7 +161,41 @@ export class ConsultationsService {
           },
         },
         passage: {
-          select: { numeroOrdre: true, createdAt: true, service: { select: { nom: true } } },
+          select: {
+            numeroOrdre: true,
+            createdAt: true,
+            service: { select: { nom: true } },
+            examensLabo: {
+              include: {
+                lignes: true,
+                validePar: {
+                  select: {
+                    matricule: true,
+                    personnel: { select: { nom: true, prenom: true } },
+                  },
+                },
+              },
+            },
+            examensImagerie: {
+              include: {
+                validePar: {
+                  select: {
+                    matricule: true,
+                    personnel: { select: { nom: true, prenom: true } },
+                  },
+                },
+              },
+            },
+            fichesExamenImagerie: {
+              select: {
+                id: true,
+                libelleType: true,
+                texte: true,
+                valeurs: true,
+                createdAt: true,
+              },
+            },
+          },
         },
       },
       orderBy: { createdAt: 'desc' },

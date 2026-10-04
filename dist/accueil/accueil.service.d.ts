@@ -257,6 +257,10 @@ export declare class AccueilService {
     }>;
     creerPassage(dto: CreatePassageDto, utilisateurId?: number): Promise<{
         impression: any;
+        controleGratuit: {
+            passageId: number;
+            numeroOrdre: string;
+        };
         clinique: {
             id: number;
             nom: string;

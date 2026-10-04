@@ -112,6 +112,7 @@ export declare class ConsultationsController {
                 agentId: number | null;
                 prestationId: number | null;
                 source: string;
+                gratuit: boolean;
                 paiementId: number | null;
                 creditId: number | null;
             }[];
@@ -271,6 +272,71 @@ export declare class ConsultationsController {
                     nom: string;
                 };
                 createdAt: Date;
+                fichesExamenImagerie: {
+                    createdAt: Date;
+                    id: number;
+                    libelleType: string;
+                    texte: string;
+                    valeurs: string;
+                }[];
+                examensLabo: ({
+                    lignes: {
+                        parametre: string;
+                        id: number;
+                        examenLaboId: number;
+                        valeur: string | null;
+                        unite: string | null;
+                        normes: string | null;
+                    }[];
+                    validePar: {
+                        personnel: {
+                            nom: string;
+                            prenom: string;
+                        };
+                        matricule: string;
+                    };
+                } & {
+                    createdAt: Date;
+                    id: number;
+                    cliniqueId: number;
+                    statut: string;
+                    updatedAt: Date;
+                    libelle: string;
+                    passageId: number;
+                    patientId: number;
+                    passagePrestationId: number;
+                    preleveParId: number | null;
+                    preleveLe: Date | null;
+                    conclusion: string | null;
+                    valideParId: number | null;
+                    valideLe: Date | null;
+                })[];
+                examensImagerie: ({
+                    validePar: {
+                        personnel: {
+                            nom: string;
+                            prenom: string;
+                        };
+                        matricule: string;
+                    };
+                } & {
+                    createdAt: Date;
+                    id: number;
+                    cliniqueId: number;
+                    statut: string;
+                    updatedAt: Date;
+                    libelle: string;
+                    passageId: number;
+                    patientId: number;
+                    indication: string | null;
+                    passagePrestationId: number;
+                    conclusion: string | null;
+                    valideParId: number | null;
+                    valideLe: Date | null;
+                    saisiParId: number | null;
+                    technique: string | null;
+                    resultat: string | null;
+                })[];
                 numeroOrdre: string;
             };
             medicaments: {
@@ -461,6 +527,7 @@ export declare class ConsultationsController {
         prestationId: number | null;
         montant: import("@prisma/client/runtime/library").Decimal;
         source: string;
+        gratuit: boolean;
         paiementId: number | null;
         creditId: number | null;
     }[]>;
@@ -476,6 +543,7 @@ export declare class ConsultationsController {
         prestationId: number | null;
         montant: import("@prisma/client/runtime/library").Decimal;
         source: string;
+        gratuit: boolean;
         paiementId: number | null;
         creditId: number | null;
     }>;
@@ -491,6 +559,7 @@ export declare class ConsultationsController {
         prestationId: number | null;
         montant: import("@prisma/client/runtime/library").Decimal;
         source: string;
+        gratuit: boolean;
         paiementId: number | null;
         creditId: number | null;
     }>;

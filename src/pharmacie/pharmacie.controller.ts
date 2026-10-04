@@ -148,6 +148,68 @@ export class PharmacieController {
     return this.pharmacieService.recalculerTousSeuils(cliniqueId);
   }
 
+  // ─── Retraits / péremptions / points financiers ───
+
+  /** Retire une quantité d'un lot (retour fournisseur, périmé, casse, perte…). */
+  @Post('lots/:id/retrait')
+  retirerLot(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { quantite: number; motif: string; commentaire?: string },
+    @Req() req,
+  ) {
+    return this.pharmacieService.retirerLot(id, dto, req.user.id);
+  }
+
+  /** Lots dont la péremption arrive dans les N prochains jours (badge d'alerte). */
+  @Get('peremptions')
+  peremptionsProches(
+    @Query('cliniqueId', ParseIntPipe) cliniqueId?: number,
+    @Query('jours') jours?: string,
+  ) {
+    if (!cliniqueId) return [];
+    return this.pharmacieService.peremptionsProches(cliniqueId, jours ? Number(jours) : 30);
+  }
+
+  /** Retire automatiquement les lots périmés (déclenchement manuel ; la tâche nocturne le fait aussi). */
+  @Post('perimes/retirer-auto')
+  retirerPerimesAuto(@Query('cliniqueId', ParseIntPipe) cliniqueId: number) {
+    return this.pharmacieService.retirerPerimesAuto(cliniqueId);
+  }
+
+  /** Historique des retraits (rapport des périmés/pertes/casses). */
+  @Get('retraits')
+  retraits(
+    @Query('cliniqueId', ParseIntPipe) cliniqueId?: number,
+    @Query('debut') debut?: string,
+    @Query('fin') fin?: string,
+  ) {
+    if (!cliniqueId) return [];
+    return this.pharmacieService.retraits(cliniqueId, debut, fin);
+  }
+
+  /** Points financiers de la pharmacie (reçus, vendus, perdus, restants, correctifs). */
+  @Get('financier')
+  pointsFinanciers(
+    @Query('cliniqueId', ParseIntPipe) cliniqueId?: number,
+    @Query('debut') debut?: string,
+    @Query('fin') fin?: string,
+  ) {
+    if (!cliniqueId) return { recus: 0, vendus: 0, perdus: 0, correctifs: 0, restants: 0, periode: {} };
+    return this.pharmacieService.pointsFinanciers(cliniqueId, debut, fin);
+  }
+
+  /** Détail d'un bloc financier (liste des lignes qui composent le montant). */
+  @Get('financier/detail')
+  detailFinancier(
+    @Query('cliniqueId', ParseIntPipe) cliniqueId?: number,
+    @Query('type') type?: string,
+    @Query('debut') debut?: string,
+    @Query('fin') fin?: string,
+  ) {
+    if (!cliniqueId || !type) return [];
+    return this.pharmacieService.detailFinancier(cliniqueId, type, debut, fin);
+  }
+
   // ── Consommables (§9.3) ──
 
   @Get('consommables')

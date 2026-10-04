@@ -38,6 +38,27 @@ let TachesSeuilsService = TachesSeuilsService_1 = class TachesSeuilsService {
             this.logger.error(`Échec du recalcul des seuils : ${e.message}`);
         }
     }
+    async retirerPerimesQuotidien() {
+        try {
+            const cliniques = await this.prisma.clinique.findMany({
+                where: { statut: 'ACTIF' },
+                select: { id: true },
+            });
+            let lotsRetires = 0;
+            let quantite = 0;
+            for (const c of cliniques) {
+                const r = await this.pharmacie.retirerPerimesAuto(c.id);
+                lotsRetires += r.lotsRetires;
+                quantite += r.quantiteRetiree;
+            }
+            if (lotsRetires > 0) {
+                this.logger.log(`Péremptions auto : ${lotsRetires} lot(s) retiré(s), ${quantite} unité(s), sur ${cliniques.length} clinique(s).`);
+            }
+        }
+        catch (e) {
+            this.logger.error(`Échec du retrait automatique des périmés : ${e.message}`);
+        }
+    }
 };
 exports.TachesSeuilsService = TachesSeuilsService;
 __decorate([
@@ -46,6 +67,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], TachesSeuilsService.prototype, "recalculerSeuilsQuotidien", null);
+__decorate([
+    (0, schedule_1.Cron)('0 2 * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], TachesSeuilsService.prototype, "retirerPerimesQuotidien", null);
 exports.TachesSeuilsService = TachesSeuilsService = TachesSeuilsService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,

@@ -139,7 +139,41 @@ let ConsultationsService = class ConsultationsService {
                     },
                 },
                 passage: {
-                    select: { numeroOrdre: true, createdAt: true, service: { select: { nom: true } } },
+                    select: {
+                        numeroOrdre: true,
+                        createdAt: true,
+                        service: { select: { nom: true } },
+                        examensLabo: {
+                            include: {
+                                lignes: true,
+                                validePar: {
+                                    select: {
+                                        matricule: true,
+                                        personnel: { select: { nom: true, prenom: true } },
+                                    },
+                                },
+                            },
+                        },
+                        examensImagerie: {
+                            include: {
+                                validePar: {
+                                    select: {
+                                        matricule: true,
+                                        personnel: { select: { nom: true, prenom: true } },
+                                    },
+                                },
+                            },
+                        },
+                        fichesExamenImagerie: {
+                            select: {
+                                id: true,
+                                libelleType: true,
+                                texte: true,
+                                valeurs: true,
+                                createdAt: true,
+                            },
+                        },
+                    },
                 },
             },
             orderBy: { createdAt: 'desc' },

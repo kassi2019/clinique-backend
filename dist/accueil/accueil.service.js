@@ -300,6 +300,22 @@ let AccueilService = AccueilService_1 = class AccueilService {
             }
         }
         const lignes = prestationsService.filter((p) => p.type !== 'CONSULTATION' || p.id === consultationChoisie?.id);
+        const controleGratuit = await this.prisma.passage.findFirst({
+            where: {
+                cliniqueId: dto.cliniqueId,
+                patientId: patient.id,
+                serviceId: dto.serviceId,
+                createdAt: { gte: new Date(Date.now() - 10 * 24 * 3600 * 1000) },
+                prestations: {
+                    some: {
+                        prestation: { type: 'CONSULTATION' },
+                        statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] },
+                    },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+            select: { id: true, numeroOrdre: true },
+        });
         const serviceSansConsultation = consultations.length === 0;
         const typePatient = dto.typePatient ?? 'INTERNE';
         if (lignes.length > 0) {
@@ -308,7 +324,8 @@ let AccueilService = AccueilService_1 = class AccueilService {
                     passageId: passage.id,
                     prestationId: p.id,
                     libelle: p.libelle,
-                    montant: p.montant,
+                    montant: p.type === 'CONSULTATION' && controleGratuit ? 0 : p.montant,
+                    gratuit: p.type === 'CONSULTATION' && !!controleGratuit,
                     serviceId: p.serviceId,
                     agentId: utilisateurId ?? null,
                     source: 'ACCUEIL',
@@ -333,7 +350,13 @@ let AccueilService = AccueilService_1 = class AccueilService {
                 this.logger.error(`Erreur impression auto ticket #${passage.id}: ${err.message}`);
             }
         }
-        return { ...resultat, impression };
+        return {
+            ...resultat,
+            impression,
+            controleGratuit: controleGratuit
+                ? { passageId: controleGratuit.id, numeroOrdre: controleGratuit.numeroOrdre }
+                : null,
+        };
     }
     async modifierPassage(id, dto, utilisateurId) {
         const passage = await this.prisma.passage.findUnique({ where: { id } });

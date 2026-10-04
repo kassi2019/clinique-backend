@@ -574,4 +574,118 @@ export declare class PharmacieService {
         commentaire: string | null;
         consommableId: number;
     }[]>;
+    static MOTIFS_RETRAIT: Record<string, string>;
+    retirerLot(lotId: number, dto: {
+        quantite: number;
+        motif: string;
+        commentaire?: string;
+    }, utilisateurId: number): Promise<{
+        fournisseur: string | null;
+        createdAt: Date;
+        id: number;
+        updatedAt: Date;
+        medicamentId: number;
+        datePeremption: Date;
+        numeroLot: string;
+        quantiteInitiale: number;
+        quantiteRestante: number;
+        prixAchat: import("@prisma/client/runtime/library").Decimal | null;
+    }>;
+    retirerPerimesAuto(cliniqueId: number): Promise<{
+        lotsRetires: number;
+        quantiteRetiree: number;
+    }>;
+    peremptionsProches(cliniqueId: number, jours?: number): Promise<({
+        medicament: {
+            id: number;
+            nom: string;
+            dosage: string;
+        };
+    } & {
+        fournisseur: string | null;
+        createdAt: Date;
+        id: number;
+        updatedAt: Date;
+        medicamentId: number;
+        datePeremption: Date;
+        numeroLot: string;
+        quantiteInitiale: number;
+        quantiteRestante: number;
+        prixAchat: import("@prisma/client/runtime/library").Decimal | null;
+    })[]>;
+    retraits(cliniqueId: number, debut?: string, fin?: string): Promise<({
+        medicament: {
+            nom: string;
+            dosage: string;
+        };
+        lot: {
+            datePeremption: Date;
+            numeroLot: string;
+            prixAchat: import("@prisma/client/runtime/library").Decimal;
+        };
+        utilisateur: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+    } & {
+        createdAt: Date;
+        id: number;
+        utilisateurId: number | null;
+        type: string;
+        medicamentId: number;
+        quantite: number;
+        reference: string | null;
+        commentaire: string | null;
+        lotId: number | null;
+    })[]>;
+    detailFinancier(cliniqueId: number, type: string, debut?: string, fin?: string): Promise<{
+        date: Date;
+        medicament: string;
+        lot: string;
+        quantite: number;
+        prixAchat: number;
+        montant: number;
+    }[] | {
+        date: Date;
+        patient: string;
+        numeroOrdre: string;
+        montant: number;
+    }[] | {
+        date: Date;
+        medicament: string;
+        motif: string;
+        quantite: number;
+        lot: string;
+        montant: number;
+        par: string;
+        commentaire: string;
+    }[] | {
+        date: Date;
+        medicament: string;
+        lot: string;
+        ecart: number;
+        montant: number;
+        par: string;
+    }[] | {
+        medicament: string;
+        lot: string;
+        peremption: string;
+        quantite: number;
+        prixAchat: number;
+        montant: number;
+    }[]>;
+    pointsFinanciers(cliniqueId: number, debut?: string, fin?: string): Promise<{
+        periode: {
+            debut: string;
+            fin: string;
+        };
+        recus: number;
+        vendus: number;
+        perdus: number;
+        correctifs: number;
+        restants: number;
+    }>;
 }

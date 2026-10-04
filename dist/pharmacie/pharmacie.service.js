@@ -705,8 +705,265 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             take: 100,
         });
     }
+    async retirerLot(lotId, dto, utilisateurId) {
+        const lot = await this.prisma.lot.findUnique({
+            where: { id: lotId },
+            include: { medicament: true },
+        });
+        if (!lot)
+            throw new common_1.NotFoundException('Lot introuvable.');
+        if (!dto.quantite || dto.quantite <= 0 || dto.quantite > lot.quantiteRestante) {
+            throw new common_1.BadRequestException(`Quantité invalide : le lot contient ${lot.quantiteRestante} unité(s) restante(s).`);
+        }
+        const libelleMotif = PharmacieService_1.MOTIFS_RETRAIT[dto.motif] ?? dto.motif ?? 'Retrait';
+        const [majLot] = await this.prisma.$transaction([
+            this.prisma.lot.update({
+                where: { id: lotId },
+                data: { quantiteRestante: lot.quantiteRestante - dto.quantite },
+            }),
+            this.prisma.medicament.update({
+                where: { id: lot.medicamentId },
+                data: { stock: Math.max(0, lot.medicament.stock - dto.quantite) },
+            }),
+            this.prisma.mouvementStock.create({
+                data: {
+                    medicamentId: lot.medicamentId,
+                    type: 'RETRAIT',
+                    quantite: -dto.quantite,
+                    lotId,
+                    reference: libelleMotif,
+                    commentaire: dto.commentaire ?? null,
+                    utilisateurId,
+                },
+            }),
+        ]);
+        return majLot;
+    }
+    async retirerPerimesAuto(cliniqueId) {
+        const lots = await this.prisma.lot.findMany({
+            where: {
+                medicament: { cliniqueId },
+                quantiteRestante: { gt: 0 },
+                datePeremption: { lt: new Date() },
+            },
+            include: { medicament: true },
+        });
+        for (const lot of lots) {
+            await this.prisma.$transaction([
+                this.prisma.lot.update({
+                    where: { id: lot.id },
+                    data: { quantiteRestante: 0 },
+                }),
+                this.prisma.medicament.update({
+                    where: { id: lot.medicamentId },
+                    data: { stock: Math.max(0, lot.medicament.stock - lot.quantiteRestante) },
+                }),
+                this.prisma.mouvementStock.create({
+                    data: {
+                        medicamentId: lot.medicamentId,
+                        type: 'RETRAIT',
+                        quantite: -lot.quantiteRestante,
+                        lotId: lot.id,
+                        reference: 'Périmé (auto)',
+                        commentaire: `Retrait automatique — péremption ${lot.datePeremption.toISOString().slice(0, 10)}`,
+                    },
+                }),
+            ]);
+        }
+        const quantiteRetiree = lots.reduce((s, l) => s + l.quantiteRestante, 0);
+        return { lotsRetires: lots.length, quantiteRetiree };
+    }
+    async peremptionsProches(cliniqueId, jours = 30) {
+        const limite = new Date(Date.now() + jours * 24 * 3600 * 1000);
+        return this.prisma.lot.findMany({
+            where: {
+                medicament: { cliniqueId },
+                quantiteRestante: { gt: 0 },
+                datePeremption: { lte: limite },
+            },
+            include: { medicament: { select: { id: true, nom: true, dosage: true } } },
+            orderBy: [{ datePeremption: 'asc' }, { medicament: { nom: 'asc' } }],
+        });
+    }
+    async retraits(cliniqueId, debut, fin) {
+        const where = {
+            type: 'RETRAIT',
+            medicament: { cliniqueId },
+        };
+        if (debut && /^\d{4}-\d{2}-\d{2}$/.test(debut)) {
+            where.createdAt = { gte: new Date(`${debut}T00:00:00`) };
+        }
+        if (fin && /^\d{4}-\d{2}-\d{2}$/.test(fin)) {
+            where.createdAt = { ...(where.createdAt ?? {}), lte: new Date(`${fin}T23:59:59.999`) };
+        }
+        return this.prisma.mouvementStock.findMany({
+            where,
+            include: {
+                medicament: { select: { nom: true, dosage: true } },
+                lot: { select: { numeroLot: true, datePeremption: true, prixAchat: true } },
+                utilisateur: {
+                    select: { matricule: true, personnel: { select: { nom: true, prenom: true } } },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 500,
+        });
+    }
+    async detailFinancier(cliniqueId, type, debut, fin) {
+        const periode = {};
+        if (debut && /^\d{4}-\d{2}-\d{2}$/.test(debut))
+            periode.gte = new Date(`${debut}T00:00:00`);
+        if (fin && /^\d{4}-\d{2}-\d{2}$/.test(fin))
+            periode.lte = new Date(`${fin}T23:59:59.999`);
+        const dansPeriode = (champ) => Object.keys(periode).length ? { [champ]: periode } : {};
+        if (type === 'recus') {
+            const lots = await this.prisma.lot.findMany({
+                where: { medicament: { cliniqueId }, ...dansPeriode('createdAt') },
+                include: { medicament: { select: { nom: true, dosage: true } } },
+                orderBy: { createdAt: 'desc' },
+            });
+            return lots.map((l) => ({
+                date: l.createdAt,
+                medicament: `${l.medicament?.nom ?? ''} ${l.medicament?.dosage ?? ''}`.trim(),
+                lot: l.numeroLot,
+                quantite: l.quantiteInitiale,
+                prixAchat: Number(l.prixAchat ?? 0),
+                montant: l.quantiteInitiale * Number(l.prixAchat ?? 0),
+            }));
+        }
+        if (type === 'vendus') {
+            const ds = await this.prisma.dispensation.findMany({
+                where: {
+                    statut: 'CLOTUREE',
+                    consultation: { passage: { cliniqueId } },
+                    ...dansPeriode('createdAt'),
+                },
+                include: {
+                    consultation: {
+                        select: {
+                            passage: {
+                                select: {
+                                    numeroOrdre: true,
+                                    patient: { select: { nom: true, prenom: true } },
+                                },
+                            },
+                        },
+                    },
+                },
+                orderBy: { createdAt: 'desc' },
+            });
+            return ds.map((d) => ({
+                date: d.createdAt,
+                patient: `${d.consultation?.passage?.patient?.nom ?? ''} ${d.consultation?.passage?.patient?.prenom ?? ''}`.trim(),
+                numeroOrdre: d.consultation?.passage?.numeroOrdre ?? '—',
+                montant: Number(d.montantTotal),
+            }));
+        }
+        if (type === 'perdus') {
+            const r = await this.retraits(cliniqueId, debut, fin);
+            return r.map((m) => ({
+                date: m.createdAt,
+                medicament: `${m.medicament?.nom ?? ''} ${m.medicament?.dosage ?? ''}`.trim(),
+                motif: m.reference ?? 'Retrait',
+                quantite: m.quantite,
+                lot: m.lot?.numeroLot ?? '—',
+                montant: Math.abs(m.quantite) * Number(m.lot?.prixAchat ?? 0),
+                par: m.utilisateur?.personnel
+                    ? `${m.utilisateur.personnel.nom} ${m.utilisateur.personnel.prenom}`
+                    : 'Système',
+                commentaire: m.commentaire ?? '',
+            }));
+        }
+        if (type === 'correctifs') {
+            const inv = await this.prisma.mouvementStock.findMany({
+                where: { type: 'INVENTAIRE', medicament: { cliniqueId }, ...dansPeriode('createdAt') },
+                include: {
+                    medicament: { select: { nom: true, dosage: true, prixVente: true } },
+                    lot: { select: { numeroLot: true, prixAchat: true } },
+                    utilisateur: {
+                        select: { matricule: true, personnel: { select: { nom: true, prenom: true } } },
+                    },
+                },
+                orderBy: { createdAt: 'desc' },
+            });
+            return inv.map((m) => ({
+                date: m.createdAt,
+                medicament: `${m.medicament?.nom ?? ''} ${m.medicament?.dosage ?? ''}`.trim(),
+                lot: m.lot?.numeroLot ?? '—',
+                ecart: m.quantite,
+                montant: m.quantite * Number(m.lot?.prixAchat ?? m.medicament?.prixVente ?? 0),
+                par: m.utilisateur?.personnel
+                    ? `${m.utilisateur.personnel.nom} ${m.utilisateur.personnel.prenom}`
+                    : '—',
+            }));
+        }
+        const lots = await this.prisma.lot.findMany({
+            where: { medicament: { cliniqueId }, quantiteRestante: { gt: 0 } },
+            include: { medicament: { select: { nom: true, dosage: true } } },
+            orderBy: { medicament: { nom: 'asc' } },
+        });
+        return lots.map((l) => ({
+            medicament: `${l.medicament?.nom ?? ''} ${l.medicament?.dosage ?? ''}`.trim(),
+            lot: l.numeroLot,
+            peremption: l.datePeremption.toISOString().slice(0, 10),
+            quantite: l.quantiteRestante,
+            prixAchat: Number(l.prixAchat ?? 0),
+            montant: l.quantiteRestante * Number(l.prixAchat ?? 0),
+        }));
+    }
+    async pointsFinanciers(cliniqueId, debut, fin) {
+        const periode = {};
+        if (debut && /^\d{4}-\d{2}-\d{2}$/.test(debut))
+            periode.gte = new Date(`${debut}T00:00:00`);
+        if (fin && /^\d{4}-\d{2}-\d{2}$/.test(fin))
+            periode.lte = new Date(`${fin}T23:59:59.999`);
+        const dansPeriode = (champ) => ({ ...(Object.keys(periode).length ? { [champ]: periode } : {}) });
+        const lotsPeriode = await this.prisma.lot.findMany({
+            where: { medicament: { cliniqueId }, ...dansPeriode('createdAt') },
+            select: { quantiteInitiale: true, prixAchat: true },
+        });
+        const recus = lotsPeriode.reduce((s, l) => s + l.quantiteInitiale * Number(l.prixAchat ?? 0), 0);
+        const vendusAgg = await this.prisma.dispensation.aggregate({
+            where: {
+                statut: 'CLOTUREE',
+                consultation: { passage: { cliniqueId } },
+                ...dansPeriode('createdAt'),
+            },
+            _sum: { montantTotal: true },
+        });
+        const retraitsPeriode = await this.prisma.mouvementStock.findMany({
+            where: { type: 'RETRAIT', medicament: { cliniqueId }, ...dansPeriode('createdAt') },
+            include: { lot: { select: { prixAchat: true } } },
+        });
+        const perdus = retraitsPeriode.reduce((s, m) => s + Math.abs(m.quantite) * Number(m.lot?.prixAchat ?? 0), 0);
+        const inventairesPeriode = await this.prisma.mouvementStock.findMany({
+            where: { type: 'INVENTAIRE', medicament: { cliniqueId }, ...dansPeriode('createdAt') },
+            include: { lot: { select: { prixAchat: true } }, medicament: { select: { prixVente: true } } },
+        });
+        const correctifs = inventairesPeriode.reduce((s, m) => s + m.quantite * Number(m.lot?.prixAchat ?? m.medicament.prixVente ?? 0), 0);
+        const lotsRestants = await this.prisma.lot.findMany({
+            where: { medicament: { cliniqueId }, quantiteRestante: { gt: 0 } },
+            select: { quantiteRestante: true, prixAchat: true },
+        });
+        const restants = lotsRestants.reduce((s, l) => s + l.quantiteRestante * Number(l.prixAchat ?? 0), 0);
+        return {
+            periode: { debut: debut ?? null, fin: fin ?? null },
+            recus,
+            vendus: Number(vendusAgg._sum.montantTotal ?? 0),
+            perdus,
+            correctifs,
+            restants,
+        };
+    }
 };
 exports.PharmacieService = PharmacieService;
+PharmacieService.MOTIFS_RETRAIT = {
+    RETOUR_FOURNISSEUR: 'Retour fournisseur',
+    PERIME: 'Périmé',
+    CASSE: 'Casse',
+    PERTE: 'Perte',
+    AUTRE: 'Autre',
+};
 exports.PharmacieService = PharmacieService = PharmacieService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,

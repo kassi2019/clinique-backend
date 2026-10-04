@@ -504,6 +504,126 @@ export declare class PharmacieController {
     recalculerSeuils(cliniqueId: number): Promise<{
         recalcules: number;
     }>;
+    retirerLot(id: number, dto: {
+        quantite: number;
+        motif: string;
+        commentaire?: string;
+    }, req: any): Promise<{
+        fournisseur: string | null;
+        createdAt: Date;
+        id: number;
+        updatedAt: Date;
+        medicamentId: number;
+        datePeremption: Date;
+        numeroLot: string;
+        quantiteInitiale: number;
+        quantiteRestante: number;
+        prixAchat: import("@prisma/client/runtime/library").Decimal | null;
+    }>;
+    peremptionsProches(cliniqueId?: number, jours?: string): any[] | Promise<({
+        medicament: {
+            id: number;
+            nom: string;
+            dosage: string;
+        };
+    } & {
+        fournisseur: string | null;
+        createdAt: Date;
+        id: number;
+        updatedAt: Date;
+        medicamentId: number;
+        datePeremption: Date;
+        numeroLot: string;
+        quantiteInitiale: number;
+        quantiteRestante: number;
+        prixAchat: import("@prisma/client/runtime/library").Decimal | null;
+    })[]>;
+    retirerPerimesAuto(cliniqueId: number): Promise<{
+        lotsRetires: number;
+        quantiteRetiree: number;
+    }>;
+    retraits(cliniqueId?: number, debut?: string, fin?: string): any[] | Promise<({
+        medicament: {
+            nom: string;
+            dosage: string;
+        };
+        lot: {
+            datePeremption: Date;
+            numeroLot: string;
+            prixAchat: import("@prisma/client/runtime/library").Decimal;
+        };
+        utilisateur: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+    } & {
+        createdAt: Date;
+        id: number;
+        utilisateurId: number | null;
+        type: string;
+        medicamentId: number;
+        quantite: number;
+        reference: string | null;
+        commentaire: string | null;
+        lotId: number | null;
+    })[]>;
+    pointsFinanciers(cliniqueId?: number, debut?: string, fin?: string): Promise<{
+        periode: {
+            debut: string;
+            fin: string;
+        };
+        recus: number;
+        vendus: number;
+        perdus: number;
+        correctifs: number;
+        restants: number;
+    }> | {
+        recus: number;
+        vendus: number;
+        perdus: number;
+        correctifs: number;
+        restants: number;
+        periode: {};
+    };
+    detailFinancier(cliniqueId?: number, type?: string, debut?: string, fin?: string): any[] | Promise<{
+        date: Date;
+        medicament: string;
+        lot: string;
+        quantite: number;
+        prixAchat: number;
+        montant: number;
+    }[] | {
+        date: Date;
+        patient: string;
+        numeroOrdre: string;
+        montant: number;
+    }[] | {
+        date: Date;
+        medicament: string;
+        motif: string;
+        quantite: number;
+        lot: string;
+        montant: number;
+        par: string;
+        commentaire: string;
+    }[] | {
+        date: Date;
+        medicament: string;
+        lot: string;
+        ecart: number;
+        montant: number;
+        par: string;
+    }[] | {
+        medicament: string;
+        lot: string;
+        peremption: string;
+        quantite: number;
+        prixAchat: number;
+        montant: number;
+    }[]>;
     consommables(cliniqueId?: number): any[] | Promise<{
         alerte: boolean;
         createdAt: Date;

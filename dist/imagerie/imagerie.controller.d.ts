@@ -56,6 +56,7 @@ export declare class ImagerieController {
             agentId: number | null;
             prestationId: number | null;
             source: string;
+            gratuit: boolean;
             paiementId: number | null;
             creditId: number | null;
         }[];
@@ -161,6 +162,7 @@ export declare class ImagerieController {
                 agentId: number | null;
                 prestationId: number | null;
                 source: string;
+                gratuit: boolean;
                 paiementId: number | null;
                 creditId: number | null;
             }[];
