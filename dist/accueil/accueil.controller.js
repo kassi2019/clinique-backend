@@ -42,11 +42,11 @@ let AccueilController = class AccueilController {
     findOne(id) {
         return this.accueilService.findOne(id);
     }
-    creerPassage(dto) {
-        return this.accueilService.creerPassage(dto);
+    creerPassage(dto, req) {
+        return this.accueilService.creerPassage(dto, req.user?.id);
     }
-    modifierPassage(id, dto) {
-        return this.accueilService.modifierPassage(id, dto);
+    modifierPassage(id, dto, req) {
+        return this.accueilService.modifierPassage(id, dto, req.user?.id);
     }
 };
 exports.AccueilController = AccueilController;
@@ -91,16 +91,18 @@ __decorate([
 __decorate([
     (0, common_1.Post)('passages'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_passage_dto_1.CreatePassageDto]),
+    __metadata("design:paramtypes", [create_passage_dto_1.CreatePassageDto, Object]),
     __metadata("design:returntype", void 0)
 ], AccueilController.prototype, "creerPassage", null);
 __decorate([
     (0, common_1.Patch)('passages/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, create_passage_dto_1.UpdatePassageDto]),
+    __metadata("design:paramtypes", [Number, create_passage_dto_1.UpdatePassageDto, Object]),
     __metadata("design:returntype", void 0)
 ], AccueilController.prototype, "modifierPassage", null);
 exports.AccueilController = AccueilController = __decorate([

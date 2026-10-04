@@ -9,16 +9,17 @@ export declare class SoinsController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -45,16 +46,17 @@ export declare class SoinsController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -79,16 +81,17 @@ export declare class SoinsController {
                 nationalite: string | null;
                 profession: string | null;
                 quartier: string | null;
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                nom: string;
-                createdAt: Date;
                 updatedAt: Date;
-                code: string;
-                telephone: string | null;
+                nom: string;
                 prenom: string;
                 sexe: string | null;
+                telephone: string | null;
+                code: string;
                 numeroDossier: string;
+                creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
                 numeroCni: string | null;
@@ -106,11 +109,11 @@ export declare class SoinsController {
                 nom: string;
             };
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            createdAt: Date;
-            updatedAt: Date;
             statut: string;
+            updatedAt: Date;
             serviceId: number;
             patientId: number;
             numeroOrdre: string;
@@ -118,6 +121,7 @@ export declare class SoinsController {
             motif: string | null;
             referent: string | null;
             prestationDemandee: string | null;
+            agentId: number | null;
             taille: string | null;
             temperature: import("@prisma/client/runtime/library").Decimal | null;
             pouls: number | null;
@@ -134,13 +138,14 @@ export declare class SoinsController {
                 nom: string;
             };
         } & {
-            id: number;
-            libelle: string;
             createdAt: Date;
-            updatedAt: Date;
-            passageId: number;
+            id: number;
             statut: string;
+            updatedAt: Date;
             serviceId: number | null;
+            libelle: string;
+            passageId: number;
+            agentId: number | null;
             prestationId: number | null;
             montant: import("@prisma/client/runtime/library").Decimal;
             source: string;
@@ -157,21 +162,21 @@ export declare class SoinsController {
                     matricule: string;
                 };
             } & {
-                id: number;
                 createdAt: Date;
-                date: Date;
+                id: number;
                 agentId: number | null;
+                date: Date;
                 observations: string | null;
                 soinId: number;
             })[];
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            libelle: string;
-            createdAt: Date;
-            updatedAt: Date;
-            passageId: number;
             statut: string;
+            updatedAt: Date;
+            libelle: string;
+            passageId: number;
             patientId: number;
             passagePrestationId: number;
         })[];
@@ -190,21 +195,21 @@ export declare class SoinsController {
                 matricule: string;
             };
         } & {
-            id: number;
             createdAt: Date;
-            date: Date;
+            id: number;
             agentId: number | null;
+            date: Date;
             observations: string | null;
             soinId: number;
         })[];
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
-        passageId: number;
         statut: string;
+        updatedAt: Date;
+        libelle: string;
+        passageId: number;
         patientId: number;
         passagePrestationId: number;
     }>;
@@ -213,20 +218,20 @@ export declare class SoinsController {
             soin: {
                 patient: {
                     nom: string;
-                    code: string;
                     prenom: string;
+                    code: string;
                 };
                 passage: {
                     numeroOrdre: string;
                 };
             } & {
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                libelle: string;
-                createdAt: Date;
-                updatedAt: Date;
-                passageId: number;
                 statut: string;
+                updatedAt: Date;
+                libelle: string;
+                passageId: number;
                 patientId: number;
                 passagePrestationId: number;
             };
@@ -238,10 +243,10 @@ export declare class SoinsController {
                 matricule: string;
             };
         } & {
-            id: number;
             createdAt: Date;
-            date: Date;
+            id: number;
             agentId: number | null;
+            date: Date;
             observations: string | null;
             soinId: number;
         })[];

@@ -279,7 +279,7 @@ export class HospitalisationService {
   }
 
   /** Enregistre l'entrée du patient : attribution d'un lit libre (§13). */
-  async admettre(passageId: number, dto: AdmissionDto) {
+  async admettre(passageId: number, dto: AdmissionDto, utilisateurId?: number) {
     const passage = await this.prisma.passage.findUnique({
       where: { id: passageId },
       include: {
@@ -341,6 +341,7 @@ export class HospitalisationService {
         motif: dto.motif ?? consultation.motif ?? null,
         statut: 'EN_COURS',
         montantJournalier: tarif,
+        agentId: utilisateurId ?? null,
       },
       include: includeSejour,
     });

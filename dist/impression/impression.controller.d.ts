@@ -37,34 +37,34 @@ export declare class ImpressionController {
         statut: 'IMPRIMEE' | 'ECHEC';
         erreur?: string;
     }): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        statut: string;
+        nom: string | null;
         poste: string;
         libelle: string | null;
-        nom: string | null;
         partage: string | null;
-        createdAt: Date;
-        statut: string;
         contenu: string;
         format: string;
         erreur: string | null;
         printedAt: Date | null;
     }>;
     updateConfig(body: any): Promise<{
-        type: string;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
+        nom: string | null;
+        type: string;
         poste: string;
         libelle: string;
-        nom: string | null;
         partage: string | null;
         ip: string | null;
         port: number;
         largeur: number;
         autoPrint: boolean;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     test(body: any): Promise<{
         ok: boolean;

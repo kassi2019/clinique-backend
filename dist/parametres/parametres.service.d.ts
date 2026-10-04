@@ -4,9 +4,9 @@ export declare class ParametresService {
     private prisma;
     constructor(prisma: PrismaService);
     getOrCreate(cliniqueId: number): import(".prisma/client").Prisma.Prisma__ParametreClient<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
         updatedAt: Date;
         loginImage: string | null;
         logoRapportGauche: string | null;
@@ -15,9 +15,9 @@ export declare class ParametresService {
         sigVersion: string | null;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
     update(cliniqueId: number, dto: UpdateParametreDto): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
         updatedAt: Date;
         loginImage: string | null;
         logoRapportGauche: string | null;

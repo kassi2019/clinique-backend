@@ -172,7 +172,7 @@ let ImagerieService = class ImagerieService {
             historique,
         };
     }
-    async enregistrerCr(passageId, dto) {
+    async enregistrerCr(passageId, dto, utilisateurId) {
         const passage = await this.prisma.passage.findUnique({ where: { id: passageId } });
         if (!passage)
             throw new common_1.NotFoundException('Passage introuvable.');
@@ -210,12 +210,14 @@ let ImagerieService = class ImagerieService {
                 technique: dto.technique ?? null,
                 resultat: dto.resultat ?? null,
                 conclusion: dto.conclusion ?? null,
+                saisiParId: utilisateurId ?? undefined,
             },
             create: {
                 passageId,
                 passagePrestationId: ligne.id,
                 cliniqueId: passage.cliniqueId,
                 patientId: passage.patientId,
+                saisiParId: utilisateurId ?? null,
                 libelle: ligne.libelle,
                 indication: dto.indication ?? null,
                 technique: dto.technique ?? null,

@@ -19,16 +19,17 @@ export declare class CaisseService {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -67,13 +68,14 @@ export declare class CaisseService {
             service: {
                 nom: string;
             };
-            id: number;
-            libelle: string;
             createdAt: Date;
-            updatedAt: Date;
-            passageId: number;
+            id: number;
             statut: string;
+            updatedAt: Date;
             serviceId: number | null;
+            libelle: string;
+            passageId: number;
+            agentId: number | null;
             prestationId: number | null;
             source: string;
             paiementId: number | null;
@@ -85,13 +87,14 @@ export declare class CaisseService {
             partPatient: number;
             lignes: {
                 montant: number;
-                id: number;
-                libelle: string;
                 createdAt: Date;
-                updatedAt: Date;
-                passageId: number;
+                id: number;
                 statut: string;
+                updatedAt: Date;
                 serviceId: number | null;
+                libelle: string;
+                passageId: number;
+                agentId: number | null;
                 prestationId: number | null;
                 source: string;
                 paiementId: number | null;
@@ -104,15 +107,15 @@ export declare class CaisseService {
                 };
                 matricule: string;
             };
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            createdAt: Date;
+            statut: string;
             updatedAt: Date;
             passageId: number;
             caissierId: number;
             numeroRecu: string;
             modePaiement: string;
-            statut: string;
             motifAnnulation: string | null;
             dateAnnulation: Date | null;
             assuranceId: number | null;
@@ -125,16 +128,17 @@ export declare class CaisseService {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -153,11 +157,11 @@ export declare class CaisseService {
             nom: string;
             code: string;
         };
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         serviceId: number;
         patientId: number;
         numeroOrdre: string;
@@ -165,6 +169,7 @@ export declare class CaisseService {
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
+        agentId: number | null;
         taille: string | null;
         temperature: import("@prisma/client/runtime/library").Decimal | null;
         pouls: number | null;
@@ -176,28 +181,30 @@ export declare class CaisseService {
         materniteTraiteLe: Date | null;
         expireLe: Date;
     }>;
-    ajouterPrestation(passageId: number, prestationId: number): Promise<{
+    ajouterPrestation(passageId: number, prestationId: number, utilisateurId?: number): Promise<{
         montant: number;
-        id: number;
-        libelle: string;
         createdAt: Date;
-        updatedAt: Date;
-        passageId: number;
+        id: number;
         statut: string;
+        updatedAt: Date;
         serviceId: number | null;
+        libelle: string;
+        passageId: number;
+        agentId: number | null;
         prestationId: number | null;
         source: string;
         paiementId: number | null;
         creditId: number | null;
     }>;
     retirerPrestation(ligneId: number): Promise<{
-        id: number;
-        libelle: string;
         createdAt: Date;
-        updatedAt: Date;
-        passageId: number;
+        id: number;
         statut: string;
+        updatedAt: Date;
         serviceId: number | null;
+        libelle: string;
+        passageId: number;
+        agentId: number | null;
         prestationId: number | null;
         montant: import("@prisma/client/runtime/library").Decimal;
         source: string;
@@ -210,27 +217,28 @@ export declare class CaisseService {
         partPatient: number;
         lignes: {
             montant: number;
-            id: number;
-            libelle: string;
             createdAt: Date;
-            updatedAt: Date;
-            passageId: number;
+            id: number;
             statut: string;
+            updatedAt: Date;
             serviceId: number | null;
+            libelle: string;
+            passageId: number;
+            agentId: number | null;
             prestationId: number | null;
             source: string;
             paiementId: number | null;
             creditId: number | null;
         }[];
         clinique: {
-            id: number;
-            nom: string;
             createdAt: Date;
-            updatedAt: Date;
+            id: number;
             statut: string;
+            updatedAt: Date;
+            nom: string;
+            telephone: string | null;
             code: string;
             adresse: string | null;
-            telephone: string | null;
             immatriculation: string | null;
             districtNom: string | null;
             districtCode: string | null;
@@ -246,16 +254,17 @@ export declare class CaisseService {
                 nationalite: string | null;
                 profession: string | null;
                 quartier: string | null;
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                nom: string;
-                createdAt: Date;
                 updatedAt: Date;
-                code: string;
-                telephone: string | null;
+                nom: string;
                 prenom: string;
                 sexe: string | null;
+                telephone: string | null;
+                code: string;
                 numeroDossier: string;
+                creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
                 numeroCni: string | null;
@@ -270,11 +279,11 @@ export declare class CaisseService {
                 residenceActuelle: string | null;
             };
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            createdAt: Date;
-            updatedAt: Date;
             statut: string;
+            updatedAt: Date;
             serviceId: number;
             patientId: number;
             numeroOrdre: string;
@@ -282,6 +291,7 @@ export declare class CaisseService {
             motif: string | null;
             referent: string | null;
             prestationDemandee: string | null;
+            agentId: number | null;
             taille: string | null;
             temperature: import("@prisma/client/runtime/library").Decimal | null;
             pouls: number | null;
@@ -300,15 +310,15 @@ export declare class CaisseService {
             };
             matricule: string;
         };
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
+        statut: string;
         updatedAt: Date;
         passageId: number;
         caissierId: number;
         numeroRecu: string;
         modePaiement: string;
-        statut: string;
         motifAnnulation: string | null;
         dateAnnulation: Date | null;
         assuranceId: number | null;
@@ -320,15 +330,15 @@ export declare class CaisseService {
     encaisser(passageId: number, dto: EncaisserDto, utilisateurId: number): Promise<{
         paiement: {
             montantTotal: number;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            createdAt: Date;
+            statut: string;
             updatedAt: Date;
             passageId: number;
             caissierId: number;
             numeroRecu: string;
             modePaiement: string;
-            statut: string;
             motifAnnulation: string | null;
             dateAnnulation: Date | null;
             assuranceId: number | null;
@@ -362,8 +372,8 @@ export declare class CaisseService {
             numeroOrdre: string;
             patient: {
                 nom: string;
-                code: string;
                 prenom: string;
+                code: string;
             };
             service: {
                 nom: string;
@@ -395,16 +405,16 @@ export declare class CaisseService {
         totalPages: number;
     }>;
     annulerPaiement(paiementId: number, motif: string): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
+        statut: string;
         updatedAt: Date;
         passageId: number;
         caissierId: number;
         numeroRecu: string;
         montantTotal: import("@prisma/client/runtime/library").Decimal;
         modePaiement: string;
-        statut: string;
         motifAnnulation: string | null;
         dateAnnulation: Date | null;
         assuranceId: number | null;
@@ -420,31 +430,31 @@ export declare class CaisseService {
         type: 'CREDIT' | 'CAS_SOCIAL';
         motif?: string;
     }, utilisateurId: number): Promise<{
-        type: string;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
+        statut: string;
         updatedAt: Date;
+        type: string;
         passageId: number;
         montantTotal: import("@prisma/client/runtime/library").Decimal;
-        statut: string;
         motif: string | null;
-        numero: string;
         agentId: number | null;
+        numero: string;
     }>;
     credits(cliniqueId: number, page?: number, perPage?: number): Promise<{
         data: ({
             passage: {
                 patient: {
                     nom: string;
-                    code: string;
                     prenom: string;
+                    code: string;
                 };
                 numeroOrdre: string;
             };
             lignes: {
-                libelle: string;
                 statut: string;
+                libelle: string;
                 montant: import("@prisma/client/runtime/library").Decimal;
             }[];
             agent: {
@@ -455,17 +465,17 @@ export declare class CaisseService {
                 matricule: string;
             };
         } & {
-            type: string;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            createdAt: Date;
+            statut: string;
             updatedAt: Date;
+            type: string;
             passageId: number;
             montantTotal: import("@prisma/client/runtime/library").Decimal;
-            statut: string;
             motif: string | null;
-            numero: string;
             agentId: number | null;
+            numero: string;
         })[];
         total: number;
         page: number;
@@ -473,16 +483,16 @@ export declare class CaisseService {
         totalPages: number;
     }>;
     annulerCredit(id: number): Promise<{
-        type: string;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
+        statut: string;
         updatedAt: Date;
+        type: string;
         passageId: number;
         montantTotal: import("@prisma/client/runtime/library").Decimal;
-        statut: string;
         motif: string | null;
-        numero: string;
         agentId: number | null;
+        numero: string;
     }>;
 }

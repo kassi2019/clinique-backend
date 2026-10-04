@@ -41,8 +41,8 @@ let ConsultationsController = class ConsultationsController {
     prescrireExamens(id, dto) {
         return this.consultationsService.prescrireExamens(id, dto.lignesIds);
     }
-    ajouterExamen(id, dto) {
-        return this.consultationsService.ajouterExamen(id, dto);
+    ajouterExamen(id, dto, req) {
+        return this.consultationsService.ajouterExamen(id, dto, req.user?.id);
     }
     retirerExamen(id) {
         return this.consultationsService.retirerExamen(id);
@@ -127,8 +127,9 @@ __decorate([
     (0, common_1.Post)(':id/examens/ajouter'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, consultation_dto_1.PrescrireExamenDto]),
+    __metadata("design:paramtypes", [Number, consultation_dto_1.PrescrireExamenDto, Object]),
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "ajouterExamen", null);
 __decorate([

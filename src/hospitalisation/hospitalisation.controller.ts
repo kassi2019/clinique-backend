@@ -108,8 +108,9 @@ export class HospitalisationController {
   admettre(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: AdmissionDto,
+    @Req() req,
   ) {
-    return this.hospitalisationService.admettre(id, dto);
+    return this.hospitalisationService.admettre(id, dto, req.user?.id);
   }
 
   /** Suivi du séjour (observations). */

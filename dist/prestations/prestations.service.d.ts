@@ -23,15 +23,15 @@ export declare class PrestationsService {
                 code: string;
             };
         } & {
-            type: string;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
+            updatedAt: Date;
+            serviceId: number;
+            type: string;
             libelle: string;
             actif: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             code: string;
-            serviceId: number;
             montant: Prisma.Decimal;
         } & {
             montant: number;
@@ -53,15 +53,15 @@ export declare class PrestationsService {
             code: string;
         };
     } & {
-        type: string;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
+        serviceId: number;
+        type: string;
         libelle: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         code: string;
-        serviceId: number;
         montant: Prisma.Decimal;
     } & {
         montant: number;
@@ -78,15 +78,15 @@ export declare class PrestationsService {
             code: string;
         };
     } & {
-        type: string;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
+        serviceId: number;
+        type: string;
         libelle: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         code: string;
-        serviceId: number;
         montant: Prisma.Decimal;
     } & {
         montant: number;
@@ -103,15 +103,15 @@ export declare class PrestationsService {
             code: string;
         };
     } & {
-        type: string;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
+        serviceId: number;
+        type: string;
         libelle: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         code: string;
-        serviceId: number;
         montant: Prisma.Decimal;
     } & {
         montant: number;
@@ -128,15 +128,15 @@ export declare class PrestationsService {
             code: string;
         };
     } & {
-        type: string;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
+        serviceId: number;
+        type: string;
         libelle: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         code: string;
-        serviceId: number;
         montant: Prisma.Decimal;
     } & {
         montant: number;

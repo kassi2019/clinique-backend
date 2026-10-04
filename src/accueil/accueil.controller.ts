@@ -1,4 +1,5 @@
 import {
+  Req,
   Body,
   Controller,
   Get,
@@ -83,15 +84,16 @@ export class AccueilController {
   }
 
   @Post('passages')
-  creerPassage(@Body() dto: CreatePassageDto) {
-    return this.accueilService.creerPassage(dto);
+  creerPassage(@Body() dto: CreatePassageDto, @Req() req) {
+    return this.accueilService.creerPassage(dto, req.user?.id);
   }
 
   @Patch('passages/:id')
   modifierPassage(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdatePassageDto,
+    @Req() req,
   ) {
-    return this.accueilService.modifierPassage(id, dto);
+    return this.accueilService.modifierPassage(id, dto, req.user?.id);
   }
 }

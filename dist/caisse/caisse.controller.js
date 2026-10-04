@@ -40,8 +40,8 @@ let CaisseController = class CaisseController {
     detailPaiement(id) {
         return this.caisseService.detailPaiement(id);
     }
-    ajouterPrestation(id, dto) {
-        return this.caisseService.ajouterPrestation(id, dto.prestationId);
+    ajouterPrestation(id, dto, req) {
+        return this.caisseService.ajouterPrestation(id, dto.prestationId, req.user?.id);
     }
     retirerPrestation(id) {
         return this.caisseService.retirerPrestation(id);
@@ -108,8 +108,9 @@ __decorate([
     (0, common_1.Post)('passages/:id/prestations'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, encaisser_dto_1.AjouterPrestationDto]),
+    __metadata("design:paramtypes", [Number, encaisser_dto_1.AjouterPrestationDto, Object]),
     __metadata("design:returntype", void 0)
 ], CaisseController.prototype, "ajouterPrestation", null);
 __decorate([

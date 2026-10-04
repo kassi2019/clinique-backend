@@ -68,8 +68,8 @@ let HospitalisationController = class HospitalisationController {
     detailPassage(id) {
         return this.hospitalisationService.detailPassage(id);
     }
-    admettre(id, dto) {
-        return this.hospitalisationService.admettre(id, dto);
+    admettre(id, dto, req) {
+        return this.hospitalisationService.admettre(id, dto, req.user?.id);
     }
     suivi(id, dto) {
         return this.hospitalisationService.suivi(id, dto);
@@ -192,8 +192,9 @@ __decorate([
     (0, common_1.Post)('passages/:id/admissions'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, hospitalisation_dto_1.AdmissionDto]),
+    __metadata("design:paramtypes", [Number, hospitalisation_dto_1.AdmissionDto, Object]),
     __metadata("design:returntype", void 0)
 ], HospitalisationController.prototype, "admettre", null);
 __decorate([

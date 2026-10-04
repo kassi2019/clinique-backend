@@ -135,7 +135,7 @@ let CaisseService = CaisseService_1 = class CaisseService {
             })),
         };
     }
-    async ajouterPrestation(passageId, prestationId) {
+    async ajouterPrestation(passageId, prestationId, utilisateurId) {
         const passage = await this.prisma.passage.findUnique({
             where: { id: passageId },
         });
@@ -154,6 +154,7 @@ let CaisseService = CaisseService_1 = class CaisseService {
                 libelle: prestation.libelle,
                 montant: prestation.montant,
                 serviceId: prestation.serviceId,
+                agentId: utilisateurId ?? null,
                 source: 'MANUEL',
             },
         });

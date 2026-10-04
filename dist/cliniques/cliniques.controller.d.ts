@@ -4,14 +4,14 @@ export declare class CliniquesController {
     private cliniquesService;
     constructor(cliniquesService: CliniquesService);
     findAll(): import(".prisma/client").Prisma.PrismaPromise<{
-        id: number;
-        nom: string;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
+        nom: string;
+        telephone: string | null;
         code: string;
         adresse: string | null;
-        telephone: string | null;
         immatriculation: string | null;
         districtNom: string | null;
         districtCode: string | null;
@@ -28,14 +28,14 @@ export declare class CliniquesController {
             services: number;
         };
     } & {
-        id: number;
-        nom: string;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
+        nom: string;
+        telephone: string | null;
         code: string;
         adresse: string | null;
-        telephone: string | null;
         immatriculation: string | null;
         districtNom: string | null;
         districtCode: string | null;
@@ -47,14 +47,14 @@ export declare class CliniquesController {
         responsableRapportContact: string | null;
     }>;
     create(dto: CreateCliniqueDto): Promise<{
-        id: number;
-        nom: string;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
+        nom: string;
+        telephone: string | null;
         code: string;
         adresse: string | null;
-        telephone: string | null;
         immatriculation: string | null;
         districtNom: string | null;
         districtCode: string | null;
@@ -66,14 +66,14 @@ export declare class CliniquesController {
         responsableRapportContact: string | null;
     }>;
     update(id: number, dto: UpdateCliniqueDto): Promise<{
-        id: number;
-        nom: string;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
+        nom: string;
+        telephone: string | null;
         code: string;
         adresse: string | null;
-        telephone: string | null;
         immatriculation: string | null;
         districtNom: string | null;
         districtCode: string | null;
@@ -85,14 +85,14 @@ export declare class CliniquesController {
         responsableRapportContact: string | null;
     }>;
     remove(id: number): Promise<{
-        id: number;
-        nom: string;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
+        nom: string;
+        telephone: string | null;
         code: string;
         adresse: string | null;
-        telephone: string | null;
         immatriculation: string | null;
         districtNom: string | null;
         districtCode: string | null;

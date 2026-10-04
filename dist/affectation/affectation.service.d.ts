@@ -6,23 +6,23 @@ export declare class AffectationService {
     constructor(prisma: PrismaService);
     private medecinsDisponibles;
     assignerPassage(passageId: number): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
+        statut: string;
         updatedAt: Date;
         passageId: number;
-        statut: string;
         medecinId: number | null;
         dateAffectation: Date;
     }>;
     redistribuerNonAffectees(cliniqueId: number): Promise<number>;
     annulerAffectation(passageId: number): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
+        statut: string;
         updatedAt: Date;
         passageId: number;
-        statut: string;
         medecinId: number | null;
         dateAffectation: Date;
     }>;

@@ -62,8 +62,9 @@ export class MaterniteController {
       patientId?: number;
       nouveauPatient?: { nom: string; prenom: string; age?: number | string; sexe?: string; telephone?: string };
     },
+    @Req() req,
   ) {
-    return this.materniteService.creerUrgence(dto);
+    return this.materniteService.creerUrgence(dto, req.user?.id);
   }
 
   /** Crée le dossier grossesse du passage à la demande (accouchement sans CPN). */

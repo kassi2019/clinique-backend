@@ -12,10 +12,10 @@ export declare class AssurancesController {
                     montant: import("@prisma/client/runtime/library").Decimal;
                 };
             } & {
-                id: number;
                 createdAt: Date;
-                updatedAt: Date;
+                id: number;
                 statut: string;
+                updatedAt: Date;
                 prestationId: number;
                 dateDebut: Date | null;
                 dateFin: Date | null;
@@ -24,11 +24,11 @@ export declare class AssurancesController {
                 formuleId: number;
             })[];
         } & {
-            id: number;
-            libelle: string;
             createdAt: Date;
-            updatedAt: Date;
+            id: number;
             statut: string;
+            updatedAt: Date;
+            libelle: string;
             assuranceId: number;
             code: string;
             description: string | null;
@@ -36,16 +36,16 @@ export declare class AssurancesController {
             dateFin: Date | null;
         })[];
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
-        code: string;
-        adresse: string | null;
+        updatedAt: Date;
         telephone: string | null;
         email: string | null;
+        libelle: string;
+        code: string;
+        adresse: string | null;
         numeroAgrement: string | null;
     })[]>;
     facturation(cliniqueId?: string, debut?: string, fin?: string, assuranceId?: string, page?: string, perPage?: string): Promise<{
@@ -59,8 +59,8 @@ export declare class AssurancesController {
             numeroRecu: string;
             patient: {
                 nom: string;
-                code: string;
                 prenom: string;
+                code: string;
             };
             numeroOrdre: string;
             assurance: {
@@ -97,16 +97,16 @@ export declare class AssurancesController {
         parAssurance: any[];
     };
     creer(cliniqueId: string, dto: any): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
-        code: string;
-        adresse: string | null;
+        updatedAt: Date;
         telephone: string | null;
         email: string | null;
+        libelle: string;
+        code: string;
+        adresse: string | null;
         numeroAgrement: string | null;
     }>;
     importer(cliniqueId: string, dto: any): Promise<{
@@ -114,37 +114,37 @@ export declare class AssurancesController {
         total: number;
     }>;
     modifier(id: number, dto: any): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
-        code: string;
-        adresse: string | null;
+        updatedAt: Date;
         telephone: string | null;
         email: string | null;
+        libelle: string;
+        code: string;
+        adresse: string | null;
         numeroAgrement: string | null;
     }>;
     desactiver(id: number): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
-        code: string;
-        adresse: string | null;
+        updatedAt: Date;
         telephone: string | null;
         email: string | null;
+        libelle: string;
+        code: string;
+        adresse: string | null;
         numeroAgrement: string | null;
     }>;
     creerFormule(dto: any): Promise<{
-        id: number;
-        libelle: string;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
+        libelle: string;
         assuranceId: number;
         code: string;
         description: string | null;
@@ -152,11 +152,11 @@ export declare class AssurancesController {
         dateFin: Date | null;
     }>;
     modifierFormule(id: number, dto: any): Promise<{
-        id: number;
-        libelle: string;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
+        libelle: string;
         assuranceId: number;
         code: string;
         description: string | null;
@@ -164,11 +164,11 @@ export declare class AssurancesController {
         dateFin: Date | null;
     }>;
     desactiverFormule(id: number): Promise<{
-        id: number;
-        libelle: string;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
+        libelle: string;
         assuranceId: number;
         code: string;
         description: string | null;
@@ -176,10 +176,10 @@ export declare class AssurancesController {
         dateFin: Date | null;
     }>;
     creerCouverture(dto: any): Promise<{
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
         prestationId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -188,10 +188,10 @@ export declare class AssurancesController {
         formuleId: number;
     }>;
     modifierCouverture(id: number, dto: any): Promise<{
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
         prestationId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -200,10 +200,10 @@ export declare class AssurancesController {
         formuleId: number;
     }>;
     desactiverCouverture(id: number): Promise<{
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
         prestationId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -223,10 +223,10 @@ export declare class AssurancesController {
             code: string;
         };
     } & {
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
         assuranceId: number;
         patientId: number;
         dateDebut: Date | null;
@@ -238,10 +238,10 @@ export declare class AssurancesController {
         typeBeneficiaire: string | null;
     })[]>;
     ajouterPatientAssurance(patientId: number, dto: any): Promise<{
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
         assuranceId: number;
         patientId: number;
         dateDebut: Date | null;
@@ -253,10 +253,10 @@ export declare class AssurancesController {
         typeBeneficiaire: string | null;
     }>;
     desactiverPatientAssurance(id: number): Promise<{
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
         assuranceId: number;
         patientId: number;
         dateDebut: Date | null;

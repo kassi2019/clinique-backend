@@ -820,11 +820,14 @@ export class MaterniteService {
    * prestations MATERNITE EN_ATTENTE (payables après à la caisse),
    * dossier grossesse créé si absent.
    */
-  async creerUrgence(dto: {
-    cliniqueId: number;
-    patientId?: number;
-    nouveauPatient?: { nom: string; prenom: string; age?: number | string; sexe?: string; telephone?: string };
-  }) {
+  async creerUrgence(
+    dto: {
+      cliniqueId: number;
+      patientId?: number;
+      nouveauPatient?: { nom: string; prenom: string; age?: number | string; sexe?: string; telephone?: string };
+    },
+    utilisateurId?: number,
+  ) {
     const { serviceId } = await this.urgenceActes(dto.cliniqueId);
 
     // Passage via l'accueil : même numérotation, mêmes règles de prestations.
@@ -845,7 +848,7 @@ export class MaterniteService {
         : undefined,
       typePatient: 'INTERNE',
       motif: 'Accouchement (urgence)',
-    } as any);
+    } as any, utilisateurId);
 
     // Dossier grossesse obligatoire pour l'enregistrement de l'accouchement
     const dossier = await this.obtenirOuCreerDossier(passage.patientId, dto.cliniqueId);

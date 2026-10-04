@@ -426,7 +426,7 @@ module.exports = [
       { code: 'placentaInsertion', libelle: 'Insertion', type: 'texte', defaut: 'bonne' },
       { code: 'grade', libelle: 'Grade', type: 'choix', options: ['0', 'I', 'II', 'III'], defaut: '0 / I / II / III' },
       { code: 'epaisseurPlacenta', libelle: 'Épaisseur (structure)', type: 'choix', options: ['homogène', 'hétérogène'], defaut: 'homogène / hétérogène' },
-      { code: 'liquideQuantite', libelle: 'Quantité du liquide amniotique', type: 'choix', options: ['normale', 'diminuée', 'augmentée'], defaut: 'normale / diminuée / augmentée' },
+      { code: 'liquideQuantite', libelle: 'Quantité du liquide amniotique', type: 'choix', options: ['excessive', 'modérée', 'minime'], defaut: 'excessive / modérée / minime' },
       { code: 'liquideQualite', libelle: 'Qualité', type: 'choix', options: ['normale', 'anormale'], defaut: 'normale / anormale' },
       { code: 'liquideCommentaire', libelle: 'Commentaire qualité', type: 'texte', defaut: '......' },
       { code: 'poids', libelle: 'Poids fœtal estimé', type: 'nombre', unite: 'grammes' },

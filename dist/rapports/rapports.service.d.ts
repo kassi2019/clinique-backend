@@ -10,8 +10,8 @@ export declare class RapportsService {
     private portes;
     lister(cliniqueId: number): Promise<{
         id: number;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         mois: number;
         annee: number;
     }[]>;
@@ -31,11 +31,11 @@ export declare class RapportsService {
             ligne: number;
             colonne: number;
         }[];
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         immatriculation: string | null;
         districtNom: string | null;
         districtCode: string | null;
@@ -60,11 +60,11 @@ export declare class RapportsService {
             ligne: number;
             colonne: number;
         }[];
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         immatriculation: string | null;
         districtNom: string | null;
         districtCode: string | null;
@@ -81,11 +81,11 @@ export declare class RapportsService {
     }>;
     reimporterEntete(id: number): Promise<{
         portes: Record<string, boolean>;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         immatriculation: string | null;
         districtNom: string | null;
         districtCode: string | null;

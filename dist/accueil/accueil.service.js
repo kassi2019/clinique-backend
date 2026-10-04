@@ -195,7 +195,7 @@ let AccueilService = AccueilService_1 = class AccueilService {
             throw new common_1.NotFoundException('Passage introuvable.');
         return this.avecStatutVerifie(passage);
     }
-    async creerPassage(dto) {
+    async creerPassage(dto, utilisateurId) {
         let patient;
         if (dto.patientId) {
             const existant = await this.prisma.patient.findUnique({
@@ -227,6 +227,7 @@ let AccueilService = AccueilService_1 = class AccueilService {
                 data: {
                     cliniqueId: dto.cliniqueId,
                     numeroDossier: await this.prochainNumeroDossier(dto.cliniqueId),
+                    creeParId: utilisateurId ?? null,
                     code: codePatient,
                     nom: dto.nouveauPatient.nom,
                     prenom: dto.nouveauPatient.prenom,
@@ -257,6 +258,7 @@ let AccueilService = AccueilService_1 = class AccueilService {
                 numeroOrdre,
                 serviceId: dto.serviceId,
                 typePatient: dto.typePatient ?? 'INTERNE',
+                agentId: utilisateurId ?? null,
                 motif: dto.motif,
                 referent: dto.referent,
                 prestationDemandee: dto.prestationDemandee,
@@ -308,6 +310,7 @@ let AccueilService = AccueilService_1 = class AccueilService {
                     libelle: p.libelle,
                     montant: p.montant,
                     serviceId: p.serviceId,
+                    agentId: utilisateurId ?? null,
                     source: 'ACCUEIL',
                     statut: p.id === consultationChoisie?.id ||
                         p.id === acteChoisi?.id ||
@@ -332,7 +335,7 @@ let AccueilService = AccueilService_1 = class AccueilService {
         }
         return { ...resultat, impression };
     }
-    async modifierPassage(id, dto) {
+    async modifierPassage(id, dto, utilisateurId) {
         const passage = await this.prisma.passage.findUnique({ where: { id } });
         if (!passage)
             throw new common_1.NotFoundException('Passage introuvable.');
@@ -364,7 +367,7 @@ let AccueilService = AccueilService_1 = class AccueilService {
         const { patient: _patient, ...donneesPassage } = dto;
         const maj = await this.prisma.passage.update({
             where: { id },
-            data: donneesPassage,
+            data: { ...donneesPassage, agentId: utilisateurId ?? undefined },
             include: includePassage,
         });
         return this.avecStatutVerifie(maj);

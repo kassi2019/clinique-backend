@@ -32,8 +32,8 @@ let MaterniteController = class MaterniteController {
             return [];
         return this.materniteService.urgencePatients(recherche ?? '', cliniqueId);
     }
-    creerUrgence(dto) {
-        return this.materniteService.creerUrgence(dto);
+    creerUrgence(dto, req) {
+        return this.materniteService.creerUrgence(dto, req.user?.id);
     }
     creerDossierPassage(id) {
         return this.materniteService.creerDossierPassage(id);
@@ -135,8 +135,9 @@ __decorate([
 __decorate([
     (0, common_1.Post)('urgences'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], MaterniteController.prototype, "creerUrgence", null);
 __decorate([

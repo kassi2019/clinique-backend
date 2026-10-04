@@ -11,12 +11,12 @@ export declare class ServicesController {
                 code: string;
             };
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
+            updatedAt: Date;
             nom: string;
             actif: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             code: string;
             description: string | null;
         })[];
@@ -32,42 +32,42 @@ export declare class ServicesController {
             code: string;
         };
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
         nom: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         code: string;
         description: string | null;
     }>;
     create(dto: CreateServiceDto): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
         nom: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         code: string;
         description: string | null;
     }>;
     update(id: number, dto: UpdateServiceDto): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
         nom: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         code: string;
         description: string | null;
     }>;
     remove(id: number): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
         nom: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         code: string;
         description: string | null;
     }>;

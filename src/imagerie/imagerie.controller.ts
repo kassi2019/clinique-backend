@@ -47,8 +47,9 @@ export class ImagerieController {
   enregistrerCr(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: EnregistrerCrDto,
+    @Req() req,
   ) {
-    return this.imagerieService.enregistrerCr(id, dto);
+    return this.imagerieService.enregistrerCr(id, dto, req.user?.id);
   }
 
   /** Valide le compte rendu. */

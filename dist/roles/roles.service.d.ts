@@ -23,10 +23,10 @@ export declare class RolesService {
                 moduleId: number;
             })[];
         } & {
-            id: number;
-            nom: string;
             createdAt: Date;
+            id: number;
             updatedAt: Date;
+            nom: string;
             code: string;
             description: string | null;
         })[];
@@ -51,10 +51,10 @@ export declare class RolesService {
             moduleId: number;
         })[];
     } & {
-        id: number;
-        nom: string;
         createdAt: Date;
+        id: number;
         updatedAt: Date;
+        nom: string;
         code: string;
         description: string | null;
     }>;
@@ -74,10 +74,10 @@ export declare class RolesService {
             moduleId: number;
         })[];
     } & {
-        id: number;
-        nom: string;
         createdAt: Date;
+        id: number;
         updatedAt: Date;
+        nom: string;
         code: string;
         description: string | null;
     }>;
@@ -97,18 +97,18 @@ export declare class RolesService {
             moduleId: number;
         })[];
     } & {
-        id: number;
-        nom: string;
         createdAt: Date;
+        id: number;
         updatedAt: Date;
+        nom: string;
         code: string;
         description: string | null;
     }>;
     remove(id: number): Promise<{
-        id: number;
-        nom: string;
         createdAt: Date;
+        id: number;
         updatedAt: Date;
+        nom: string;
         code: string;
         description: string | null;
     }>;

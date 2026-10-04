@@ -238,7 +238,7 @@ export class AccueilService {
    * Crée un passage : patient (existant ou nouveau), N° d'ordre du jour,
    * code unique et date d'expiration (10 jours, §4.3).
    */
-  async creerPassage(dto: CreatePassageDto) {
+  async creerPassage(dto: CreatePassageDto, utilisateurId?: number) {
     let patient: { id: number };
 
     if (dto.patientId) {
@@ -275,6 +275,7 @@ export class AccueilService {
         data: {
           cliniqueId: dto.cliniqueId,
           numeroDossier: await this.prochainNumeroDossier(dto.cliniqueId),
+          creeParId: utilisateurId ?? null,
           code: codePatient,
           nom: dto.nouveauPatient.nom,
           prenom: dto.nouveauPatient.prenom,
@@ -314,6 +315,7 @@ export class AccueilService {
         numeroOrdre,
         serviceId: dto.serviceId,
         typePatient: dto.typePatient ?? 'INTERNE',
+        agentId: utilisateurId ?? null,
         motif: dto.motif,
         referent: dto.referent,
         prestationDemandee: dto.prestationDemandee,
@@ -388,6 +390,7 @@ export class AccueilService {
           libelle: p.libelle,
           montant: p.montant,
           serviceId: p.serviceId,
+          agentId: utilisateurId ?? null,
           source: 'ACCUEIL',
           statut:
             p.id === consultationChoisie?.id ||
@@ -422,7 +425,7 @@ export class AccueilService {
   }
 
   /** Modifie un passage (et les données du patient si fournies). */
-  async modifierPassage(id: number, dto: UpdatePassageDto) {
+  async modifierPassage(id: number, dto: UpdatePassageDto, utilisateurId?: number) {
     const passage = await this.prisma.passage.findUnique({ where: { id } });
     if (!passage) throw new NotFoundException('Passage introuvable.');
 
@@ -456,7 +459,8 @@ export class AccueilService {
     const { patient: _patient, ...donneesPassage } = dto;
     const maj = await this.prisma.passage.update({
       where: { id },
-      data: donneesPassage,
+      // Le dernier agent ayant agi sur le passage (constantes) est tracé
+      data: { ...donneesPassage, agentId: utilisateurId ?? undefined },
       include: includePassage,
     });
     return this.avecStatutVerifie(maj);

@@ -222,10 +222,10 @@ let ConsultationsService = class ConsultationsService {
             },
             include: includeConsultation,
         });
-        await this.synchroniserFactureHospitalisation(passage.cliniqueId, passageId, dto);
+        await this.synchroniserFactureHospitalisation(passage.cliniqueId, passageId, dto, medecinId);
         return consultation;
     }
-    async synchroniserFactureHospitalisation(cliniqueId, passageId, dto) {
+    async synchroniserFactureHospitalisation(cliniqueId, passageId, dto, medecinId) {
         if (dto.hospitalisation === true) {
             if (!dto.litId || dto.hospitalisationDureeJours == null || dto.hospitalisationDureeJours < 1) {
                 return;
@@ -272,6 +272,7 @@ let ConsultationsService = class ConsultationsService {
                         libelle,
                         montant,
                         serviceId: serviceHos?.id ?? null,
+                        agentId: medecinId ?? null,
                         source: 'PRESCRIPTION',
                         statut: 'EN_ATTENTE',
                     },
@@ -370,7 +371,7 @@ let ConsultationsService = class ConsultationsService {
             where: { id: { in: lignesIds } },
         });
     }
-    async ajouterExamen(consultationId, dto) {
+    async ajouterExamen(consultationId, dto, utilisateurId) {
         const consultation = await this.prisma.consultation.findUnique({
             where: { id: consultationId },
             include: { passage: { include: { prestations: true } } },
@@ -391,6 +392,7 @@ let ConsultationsService = class ConsultationsService {
                     passageId: consultation.passageId,
                     libelle: libelleLibre,
                     montant: 0,
+                    agentId: utilisateurId ?? null,
                     source: 'PRESCRIPTION',
                     statut: 'EXTERNE',
                 },
@@ -425,6 +427,7 @@ let ConsultationsService = class ConsultationsService {
                 libelle: prestation.libelle,
                 montant: prestation.montant,
                 serviceId: prestation.serviceId,
+                agentId: utilisateurId ?? null,
                 source: 'PRESCRIPTION',
                 statut: 'EN_ATTENTE',
             },

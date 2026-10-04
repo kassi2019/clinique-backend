@@ -147,7 +147,7 @@ export class CaisseService {
   }
 
   /** Ajout manuel d'une prestation à régler (§6.1). */
-  async ajouterPrestation(passageId: number, prestationId: number) {
+  async ajouterPrestation(passageId: number, prestationId: number, utilisateurId?: number) {
     const passage = await this.prisma.passage.findUnique({
       where: { id: passageId },
     });
@@ -167,6 +167,7 @@ export class CaisseService {
         libelle: prestation.libelle,
         montant: prestation.montant,
         serviceId: prestation.serviceId,
+        agentId: utilisateurId ?? null,
         source: 'MANUEL',
       },
     });

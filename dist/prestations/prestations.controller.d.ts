@@ -16,15 +16,15 @@ export declare class PrestationsController {
                 code: string;
             };
         } & {
-            type: string;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
+            updatedAt: Date;
+            serviceId: number;
+            type: string;
             libelle: string;
             actif: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             code: string;
-            serviceId: number;
             montant: import("@prisma/client/runtime/library").Decimal;
         } & {
             montant: number;
@@ -46,15 +46,15 @@ export declare class PrestationsController {
             code: string;
         };
     } & {
-        type: string;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
+        serviceId: number;
+        type: string;
         libelle: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         code: string;
-        serviceId: number;
         montant: import("@prisma/client/runtime/library").Decimal;
     } & {
         montant: number;
@@ -71,15 +71,15 @@ export declare class PrestationsController {
             code: string;
         };
     } & {
-        type: string;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
+        serviceId: number;
+        type: string;
         libelle: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         code: string;
-        serviceId: number;
         montant: import("@prisma/client/runtime/library").Decimal;
     } & {
         montant: number;
@@ -96,15 +96,15 @@ export declare class PrestationsController {
             code: string;
         };
     } & {
-        type: string;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
+        serviceId: number;
+        type: string;
         libelle: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         code: string;
-        serviceId: number;
         montant: import("@prisma/client/runtime/library").Decimal;
     } & {
         montant: number;
@@ -121,15 +121,15 @@ export declare class PrestationsController {
             code: string;
         };
     } & {
-        type: string;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
+        serviceId: number;
+        type: string;
         libelle: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         code: string;
-        serviceId: number;
         montant: import("@prisma/client/runtime/library").Decimal;
     } & {
         montant: number;

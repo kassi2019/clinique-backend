@@ -10,16 +10,17 @@ export declare class MaterniteController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -53,10 +54,10 @@ export declare class MaterniteController {
     urgencePatients(recherche?: string, cliniqueId?: number): any[] | Promise<{
         id: number;
         nom: string;
-        code: string;
-        telephone: string;
         prenom: string;
         sexe: string;
+        telephone: string;
+        code: string;
         age: string;
     }[]>;
     creerUrgence(dto: {
@@ -69,7 +70,7 @@ export declare class MaterniteController {
             sexe?: string;
             telephone?: string;
         };
-    }): Promise<{
+    }, req: any): Promise<{
         passage: {
             id: number;
             numeroOrdre: string;
@@ -81,11 +82,11 @@ export declare class MaterniteController {
         };
     }>;
     creerDossierPassage(id: number): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         patientId: number;
         modeEntree: string | null;
         antecedentsMedicaux: string | null;
@@ -117,16 +118,17 @@ export declare class MaterniteController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -155,16 +157,17 @@ export declare class MaterniteController {
                 nationalite: string | null;
                 profession: string | null;
                 quartier: string | null;
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                nom: string;
-                createdAt: Date;
                 updatedAt: Date;
-                code: string;
-                telephone: string | null;
+                nom: string;
                 prenom: string;
                 sexe: string | null;
+                telephone: string | null;
+                code: string;
                 numeroDossier: string;
+                creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
                 numeroCni: string | null;
@@ -182,11 +185,11 @@ export declare class MaterniteController {
                 nom: string;
             };
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            createdAt: Date;
-            updatedAt: Date;
             statut: string;
+            updatedAt: Date;
             serviceId: number;
             patientId: number;
             numeroOrdre: string;
@@ -194,6 +197,7 @@ export declare class MaterniteController {
             motif: string | null;
             referent: string | null;
             prestationDemandee: string | null;
+            agentId: number | null;
             taille: string | null;
             temperature: import("@prisma/client/runtime/library").Decimal | null;
             pouls: number | null;
@@ -215,8 +219,8 @@ export declare class MaterniteController {
             consultation: {
                 medicaments: {
                     posologie: string | null;
-                    id: number;
                     createdAt: Date;
+                    id: number;
                     consultationId: number;
                     medicamentId: number | null;
                     medicamentNom: string;
@@ -227,11 +231,11 @@ export declare class MaterniteController {
             } & {
                 diagnostic: string | null;
                 hospitalisation: boolean;
-                id: number;
                 createdAt: Date;
+                id: number;
+                statut: string;
                 updatedAt: Date;
                 passageId: number;
-                statut: string;
                 patientId: number;
                 motif: string | null;
                 perimetreBrachial: string | null;
@@ -286,16 +290,17 @@ export declare class MaterniteController {
                 nationalite: string | null;
                 profession: string | null;
                 quartier: string | null;
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                nom: string;
-                createdAt: Date;
                 updatedAt: Date;
-                code: string;
-                telephone: string | null;
+                nom: string;
                 prenom: string;
                 sexe: string | null;
+                telephone: string | null;
+                code: string;
                 numeroDossier: string;
+                creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
                 numeroCni: string | null;
@@ -314,36 +319,37 @@ export declare class MaterniteController {
             };
             prestations: ({
                 prestation: {
-                    type: string;
+                    createdAt: Date;
                     id: number;
                     cliniqueId: number;
+                    updatedAt: Date;
+                    serviceId: number;
+                    type: string;
                     libelle: string;
                     actif: boolean;
-                    createdAt: Date;
-                    updatedAt: Date;
                     code: string;
-                    serviceId: number;
                     montant: import("@prisma/client/runtime/library").Decimal;
                 };
             } & {
-                id: number;
-                libelle: string;
                 createdAt: Date;
-                updatedAt: Date;
-                passageId: number;
+                id: number;
                 statut: string;
+                updatedAt: Date;
                 serviceId: number | null;
+                libelle: string;
+                passageId: number;
+                agentId: number | null;
                 prestationId: number | null;
                 montant: import("@prisma/client/runtime/library").Decimal;
                 source: string;
                 paiementId: number | null;
                 creditId: number | null;
             })[];
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            createdAt: Date;
-            updatedAt: Date;
             statut: string;
+            updatedAt: Date;
             serviceId: number;
             patientId: number;
             numeroOrdre: string;
@@ -351,6 +357,7 @@ export declare class MaterniteController {
             motif: string | null;
             referent: string | null;
             prestationDemandee: string | null;
+            agentId: number | null;
             taille: string | null;
             temperature: import("@prisma/client/runtime/library").Decimal | null;
             pouls: number | null;
@@ -364,13 +371,13 @@ export declare class MaterniteController {
         };
         dossier: {
             accouchement: {
-                id: number;
                 createdAt: Date;
+                id: number;
                 updatedAt: Date;
+                agentId: number | null;
                 modeEntree: string | null;
                 antecedentsMedicaux: string | null;
                 antecedentsChirurgicaux: string | null;
-                agentId: number | null;
                 lieu: string | null;
                 enfantsVivants: number | null;
                 enfantsDecedes: number | null;
@@ -435,9 +442,10 @@ export declare class MaterniteController {
                     matricule: string;
                 };
             } & {
-                id: number;
                 createdAt: Date;
+                id: number;
                 updatedAt: Date;
+                agentId: number | null;
                 taille: string | null;
                 tensionGauche: string | null;
                 tensionDroite: string | null;
@@ -445,7 +453,6 @@ export declare class MaterniteController {
                 mildaRemise: boolean | null;
                 date: Date;
                 numero: number;
-                agentId: number | null;
                 ageGestationnelSA: string | null;
                 hauteurUterine: string | null;
                 bcf: string | null;
@@ -469,11 +476,11 @@ export declare class MaterniteController {
                 grossesseId: number;
             })[];
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            createdAt: Date;
-            updatedAt: Date;
             statut: string;
+            updatedAt: Date;
             patientId: number;
             modeEntree: string | null;
             antecedentsMedicaux: string | null;
@@ -507,15 +514,15 @@ export declare class MaterniteController {
                 matricule: string;
             };
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            createdAt: Date;
             updatedAt: Date;
             passageId: number;
             patientId: number;
+            agentId: number | null;
             modeEntree: string | null;
             date: Date;
-            agentId: number | null;
             observations: string | null;
             statutVih: string | null;
             conseils: string | null;
@@ -538,16 +545,16 @@ export declare class MaterniteController {
                 matricule: string;
             };
         } & {
+            methode: string;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            createdAt: Date;
             updatedAt: Date;
             passageId: number;
             patientId: number;
-            date: Date;
             agentId: number | null;
+            date: Date;
             observations: string | null;
-            methode: string;
             nouvelleUtilisatrice: boolean;
             protégée: boolean;
             perdueDeVue: boolean;
@@ -564,11 +571,11 @@ export declare class MaterniteController {
         })[];
     }>;
     terminer(id: number): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         serviceId: number;
         patientId: number;
         numeroOrdre: string;
@@ -576,6 +583,7 @@ export declare class MaterniteController {
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
+        agentId: number | null;
         taille: string | null;
         temperature: import("@prisma/client/runtime/library").Decimal | null;
         pouls: number | null;
@@ -590,11 +598,11 @@ export declare class MaterniteController {
     assurerConsultation(id: number, req: any): Promise<{
         diagnostic: string | null;
         hospitalisation: boolean;
-        id: number;
         createdAt: Date;
+        id: number;
+        statut: string;
         updatedAt: Date;
         passageId: number;
-        statut: string;
         patientId: number;
         motif: string | null;
         perimetreBrachial: string | null;
@@ -647,13 +655,13 @@ export declare class MaterniteController {
     }>;
     dossierPatient(patientId: number): Promise<{
         accouchement: {
-            id: number;
             createdAt: Date;
+            id: number;
             updatedAt: Date;
+            agentId: number | null;
             modeEntree: string | null;
             antecedentsMedicaux: string | null;
             antecedentsChirurgicaux: string | null;
-            agentId: number | null;
             lieu: string | null;
             enfantsVivants: number | null;
             enfantsDecedes: number | null;
@@ -718,9 +726,10 @@ export declare class MaterniteController {
                 matricule: string;
             };
         } & {
-            id: number;
             createdAt: Date;
+            id: number;
             updatedAt: Date;
+            agentId: number | null;
             taille: string | null;
             tensionGauche: string | null;
             tensionDroite: string | null;
@@ -728,7 +737,6 @@ export declare class MaterniteController {
             mildaRemise: boolean | null;
             date: Date;
             numero: number;
-            agentId: number | null;
             ageGestationnelSA: string | null;
             hauteurUterine: string | null;
             bcf: string | null;
@@ -752,11 +760,11 @@ export declare class MaterniteController {
             grossesseId: number;
         })[];
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         patientId: number;
         modeEntree: string | null;
         antecedentsMedicaux: string | null;
@@ -782,15 +790,15 @@ export declare class MaterniteController {
         dpa: Date | null;
     }>;
     creerCpon(id: number, dto: CreateCponDto, req: any): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
         updatedAt: Date;
         passageId: number;
         patientId: number;
+        agentId: number | null;
         modeEntree: string | null;
         date: Date;
-        agentId: number | null;
         observations: string | null;
         statutVih: string | null;
         conseils: string | null;
@@ -805,15 +813,15 @@ export declare class MaterniteController {
         examenEnfant: string | null;
     }>;
     modifierCpon(id: number, dto: UpdateCponDto): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
         updatedAt: Date;
         passageId: number;
         patientId: number;
+        agentId: number | null;
         modeEntree: string | null;
         date: Date;
-        agentId: number | null;
         observations: string | null;
         statutVih: string | null;
         conseils: string | null;
@@ -828,16 +836,16 @@ export declare class MaterniteController {
         examenEnfant: string | null;
     }>;
     creerPf(id: number, dto: CreatePfDto, req: any): Promise<{
+        methode: string;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
         updatedAt: Date;
         passageId: number;
         patientId: number;
-        date: Date;
         agentId: number | null;
+        date: Date;
         observations: string | null;
-        methode: string;
         nouvelleUtilisatrice: boolean;
         protégée: boolean;
         perdueDeVue: boolean;
@@ -853,16 +861,16 @@ export declare class MaterniteController {
         nourrisson6: boolean;
     }>;
     modifierPf(id: number, dto: UpdatePfDto): Promise<{
+        methode: string;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
         updatedAt: Date;
         passageId: number;
         patientId: number;
-        date: Date;
         agentId: number | null;
+        date: Date;
         observations: string | null;
-        methode: string;
         nouvelleUtilisatrice: boolean;
         protégée: boolean;
         perdueDeVue: boolean;
@@ -884,16 +892,17 @@ export declare class MaterniteController {
                 nationalite: string | null;
                 profession: string | null;
                 quartier: string | null;
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                nom: string;
-                createdAt: Date;
                 updatedAt: Date;
-                code: string;
-                telephone: string | null;
+                nom: string;
                 prenom: string;
                 sexe: string | null;
+                telephone: string | null;
+                code: string;
                 numeroDossier: string;
+                creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
                 numeroCni: string | null;
@@ -908,13 +917,13 @@ export declare class MaterniteController {
                 residenceActuelle: string | null;
             };
             accouchement: {
-                id: number;
                 createdAt: Date;
+                id: number;
                 updatedAt: Date;
+                agentId: number | null;
                 modeEntree: string | null;
                 antecedentsMedicaux: string | null;
                 antecedentsChirurgicaux: string | null;
-                agentId: number | null;
                 lieu: string | null;
                 enfantsVivants: number | null;
                 enfantsDecedes: number | null;
@@ -974,9 +983,10 @@ export declare class MaterniteController {
                 visites: number;
             };
             visites: {
-                id: number;
                 createdAt: Date;
+                id: number;
                 updatedAt: Date;
+                agentId: number | null;
                 taille: string | null;
                 tensionGauche: string | null;
                 tensionDroite: string | null;
@@ -984,7 +994,6 @@ export declare class MaterniteController {
                 mildaRemise: boolean | null;
                 date: Date;
                 numero: number;
-                agentId: number | null;
                 ageGestationnelSA: string | null;
                 hauteurUterine: string | null;
                 bcf: string | null;
@@ -1007,11 +1016,11 @@ export declare class MaterniteController {
                 counselingPfppi: boolean | null;
                 grossesseId: number;
             }[];
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            createdAt: Date;
-            updatedAt: Date;
             statut: string;
+            updatedAt: Date;
             patientId: number;
             modeEntree: string | null;
             antecedentsMedicaux: string | null;
@@ -1046,16 +1055,17 @@ export declare class MaterniteController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -1078,13 +1088,13 @@ export declare class MaterniteController {
                 matricule: string;
             };
         } & {
-            id: number;
             createdAt: Date;
+            id: number;
             updatedAt: Date;
+            agentId: number | null;
             modeEntree: string | null;
             antecedentsMedicaux: string | null;
             antecedentsChirurgicaux: string | null;
-            agentId: number | null;
             lieu: string | null;
             enfantsVivants: number | null;
             enfantsDecedes: number | null;
@@ -1149,9 +1159,10 @@ export declare class MaterniteController {
                 matricule: string;
             };
         } & {
-            id: number;
             createdAt: Date;
+            id: number;
             updatedAt: Date;
+            agentId: number | null;
             taille: string | null;
             tensionGauche: string | null;
             tensionDroite: string | null;
@@ -1159,7 +1170,6 @@ export declare class MaterniteController {
             mildaRemise: boolean | null;
             date: Date;
             numero: number;
-            agentId: number | null;
             ageGestationnelSA: string | null;
             hauteurUterine: string | null;
             bcf: string | null;
@@ -1183,11 +1193,11 @@ export declare class MaterniteController {
             grossesseId: number;
         })[];
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         patientId: number;
         modeEntree: string | null;
         antecedentsMedicaux: string | null;
@@ -1217,16 +1227,17 @@ export declare class MaterniteController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -1241,11 +1252,11 @@ export declare class MaterniteController {
             residenceActuelle: string | null;
         };
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         patientId: number;
         modeEntree: string | null;
         antecedentsMedicaux: string | null;
@@ -1275,16 +1286,17 @@ export declare class MaterniteController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -1299,11 +1311,11 @@ export declare class MaterniteController {
             residenceActuelle: string | null;
         };
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         patientId: number;
         modeEntree: string | null;
         antecedentsMedicaux: string | null;
@@ -1337,9 +1349,10 @@ export declare class MaterniteController {
             matricule: string;
         };
     } & {
-        id: number;
         createdAt: Date;
+        id: number;
         updatedAt: Date;
+        agentId: number | null;
         taille: string | null;
         tensionGauche: string | null;
         tensionDroite: string | null;
@@ -1347,7 +1360,6 @@ export declare class MaterniteController {
         mildaRemise: boolean | null;
         date: Date;
         numero: number;
-        agentId: number | null;
         ageGestationnelSA: string | null;
         hauteurUterine: string | null;
         bcf: string | null;
@@ -1379,9 +1391,10 @@ export declare class MaterniteController {
             matricule: string;
         };
     } & {
-        id: number;
         createdAt: Date;
+        id: number;
         updatedAt: Date;
+        agentId: number | null;
         taille: string | null;
         tensionGauche: string | null;
         tensionDroite: string | null;
@@ -1389,7 +1402,6 @@ export declare class MaterniteController {
         mildaRemise: boolean | null;
         date: Date;
         numero: number;
-        agentId: number | null;
         ageGestationnelSA: string | null;
         hauteurUterine: string | null;
         bcf: string | null;
@@ -1413,13 +1425,13 @@ export declare class MaterniteController {
         grossesseId: number;
     }>;
     creerAccouchement(id: number, dto: CreateAccouchementDto, req: any): Promise<{
-        id: number;
         createdAt: Date;
+        id: number;
         updatedAt: Date;
+        agentId: number | null;
         modeEntree: string | null;
         antecedentsMedicaux: string | null;
         antecedentsChirurgicaux: string | null;
-        agentId: number | null;
         lieu: string | null;
         enfantsVivants: number | null;
         enfantsDecedes: number | null;
@@ -1476,13 +1488,13 @@ export declare class MaterniteController {
         grossesseId: number;
     }>;
     modifierAccouchement(id: number, dto: UpdateAccouchementDto): Promise<{
-        id: number;
         createdAt: Date;
+        id: number;
         updatedAt: Date;
+        agentId: number | null;
         modeEntree: string | null;
         antecedentsMedicaux: string | null;
         antecedentsChirurgicaux: string | null;
-        agentId: number | null;
         lieu: string | null;
         enfantsVivants: number | null;
         enfantsDecedes: number | null;
@@ -1545,16 +1557,17 @@ export declare class MaterniteController {
                     nationalite: string | null;
                     profession: string | null;
                     quartier: string | null;
+                    createdAt: Date;
                     id: number;
                     cliniqueId: number;
-                    nom: string;
-                    createdAt: Date;
                     updatedAt: Date;
-                    code: string;
-                    telephone: string | null;
+                    nom: string;
                     prenom: string;
                     sexe: string | null;
+                    telephone: string | null;
+                    code: string;
                     numeroDossier: string;
+                    creeParId: number | null;
                     age: string | null;
                     dateNaissance: Date | null;
                     numeroCni: string | null;
@@ -1569,11 +1582,11 @@ export declare class MaterniteController {
                     residenceActuelle: string | null;
                 };
             } & {
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                createdAt: Date;
-                updatedAt: Date;
                 statut: string;
+                updatedAt: Date;
                 patientId: number;
                 modeEntree: string | null;
                 antecedentsMedicaux: string | null;
@@ -1599,13 +1612,13 @@ export declare class MaterniteController {
                 dpa: Date | null;
             };
         } & {
-            id: number;
             createdAt: Date;
+            id: number;
             updatedAt: Date;
+            agentId: number | null;
             modeEntree: string | null;
             antecedentsMedicaux: string | null;
             antecedentsChirurgicaux: string | null;
-            agentId: number | null;
             lieu: string | null;
             enfantsVivants: number | null;
             enfantsDecedes: number | null;

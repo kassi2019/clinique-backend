@@ -4,12 +4,12 @@ export declare class MedicamentsController {
     constructor(prisma: PrismaService);
     findAll(cliniqueId?: string): Promise<{
         consommable: boolean;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
         nom: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         forme: string | null;
         uniteVente: string;
         dosage: string | null;
@@ -19,12 +19,12 @@ export declare class MedicamentsController {
     }[]>;
     create(dto: any): Promise<{
         consommable: boolean;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
         nom: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         forme: string | null;
         uniteVente: string;
         dosage: string | null;
@@ -34,12 +34,12 @@ export declare class MedicamentsController {
     }>;
     update(id: number, dto: any): Promise<{
         consommable: boolean;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
         nom: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         forme: string | null;
         uniteVente: string;
         dosage: string | null;
@@ -49,12 +49,12 @@ export declare class MedicamentsController {
     }>;
     remove(id: number): Promise<{
         consommable: boolean;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
         nom: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         forme: string | null;
         uniteVente: string;
         dosage: string | null;

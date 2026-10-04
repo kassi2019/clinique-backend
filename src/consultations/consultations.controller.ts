@@ -78,8 +78,9 @@ export class ConsultationsController {
   ajouterExamen(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: PrescrireExamenDto,
+    @Req() req,
   ) {
-    return this.consultationsService.ajouterExamen(id, dto);
+    return this.consultationsService.ajouterExamen(id, dto, req.user?.id);
   }
 
   @Delete('examens/:id')

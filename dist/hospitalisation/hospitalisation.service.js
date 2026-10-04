@@ -267,7 +267,7 @@ let HospitalisationService = class HospitalisationService {
             historique,
         };
     }
-    async admettre(passageId, dto) {
+    async admettre(passageId, dto, utilisateurId) {
         const passage = await this.prisma.passage.findUnique({
             where: { id: passageId },
             include: {
@@ -325,6 +325,7 @@ let HospitalisationService = class HospitalisationService {
                 motif: dto.motif ?? consultation.motif ?? null,
                 statut: 'EN_COURS',
                 montantJournalier: tarif,
+                agentId: utilisateurId ?? null,
             },
             include: includeSejour,
         });

@@ -41,9 +41,9 @@ export declare class StatistiquesService {
                 numeroOrdre: string;
                 patient: {
                     nom: string;
-                    code: string;
                     prenom: string;
                     sexe: string;
+                    code: string;
                     age: string;
                 };
                 service: string;

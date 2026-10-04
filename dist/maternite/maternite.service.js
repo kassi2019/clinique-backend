@@ -755,7 +755,7 @@ let MaterniteService = class MaterniteService {
             throw new common_1.NotFoundException('Passage introuvable.');
         return this.obtenirOuCreerDossier(passage.patientId, passage.cliniqueId);
     }
-    async creerUrgence(dto) {
+    async creerUrgence(dto, utilisateurId) {
         const { serviceId } = await this.urgenceActes(dto.cliniqueId);
         const passage = await this.accueil.creerPassage({
             cliniqueId: dto.cliniqueId,
@@ -772,7 +772,7 @@ let MaterniteService = class MaterniteService {
                 : undefined,
             typePatient: 'INTERNE',
             motif: 'Accouchement (urgence)',
-        });
+        }, utilisateurId);
         const dossier = await this.obtenirOuCreerDossier(passage.patientId, dto.cliniqueId);
         return {
             passage: { id: passage.id, numeroOrdre: passage.numeroOrdre, patientId: passage.patientId },

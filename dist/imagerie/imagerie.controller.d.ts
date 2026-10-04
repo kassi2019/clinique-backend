@@ -12,16 +12,17 @@ export declare class ImagerieController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -45,13 +46,14 @@ export declare class ImagerieController {
             service: {
                 nom: string;
             };
-            id: number;
-            libelle: string;
             createdAt: Date;
-            updatedAt: Date;
-            passageId: number;
+            id: number;
             statut: string;
+            updatedAt: Date;
             serviceId: number | null;
+            libelle: string;
+            passageId: number;
+            agentId: number | null;
             prestationId: number | null;
             source: string;
             paiementId: number | null;
@@ -67,16 +69,17 @@ export declare class ImagerieController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -109,16 +112,17 @@ export declare class ImagerieController {
                 nationalite: string | null;
                 profession: string | null;
                 quartier: string | null;
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                nom: string;
-                createdAt: Date;
                 updatedAt: Date;
-                code: string;
-                telephone: string | null;
+                nom: string;
                 prenom: string;
                 sexe: string | null;
+                telephone: string | null;
+                code: string;
                 numeroDossier: string;
+                creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
                 numeroCni: string | null;
@@ -147,13 +151,14 @@ export declare class ImagerieController {
                 prestation: {
                     type: string;
                 };
-                id: number;
-                libelle: string;
                 createdAt: Date;
-                updatedAt: Date;
-                passageId: number;
+                id: number;
                 statut: string;
+                updatedAt: Date;
                 serviceId: number | null;
+                libelle: string;
+                passageId: number;
+                agentId: number | null;
                 prestationId: number | null;
                 source: string;
                 paiementId: number | null;
@@ -168,19 +173,20 @@ export declare class ImagerieController {
                     matricule: string;
                 };
             } & {
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                libelle: string;
-                createdAt: Date;
-                updatedAt: Date;
-                passageId: number;
                 statut: string;
+                updatedAt: Date;
+                libelle: string;
+                passageId: number;
                 patientId: number;
                 indication: string | null;
                 passagePrestationId: number;
                 conclusion: string | null;
                 valideParId: number | null;
                 valideLe: Date | null;
+                saisiParId: number | null;
                 technique: string | null;
                 resultat: string | null;
             })[];
@@ -194,24 +200,25 @@ export declare class ImagerieController {
                 numeroOrdre: string;
             };
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            libelle: string;
-            createdAt: Date;
-            updatedAt: Date;
-            passageId: number;
             statut: string;
+            updatedAt: Date;
+            libelle: string;
+            passageId: number;
             patientId: number;
             indication: string | null;
             passagePrestationId: number;
             conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;
+            saisiParId: number | null;
             technique: string | null;
             resultat: string | null;
         })[];
     }>;
-    enregistrerCr(id: number, dto: EnregistrerCrDto): Promise<{
+    enregistrerCr(id: number, dto: EnregistrerCrDto, req: any): Promise<{
         validePar: {
             personnel: {
                 nom: string;
@@ -220,19 +227,20 @@ export declare class ImagerieController {
             matricule: string;
         };
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
-        passageId: number;
         statut: string;
+        updatedAt: Date;
+        libelle: string;
+        passageId: number;
         patientId: number;
         indication: string | null;
         passagePrestationId: number;
         conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
+        saisiParId: number | null;
         technique: string | null;
         resultat: string | null;
     }>;
@@ -245,19 +253,20 @@ export declare class ImagerieController {
             matricule: string;
         };
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
-        passageId: number;
         statut: string;
+        updatedAt: Date;
+        libelle: string;
+        passageId: number;
         patientId: number;
         indication: string | null;
         passagePrestationId: number;
         conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
+        saisiParId: number | null;
         technique: string | null;
         resultat: string | null;
     }>;
@@ -265,9 +274,9 @@ export declare class ImagerieController {
         data: ({
             patient: {
                 nom: string;
-                code: string;
                 prenom: string;
                 sexe: string;
+                code: string;
                 age: string;
             };
             passage: {
@@ -281,19 +290,20 @@ export declare class ImagerieController {
                 };
             };
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            libelle: string;
-            createdAt: Date;
-            updatedAt: Date;
-            passageId: number;
             statut: string;
+            updatedAt: Date;
+            libelle: string;
+            passageId: number;
             patientId: number;
             indication: string | null;
             passagePrestationId: number;
             conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;
+            saisiParId: number | null;
             technique: string | null;
             resultat: string | null;
         })[];
@@ -309,12 +319,12 @@ export declare class ImagerieController {
         totalPages: number;
     };
     fichesTypes(cliniqueId: number): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
         libelle: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         texte: string;
         titre: string | null;
         titre2: string | null;
@@ -327,12 +337,12 @@ export declare class ImagerieController {
         texte: string;
         champs?: string;
     }): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
         libelle: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         texte: string;
         titre: string | null;
         titre2: string | null;
@@ -345,33 +355,33 @@ export declare class ImagerieController {
         champs?: string;
         actif?: boolean;
     }): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
         libelle: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         texte: string;
         titre: string | null;
         titre2: string | null;
         champs: string | null;
     }>;
     basculerFicheType(id: number): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
+        updatedAt: Date;
         libelle: string;
         actif: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         texte: string;
         titre: string | null;
         titre2: string | null;
         champs: string | null;
     }>;
     fichesPassage(id: number): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
         updatedAt: Date;
         passageId: number;
         patientId: number;
@@ -390,9 +400,9 @@ export declare class ImagerieController {
         indication?: string;
         prescripteur?: string;
     }, req: any): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
         updatedAt: Date;
         passageId: number;
         patientId: number;
@@ -410,9 +420,9 @@ export declare class ImagerieController {
         indication?: string;
         prescripteur?: string;
     }): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
         updatedAt: Date;
         passageId: number;
         patientId: number;

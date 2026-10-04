@@ -12,16 +12,17 @@ export declare class LaboratoireController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -45,13 +46,14 @@ export declare class LaboratoireController {
             service: {
                 nom: string;
             };
-            id: number;
-            libelle: string;
             createdAt: Date;
-            updatedAt: Date;
-            passageId: number;
+            id: number;
             statut: string;
+            updatedAt: Date;
             serviceId: number | null;
+            libelle: string;
+            passageId: number;
+            agentId: number | null;
             prestationId: number | null;
             source: string;
             paiementId: number | null;
@@ -67,16 +69,17 @@ export declare class LaboratoireController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -117,16 +120,17 @@ export declare class LaboratoireController {
                 nationalite: string | null;
                 profession: string | null;
                 quartier: string | null;
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                nom: string;
-                createdAt: Date;
                 updatedAt: Date;
-                code: string;
-                telephone: string | null;
+                nom: string;
                 prenom: string;
                 sexe: string | null;
+                telephone: string | null;
+                code: string;
                 numeroDossier: string;
+                creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
                 numeroCni: string | null;
@@ -155,13 +159,14 @@ export declare class LaboratoireController {
                 prestation: {
                     type: string;
                 };
-                id: number;
-                libelle: string;
                 createdAt: Date;
-                updatedAt: Date;
-                passageId: number;
+                id: number;
                 statut: string;
+                updatedAt: Date;
                 serviceId: number | null;
+                libelle: string;
+                passageId: number;
+                agentId: number | null;
                 prestationId: number | null;
                 source: string;
                 paiementId: number | null;
@@ -191,13 +196,13 @@ export declare class LaboratoireController {
                     matricule: string;
                 };
             } & {
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                libelle: string;
-                createdAt: Date;
-                updatedAt: Date;
-                passageId: number;
                 statut: string;
+                updatedAt: Date;
+                libelle: string;
+                passageId: number;
                 patientId: number;
                 passagePrestationId: number;
                 preleveParId: number | null;
@@ -224,13 +229,13 @@ export declare class LaboratoireController {
                 normes: string | null;
             }[];
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            libelle: string;
-            createdAt: Date;
-            updatedAt: Date;
-            passageId: number;
             statut: string;
+            updatedAt: Date;
+            libelle: string;
+            passageId: number;
             patientId: number;
             passagePrestationId: number;
             preleveParId: number | null;
@@ -264,13 +269,13 @@ export declare class LaboratoireController {
             matricule: string;
         };
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
-        passageId: number;
         statut: string;
+        updatedAt: Date;
+        libelle: string;
+        passageId: number;
         patientId: number;
         passagePrestationId: number;
         preleveParId: number | null;
@@ -303,13 +308,13 @@ export declare class LaboratoireController {
             matricule: string;
         };
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
-        passageId: number;
         statut: string;
+        updatedAt: Date;
+        libelle: string;
+        passageId: number;
         patientId: number;
         passagePrestationId: number;
         preleveParId: number | null;
@@ -342,13 +347,13 @@ export declare class LaboratoireController {
             matricule: string;
         };
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
-        passageId: number;
         statut: string;
+        updatedAt: Date;
+        libelle: string;
+        passageId: number;
         patientId: number;
         passagePrestationId: number;
         preleveParId: number | null;
@@ -361,9 +366,9 @@ export declare class LaboratoireController {
         data: ({
             patient: {
                 nom: string;
-                code: string;
                 prenom: string;
                 sexe: string;
+                code: string;
                 age: string;
             };
             passage: {
@@ -391,13 +396,13 @@ export declare class LaboratoireController {
                 };
             };
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            libelle: string;
-            createdAt: Date;
-            updatedAt: Date;
-            passageId: number;
             statut: string;
+            updatedAt: Date;
+            libelle: string;
+            passageId: number;
             patientId: number;
             passagePrestationId: number;
             preleveParId: number | null;

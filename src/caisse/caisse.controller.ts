@@ -82,8 +82,9 @@ export class CaisseController {
   ajouterPrestation(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: AjouterPrestationDto,
+    @Req() req,
   ) {
-    return this.caisseService.ajouterPrestation(id, dto.prestationId);
+    return this.caisseService.ajouterPrestation(id, dto.prestationId, req.user?.id);
   }
 
   /** Retire une prestation non payée. */

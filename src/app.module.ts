@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AuditInterceptor } from './audit/audit.interceptor';
+import { AuditController } from './audit/audit.controller';
 import { AccueilModule } from './accueil/accueil.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -57,7 +60,11 @@ import { RapportsModule } from './rapports/rapports.module';
     SoinsModule,
     RapportsModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, AuditController],
+  providers: [
+    AppService,
+    // Journal global : chaque écriture (POST/PATCH/DELETE) est tracée
+    { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
+  ],
 })
 export class AppModule {}

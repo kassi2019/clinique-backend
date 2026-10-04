@@ -36,8 +36,8 @@ let ImagerieController = class ImagerieController {
     detailPassage(id) {
         return this.imagerieService.detailPassage(id);
     }
-    enregistrerCr(id, dto) {
-        return this.imagerieService.enregistrerCr(id, dto);
+    enregistrerCr(id, dto, req) {
+        return this.imagerieService.enregistrerCr(id, dto, req.user?.id);
     }
     valider(id, req) {
         return this.imagerieService.valider(id, req.user.id);
@@ -105,8 +105,9 @@ __decorate([
     (0, common_1.Post)('passages/:id/examens'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, imagerie_dto_1.EnregistrerCrDto]),
+    __metadata("design:paramtypes", [Number, imagerie_dto_1.EnregistrerCrDto, Object]),
     __metadata("design:returntype", void 0)
 ], ImagerieController.prototype, "enregistrerCr", null);
 __decorate([

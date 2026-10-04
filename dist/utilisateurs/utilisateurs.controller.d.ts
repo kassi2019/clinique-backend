@@ -13,9 +13,9 @@ export declare class UtilisateursController {
                     nom: string;
                 };
                 id: number;
-                nom: string;
-                statut: string;
                 matricule: string;
+                statut: string;
+                nom: string;
                 prenom: string;
             };
             role: {
@@ -24,15 +24,15 @@ export declare class UtilisateursController {
                 code: string;
             };
         } & {
-            id: number;
             createdAt: Date;
-            updatedAt: Date;
-            statut: string;
+            id: number;
             personnelId: number;
             matricule: string;
             motDePasse: string;
             roleId: number;
+            statut: string;
             derniereConnexion: Date | null;
+            updatedAt: Date;
             disponibilite: string;
             derniereActivite: Date | null;
         })[];
@@ -49,9 +49,9 @@ export declare class UtilisateursController {
                 nom: string;
             };
             id: number;
-            nom: string;
-            statut: string;
             matricule: string;
+            statut: string;
+            nom: string;
             prenom: string;
         };
         role: {
@@ -60,15 +60,15 @@ export declare class UtilisateursController {
             code: string;
         };
     } & {
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
-        statut: string;
+        id: number;
         personnelId: number;
         matricule: string;
         motDePasse: string;
         roleId: number;
+        statut: string;
         derniereConnexion: Date | null;
+        updatedAt: Date;
         disponibilite: string;
         derniereActivite: Date | null;
     }>;
@@ -80,9 +80,9 @@ export declare class UtilisateursController {
                 nom: string;
             };
             id: number;
-            nom: string;
-            statut: string;
             matricule: string;
+            statut: string;
+            nom: string;
             prenom: string;
         };
         role: {
@@ -91,15 +91,15 @@ export declare class UtilisateursController {
             code: string;
         };
     } & {
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
-        statut: string;
+        id: number;
         personnelId: number;
         matricule: string;
         motDePasse: string;
         roleId: number;
+        statut: string;
         derniereConnexion: Date | null;
+        updatedAt: Date;
         disponibilite: string;
         derniereActivite: Date | null;
     }>;
@@ -111,9 +111,9 @@ export declare class UtilisateursController {
                 nom: string;
             };
             id: number;
-            nom: string;
-            statut: string;
             matricule: string;
+            statut: string;
+            nom: string;
             prenom: string;
         };
         role: {
@@ -122,15 +122,15 @@ export declare class UtilisateursController {
             code: string;
         };
     } & {
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
-        statut: string;
+        id: number;
         personnelId: number;
         matricule: string;
         motDePasse: string;
         roleId: number;
+        statut: string;
         derniereConnexion: Date | null;
+        updatedAt: Date;
         disponibilite: string;
         derniereActivite: Date | null;
     }>;
@@ -142,9 +142,9 @@ export declare class UtilisateursController {
                 nom: string;
             };
             id: number;
-            nom: string;
-            statut: string;
             matricule: string;
+            statut: string;
+            nom: string;
             prenom: string;
         };
         role: {
@@ -153,15 +153,15 @@ export declare class UtilisateursController {
             code: string;
         };
     } & {
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
-        statut: string;
+        id: number;
         personnelId: number;
         matricule: string;
         motDePasse: string;
         roleId: number;
+        statut: string;
         derniereConnexion: Date | null;
+        updatedAt: Date;
         disponibilite: string;
         derniereActivite: Date | null;
     }>;
@@ -173,9 +173,9 @@ export declare class UtilisateursController {
                 nom: string;
             };
             id: number;
-            nom: string;
-            statut: string;
             matricule: string;
+            statut: string;
+            nom: string;
             prenom: string;
         };
         role: {
@@ -184,15 +184,15 @@ export declare class UtilisateursController {
             code: string;
         };
     } & {
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
-        statut: string;
+        id: number;
         personnelId: number;
         matricule: string;
         motDePasse: string;
         roleId: number;
+        statut: string;
         derniereConnexion: Date | null;
+        updatedAt: Date;
         disponibilite: string;
         derniereActivite: Date | null;
     }>;

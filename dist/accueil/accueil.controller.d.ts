@@ -8,8 +8,8 @@ export declare class AccueilController {
             service: {
                 nom: string;
             };
-            id: number;
             createdAt: Date;
+            id: number;
             statut: string;
             numeroOrdre: string;
         }[];
@@ -17,16 +17,17 @@ export declare class AccueilController {
         nationalite: string | null;
         profession: string | null;
         quartier: string | null;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        nom: string;
-        createdAt: Date;
         updatedAt: Date;
-        code: string;
-        telephone: string | null;
+        nom: string;
         prenom: string;
         sexe: string | null;
+        telephone: string | null;
+        code: string;
         numeroDossier: string;
+        creeParId: number | null;
         age: string | null;
         dateNaissance: Date | null;
         numeroCni: string | null;
@@ -52,16 +53,17 @@ export declare class AccueilController {
                 nationalite: string | null;
                 profession: string | null;
                 quartier: string | null;
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                nom: string;
-                createdAt: Date;
                 updatedAt: Date;
-                code: string;
-                telephone: string | null;
+                nom: string;
                 prenom: string;
                 sexe: string | null;
+                telephone: string | null;
+                code: string;
                 numeroDossier: string;
+                creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
                 numeroCni: string | null;
@@ -81,11 +83,11 @@ export declare class AccueilController {
                 code: string;
             };
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            createdAt: Date;
-            updatedAt: Date;
             statut: string;
+            updatedAt: Date;
             serviceId: number;
             patientId: number;
             numeroOrdre: string;
@@ -93,6 +95,7 @@ export declare class AccueilController {
             motif: string | null;
             referent: string | null;
             prestationDemandee: string | null;
+            agentId: number | null;
             taille: string | null;
             temperature: import("@prisma/client/runtime/library").Decimal | null;
             pouls: number | null;
@@ -120,16 +123,17 @@ export declare class AccueilController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -149,11 +153,11 @@ export declare class AccueilController {
             code: string;
         };
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         serviceId: number;
         patientId: number;
         numeroOrdre: string;
@@ -161,6 +165,7 @@ export declare class AccueilController {
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
+        agentId: number | null;
         taille: string | null;
         temperature: import("@prisma/client/runtime/library").Decimal | null;
         pouls: number | null;
@@ -183,16 +188,17 @@ export declare class AccueilController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -212,11 +218,11 @@ export declare class AccueilController {
             code: string;
         };
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         serviceId: number;
         patientId: number;
         numeroOrdre: string;
@@ -224,6 +230,7 @@ export declare class AccueilController {
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
+        agentId: number | null;
         taille: string | null;
         temperature: import("@prisma/client/runtime/library").Decimal | null;
         pouls: number | null;
@@ -235,7 +242,7 @@ export declare class AccueilController {
         materniteTraiteLe: Date | null;
         expireLe: Date;
     }>;
-    creerPassage(dto: CreatePassageDto): Promise<{
+    creerPassage(dto: CreatePassageDto, req: any): Promise<{
         impression: any;
         clinique: {
             id: number;
@@ -247,16 +254,17 @@ export declare class AccueilController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -275,11 +283,11 @@ export declare class AccueilController {
             nom: string;
             code: string;
         };
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         serviceId: number;
         patientId: number;
         numeroOrdre: string;
@@ -287,6 +295,7 @@ export declare class AccueilController {
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
+        agentId: number | null;
         taille: string | null;
         temperature: import("@prisma/client/runtime/library").Decimal | null;
         pouls: number | null;
@@ -298,7 +307,7 @@ export declare class AccueilController {
         materniteTraiteLe: Date | null;
         expireLe: Date;
     }>;
-    modifierPassage(id: number, dto: UpdatePassageDto): Promise<{
+    modifierPassage(id: number, dto: UpdatePassageDto, req: any): Promise<{
         clinique: {
             id: number;
             nom: string;
@@ -309,16 +318,17 @@ export declare class AccueilController {
             nationalite: string | null;
             profession: string | null;
             quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            nom: string;
-            createdAt: Date;
             updatedAt: Date;
-            code: string;
-            telephone: string | null;
+            nom: string;
             prenom: string;
             sexe: string | null;
+            telephone: string | null;
+            code: string;
             numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
@@ -338,11 +348,11 @@ export declare class AccueilController {
             code: string;
         };
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
+        updatedAt: Date;
         serviceId: number;
         patientId: number;
         numeroOrdre: string;
@@ -350,6 +360,7 @@ export declare class AccueilController {
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
+        agentId: number | null;
         taille: string | null;
         temperature: import("@prisma/client/runtime/library").Decimal | null;
         pouls: number | null;

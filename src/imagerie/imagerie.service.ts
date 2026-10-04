@@ -184,7 +184,7 @@ export class ImagerieService {
    * Enregistre le compte rendu d'un examen IMA payé (4 sections).
    * Création paresseuse et idempotente (statut RESULTATS) ; verrouillé après validation.
    */
-  async enregistrerCr(passageId: number, dto: EnregistrerCrDto) {
+  async enregistrerCr(passageId: number, dto: EnregistrerCrDto, utilisateurId?: number) {
     const passage = await this.prisma.passage.findUnique({ where: { id: passageId } });
     if (!passage) throw new NotFoundException('Passage introuvable.');
     if (passage.statut !== 'ACTIF') {
@@ -225,6 +225,7 @@ export class ImagerieService {
         technique: dto.technique ?? null,
         resultat: dto.resultat ?? null,
         conclusion: dto.conclusion ?? null,
+        saisiParId: utilisateurId ?? undefined,
         // ne touche jamais statut / validation
       },
       create: {
@@ -232,6 +233,7 @@ export class ImagerieService {
         passagePrestationId: ligne.id,
         cliniqueId: passage.cliniqueId,
         patientId: passage.patientId,
+        saisiParId: utilisateurId ?? null,
         libelle: ligne.libelle,
         indication: dto.indication ?? null,
         technique: dto.technique ?? null,

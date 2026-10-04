@@ -13,10 +13,10 @@ export declare class AssurancesService {
                     montant: Prisma.Decimal;
                 };
             } & {
-                id: number;
                 createdAt: Date;
-                updatedAt: Date;
+                id: number;
                 statut: string;
+                updatedAt: Date;
                 prestationId: number;
                 dateDebut: Date | null;
                 dateFin: Date | null;
@@ -25,11 +25,11 @@ export declare class AssurancesService {
                 formuleId: number;
             })[];
         } & {
-            id: number;
-            libelle: string;
             createdAt: Date;
-            updatedAt: Date;
+            id: number;
             statut: string;
+            updatedAt: Date;
+            libelle: string;
             assuranceId: number;
             code: string;
             description: string | null;
@@ -37,29 +37,29 @@ export declare class AssurancesService {
             dateFin: Date | null;
         })[];
     } & {
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
-        code: string;
-        adresse: string | null;
+        updatedAt: Date;
         telephone: string | null;
         email: string | null;
+        libelle: string;
+        code: string;
+        adresse: string | null;
         numeroAgrement: string | null;
     })[]>;
     creerAssurance(cliniqueId: number, dto: any): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
-        code: string;
-        adresse: string | null;
+        updatedAt: Date;
         telephone: string | null;
         email: string | null;
+        libelle: string;
+        code: string;
+        adresse: string | null;
         numeroAgrement: string | null;
     }>;
     importerAssurances(cliniqueId: number, lignes: {
@@ -74,37 +74,37 @@ export declare class AssurancesService {
         total: number;
     }>;
     modifierAssurance(id: number, dto: any): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
-        code: string;
-        adresse: string | null;
+        updatedAt: Date;
         telephone: string | null;
         email: string | null;
+        libelle: string;
+        code: string;
+        adresse: string | null;
         numeroAgrement: string | null;
     }>;
     desactiverAssurance(id: number): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        libelle: string;
-        createdAt: Date;
-        updatedAt: Date;
         statut: string;
-        code: string;
-        adresse: string | null;
+        updatedAt: Date;
         telephone: string | null;
         email: string | null;
+        libelle: string;
+        code: string;
+        adresse: string | null;
         numeroAgrement: string | null;
     }>;
     creerFormule(assuranceId: number, dto: any): Promise<{
-        id: number;
-        libelle: string;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
+        libelle: string;
         assuranceId: number;
         code: string;
         description: string | null;
@@ -112,11 +112,11 @@ export declare class AssurancesService {
         dateFin: Date | null;
     }>;
     modifierFormule(id: number, dto: any): Promise<{
-        id: number;
-        libelle: string;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
+        libelle: string;
         assuranceId: number;
         code: string;
         description: string | null;
@@ -124,11 +124,11 @@ export declare class AssurancesService {
         dateFin: Date | null;
     }>;
     desactiverFormule(id: number): Promise<{
-        id: number;
-        libelle: string;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
+        libelle: string;
         assuranceId: number;
         code: string;
         description: string | null;
@@ -136,10 +136,10 @@ export declare class AssurancesService {
         dateFin: Date | null;
     }>;
     creerCouverture(formuleId: number, dto: any): Promise<{
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
         prestationId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -148,10 +148,10 @@ export declare class AssurancesService {
         formuleId: number;
     }>;
     modifierCouverture(id: number, dto: any): Promise<{
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
         prestationId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -160,10 +160,10 @@ export declare class AssurancesService {
         formuleId: number;
     }>;
     desactiverCouverture(id: number): Promise<{
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
         prestationId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -183,10 +183,10 @@ export declare class AssurancesService {
             code: string;
         };
     } & {
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
         assuranceId: number;
         patientId: number;
         dateDebut: Date | null;
@@ -199,37 +199,37 @@ export declare class AssurancesService {
     })[]>;
     couvertureActiveDuPatient(patientId: number): Promise<{
         assurance: {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            libelle: string;
-            createdAt: Date;
-            updatedAt: Date;
             statut: string;
-            code: string;
-            adresse: string | null;
+            updatedAt: Date;
             telephone: string | null;
             email: string | null;
+            libelle: string;
+            code: string;
+            adresse: string | null;
             numeroAgrement: string | null;
         };
         formule: {
             couvertures: ({
                 prestation: {
-                    type: string;
+                    createdAt: Date;
                     id: number;
                     cliniqueId: number;
+                    updatedAt: Date;
+                    serviceId: number;
+                    type: string;
                     libelle: string;
                     actif: boolean;
-                    createdAt: Date;
-                    updatedAt: Date;
                     code: string;
-                    serviceId: number;
                     montant: Prisma.Decimal;
                 };
             } & {
-                id: number;
                 createdAt: Date;
-                updatedAt: Date;
+                id: number;
                 statut: string;
+                updatedAt: Date;
                 prestationId: number;
                 dateDebut: Date | null;
                 dateFin: Date | null;
@@ -238,11 +238,11 @@ export declare class AssurancesService {
                 formuleId: number;
             })[];
         } & {
-            id: number;
-            libelle: string;
             createdAt: Date;
-            updatedAt: Date;
+            id: number;
             statut: string;
+            updatedAt: Date;
+            libelle: string;
             assuranceId: number;
             code: string;
             description: string | null;
@@ -250,10 +250,10 @@ export declare class AssurancesService {
             dateFin: Date | null;
         };
     } & {
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
         assuranceId: number;
         patientId: number;
         dateDebut: Date | null;
@@ -265,10 +265,10 @@ export declare class AssurancesService {
         typeBeneficiaire: string | null;
     }>;
     ajouterPatientAssurance(patientId: number, dto: any): Promise<{
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
         assuranceId: number;
         patientId: number;
         dateDebut: Date | null;
@@ -280,10 +280,10 @@ export declare class AssurancesService {
         typeBeneficiaire: string | null;
     }>;
     desactiverPatientAssurance(id: number): Promise<{
-        id: number;
         createdAt: Date;
-        updatedAt: Date;
+        id: number;
         statut: string;
+        updatedAt: Date;
         assuranceId: number;
         patientId: number;
         dateDebut: Date | null;
@@ -311,8 +311,8 @@ export declare class AssurancesService {
             numeroRecu: string;
             patient: {
                 nom: string;
-                code: string;
                 prenom: string;
+                code: string;
             };
             numeroOrdre: string;
             assurance: {
