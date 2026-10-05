@@ -520,6 +520,9 @@ model Consultation {
   codeDepistage        String?
   glycemieAjeun        String?
   glycemieNonAjeun     String?
+  tauxHemoglobine      String? // g/dl
+  testSyphilis         String? // POSITIF / NEGATIF / NON_REALISE
+  testHepatite         String? // POSITIF / NEGATIF / NON_REALISE
   autresExamens        String?
   conduiteTenir        String? // traitement : médicaments, posologie, voie, durée, conseils
   issueSortie          String? // HOSPITALISE / MO / REFERE_INTERNE / REFERE_EXTERNE

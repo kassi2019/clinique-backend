@@ -47,6 +47,9 @@ export declare class CreerConsultationDto {
     codeDepistage?: string;
     glycemieAjeun?: string;
     glycemieNonAjeun?: string;
+    tauxHemoglobine?: string;
+    testSyphilis?: string;
+    testHepatite?: string;
     autresExamens?: string;
     conduiteTenir?: string;
     issueSortie?: string;

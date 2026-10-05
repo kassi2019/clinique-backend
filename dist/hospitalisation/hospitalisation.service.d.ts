@@ -277,6 +277,9 @@ export declare class HospitalisationService {
             codeDepistage: string | null;
             glycemieAjeun: string | null;
             glycemieNonAjeun: string | null;
+            tauxHemoglobine: string | null;
+            testSyphilis: string | null;
+            testHepatite: string | null;
             autresExamens: string | null;
             conduiteTenir: string | null;
             issueSortie: string | null;
@@ -404,6 +407,9 @@ export declare class HospitalisationService {
                 codeDepistage: string | null;
                 glycemieAjeun: string | null;
                 glycemieNonAjeun: string | null;
+                tauxHemoglobine: string | null;
+                testSyphilis: string | null;
+                testHepatite: string | null;
                 autresExamens: string | null;
                 conduiteTenir: string | null;
                 issueSortie: string | null;

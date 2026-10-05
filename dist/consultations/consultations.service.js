@@ -192,6 +192,8 @@ let ConsultationsService = class ConsultationsService {
                     tensionGauche: passage.tensionGauche,
                     tensionDroite: passage.tensionDroite,
                     poids: passage.poids ? Number(passage.poids) : null,
+                    perimetreBrachial: passage.perimetreBrachial,
+                    perimetreCranien: passage.perimetreCranien,
                 },
                 patient: passage.patient,
                 service: passage.service,
@@ -257,6 +259,12 @@ let ConsultationsService = class ConsultationsService {
             include: includeConsultation,
         });
         await this.synchroniserFactureHospitalisation(passage.cliniqueId, passageId, dto, medecinId);
+        if (await this.synchroniserTestsOrdonnance(consultation, passage.cliniqueId)) {
+            return this.prisma.consultation.findUnique({
+                where: { id: consultation.id },
+                include: includeConsultation,
+            });
+        }
         return consultation;
     }
     async synchroniserFactureHospitalisation(cliniqueId, passageId, dto, medecinId) {
@@ -322,6 +330,62 @@ let ConsultationsService = class ConsultationsService {
             }
         }
     }
+    async synchroniserTestsOrdonnance(consultation, cliniqueId) {
+        const resultat = (v) => (v ?? '')
+            .normalize('NFD')
+            .replace(/[̀-ͯ]/g, '')
+            .toUpperCase()
+            .trim();
+        const fait = (v) => ['POSITIF', 'NEGATIF'].includes(resultat(v));
+        const regles = [
+            { libelle: 'Test de diagnostic rapide', actif: fait(consultation.tdrPaludisme) },
+            { libelle: 'Test de VIH', actif: consultation.cdipRealise === true },
+            { libelle: "Taux d'hémoglobine", actif: !!consultation.tauxHemoglobine?.trim() },
+            { libelle: 'Test de syphilis', actif: fait(consultation.testSyphilis) },
+            { libelle: "Test d'hépatite", actif: fait(consultation.testHepatite) },
+        ];
+        const existantes = await this.prisma.prescription.findMany({
+            where: { consultationId: consultation.id },
+            include: { _count: { select: { lignes: true } } },
+        });
+        const cle = (s) => resultat(s).replace(/[^A-Z]/g, '');
+        let change = false;
+        for (const r of regles) {
+            const ligne = existantes.find((p) => cle(p.medicamentNom) === cle(r.libelle));
+            if (r.actif && !ligne) {
+                const produit = await this.prisma.medicament.findFirst({
+                    where: { cliniqueId, nom: r.libelle },
+                });
+                await this.prisma.prescription.create({
+                    data: {
+                        consultationId: consultation.id,
+                        medicamentId: produit?.id ?? null,
+                        medicamentNom: produit?.nom ?? r.libelle,
+                        forme: produit?.forme ?? null,
+                        quantite: '1',
+                    },
+                });
+                change = true;
+            }
+            else if (!r.actif && ligne && ligne._count.lignes === 0) {
+                await this.prisma.prescription.delete({ where: { id: ligne.id } });
+                change = true;
+            }
+        }
+        if (change && !consultation.numeroOrdonnance) {
+            await this.attribuerNumeroOrdonnance(consultation.id, cliniqueId);
+        }
+        return change;
+    }
+    async attribuerNumeroOrdonnance(consultationId, cliniqueId) {
+        const nb = await this.prisma.consultation.count({
+            where: { numeroOrdonnance: { not: null }, passage: { cliniqueId } },
+        });
+        await this.prisma.consultation.update({
+            where: { id: consultationId },
+            data: { numeroOrdonnance: `ORD-${String(nb + 1).padStart(5, '0')}` },
+        });
+    }
     async ajouterMedicament(consultationId, dto) {
         const consultation = await this.prisma.consultation.findUnique({
             where: { id: consultationId },
@@ -360,16 +424,7 @@ let ConsultationsService = class ConsultationsService {
             },
         });
         if (!consultation.numeroOrdonnance) {
-            const nb = await this.prisma.consultation.count({
-                where: {
-                    numeroOrdonnance: { not: null },
-                    passage: { cliniqueId: consultation.passage.cliniqueId },
-                },
-            });
-            await this.prisma.consultation.update({
-                where: { id: consultationId },
-                data: { numeroOrdonnance: `ORD-${String(nb + 1).padStart(5, '0')}` },
-            });
+            await this.attribuerNumeroOrdonnance(consultationId, consultation.passage.cliniqueId);
         }
         return prescription;
     }

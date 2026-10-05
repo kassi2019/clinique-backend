@@ -61,6 +61,8 @@ export declare class ConsultationsService {
                 tensionGauche: string;
                 tensionDroite: string;
                 poids: number;
+                perimetreBrachial: string;
+                perimetreCranien: string;
             };
             patient: {
                 nationalite: string | null;
@@ -187,6 +189,9 @@ export declare class ConsultationsService {
                 codeDepistage: string | null;
                 glycemieAjeun: string | null;
                 glycemieNonAjeun: string | null;
+                tauxHemoglobine: string | null;
+                testSyphilis: string | null;
+                testHepatite: string | null;
                 autresExamens: string | null;
                 conduiteTenir: string | null;
                 issueSortie: string | null;
@@ -409,6 +414,9 @@ export declare class ConsultationsService {
             codeDepistage: string | null;
             glycemieAjeun: string | null;
             glycemieNonAjeun: string | null;
+            tauxHemoglobine: string | null;
+            testSyphilis: string | null;
+            testHepatite: string | null;
             autresExamens: string | null;
             conduiteTenir: string | null;
             issueSortie: string | null;
@@ -487,6 +495,9 @@ export declare class ConsultationsService {
         codeDepistage: string | null;
         glycemieAjeun: string | null;
         glycemieNonAjeun: string | null;
+        tauxHemoglobine: string | null;
+        testSyphilis: string | null;
+        testHepatite: string | null;
         autresExamens: string | null;
         conduiteTenir: string | null;
         issueSortie: string | null;
@@ -497,6 +508,8 @@ export declare class ConsultationsService {
         moFin: Date | null;
     }>;
     private synchroniserFactureHospitalisation;
+    private synchroniserTestsOrdonnance;
+    private attribuerNumeroOrdonnance;
     ajouterMedicament(consultationId: number, dto: PrescriptionDto): Promise<{
         posologie: string | null;
         createdAt: Date;
@@ -638,6 +651,9 @@ export declare class ConsultationsService {
         codeDepistage: string | null;
         glycemieAjeun: string | null;
         glycemieNonAjeun: string | null;
+        tauxHemoglobine: string | null;
+        testSyphilis: string | null;
+        testHepatite: string | null;
         autresExamens: string | null;
         conduiteTenir: string | null;
         issueSortie: string | null;
@@ -845,6 +861,9 @@ export declare class ConsultationsService {
         codeDepistage: string | null;
         glycemieAjeun: string | null;
         glycemieNonAjeun: string | null;
+        tauxHemoglobine: string | null;
+        testSyphilis: string | null;
+        testHepatite: string | null;
         autresExamens: string | null;
         conduiteTenir: string | null;
         issueSortie: string | null;

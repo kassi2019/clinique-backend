@@ -58,6 +58,8 @@ export declare class ConsultationsController {
                 tensionGauche: string;
                 tensionDroite: string;
                 poids: number;
+                perimetreBrachial: string;
+                perimetreCranien: string;
             };
             patient: {
                 nationalite: string | null;
@@ -184,6 +186,9 @@ export declare class ConsultationsController {
                 codeDepistage: string | null;
                 glycemieAjeun: string | null;
                 glycemieNonAjeun: string | null;
+                tauxHemoglobine: string | null;
+                testSyphilis: string | null;
+                testHepatite: string | null;
                 autresExamens: string | null;
                 conduiteTenir: string | null;
                 issueSortie: string | null;
@@ -406,6 +411,9 @@ export declare class ConsultationsController {
             codeDepistage: string | null;
             glycemieAjeun: string | null;
             glycemieNonAjeun: string | null;
+            tauxHemoglobine: string | null;
+            testSyphilis: string | null;
+            testHepatite: string | null;
             autresExamens: string | null;
             conduiteTenir: string | null;
             issueSortie: string | null;
@@ -484,6 +492,9 @@ export declare class ConsultationsController {
         codeDepistage: string | null;
         glycemieAjeun: string | null;
         glycemieNonAjeun: string | null;
+        tauxHemoglobine: string | null;
+        testSyphilis: string | null;
+        testHepatite: string | null;
         autresExamens: string | null;
         conduiteTenir: string | null;
         issueSortie: string | null;
@@ -631,6 +642,9 @@ export declare class ConsultationsController {
         codeDepistage: string | null;
         glycemieAjeun: string | null;
         glycemieNonAjeun: string | null;
+        tauxHemoglobine: string | null;
+        testSyphilis: string | null;
+        testHepatite: string | null;
         autresExamens: string | null;
         conduiteTenir: string | null;
         issueSortie: string | null;
@@ -756,6 +770,9 @@ export declare class ConsultationsController {
         codeDepistage: string | null;
         glycemieAjeun: string | null;
         glycemieNonAjeun: string | null;
+        tauxHemoglobine: string | null;
+        testSyphilis: string | null;
+        testHepatite: string | null;
         autresExamens: string | null;
         conduiteTenir: string | null;
         issueSortie: string | null;

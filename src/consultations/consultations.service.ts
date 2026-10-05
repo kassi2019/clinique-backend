@@ -216,6 +216,8 @@ export class ConsultationsService {
           tensionGauche: passage.tensionGauche,
           tensionDroite: passage.tensionDroite,
           poids: passage.poids ? Number(passage.poids) : null,
+          perimetreBrachial: passage.perimetreBrachial,
+          perimetreCranien: passage.perimetreCranien,
         },
         patient: passage.patient,
         service: passage.service,
@@ -298,6 +300,14 @@ export class ConsultationsService {
     // est créée dès que le médecin valide la prescription (lit + jours).
     await this.synchroniserFactureHospitalisation(passage.cliniqueId, passageId, dto, medecinId);
 
+    // Tests cochés dans la fiche (TDR, CDIP, hémoglobine…) → inscrits sur l'ordonnance
+    if (await this.synchroniserTestsOrdonnance(consultation, passage.cliniqueId)) {
+      return this.prisma.consultation.findUnique({
+        where: { id: consultation.id },
+        include: includeConsultation,
+      });
+    }
+
     return consultation;
   }
 
@@ -374,6 +384,85 @@ export class ConsultationsService {
     }
   }
 
+  /**
+   * Tests de la fiche reportés automatiquement sur l'ordonnance :
+   * TDR positif/négatif, CDIP réalisé, taux d'hémoglobine renseigné,
+   * syphilis/hépatite positif/négatif. La ligne est ajoutée une seule fois et
+   * retirée si le test est décoché (sauf si elle a déjà été dispensée).
+   * Renvoie true si l'ordonnance a changé.
+   */
+  private async synchroniserTestsOrdonnance(
+    consultation: {
+      id: number;
+      numeroOrdonnance: string | null;
+      tdrPaludisme: string | null;
+      cdipRealise: boolean | null;
+      tauxHemoglobine: string | null;
+      testSyphilis: string | null;
+      testHepatite: string | null;
+    },
+    cliniqueId: number,
+  ) {
+    const resultat = (v: string | null) =>
+      (v ?? '')
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toUpperCase()
+        .trim();
+    const fait = (v: string | null) => ['POSITIF', 'NEGATIF'].includes(resultat(v));
+    const regles: { libelle: string; actif: boolean }[] = [
+      { libelle: 'Test de diagnostic rapide', actif: fait(consultation.tdrPaludisme) },
+      { libelle: 'Test de VIH', actif: consultation.cdipRealise === true },
+      { libelle: "Taux d'hémoglobine", actif: !!consultation.tauxHemoglobine?.trim() },
+      { libelle: 'Test de syphilis', actif: fait(consultation.testSyphilis) },
+      { libelle: "Test d'hépatite", actif: fait(consultation.testHepatite) },
+    ];
+
+    const existantes = await this.prisma.prescription.findMany({
+      where: { consultationId: consultation.id },
+      include: { _count: { select: { lignes: true } } },
+    });
+    const cle = (s: string) => resultat(s).replace(/[^A-Z]/g, '');
+    let change = false;
+    for (const r of regles) {
+      const ligne = existantes.find((p) => cle(p.medicamentNom) === cle(r.libelle));
+      if (r.actif && !ligne) {
+        // Produit du catalogue du même nom (kit vendu à la pharmacie) si paramétré
+        const produit = await this.prisma.medicament.findFirst({
+          where: { cliniqueId, nom: r.libelle },
+        });
+        await this.prisma.prescription.create({
+          data: {
+            consultationId: consultation.id,
+            medicamentId: produit?.id ?? null,
+            medicamentNom: produit?.nom ?? r.libelle,
+            forme: produit?.forme ?? null,
+            quantite: '1',
+          },
+        });
+        change = true;
+      } else if (!r.actif && ligne && ligne._count.lignes === 0) {
+        await this.prisma.prescription.delete({ where: { id: ligne.id } });
+        change = true;
+      }
+    }
+    if (change && !consultation.numeroOrdonnance) {
+      await this.attribuerNumeroOrdonnance(consultation.id, cliniqueId);
+    }
+    return change;
+  }
+
+  /** Numéro d'ordonnance (ORD-XXXXX par clinique), attribué à la première prescription. */
+  private async attribuerNumeroOrdonnance(consultationId: number, cliniqueId: number) {
+    const nb = await this.prisma.consultation.count({
+      where: { numeroOrdonnance: { not: null }, passage: { cliniqueId } },
+    });
+    await this.prisma.consultation.update({
+      where: { id: consultationId },
+      data: { numeroOrdonnance: `ORD-${String(nb + 1).padStart(5, '0')}` },
+    });
+  }
+
   /** Ajoute une prescription de médicament (catalogue ou saisie libre). */
   async ajouterMedicament(consultationId: number, dto: PrescriptionDto) {
     const consultation = await this.prisma.consultation.findUnique({
@@ -420,16 +509,7 @@ export class ConsultationsService {
 
     // Numéro d'ordonnance généré à la première prescription (ORD-XXXXX par clinique)
     if (!consultation.numeroOrdonnance) {
-      const nb = await this.prisma.consultation.count({
-        where: {
-          numeroOrdonnance: { not: null },
-          passage: { cliniqueId: consultation.passage.cliniqueId },
-        },
-      });
-      await this.prisma.consultation.update({
-        where: { id: consultationId },
-        data: { numeroOrdonnance: `ORD-${String(nb + 1).padStart(5, '0')}` },
-      });
+      await this.attribuerNumeroOrdonnance(consultationId, consultation.passage.cliniqueId);
     }
 
     return prescription;
