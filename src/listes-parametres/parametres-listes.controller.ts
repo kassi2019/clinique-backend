@@ -244,4 +244,48 @@ export class ParametresListesController {
   basculerQuartier(@Param('id', ParseIntPipe) id: number) {
     return this.listes.desactiver(id, 'QUARTIER');
   }
+
+  // ── ANTÉCÉDENTS MÉDICAUX ──
+  @UseGuards(JwtAuthGuard)
+  @Get('antecedents-medicaux')
+  antecedentsmedicaux(@Query('cliniqueId', ParseIntPipe) cliniqueId: number, @Query('tous') tous?: string, @Query('page') page?: string, @Query('perPage') perPage?: string) {
+    return this.listes.findAll(cliniqueId, 'ANTECEDENT', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('antecedents-medicaux')
+  creerAntecedent(@Body() b: { cliniqueId: number; libelle: string }) {
+    return this.listes.creer(Number(b.cliniqueId), 'ANTECEDENT', b.libelle);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Patch('antecedents-medicaux/:id')
+  modifierAntecedent(@Param('id', ParseIntPipe) id: number, @Body() b: { libelle: string }) {
+    return this.listes.modifier(id, 'ANTECEDENT', b.libelle ?? '');
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Delete('antecedents-medicaux/:id')
+  basculerAntecedent(@Param('id', ParseIntPipe) id: number) {
+    return this.listes.desactiver(id, 'ANTECEDENT');
+  }
+
+  // ── AUTRES EXAMENS ──
+  @UseGuards(JwtAuthGuard)
+  @Get('autres-examens')
+  autresexamens(@Query('cliniqueId', ParseIntPipe) cliniqueId: number, @Query('tous') tous?: string, @Query('page') page?: string, @Query('perPage') perPage?: string) {
+    return this.listes.findAll(cliniqueId, 'EXAMEN', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('autres-examens')
+  creerAutreExamen(@Body() b: { cliniqueId: number; libelle: string }) {
+    return this.listes.creer(Number(b.cliniqueId), 'EXAMEN', b.libelle);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Patch('autres-examens/:id')
+  modifierAutreExamen(@Param('id', ParseIntPipe) id: number, @Body() b: { libelle: string }) {
+    return this.listes.modifier(id, 'EXAMEN', b.libelle ?? '');
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Delete('autres-examens/:id')
+  basculerAutreExamen(@Param('id', ParseIntPipe) id: number) {
+    return this.listes.desactiver(id, 'EXAMEN');
+  }
 }

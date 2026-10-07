@@ -581,6 +581,9 @@ export class ImpressionService {
         if (m.posologie) lignes.push(`   Posologie : ${m.posologie}`);
         if (m.quantite) lignes.push(`   Quantite  : ${m.quantite}`);
         if (m.duree) lignes.push(`   Duree     : ${m.duree}`);
+        if (m.prixUnitaire != null) {
+          lignes.push(`   Prix      : ${String(Math.round(Number(m.prixUnitaire))).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} F`);
+        }
         i++;
       }
     }

@@ -25,6 +25,8 @@ export class ListesParametresService {
       case 'PROFESSION': return this.prisma.profession;
       case 'MOTIF': return this.prisma.motifConsultation;
       case 'QUARTIER': return this.prisma.quartier;
+      case 'ANTECEDENT': return this.prisma.antecedentMedical;
+      case 'EXAMEN': return this.prisma.autreExamen;
       default: throw new BadRequestException(`Code de liste inconnu : ${code}`);
     }
   }

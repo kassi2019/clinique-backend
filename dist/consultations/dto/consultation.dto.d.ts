@@ -48,6 +48,8 @@ export declare class CreerConsultationDto {
     glycemieAjeun?: string;
     glycemieNonAjeun?: string;
     tauxHemoglobine?: string;
+    chirurgie?: boolean;
+    prescriptionMedicaments?: boolean;
     testSyphilis?: string;
     testHepatite?: string;
     autresExamens?: string;

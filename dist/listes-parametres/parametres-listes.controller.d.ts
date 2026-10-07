@@ -92,4 +92,22 @@ export declare class ParametresListesController {
         libelle: string;
     }): Promise<any>;
     basculerQuartier(id: number): Promise<any>;
+    antecedentsmedicaux(cliniqueId: number, tous?: string, page?: string, perPage?: string): Promise<any>;
+    creerAntecedent(b: {
+        cliniqueId: number;
+        libelle: string;
+    }): Promise<any>;
+    modifierAntecedent(id: number, b: {
+        libelle: string;
+    }): Promise<any>;
+    basculerAntecedent(id: number): Promise<any>;
+    autresexamens(cliniqueId: number, tous?: string, page?: string, perPage?: string): Promise<any>;
+    creerAutreExamen(b: {
+        cliniqueId: number;
+        libelle: string;
+    }): Promise<any>;
+    modifierAutreExamen(id: number, b: {
+        libelle: string;
+    }): Promise<any>;
+    basculerAutreExamen(id: number): Promise<any>;
 }

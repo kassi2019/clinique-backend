@@ -48,6 +48,7 @@ export declare class PharmacieController {
                 consultationId: number;
                 medicamentId: number | null;
                 medicamentNom: string;
+                prixUnitaire: import("@prisma/client/runtime/library").Decimal | null;
                 forme: string | null;
                 quantite: string | null;
                 duree: string | null;
@@ -243,12 +244,12 @@ export declare class PharmacieController {
             montant: import("@prisma/client/runtime/library").Decimal;
             medicamentId: number | null;
             medicamentNom: string;
+            prixUnitaire: import("@prisma/client/runtime/library").Decimal;
             dispensationId: number;
             prescriptionId: number | null;
             quantitePrescrite: string | null;
             quantiteDelivree: number;
             uniteVente: string | null;
-            prixUnitaire: import("@prisma/client/runtime/library").Decimal;
         }[];
     } & {
         createdAt: Date;

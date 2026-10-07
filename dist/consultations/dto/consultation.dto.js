@@ -255,6 +255,16 @@ __decorate([
 ], CreerConsultationDto.prototype, "tauxHemoglobine", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreerConsultationDto.prototype, "chirurgie", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreerConsultationDto.prototype, "prescriptionMedicaments", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreerConsultationDto.prototype, "testSyphilis", void 0);

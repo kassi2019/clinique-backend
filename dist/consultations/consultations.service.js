@@ -352,20 +352,36 @@ let ConsultationsService = class ConsultationsService {
         let change = false;
         for (const r of regles) {
             const ligne = existantes.find((p) => cle(p.medicamentNom) === cle(r.libelle));
-            if (r.actif && !ligne) {
+            if (r.actif && (!ligne || ligne.prixUnitaire == null)) {
                 const produit = await this.prisma.medicament.findFirst({
                     where: { cliniqueId, nom: r.libelle },
                 });
-                await this.prisma.prescription.create({
-                    data: {
-                        consultationId: consultation.id,
-                        medicamentId: produit?.id ?? null,
-                        medicamentNom: produit?.nom ?? r.libelle,
-                        forme: produit?.forme ?? null,
-                        quantite: '1',
-                    },
-                });
-                change = true;
+                const prestation = produit?.prixVente
+                    ? null
+                    : await this.prisma.prestation.findFirst({
+                        where: { cliniqueId, libelle: r.libelle, actif: true },
+                    });
+                const prix = produit?.prixVente ?? prestation?.montant ?? null;
+                if (!ligne) {
+                    await this.prisma.prescription.create({
+                        data: {
+                            consultationId: consultation.id,
+                            medicamentId: produit?.id ?? null,
+                            medicamentNom: produit?.nom ?? r.libelle,
+                            forme: produit?.forme ?? null,
+                            quantite: '1',
+                            prixUnitaire: prix,
+                        },
+                    });
+                    change = true;
+                }
+                else if (prix != null) {
+                    await this.prisma.prescription.update({
+                        where: { id: ligne.id },
+                        data: { prixUnitaire: prix, medicamentId: ligne.medicamentId ?? produit?.id ?? null },
+                    });
+                    change = true;
+                }
             }
             else if (!r.actif && ligne && ligne._count.lignes === 0) {
                 await this.prisma.prescription.delete({ where: { id: ligne.id } });

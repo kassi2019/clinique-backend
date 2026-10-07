@@ -256,6 +256,8 @@ export declare class HospitalisationController {
             diabete: boolean | null;
             antecedentsMedicaux: string | null;
             antecedentsChirurgicaux: string | null;
+            chirurgie: boolean | null;
+            prescriptionMedicaments: boolean | null;
             ddr: string | null;
             grossesseEnCours: boolean | null;
             tabac: boolean | null;
@@ -386,6 +388,8 @@ export declare class HospitalisationController {
                 diabete: boolean | null;
                 antecedentsMedicaux: string | null;
                 antecedentsChirurgicaux: string | null;
+                chirurgie: boolean | null;
+                prescriptionMedicaments: boolean | null;
                 ddr: string | null;
                 grossesseEnCours: boolean | null;
                 tabac: boolean | null;

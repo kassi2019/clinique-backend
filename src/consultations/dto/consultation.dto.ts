@@ -204,6 +204,14 @@ export class CreerConsultationDto {
   tauxHemoglobine?: string;
 
   @IsOptional()
+  @IsBoolean()
+  chirurgie?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  prescriptionMedicaments?: boolean;
+
+  @IsOptional()
   @IsString()
   testSyphilis?: string;
 

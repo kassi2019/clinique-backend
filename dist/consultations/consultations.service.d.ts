@@ -129,6 +129,7 @@ export declare class ConsultationsService {
                     consultationId: number;
                     medicamentId: number | null;
                     medicamentNom: string;
+                    prixUnitaire: Prisma.Decimal | null;
                     forme: string | null;
                     quantite: string | null;
                     duree: string | null;
@@ -169,6 +170,8 @@ export declare class ConsultationsService {
                 diabete: boolean | null;
                 antecedentsMedicaux: string | null;
                 antecedentsChirurgicaux: string | null;
+                chirurgie: boolean | null;
+                prescriptionMedicaments: boolean | null;
                 ddr: string | null;
                 grossesseEnCours: boolean | null;
                 tabac: boolean | null;
@@ -354,6 +357,7 @@ export declare class ConsultationsService {
                 consultationId: number;
                 medicamentId: number | null;
                 medicamentNom: string;
+                prixUnitaire: Prisma.Decimal | null;
                 forme: string | null;
                 quantite: string | null;
                 duree: string | null;
@@ -394,6 +398,8 @@ export declare class ConsultationsService {
             diabete: boolean | null;
             antecedentsMedicaux: string | null;
             antecedentsChirurgicaux: string | null;
+            chirurgie: boolean | null;
+            prescriptionMedicaments: boolean | null;
             ddr: string | null;
             grossesseEnCours: boolean | null;
             tabac: boolean | null;
@@ -435,6 +441,7 @@ export declare class ConsultationsService {
             consultationId: number;
             medicamentId: number | null;
             medicamentNom: string;
+            prixUnitaire: Prisma.Decimal | null;
             forme: string | null;
             quantite: string | null;
             duree: string | null;
@@ -475,6 +482,8 @@ export declare class ConsultationsService {
         diabete: boolean | null;
         antecedentsMedicaux: string | null;
         antecedentsChirurgicaux: string | null;
+        chirurgie: boolean | null;
+        prescriptionMedicaments: boolean | null;
         ddr: string | null;
         grossesseEnCours: boolean | null;
         tabac: boolean | null;
@@ -517,6 +526,7 @@ export declare class ConsultationsService {
         consultationId: number;
         medicamentId: number | null;
         medicamentNom: string;
+        prixUnitaire: Prisma.Decimal | null;
         forme: string | null;
         quantite: string | null;
         duree: string | null;
@@ -528,6 +538,7 @@ export declare class ConsultationsService {
         consultationId: number;
         medicamentId: number | null;
         medicamentNom: string;
+        prixUnitaire: Prisma.Decimal | null;
         forme: string | null;
         quantite: string | null;
         duree: string | null;
@@ -591,6 +602,7 @@ export declare class ConsultationsService {
             consultationId: number;
             medicamentId: number | null;
             medicamentNom: string;
+            prixUnitaire: Prisma.Decimal | null;
             forme: string | null;
             quantite: string | null;
             duree: string | null;
@@ -631,6 +643,8 @@ export declare class ConsultationsService {
         diabete: boolean | null;
         antecedentsMedicaux: string | null;
         antecedentsChirurgicaux: string | null;
+        chirurgie: boolean | null;
+        prescriptionMedicaments: boolean | null;
         ddr: string | null;
         grossesseEnCours: boolean | null;
         tabac: boolean | null;
@@ -801,6 +815,7 @@ export declare class ConsultationsService {
             consultationId: number;
             medicamentId: number | null;
             medicamentNom: string;
+            prixUnitaire: Prisma.Decimal | null;
             forme: string | null;
             quantite: string | null;
             duree: string | null;
@@ -841,6 +856,8 @@ export declare class ConsultationsService {
         diabete: boolean | null;
         antecedentsMedicaux: string | null;
         antecedentsChirurgicaux: string | null;
+        chirurgie: boolean | null;
+        prescriptionMedicaments: boolean | null;
         ddr: string | null;
         grossesseEnCours: boolean | null;
         tabac: boolean | null;

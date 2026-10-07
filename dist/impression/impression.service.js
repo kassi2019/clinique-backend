@@ -449,6 +449,9 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
                     lignes.push(`   Quantite  : ${m.quantite}`);
                 if (m.duree)
                     lignes.push(`   Duree     : ${m.duree}`);
+                if (m.prixUnitaire != null) {
+                    lignes.push(`   Prix      : ${String(Math.round(Number(m.prixUnitaire))).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} F`);
+                }
                 i++;
             }
         }

@@ -142,6 +142,30 @@ let ParametresListesController = class ParametresListesController {
     basculerQuartier(id) {
         return this.listes.desactiver(id, 'QUARTIER');
     }
+    antecedentsmedicaux(cliniqueId, tous, page, perPage) {
+        return this.listes.findAll(cliniqueId, 'ANTECEDENT', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+    }
+    creerAntecedent(b) {
+        return this.listes.creer(Number(b.cliniqueId), 'ANTECEDENT', b.libelle);
+    }
+    modifierAntecedent(id, b) {
+        return this.listes.modifier(id, 'ANTECEDENT', b.libelle ?? '');
+    }
+    basculerAntecedent(id) {
+        return this.listes.desactiver(id, 'ANTECEDENT');
+    }
+    autresexamens(cliniqueId, tous, page, perPage) {
+        return this.listes.findAll(cliniqueId, 'EXAMEN', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+    }
+    creerAutreExamen(b) {
+        return this.listes.creer(Number(b.cliniqueId), 'EXAMEN', b.libelle);
+    }
+    modifierAutreExamen(id, b) {
+        return this.listes.modifier(id, 'EXAMEN', b.libelle ?? '');
+    }
+    basculerAutreExamen(id) {
+        return this.listes.desactiver(id, 'EXAMEN');
+    }
 };
 exports.ParametresListesController = ParametresListesController;
 __decorate([
@@ -531,6 +555,82 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], ParametresListesController.prototype, "basculerQuartier", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('antecedents-medicaux'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('tous')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('perPage')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String, String]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "antecedentsmedicaux", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('antecedents-medicaux'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "creerAntecedent", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Patch)('antecedents-medicaux/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "modifierAntecedent", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Delete)('antecedents-medicaux/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "basculerAntecedent", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('autres-examens'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('tous')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('perPage')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String, String]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "autresexamens", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('autres-examens'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "creerAutreExamen", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Patch)('autres-examens/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "modifierAutreExamen", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Delete)('autres-examens/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "basculerAutreExamen", null);
 exports.ParametresListesController = ParametresListesController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [listes_parametres_service_1.ListesParametresService])
