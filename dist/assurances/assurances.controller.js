@@ -27,15 +27,35 @@ let AssurancesController = class AssurancesController {
             return [];
         return this.assurancesService.listerAssurances(Number(cliniqueId));
     }
-    facturation(cliniqueId, debut, fin, assuranceId, page, perPage) {
+    facturation(cliniqueId, debut, fin, assuranceId, patientId, page, perPage) {
         if (!cliniqueId)
             return { lignes: [], total: 0, parAssurance: [] };
         return this.assurancesService.facturation(Number(cliniqueId), {
             debut,
             fin,
             assuranceId: assuranceId ? Number(assuranceId) : undefined,
+            patientId: patientId ? Number(patientId) : undefined,
             page: page ? Number(page) : 1,
-            perPage: perPage ? Number(perPage) : 20,
+            perPage: perPage !== undefined && perPage !== '' ? Number(perPage) : 20,
+        });
+    }
+    recouvrement(cliniqueId) {
+        if (!cliniqueId)
+            return { parAssurance: [], totaux: { facture: 0, recu: 0, reste: 0 }, reglements: [] };
+        return this.assurancesService.recouvrement(Number(cliniqueId));
+    }
+    creerReglement(dto, req) {
+        return this.assurancesService.creerReglement(dto, req.user.id);
+    }
+    supprimerReglement(id) {
+        return this.assurancesService.supprimerReglement(id);
+    }
+    assures(cliniqueId, assuranceId, search) {
+        if (!cliniqueId)
+            return { assures: [], total: 0, parAssurance: [] };
+        return this.assurancesService.assures(Number(cliniqueId), {
+            assuranceId: assuranceId ? Number(assuranceId) : undefined,
+            search,
         });
     }
     creer(cliniqueId, dto) {
@@ -52,6 +72,9 @@ let AssurancesController = class AssurancesController {
     }
     creerFormule(dto) {
         return this.assurancesService.creerFormule(Number(dto.assuranceId), dto);
+    }
+    definirTauxPharmacie(id, dto) {
+        return this.assurancesService.definirTauxPharmacie(id, dto.tauxPharmacie);
     }
     modifierFormule(id, dto) {
         return this.assurancesService.modifierFormule(id, dto);
@@ -92,12 +115,48 @@ __decorate([
     __param(1, (0, common_1.Query)('debut')),
     __param(2, (0, common_1.Query)('fin')),
     __param(3, (0, common_1.Query)('assuranceId')),
-    __param(4, (0, common_1.Query)('page')),
-    __param(5, (0, common_1.Query)('perPage')),
+    __param(4, (0, common_1.Query)('patientId')),
+    __param(5, (0, common_1.Query)('page')),
+    __param(6, (0, common_1.Query)('perPage')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], AssurancesController.prototype, "facturation", null);
+__decorate([
+    (0, common_1.Get)('recouvrement'),
+    __param(0, (0, common_1.Query)('cliniqueId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AssurancesController.prototype, "recouvrement", null);
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Post)('reglements'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], AssurancesController.prototype, "creerReglement", null);
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Delete)('reglements/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], AssurancesController.prototype, "supprimerReglement", null);
+__decorate([
+    (0, common_1.Get)('assures'),
+    __param(0, (0, common_1.Query)('cliniqueId')),
+    __param(1, (0, common_1.Query)('assuranceId')),
+    __param(2, (0, common_1.Query)('search')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", void 0)
+], AssurancesController.prototype, "assures", null);
 __decorate([
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
@@ -144,6 +203,16 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AssurancesController.prototype, "creerFormule", null);
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Patch)('formules/:id/taux-pharmacie'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], AssurancesController.prototype, "definirTauxPharmacie", null);
 __decorate([
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),

@@ -25,10 +25,10 @@ export declare class RapportsService {
         };
         valeurs: {
             id: number;
+            ligne: number;
             valeur: number | null;
             rapportId: number;
             tableau: string;
-            ligne: number;
             colonne: number;
         }[];
         createdAt: Date;
@@ -54,10 +54,10 @@ export declare class RapportsService {
         portes: Record<string, boolean>;
         valeurs: {
             id: number;
+            ligne: number;
             valeur: number | null;
             rapportId: number;
             tableau: string;
-            ligne: number;
             colonne: number;
         }[];
         createdAt: Date;

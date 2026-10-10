@@ -183,8 +183,8 @@ export declare class ImagerieController {
                 libelle: string;
                 passageId: number;
                 patientId: number;
-                indication: string | null;
                 passagePrestationId: number;
+                indication: string | null;
                 conclusion: string | null;
                 valideParId: number | null;
                 valideLe: Date | null;
@@ -210,8 +210,8 @@ export declare class ImagerieController {
             libelle: string;
             passageId: number;
             patientId: number;
-            indication: string | null;
             passagePrestationId: number;
+            indication: string | null;
             conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;
@@ -237,8 +237,8 @@ export declare class ImagerieController {
         libelle: string;
         passageId: number;
         patientId: number;
-        indication: string | null;
         passagePrestationId: number;
+        indication: string | null;
         conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
@@ -263,8 +263,8 @@ export declare class ImagerieController {
         libelle: string;
         passageId: number;
         patientId: number;
-        indication: string | null;
         passagePrestationId: number;
+        indication: string | null;
         conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
@@ -300,8 +300,8 @@ export declare class ImagerieController {
             libelle: string;
             passageId: number;
             patientId: number;
-            indication: string | null;
             passagePrestationId: number;
+            indication: string | null;
             conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;

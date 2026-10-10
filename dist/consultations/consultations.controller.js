@@ -47,6 +47,18 @@ let ConsultationsController = class ConsultationsController {
     retirerExamen(id) {
         return this.consultationsService.retirerExamen(id);
     }
+    joindreResultatExterne(id, dto, req) {
+        return this.consultationsService.joindreResultatExterne(id, dto, req.user?.id);
+    }
+    resultatExterne(id) {
+        return this.consultationsService.resultatExterne(id);
+    }
+    supprimerResultatExterne(id) {
+        return this.consultationsService.supprimerResultatExterne(id);
+    }
+    nouvelleOrdonnance(id) {
+        return this.consultationsService.nouvelleOrdonnance(id);
+    }
     sauvegarderOrdonnance(id) {
         return this.consultationsService.sauvegarderOrdonnance(id);
     }
@@ -139,6 +151,36 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "retirerExamen", null);
+__decorate([
+    (0, common_1.Post)('examens/:id/resultat-externe'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object, Object]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "joindreResultatExterne", null);
+__decorate([
+    (0, common_1.Get)('examens/:id/resultat-externe'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "resultatExterne", null);
+__decorate([
+    (0, common_1.Delete)('examens/:id/resultat-externe'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "supprimerResultatExterne", null);
+__decorate([
+    (0, common_1.Post)(':id/ordonnances'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "nouvelleOrdonnance", null);
 __decorate([
     (0, common_1.Post)(':id/ordonnance-sauvegarder'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),

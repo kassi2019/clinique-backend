@@ -35,14 +35,29 @@ let PharmacieController = class PharmacieController {
     detailOrdonnance(id) {
         return this.pharmacieService.detailOrdonnance(id);
     }
-    dispenser(consultationId, dto, req) {
-        return this.pharmacieService.dispenser(consultationId, dto.lignes ?? [], req.user.id);
+    dispenser(id, dto, req) {
+        return this.pharmacieService.dispenser(id, dto.lignes ?? [], req.user.id);
+    }
+    async detailOrdonnanceConsultation(id) {
+        return this.pharmacieService.detailOrdonnance(await this.pharmacieService.ordonnanceDeConsultation(id));
+    }
+    async dispenserConsultation(consultationId, dto, req) {
+        return this.pharmacieService.dispenser(await this.pharmacieService.ordonnanceDeConsultation(consultationId), dto.lignes ?? [], req.user.id);
     }
     cloturer(id) {
         return this.pharmacieService.cloturer(id);
     }
     payer(id, dto, req) {
-        return this.pharmacieService.payer(id, dto.modePaiement, req.user.id);
+        return this.pharmacieService.payer(id, dto.modePaiement, req.user.id, {
+            type: dto.type,
+            motif: dto.motif,
+        });
+    }
+    credits(cliniqueId) {
+        return this.pharmacieService.credits(cliniqueId);
+    }
+    reglerCredit(id, dto) {
+        return this.pharmacieService.reglerCredit(id, dto.modePaiement);
     }
     annulerPaiement(id, dto) {
         return this.pharmacieService.annulerPaiement(id, dto.motif);
@@ -57,6 +72,9 @@ let PharmacieController = class PharmacieController {
     }
     inventaire(dto, req) {
         return this.pharmacieService.inventaire(dto, req.user.id);
+    }
+    ficheInventaire(cliniqueId, debut, fin) {
+        return this.pharmacieService.ficheInventaire(cliniqueId, debut, fin);
     }
     inventaireMultiple(dto, req) {
         return this.pharmacieService.inventaireMultiple(dto.lignes ?? [], req.user.id);
@@ -139,12 +157,28 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "rechercherOrdonnances", null);
 __decorate([
-    (0, common_1.Get)('consultations/:id'),
+    (0, common_1.Get)('ordonnances/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "detailOrdonnance", null);
+__decorate([
+    (0, common_1.Post)('ordonnances/:id/dispenser'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object, Object]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "dispenser", null);
+__decorate([
+    (0, common_1.Get)('consultations/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], PharmacieController.prototype, "detailOrdonnanceConsultation", null);
 __decorate([
     (0, common_1.Post)('dispensations/:consultationId'),
     __param(0, (0, common_1.Param)('consultationId', common_1.ParseIntPipe)),
@@ -152,8 +186,8 @@ __decorate([
     __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, Object, Object]),
-    __metadata("design:returntype", void 0)
-], PharmacieController.prototype, "dispenser", null);
+    __metadata("design:returntype", Promise)
+], PharmacieController.prototype, "dispenserConsultation", null);
 __decorate([
     (0, common_1.Post)('dispensations/:id/cloturer'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
@@ -170,6 +204,21 @@ __decorate([
     __metadata("design:paramtypes", [Number, Object, Object]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "payer", null);
+__decorate([
+    (0, common_1.Get)('credits'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "credits", null);
+__decorate([
+    (0, common_1.Post)('paiements/:id/regler'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "reglerCredit", null);
 __decorate([
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
@@ -204,6 +253,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "inventaire", null);
+__decorate([
+    (0, common_1.Get)('inventaires/fiche'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('debut')),
+    __param(2, (0, common_1.Query)('fin')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "ficheInventaire", null);
 __decorate([
     (0, common_1.Post)('lots/inventaire-multiple'),
     __param(0, (0, common_1.Body)()),

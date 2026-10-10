@@ -64,6 +64,7 @@ export declare class CreerConsultationDto {
 }
 export declare class PrescriptionDto {
     medicamentId?: number;
+    ordonnanceId?: number;
     nom?: string;
     forme?: string;
     posologie?: string;

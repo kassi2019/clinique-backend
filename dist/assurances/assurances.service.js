@@ -109,9 +109,28 @@ let AssurancesService = class AssurancesService {
                 code: dto.code.trim().toUpperCase(),
                 libelle: dto.libelle.trim(),
                 description: dto.description ?? null,
+                tauxPharmacie: this.tauxValide(dto.tauxPharmacie),
                 dateDebut: dto.dateDebut ? new Date(dto.dateDebut) : null,
                 dateFin: dto.dateFin ? new Date(dto.dateFin) : null,
             },
+        });
+    }
+    tauxValide(v) {
+        if (v === undefined || v === null || v === '')
+            return null;
+        const n = Math.round(Number(v));
+        if (isNaN(n) || n < 0 || n > 100) {
+            throw new common_1.BadRequestException('Le taux doit être compris entre 0 et 100 %.');
+        }
+        return n;
+    }
+    async definirTauxPharmacie(id, taux) {
+        const f = await this.prisma.formuleAssurance.findUnique({ where: { id } });
+        if (!f)
+            throw new common_1.NotFoundException('Formule introuvable.');
+        return this.prisma.formuleAssurance.update({
+            where: { id },
+            data: { tauxPharmacie: this.tauxValide(taux) },
         });
     }
     async modifierFormule(id, dto) {
@@ -246,32 +265,24 @@ let AssurancesService = class AssurancesService {
             data: { statut: a.statut === 'ACTIF' ? 'INACTIF' : 'ACTIF' },
         });
     }
-    async facturation(cliniqueId, opts) {
-        const debut = opts.debut
-            ? new Date(`${opts.debut}T00:00:00`)
-            : new Date(new Date().setHours(0, 0, 0, 0));
-        const fin = opts.fin
-            ? new Date(`${opts.fin}T23:59:59.999`)
-            : new Date(new Date().setHours(23, 59, 59, 999));
-        const page = opts.page ?? 1;
-        const perPage = opts.perPage ?? 20;
-        const where = {
-            assuranceId: { not: null },
-            createdAt: { gte: debut, lte: fin },
-        };
-        if (opts.assuranceId)
-            where.assuranceId = opts.assuranceId;
-        const [lignes, total, toutes] = await this.prisma.$transaction([
+    async lignesAssurance(cliniqueId, opts) {
+        const periode = opts.debut || opts.fin ? { createdAt: { gte: opts.debut, lte: opts.fin } } : {};
+        const filtreAssurance = opts.assuranceId ? opts.assuranceId : { not: null };
+        const [caisse, pharmacie] = await Promise.all([
             this.prisma.priseEnCharge.findMany({
                 where: {
-                    ...where,
-                    paiement: { cliniqueId, statut: 'VALIDE' },
+                    assuranceId: filtreAssurance,
+                    ...periode,
+                    paiement: {
+                        cliniqueId,
+                        statut: 'VALIDE',
+                        ...(opts.patientId ? { passage: { patientId: opts.patientId } } : {}),
+                    },
                 },
                 include: {
                     paiement: {
                         select: {
                             numeroRecu: true,
-                            createdAt: true,
                             passage: {
                                 select: {
                                     numeroOrdre: true,
@@ -283,46 +294,40 @@ let AssurancesService = class AssurancesService {
                     assurance: { select: { id: true, code: true, libelle: true } },
                     formule: { select: { id: true, code: true, libelle: true } },
                 },
-                orderBy: { createdAt: 'desc' },
-                skip: (page - 1) * perPage,
-                take: perPage,
             }),
-            this.prisma.priseEnCharge.count({
-                where: { ...where, paiement: { cliniqueId, statut: 'VALIDE' } },
-            }),
-            this.prisma.priseEnCharge.findMany({
-                where: { ...where, paiement: { cliniqueId, statut: 'VALIDE' } },
-                select: {
-                    montantAssurance: true,
-                    montantPatient: true,
-                    montantTotal: true,
-                    assurance: { select: { id: true, libelle: true, code: true } },
+            this.prisma.pharmaciePaiement.findMany({
+                where: {
+                    statut: 'VALIDE',
+                    montantAssurance: { gt: 0 },
+                    assuranceId: filtreAssurance,
+                    ...periode,
+                    dispensation: {
+                        consultation: {
+                            passage: { cliniqueId },
+                            ...(opts.patientId ? { patientId: opts.patientId } : {}),
+                        },
+                    },
+                },
+                include: {
+                    dispensation: {
+                        select: {
+                            consultation: {
+                                select: {
+                                    patient: { select: { nom: true, prenom: true, code: true } },
+                                    passage: { select: { numeroOrdre: true } },
+                                },
+                            },
+                        },
+                    },
+                    assurance: { select: { id: true, code: true, libelle: true } },
+                    formule: { select: { id: true, code: true, libelle: true } },
                 },
             }),
         ]);
-        const parAssuranceMap = new Map();
-        for (const l of toutes) {
-            const key = l.assurance?.id ?? 0;
-            const e = parAssuranceMap.get(key) ?? {
-                assurance: l.assurance ? `${l.assurance.code} — ${l.assurance.libelle}` : '—',
-                totalAssurance: 0,
-                totalPatient: 0,
-                totalFacture: 0,
-                nbLignes: 0,
-            };
-            e.totalAssurance += N(l.montantAssurance);
-            e.totalPatient += N(l.montantPatient);
-            e.totalFacture += N(l.montantTotal);
-            e.nbLignes += 1;
-            parAssuranceMap.set(key, e);
-        }
-        return {
-            periode: {
-                debut: debut.toISOString().slice(0, 10),
-                fin: fin.toISOString().slice(0, 10),
-            },
-            lignes: lignes.map((l) => ({
-                id: l.id,
+        return [
+            ...caisse.map((l) => ({
+                id: `C${l.id}`,
+                source: 'CAISSE',
                 createdAt: l.createdAt,
                 numeroRecu: l.paiement.numeroRecu,
                 patient: l.paiement.passage.patient,
@@ -336,12 +341,175 @@ let AssurancesService = class AssurancesService {
                 montantPatient: N(l.montantPatient),
                 motifModification: l.motifModification,
             })),
-            total,
+            ...pharmacie.map((l) => ({
+                id: `P${l.id}`,
+                source: 'PHARMACIE',
+                createdAt: l.createdAt,
+                numeroRecu: l.numeroRecu,
+                patient: l.dispensation.consultation.patient,
+                numeroOrdre: l.dispensation.consultation.passage.numeroOrdre,
+                assurance: l.assurance,
+                formule: l.formule,
+                tauxParametre: l.tauxAssurance ?? 0,
+                tauxApplique: l.tauxAssurance ?? 0,
+                montantTotal: N(l.montantTotal),
+                montantAssurance: N(l.montantAssurance),
+                montantPatient: N(l.montantTotal) - N(l.montantAssurance),
+                motifModification: null,
+            })),
+        ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    }
+    async facturation(cliniqueId, opts) {
+        const debut = opts.debut
+            ? new Date(`${opts.debut}T00:00:00`)
+            : new Date(new Date().setHours(0, 0, 0, 0));
+        const fin = opts.fin
+            ? new Date(`${opts.fin}T23:59:59.999`)
+            : new Date(new Date().setHours(23, 59, 59, 999));
+        const page = opts.page ?? 1;
+        const perPage = opts.perPage ?? 20;
+        const tout = perPage === 0;
+        const toutes = await this.lignesAssurance(cliniqueId, {
+            debut,
+            fin,
+            assuranceId: opts.assuranceId,
+            patientId: opts.patientId,
+        });
+        const parAssuranceMap = new Map();
+        for (const l of toutes) {
+            const key = l.assurance?.id ?? 0;
+            const e = parAssuranceMap.get(key) ?? {
+                assurance: l.assurance ? `${l.assurance.code} — ${l.assurance.libelle}` : '—',
+                totalAssurance: 0,
+                totalPatient: 0,
+                totalFacture: 0,
+                nbLignes: 0,
+            };
+            e.totalAssurance += l.montantAssurance;
+            e.totalPatient += l.montantPatient;
+            e.totalFacture += l.montantTotal;
+            e.nbLignes += 1;
+            parAssuranceMap.set(key, e);
+        }
+        return {
+            periode: {
+                debut: debut.toISOString().slice(0, 10),
+                fin: fin.toISOString().slice(0, 10),
+            },
+            lignes: tout ? toutes : toutes.slice((page - 1) * perPage, page * perPage),
+            total: toutes.length,
             page,
             perPage,
-            totalPages: Math.ceil(total / perPage),
+            totalPages: tout ? 1 : Math.ceil(toutes.length / perPage),
             parAssurance: [...parAssuranceMap.values()],
         };
+    }
+    async recouvrement(cliniqueId) {
+        const [assurances, lignes, reglements] = await Promise.all([
+            this.prisma.assurance.findMany({ where: { cliniqueId }, orderBy: { libelle: 'asc' } }),
+            this.lignesAssurance(cliniqueId, {}),
+            this.prisma.reglementAssurance.findMany({
+                where: { cliniqueId },
+                include: { assurance: { select: { id: true, code: true, libelle: true } } },
+                orderBy: [{ dateReglement: 'desc' }, { id: 'desc' }],
+            }),
+        ]);
+        const parAssurance = assurances
+            .map((a) => {
+            const facture = lignes
+                .filter((l) => l.assurance?.id === a.id)
+                .reduce((s, l) => s + l.montantAssurance, 0);
+            const recu = reglements
+                .filter((r) => r.assuranceId === a.id)
+                .reduce((s, r) => s + N(r.montant), 0);
+            return {
+                assuranceId: a.id,
+                assurance: a.libelle,
+                code: a.code,
+                nbFactures: lignes.filter((l) => l.assurance?.id === a.id).length,
+                facture,
+                recu,
+                reste: facture - recu,
+            };
+        })
+            .filter((a) => a.facture !== 0 || a.recu !== 0);
+        return {
+            parAssurance,
+            totaux: {
+                facture: parAssurance.reduce((s, a) => s + a.facture, 0),
+                recu: parAssurance.reduce((s, a) => s + a.recu, 0),
+                reste: parAssurance.reduce((s, a) => s + a.reste, 0),
+            },
+            reglements: reglements.map((r) => ({ ...r, montant: N(r.montant) })),
+        };
+    }
+    async creerReglement(dto, utilisateurId) {
+        const assurance = await this.prisma.assurance.findUnique({ where: { id: Number(dto.assuranceId) } });
+        if (!assurance)
+            throw new common_1.NotFoundException('Assurance introuvable.');
+        const montant = Number(dto.montant);
+        if (!montant || montant <= 0)
+            throw new common_1.BadRequestException('Le montant du règlement doit être supérieur à 0.');
+        if (!dto.dateReglement)
+            throw new common_1.BadRequestException('La date du règlement est obligatoire.');
+        const reglement = await this.prisma.reglementAssurance.create({
+            data: {
+                cliniqueId: assurance.cliniqueId,
+                assuranceId: assurance.id,
+                dateReglement: new Date(`${dto.dateReglement}T00:00:00`),
+                montant,
+                modeReglement: dto.modeReglement || null,
+                reference: dto.reference?.trim() || null,
+                commentaire: dto.commentaire?.trim() || null,
+                utilisateurId,
+            },
+        });
+        return { ...reglement, montant: N(reglement.montant) };
+    }
+    async supprimerReglement(id) {
+        const r = await this.prisma.reglementAssurance.findUnique({ where: { id } });
+        if (!r)
+            throw new common_1.NotFoundException('Règlement introuvable.');
+        await this.prisma.reglementAssurance.delete({ where: { id } });
+        return { ok: true };
+    }
+    async assures(cliniqueId, opts = {}) {
+        const mots = (opts.search ?? '').trim().split(/\s+/).filter(Boolean);
+        const rattachements = await this.prisma.patientAssurance.findMany({
+            where: {
+                statut: 'ACTIF',
+                ...(opts.assuranceId ? { assuranceId: opts.assuranceId } : {}),
+                patient: {
+                    cliniqueId,
+                    ...(mots.length
+                        ? {
+                            AND: mots.map((m) => ({
+                                OR: [
+                                    { nom: { contains: m } },
+                                    { prenom: { contains: m } },
+                                    { code: { contains: m } },
+                                ],
+                            })),
+                        }
+                        : {}),
+                },
+            },
+            include: {
+                patient: {
+                    select: { id: true, nom: true, prenom: true, code: true, sexe: true, age: true, telephone: true },
+                },
+                assurance: { select: { id: true, code: true, libelle: true } },
+                formule: { select: { id: true, code: true, libelle: true } },
+            },
+            orderBy: [{ assurance: { libelle: 'asc' } }, { patient: { nom: 'asc' } }],
+        });
+        const parAssuranceMap = new Map();
+        for (const r of rattachements) {
+            const e = parAssuranceMap.get(r.assuranceId) ?? { assurance: r.assurance.libelle, nbAssures: 0 };
+            e.nbAssures += 1;
+            parAssuranceMap.set(r.assuranceId, e);
+        }
+        return { assures: rattachements, total: rattachements.length, parAssurance: [...parAssuranceMap.values()] };
     }
     async tauxApplicable(patientId, prestationId) {
         const rattachement = await this.couvertureActiveDuPatient(patientId);

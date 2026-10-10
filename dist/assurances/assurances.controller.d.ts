@@ -17,11 +17,11 @@ export declare class AssurancesController {
                 statut: string;
                 updatedAt: Date;
                 prestationId: number;
+                formuleId: number;
                 dateDebut: Date | null;
                 dateFin: Date | null;
                 tauxCouverture: number;
                 plafond: import("@prisma/client/runtime/library").Decimal | null;
-                formuleId: number;
             })[];
         } & {
             createdAt: Date;
@@ -32,6 +32,7 @@ export declare class AssurancesController {
             assuranceId: number;
             code: string;
             description: string | null;
+            tauxPharmacie: number | null;
             dateDebut: Date | null;
             dateFin: Date | null;
         })[];
@@ -48,13 +49,14 @@ export declare class AssurancesController {
         adresse: string | null;
         numeroAgrement: string | null;
     })[]>;
-    facturation(cliniqueId?: string, debut?: string, fin?: string, assuranceId?: string, page?: string, perPage?: string): Promise<{
+    facturation(cliniqueId?: string, debut?: string, fin?: string, assuranceId?: string, patientId?: string, page?: string, perPage?: string): Promise<{
         periode: {
             debut: string;
             fin: string;
         };
         lignes: {
-            id: number;
+            id: string;
+            source: string;
             createdAt: Date;
             numeroRecu: string;
             patient: {
@@ -93,6 +95,108 @@ export declare class AssurancesController {
         }[];
     }> | {
         lignes: any[];
+        total: number;
+        parAssurance: any[];
+    };
+    recouvrement(cliniqueId?: string): Promise<{
+        parAssurance: {
+            assuranceId: number;
+            assurance: string;
+            code: string;
+            nbFactures: number;
+            facture: number;
+            recu: number;
+            reste: number;
+        }[];
+        totaux: {
+            facture: number;
+            recu: number;
+            reste: number;
+        };
+        reglements: {
+            montant: number;
+            assurance: {
+                id: number;
+                libelle: string;
+                code: string;
+            };
+            createdAt: Date;
+            id: number;
+            cliniqueId: number;
+            utilisateurId: number | null;
+            assuranceId: number;
+            dateReglement: Date;
+            modeReglement: string | null;
+            reference: string | null;
+            commentaire: string | null;
+        }[];
+    }> | {
+        parAssurance: any[];
+        totaux: {
+            facture: number;
+            recu: number;
+            reste: number;
+        };
+        reglements: any[];
+    };
+    creerReglement(dto: any, req: any): Promise<{
+        montant: number;
+        createdAt: Date;
+        id: number;
+        cliniqueId: number;
+        utilisateurId: number | null;
+        assuranceId: number;
+        dateReglement: Date;
+        modeReglement: string | null;
+        reference: string | null;
+        commentaire: string | null;
+    }>;
+    supprimerReglement(id: number): Promise<{
+        ok: boolean;
+    }>;
+    assures(cliniqueId?: string, assuranceId?: string, search?: string): Promise<{
+        assures: ({
+            patient: {
+                id: number;
+                nom: string;
+                prenom: string;
+                sexe: string;
+                telephone: string;
+                code: string;
+                age: string;
+            };
+            assurance: {
+                id: number;
+                libelle: string;
+                code: string;
+            };
+            formule: {
+                id: number;
+                libelle: string;
+                code: string;
+            };
+        } & {
+            createdAt: Date;
+            id: number;
+            statut: string;
+            updatedAt: Date;
+            assuranceId: number;
+            patientId: number;
+            formuleId: number;
+            dateDebut: Date | null;
+            dateFin: Date | null;
+            numeroAssure: string | null;
+            numeroCarte: string | null;
+            nomAssurePrincipal: string | null;
+            typeBeneficiaire: string | null;
+        })[];
+        total: number;
+        parAssurance: {
+            assurance: string;
+            nbAssures: number;
+        }[];
+    }> | {
+        assures: any[];
         total: number;
         parAssurance: any[];
     };
@@ -148,6 +252,22 @@ export declare class AssurancesController {
         assuranceId: number;
         code: string;
         description: string | null;
+        tauxPharmacie: number | null;
+        dateDebut: Date | null;
+        dateFin: Date | null;
+    }>;
+    definirTauxPharmacie(id: number, dto: {
+        tauxPharmacie: any;
+    }): Promise<{
+        createdAt: Date;
+        id: number;
+        statut: string;
+        updatedAt: Date;
+        libelle: string;
+        assuranceId: number;
+        code: string;
+        description: string | null;
+        tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
     }>;
@@ -160,6 +280,7 @@ export declare class AssurancesController {
         assuranceId: number;
         code: string;
         description: string | null;
+        tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
     }>;
@@ -172,6 +293,7 @@ export declare class AssurancesController {
         assuranceId: number;
         code: string;
         description: string | null;
+        tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
     }>;
@@ -181,11 +303,11 @@ export declare class AssurancesController {
         statut: string;
         updatedAt: Date;
         prestationId: number;
+        formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
         tauxCouverture: number;
         plafond: import("@prisma/client/runtime/library").Decimal | null;
-        formuleId: number;
     }>;
     modifierCouverture(id: number, dto: any): Promise<{
         createdAt: Date;
@@ -193,11 +315,11 @@ export declare class AssurancesController {
         statut: string;
         updatedAt: Date;
         prestationId: number;
+        formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
         tauxCouverture: number;
         plafond: import("@prisma/client/runtime/library").Decimal | null;
-        formuleId: number;
     }>;
     desactiverCouverture(id: number): Promise<{
         createdAt: Date;
@@ -205,11 +327,11 @@ export declare class AssurancesController {
         statut: string;
         updatedAt: Date;
         prestationId: number;
+        formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
         tauxCouverture: number;
         plafond: import("@prisma/client/runtime/library").Decimal | null;
-        formuleId: number;
     }>;
     assurancesDuPatient(patientId: number): Promise<({
         assurance: {
@@ -229,9 +351,9 @@ export declare class AssurancesController {
         updatedAt: Date;
         assuranceId: number;
         patientId: number;
+        formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
-        formuleId: number;
         numeroAssure: string | null;
         numeroCarte: string | null;
         nomAssurePrincipal: string | null;
@@ -244,9 +366,9 @@ export declare class AssurancesController {
         updatedAt: Date;
         assuranceId: number;
         patientId: number;
+        formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
-        formuleId: number;
         numeroAssure: string | null;
         numeroCarte: string | null;
         nomAssurePrincipal: string | null;
@@ -259,9 +381,9 @@ export declare class AssurancesController {
         updatedAt: Date;
         assuranceId: number;
         patientId: number;
+        formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
-        formuleId: number;
         numeroAssure: string | null;
         numeroCarte: string | null;
         nomAssurePrincipal: string | null;

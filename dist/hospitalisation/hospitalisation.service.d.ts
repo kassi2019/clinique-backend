@@ -179,7 +179,6 @@ export declare class HospitalisationService {
             motif: string | null;
             agentId: number | null;
             litId: number;
-            passagePrestationId: number | null;
             dateEntree: Date;
             dateSortie: Date | null;
             dureePrevue: string | null;
@@ -188,6 +187,7 @@ export declare class HospitalisationService {
             sortieParId: number | null;
             nbJoursFactures: number | null;
             montantJournalier: Prisma.Decimal | null;
+            passagePrestationId: number | null;
         };
     }[]>;
     rechercher(reference: string, cliniqueId: number): Promise<{
@@ -302,7 +302,6 @@ export declare class HospitalisationService {
             motif: string | null;
             agentId: number | null;
             litId: number;
-            passagePrestationId: number | null;
             dateEntree: Date;
             dateSortie: Date | null;
             dureePrevue: string | null;
@@ -311,6 +310,7 @@ export declare class HospitalisationService {
             sortieParId: number | null;
             nbJoursFactures: number | null;
             montantJournalier: Prisma.Decimal | null;
+            passagePrestationId: number | null;
         };
     }[]>;
     detailPassage(passageId: number): Promise<{
@@ -486,7 +486,6 @@ export declare class HospitalisationService {
                 motif: string | null;
                 agentId: number | null;
                 litId: number;
-                passagePrestationId: number | null;
                 dateEntree: Date;
                 dateSortie: Date | null;
                 dureePrevue: string | null;
@@ -495,6 +494,7 @@ export declare class HospitalisationService {
                 sortieParId: number | null;
                 nbJoursFactures: number | null;
                 montantJournalier: Prisma.Decimal | null;
+                passagePrestationId: number | null;
             };
         };
         historique: ({
@@ -530,7 +530,6 @@ export declare class HospitalisationService {
             motif: string | null;
             agentId: number | null;
             litId: number;
-            passagePrestationId: number | null;
             dateEntree: Date;
             dateSortie: Date | null;
             dureePrevue: string | null;
@@ -539,6 +538,7 @@ export declare class HospitalisationService {
             sortieParId: number | null;
             nbJoursFactures: number | null;
             montantJournalier: Prisma.Decimal | null;
+            passagePrestationId: number | null;
         })[];
     }>;
     admettre(passageId: number, dto: AdmissionDto, utilisateurId?: number): Promise<{
@@ -604,7 +604,6 @@ export declare class HospitalisationService {
         motif: string | null;
         agentId: number | null;
         litId: number;
-        passagePrestationId: number | null;
         dateEntree: Date;
         dateSortie: Date | null;
         dureePrevue: string | null;
@@ -613,6 +612,7 @@ export declare class HospitalisationService {
         sortieParId: number | null;
         nbJoursFactures: number | null;
         montantJournalier: Prisma.Decimal | null;
+        passagePrestationId: number | null;
     }>;
     suivi(sejourId: number, dto: SuiviDto): Promise<{
         patient: {
@@ -677,7 +677,6 @@ export declare class HospitalisationService {
         motif: string | null;
         agentId: number | null;
         litId: number;
-        passagePrestationId: number | null;
         dateEntree: Date;
         dateSortie: Date | null;
         dureePrevue: string | null;
@@ -686,6 +685,7 @@ export declare class HospitalisationService {
         sortieParId: number | null;
         nbJoursFactures: number | null;
         montantJournalier: Prisma.Decimal | null;
+        passagePrestationId: number | null;
     }>;
     sortie(sejourId: number, dto: SortieDto, utilisateurId: number): Promise<{
         patient: {
@@ -750,7 +750,6 @@ export declare class HospitalisationService {
         motif: string | null;
         agentId: number | null;
         litId: number;
-        passagePrestationId: number | null;
         dateEntree: Date;
         dateSortie: Date | null;
         dureePrevue: string | null;
@@ -759,6 +758,7 @@ export declare class HospitalisationService {
         sortieParId: number | null;
         nbJoursFactures: number | null;
         montantJournalier: Prisma.Decimal | null;
+        passagePrestationId: number | null;
     }>;
     historique(params: {
         jour?: string;
@@ -831,7 +831,6 @@ export declare class HospitalisationService {
             motif: string | null;
             agentId: number | null;
             litId: number;
-            passagePrestationId: number | null;
             dateEntree: Date;
             dateSortie: Date | null;
             dureePrevue: string | null;
@@ -839,6 +838,7 @@ export declare class HospitalisationService {
             sortieMotif: string | null;
             sortieParId: number | null;
             nbJoursFactures: number | null;
+            passagePrestationId: number | null;
         }[];
         total: number;
         page: number;

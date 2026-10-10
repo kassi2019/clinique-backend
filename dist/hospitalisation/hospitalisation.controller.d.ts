@@ -178,7 +178,6 @@ export declare class HospitalisationController {
             motif: string | null;
             agentId: number | null;
             litId: number;
-            passagePrestationId: number | null;
             dateEntree: Date;
             dateSortie: Date | null;
             dureePrevue: string | null;
@@ -187,6 +186,7 @@ export declare class HospitalisationController {
             sortieParId: number | null;
             nbJoursFactures: number | null;
             montantJournalier: import("@prisma/client/runtime/library").Decimal | null;
+            passagePrestationId: number | null;
         };
     }[]>;
     rechercher(code?: string, cliniqueId?: string): any[] | Promise<{
@@ -301,7 +301,6 @@ export declare class HospitalisationController {
             motif: string | null;
             agentId: number | null;
             litId: number;
-            passagePrestationId: number | null;
             dateEntree: Date;
             dateSortie: Date | null;
             dureePrevue: string | null;
@@ -310,6 +309,7 @@ export declare class HospitalisationController {
             sortieParId: number | null;
             nbJoursFactures: number | null;
             montantJournalier: import("@prisma/client/runtime/library").Decimal | null;
+            passagePrestationId: number | null;
         };
     }[]>;
     detailPassage(id: number): Promise<{
@@ -485,7 +485,6 @@ export declare class HospitalisationController {
                 motif: string | null;
                 agentId: number | null;
                 litId: number;
-                passagePrestationId: number | null;
                 dateEntree: Date;
                 dateSortie: Date | null;
                 dureePrevue: string | null;
@@ -494,6 +493,7 @@ export declare class HospitalisationController {
                 sortieParId: number | null;
                 nbJoursFactures: number | null;
                 montantJournalier: import("@prisma/client/runtime/library").Decimal | null;
+                passagePrestationId: number | null;
             };
         };
         historique: ({
@@ -529,7 +529,6 @@ export declare class HospitalisationController {
             motif: string | null;
             agentId: number | null;
             litId: number;
-            passagePrestationId: number | null;
             dateEntree: Date;
             dateSortie: Date | null;
             dureePrevue: string | null;
@@ -538,6 +537,7 @@ export declare class HospitalisationController {
             sortieParId: number | null;
             nbJoursFactures: number | null;
             montantJournalier: import("@prisma/client/runtime/library").Decimal | null;
+            passagePrestationId: number | null;
         })[];
     }>;
     admettre(id: number, dto: AdmissionDto, req: any): Promise<{
@@ -603,7 +603,6 @@ export declare class HospitalisationController {
         motif: string | null;
         agentId: number | null;
         litId: number;
-        passagePrestationId: number | null;
         dateEntree: Date;
         dateSortie: Date | null;
         dureePrevue: string | null;
@@ -612,6 +611,7 @@ export declare class HospitalisationController {
         sortieParId: number | null;
         nbJoursFactures: number | null;
         montantJournalier: import("@prisma/client/runtime/library").Decimal | null;
+        passagePrestationId: number | null;
     }>;
     suivi(id: number, dto: SuiviDto): Promise<{
         patient: {
@@ -676,7 +676,6 @@ export declare class HospitalisationController {
         motif: string | null;
         agentId: number | null;
         litId: number;
-        passagePrestationId: number | null;
         dateEntree: Date;
         dateSortie: Date | null;
         dureePrevue: string | null;
@@ -685,6 +684,7 @@ export declare class HospitalisationController {
         sortieParId: number | null;
         nbJoursFactures: number | null;
         montantJournalier: import("@prisma/client/runtime/library").Decimal | null;
+        passagePrestationId: number | null;
     }>;
     sortie(id: number, dto: SortieDto, req: any): Promise<{
         patient: {
@@ -749,7 +749,6 @@ export declare class HospitalisationController {
         motif: string | null;
         agentId: number | null;
         litId: number;
-        passagePrestationId: number | null;
         dateEntree: Date;
         dateSortie: Date | null;
         dureePrevue: string | null;
@@ -758,6 +757,7 @@ export declare class HospitalisationController {
         sortieParId: number | null;
         nbJoursFactures: number | null;
         montantJournalier: import("@prisma/client/runtime/library").Decimal | null;
+        passagePrestationId: number | null;
     }>;
     historique(jour?: string, recherche?: string, statut?: string, page?: string, perPage?: string, cliniqueId?: string): Promise<{
         data: {
@@ -823,7 +823,6 @@ export declare class HospitalisationController {
             motif: string | null;
             agentId: number | null;
             litId: number;
-            passagePrestationId: number | null;
             dateEntree: Date;
             dateSortie: Date | null;
             dureePrevue: string | null;
@@ -831,6 +830,7 @@ export declare class HospitalisationController {
             sortieMotif: string | null;
             sortieParId: number | null;
             nbJoursFactures: number | null;
+            passagePrestationId: number | null;
         }[];
         total: number;
         page: number;

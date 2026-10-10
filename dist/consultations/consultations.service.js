@@ -14,8 +14,21 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const affectation_service_1 = require("../affectation/affectation.service");
 const recherche_patient_1 = require("../common/recherche-patient");
+const metaResultatExterne = {
+    select: {
+        id: true,
+        nomFichier: true,
+        typeMime: true,
+        tailleOctets: true,
+        dateExamen: true,
+        lieu: true,
+        conclusion: true,
+        createdAt: true,
+    },
+};
 const includeConsultation = {
     medicaments: true,
+    ordonnances: { orderBy: { id: 'asc' } },
     medecin: {
         select: {
             matricule: true,
@@ -107,6 +120,7 @@ let ConsultationsService = class ConsultationsService {
                     include: {
                         service: { select: { id: true, code: true, nom: true } },
                         prestation: { select: { type: true } },
+                        resultatExterne: metaResultatExterne,
                     },
                     orderBy: { createdAt: 'asc' },
                 },
@@ -152,6 +166,7 @@ let ConsultationsService = class ConsultationsService {
             where: { patientId: passage.patientId },
             include: {
                 medicaments: true,
+                ordonnances: { orderBy: { id: 'asc' } },
                 medecin: {
                     select: {
                         matricule: true,
@@ -162,6 +177,34 @@ let ConsultationsService = class ConsultationsService {
                     select: {
                         numeroOrdre: true,
                         createdAt: true,
+                        taille: true,
+                        temperature: true,
+                        pouls: true,
+                        tensionGauche: true,
+                        tensionDroite: true,
+                        poids: true,
+                        prestations: {
+                            where: {
+                                OR: [
+                                    { statut: 'EXTERNE' },
+                                    {
+                                        statut: { notIn: ['NON_PRESCRITE', 'ANNULEE'] },
+                                        prestation: { type: { in: ['EXAMEN_LABO', 'IMAGERIE'] } },
+                                    },
+                                ],
+                            },
+                            select: {
+                                id: true,
+                                libelle: true,
+                                statut: true,
+                                createdAt: true,
+                                prestation: { select: { type: true } },
+                                examenLabo: { select: { id: true } },
+                                examenImagerie: { select: { id: true } },
+                                resultatExterne: metaResultatExterne,
+                            },
+                            orderBy: { createdAt: 'asc' },
+                        },
                         service: { select: { nom: true } },
                         examensLabo: {
                             include: {
@@ -260,6 +303,10 @@ let ConsultationsService = class ConsultationsService {
                 },
             });
         }
+        const precedente = await this.prisma.consultation.findUnique({
+            where: { passageId },
+            select: { autresExamens: true },
+        });
         const { patient: _patient, moDebut, moFin, ...donnees } = dto;
         const consultation = await this.prisma.consultation.upsert({
             where: { passageId },
@@ -279,6 +326,7 @@ let ConsultationsService = class ConsultationsService {
             include: includeConsultation,
         });
         await this.synchroniserFactureHospitalisation(passage.cliniqueId, passageId, dto, medecinId);
+        await this.synchroniserAutresExamens(passageId, passage.cliniqueId, precedente?.autresExamens ?? null, consultation.autresExamens, medecinId);
         if (await this.synchroniserTestsOrdonnance(consultation, passage.cliniqueId)) {
             return this.prisma.consultation.findUnique({
                 where: { id: consultation.id },
@@ -350,6 +398,73 @@ let ConsultationsService = class ConsultationsService {
             }
         }
     }
+    async synchroniserAutresExamens(passageId, cliniqueId, avant, apres, utilisateurId) {
+        const separer = (t) => (t ?? '')
+            .split(';')
+            .map((x) => x.trim())
+            .filter(Boolean);
+        const cle = (t) => t
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toUpperCase()
+            .replace(/\s+/g, ' ')
+            .trim();
+        const voulus = separer(apres);
+        const retires = separer(avant).filter((a) => !voulus.some((v) => cle(v) === cle(a)));
+        if (voulus.length === 0 && retires.length === 0)
+            return;
+        const catalogue = await this.prisma.prestation.findMany({
+            where: { cliniqueId, actif: true, type: { in: ['EXAMEN_LABO', 'IMAGERIE'] } },
+        });
+        const prestationDe = (libelle) => catalogue.find((c) => cle(c.libelle) === cle(libelle));
+        const lignes = await this.prisma.passagePrestation.findMany({ where: { passageId } });
+        const ligneDe = (libelle) => {
+            const prestation = prestationDe(libelle);
+            return prestation
+                ? lignes.find((l) => l.prestationId === prestation.id)
+                : lignes.find((l) => l.prestationId === null && cle(l.libelle) === cle(libelle));
+        };
+        for (const libelle of voulus) {
+            const prestation = prestationDe(libelle);
+            const ligne = ligneDe(libelle);
+            if (ligne) {
+                if (ligne.statut === 'NON_PRESCRITE') {
+                    await this.prisma.passagePrestation.update({
+                        where: { id: ligne.id },
+                        data: { statut: 'EN_ATTENTE' },
+                    });
+                }
+                continue;
+            }
+            await this.prisma.passagePrestation.create({
+                data: prestation
+                    ? {
+                        passageId,
+                        prestationId: prestation.id,
+                        libelle: prestation.libelle,
+                        montant: prestation.montant,
+                        serviceId: prestation.serviceId,
+                        agentId: utilisateurId,
+                        source: 'PRESCRIPTION',
+                        statut: 'EN_ATTENTE',
+                    }
+                    : {
+                        passageId,
+                        libelle,
+                        montant: 0,
+                        agentId: utilisateurId,
+                        source: 'PRESCRIPTION',
+                        statut: 'EXTERNE',
+                    },
+            });
+        }
+        for (const libelle of retires) {
+            const ligne = ligneDe(libelle);
+            if (ligne && ligne.source === 'PRESCRIPTION' && ['EN_ATTENTE', 'EXTERNE'].includes(ligne.statut)) {
+                await this.prisma.passagePrestation.delete({ where: { id: ligne.id } });
+            }
+        }
+    }
     async synchroniserTestsOrdonnance(consultation, cliniqueId) {
         const resultat = (v) => (v ?? '')
             .normalize('NFD')
@@ -372,10 +487,8 @@ let ConsultationsService = class ConsultationsService {
         let change = false;
         for (const r of regles) {
             const ligne = existantes.find((p) => cle(p.medicamentNom) === cle(r.libelle));
-            if (r.actif && (!ligne || ligne.prixUnitaire == null)) {
-                const produit = await this.prisma.medicament.findFirst({
-                    where: { cliniqueId, nom: r.libelle },
-                });
+            if (r.actif && (!ligne || ligne.prixUnitaire == null || ligne.medicamentId == null)) {
+                const produit = await this.produitTest(cliniqueId, r.libelle);
                 const prestation = produit?.prixVente
                     ? null
                     : await this.prisma.prestation.findFirst({
@@ -383,9 +496,11 @@ let ConsultationsService = class ConsultationsService {
                     });
                 const prix = produit?.prixVente ?? prestation?.montant ?? null;
                 if (!ligne) {
+                    const ordonnance = await this.ordonnanceEnCours(consultation.id, cliniqueId);
                     await this.prisma.prescription.create({
                         data: {
                             consultationId: consultation.id,
+                            ordonnanceId: ordonnance.id,
                             medicamentId: produit?.id ?? null,
                             medicamentNom: produit?.nom ?? r.libelle,
                             forme: produit?.forme ?? null,
@@ -395,10 +510,14 @@ let ConsultationsService = class ConsultationsService {
                     });
                     change = true;
                 }
-                else if (prix != null) {
+                else if (prix != null || ligne.medicamentId == null) {
                     await this.prisma.prescription.update({
                         where: { id: ligne.id },
-                        data: { prixUnitaire: prix, medicamentId: ligne.medicamentId ?? produit?.id ?? null },
+                        data: {
+                            prixUnitaire: ligne.prixUnitaire ?? prix,
+                            medicamentId: ligne.medicamentId ?? produit?.id ?? null,
+                            forme: ligne.forme ?? produit?.forme ?? null,
+                        },
                     });
                     change = true;
                 }
@@ -408,19 +527,66 @@ let ConsultationsService = class ConsultationsService {
                 change = true;
             }
         }
-        if (change && !consultation.numeroOrdonnance) {
-            await this.attribuerNumeroOrdonnance(consultation.id, cliniqueId);
-        }
         return change;
     }
-    async attribuerNumeroOrdonnance(consultationId, cliniqueId) {
-        const nb = await this.prisma.consultation.count({
-            where: { numeroOrdonnance: { not: null }, passage: { cliniqueId } },
+    async produitTest(cliniqueId, nom) {
+        const existant = await this.prisma.medicament.findFirst({ where: { cliniqueId, nom } });
+        if (existant)
+            return existant;
+        try {
+            return await this.prisma.medicament.create({
+                data: { cliniqueId, nom, forme: 'Test', uniteVente: 'BOITE' },
+            });
+        }
+        catch {
+            return this.prisma.medicament.findFirst({ where: { cliniqueId, nom } });
+        }
+    }
+    async creerOrdonnance(consultationId, cliniqueId) {
+        let n = (await this.prisma.ordonnance.count({ where: { cliniqueId } })) + 1;
+        let numero = `ORD-${String(n).padStart(5, '0')}`;
+        while (await this.prisma.ordonnance.findFirst({ where: { cliniqueId, numero } })) {
+            n += 1;
+            numero = `ORD-${String(n).padStart(5, '0')}`;
+        }
+        const ordonnance = await this.prisma.ordonnance.create({
+            data: { cliniqueId, consultationId, numero },
         });
-        await this.prisma.consultation.update({
+        await this.prisma.consultation.updateMany({
+            where: { id: consultationId, numeroOrdonnance: null },
+            data: { numeroOrdonnance: numero },
+        });
+        return ordonnance;
+    }
+    async ordonnanceEnCours(consultationId, cliniqueId, ordonnanceId) {
+        if (ordonnanceId) {
+            const demandee = await this.prisma.ordonnance.findUnique({ where: { id: ordonnanceId } });
+            if (!demandee || demandee.consultationId !== consultationId) {
+                throw new common_1.BadRequestException('Ordonnance introuvable pour cette consultation.');
+            }
+            if (demandee.statut === 'TRAITEE') {
+                throw new common_1.BadRequestException(`L'ordonnance ${demandee.numero} a déjà été délivrée par la pharmacie : créez une nouvelle ordonnance.`);
+            }
+            return demandee;
+        }
+        const ouverte = await this.prisma.ordonnance.findFirst({
+            where: { consultationId, statut: 'EN_ATTENTE' },
+            orderBy: { id: 'desc' },
+        });
+        return ouverte ?? this.creerOrdonnance(consultationId, cliniqueId);
+    }
+    async nouvelleOrdonnance(consultationId) {
+        const consultation = await this.prisma.consultation.findUnique({
             where: { id: consultationId },
-            data: { numeroOrdonnance: `ORD-${String(nb + 1).padStart(5, '0')}` },
+            include: { passage: { select: { cliniqueId: true } } },
         });
+        if (!consultation)
+            throw new common_1.NotFoundException('Consultation introuvable.');
+        const vide = await this.prisma.ordonnance.findFirst({
+            where: { consultationId, statut: 'EN_ATTENTE', medicaments: { none: {} } },
+            orderBy: { id: 'desc' },
+        });
+        return vide ?? this.creerOrdonnance(consultationId, consultation.passage.cliniqueId);
     }
     async ajouterMedicament(consultationId, dto) {
         const consultation = await this.prisma.consultation.findUnique({
@@ -448,9 +614,11 @@ let ConsultationsService = class ConsultationsService {
         }
         if (!nom)
             throw new common_1.BadRequestException('Nom du médicament requis.');
-        const prescription = await this.prisma.prescription.create({
+        const ordonnance = await this.ordonnanceEnCours(consultationId, consultation.passage.cliniqueId, dto.ordonnanceId);
+        return this.prisma.prescription.create({
             data: {
                 consultationId,
+                ordonnanceId: ordonnance.id,
                 medicamentId,
                 medicamentNom: nom,
                 forme,
@@ -459,17 +627,17 @@ let ConsultationsService = class ConsultationsService {
                 duree: dto.duree,
             },
         });
-        if (!consultation.numeroOrdonnance) {
-            await this.attribuerNumeroOrdonnance(consultationId, consultation.passage.cliniqueId);
-        }
-        return prescription;
     }
     async retirerMedicament(prescriptionId) {
         const prescription = await this.prisma.prescription.findUnique({
             where: { id: prescriptionId },
+            include: { ordonnance: true, _count: { select: { lignes: true } } },
         });
         if (!prescription)
             throw new common_1.NotFoundException('Prescription introuvable.');
+        if (prescription.ordonnance?.statut === 'TRAITEE' || prescription._count.lignes > 0) {
+            throw new common_1.BadRequestException('Ce médicament a déjà été délivré par la pharmacie : il ne peut plus être retiré.');
+        }
         return this.prisma.prescription.delete({ where: { id: prescriptionId } });
     }
     async prescrireExamens(consultationId, lignesIds) {
@@ -564,7 +732,7 @@ let ConsultationsService = class ConsultationsService {
         });
         if (!ligne)
             throw new common_1.NotFoundException('Ligne introuvable.');
-        const libreExterne = ligne.source === 'PRESCRIPTION' && ligne.statut === 'EXTERNE';
+        const libreExterne = ligne.statut === 'EXTERNE';
         if (ligne.statut !== 'EN_ATTENTE' && !libreExterne) {
             throw new common_1.BadRequestException('Cette prestation est déjà payée : impossible de retirer la prescription.');
         }
@@ -576,12 +744,95 @@ let ConsultationsService = class ConsultationsService {
             data: { statut: 'NON_PRESCRITE' },
         });
     }
+    async joindreResultatExterne(ligneId, dto, utilisateurId) {
+        const ligne = await this.prisma.passagePrestation.findUnique({
+            where: { id: ligneId },
+            include: {
+                resultatExterne: { select: { id: true } },
+                prestation: { select: { type: true } },
+                examenLabo: { select: { id: true } },
+                examenImagerie: { select: { id: true } },
+            },
+        });
+        if (!ligne)
+            throw new common_1.NotFoundException('Examen introuvable.');
+        const prescritNonRealise = ligne.statut === 'EN_ATTENTE' &&
+            ['EXAMEN_LABO', 'IMAGERIE'].includes(ligne.prestation?.type ?? '') &&
+            !ligne.examenLabo &&
+            !ligne.examenImagerie;
+        if (ligne.statut !== 'EXTERNE' && !prescritNonRealise) {
+            throw new common_1.BadRequestException("Un document ne se joint qu'à un examen réalisé hors clinique (cet examen est payé ou fait à la clinique).");
+        }
+        const infos = {
+            dateExamen: dto.dateExamen ? new Date(`${dto.dateExamen}T00:00:00`) : null,
+            lieu: dto.lieu?.trim() || null,
+            conclusion: dto.conclusion?.trim() || null,
+        };
+        if (!dto.contenu) {
+            if (!ligne.resultatExterne)
+                throw new common_1.BadRequestException('Choisissez le fichier du résultat.');
+            return this.prisma.resultatExterne.update({
+                where: { passagePrestationId: ligneId },
+                data: infos,
+                ...metaResultatExterne,
+            });
+        }
+        const m = /^data:([a-zA-Z0-9.+/-]+);base64,/.exec(dto.contenu);
+        const TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+        if (!m || !TYPES.includes(m[1])) {
+            throw new common_1.BadRequestException('Format non accepté : choisissez une image (JPG, PNG) ou un PDF.');
+        }
+        const tailleOctets = Math.floor(((dto.contenu.length - m[0].length) * 3) / 4);
+        if (tailleOctets > 7 * 1024 * 1024) {
+            throw new common_1.BadRequestException('Fichier trop volumineux (7 Mo maximum).');
+        }
+        if (prescritNonRealise) {
+            await this.prisma.passagePrestation.update({
+                where: { id: ligneId },
+                data: { statut: 'EXTERNE' },
+            });
+        }
+        const donnees = {
+            nomFichier: dto.nomFichier?.trim() || 'resultat',
+            typeMime: m[1],
+            contenu: dto.contenu,
+            tailleOctets,
+            utilisateurId: utilisateurId ?? null,
+            ...infos,
+        };
+        return this.prisma.resultatExterne.upsert({
+            where: { passagePrestationId: ligneId },
+            create: { passagePrestationId: ligneId, ...donnees },
+            update: donnees,
+            ...metaResultatExterne,
+        });
+    }
+    async resultatExterne(ligneId) {
+        const doc = await this.prisma.resultatExterne.findUnique({
+            where: { passagePrestationId: ligneId },
+            include: { ligne: { select: { libelle: true } } },
+        });
+        if (!doc)
+            throw new common_1.NotFoundException('Aucun document joint à cet examen.');
+        return doc;
+    }
+    async supprimerResultatExterne(ligneId) {
+        const doc = await this.prisma.resultatExterne.findUnique({ where: { passagePrestationId: ligneId } });
+        if (!doc)
+            throw new common_1.NotFoundException('Aucun document joint à cet examen.');
+        await this.prisma.resultatExterne.delete({ where: { id: doc.id } });
+        return { ok: true };
+    }
     async sauvegarderOrdonnance(consultationId) {
         const consultation = await this.prisma.consultation.findUnique({
             where: { id: consultationId },
         });
         if (!consultation)
             throw new common_1.NotFoundException('Consultation introuvable.');
+        await this.prisma.ordonnance.updateMany({
+            where: { consultationId, statut: 'EN_ATTENTE' },
+            data: { sauveeLe: new Date() },
+        });
         return this.prisma.consultation.update({
             where: { id: consultationId },
             data: { ordonnanceSauveeLe: new Date() },

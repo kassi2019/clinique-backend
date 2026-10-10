@@ -88,6 +88,32 @@ export class ConsultationsController {
     return this.consultationsService.retirerExamen(id);
   }
 
+  // ── Résultat scanné d'un examen réalisé hors clinique ──
+  @Post('examens/:id/resultat-externe')
+  joindreResultatExterne(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { nomFichier?: string; contenu?: string; dateExamen?: string; lieu?: string; conclusion?: string },
+    @Req() req,
+  ) {
+    return this.consultationsService.joindreResultatExterne(id, dto, req.user?.id);
+  }
+
+  @Get('examens/:id/resultat-externe')
+  resultatExterne(@Param('id', ParseIntPipe) id: number) {
+    return this.consultationsService.resultatExterne(id);
+  }
+
+  @Delete('examens/:id/resultat-externe')
+  supprimerResultatExterne(@Param('id', ParseIntPipe) id: number) {
+    return this.consultationsService.supprimerResultatExterne(id);
+  }
+
+  /** Nouvelle ordonnance indépendante pour la même consultation. */
+  @Post(':id/ordonnances')
+  nouvelleOrdonnance(@Param('id', ParseIntPipe) id: number) {
+    return this.consultationsService.nouvelleOrdonnance(id);
+  }
+
   /** Sauvegarde l'ordonnance (horodatée). */
   @Post(':id/ordonnance-sauvegarder')
   sauvegarderOrdonnance(@Param('id', ParseIntPipe) id: number) {

@@ -19,10 +19,10 @@ export declare class RapportsController {
         };
         valeurs: {
             id: number;
+            ligne: number;
             valeur: number | null;
             rapportId: number;
             tableau: string;
-            ligne: number;
             colonne: number;
         }[];
         createdAt: Date;
@@ -48,10 +48,10 @@ export declare class RapportsController {
         portes: Record<string, boolean>;
         valeurs: {
             id: number;
+            ligne: number;
             valeur: number | null;
             rapportId: number;
             tableau: string;
-            ligne: number;
             colonne: number;
         }[];
         createdAt: Date;

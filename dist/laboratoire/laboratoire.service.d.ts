@@ -179,10 +179,10 @@ export declare class LaboratoireService {
                 lignes: {
                     parametre: string;
                     id: number;
-                    examenLaboId: number;
-                    valeur: string | null;
                     unite: string | null;
+                    valeur: string | null;
                     normes: string | null;
+                    examenLaboId: number;
                 }[];
                 prelevePar: {
                     personnel: {
@@ -208,9 +208,9 @@ export declare class LaboratoireService {
                 passageId: number;
                 patientId: number;
                 passagePrestationId: number;
+                conclusion: string | null;
                 preleveParId: number | null;
                 preleveLe: Date | null;
-                conclusion: string | null;
                 valideParId: number | null;
                 valideLe: Date | null;
             })[];
@@ -226,10 +226,10 @@ export declare class LaboratoireService {
             lignes: {
                 parametre: string;
                 id: number;
-                examenLaboId: number;
-                valeur: string | null;
                 unite: string | null;
+                valeur: string | null;
                 normes: string | null;
+                examenLaboId: number;
             }[];
         } & {
             createdAt: Date;
@@ -241,9 +241,9 @@ export declare class LaboratoireService {
             passageId: number;
             patientId: number;
             passagePrestationId: number;
+            conclusion: string | null;
             preleveParId: number | null;
             preleveLe: Date | null;
-            conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;
         })[];
@@ -252,10 +252,10 @@ export declare class LaboratoireService {
         lignes: {
             parametre: string;
             id: number;
-            examenLaboId: number;
-            valeur: string | null;
             unite: string | null;
+            valeur: string | null;
             normes: string | null;
+            examenLaboId: number;
         }[];
         prelevePar: {
             personnel: {
@@ -281,9 +281,9 @@ export declare class LaboratoireService {
         passageId: number;
         patientId: number;
         passagePrestationId: number;
+        conclusion: string | null;
         preleveParId: number | null;
         preleveLe: Date | null;
-        conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
     }>;
@@ -291,10 +291,10 @@ export declare class LaboratoireService {
         lignes: {
             parametre: string;
             id: number;
-            examenLaboId: number;
-            valeur: string | null;
             unite: string | null;
+            valeur: string | null;
             normes: string | null;
+            examenLaboId: number;
         }[];
         prelevePar: {
             personnel: {
@@ -320,9 +320,9 @@ export declare class LaboratoireService {
         passageId: number;
         patientId: number;
         passagePrestationId: number;
+        conclusion: string | null;
         preleveParId: number | null;
         preleveLe: Date | null;
-        conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
     }>;
@@ -330,10 +330,10 @@ export declare class LaboratoireService {
         lignes: {
             parametre: string;
             id: number;
-            examenLaboId: number;
-            valeur: string | null;
             unite: string | null;
+            valeur: string | null;
             normes: string | null;
+            examenLaboId: number;
         }[];
         prelevePar: {
             personnel: {
@@ -359,9 +359,9 @@ export declare class LaboratoireService {
         passageId: number;
         patientId: number;
         passagePrestationId: number;
+        conclusion: string | null;
         preleveParId: number | null;
         preleveLe: Date | null;
-        conclusion: string | null;
         valideParId: number | null;
         valideLe: Date | null;
     }>;
@@ -387,10 +387,10 @@ export declare class LaboratoireService {
             lignes: {
                 parametre: string;
                 id: number;
-                examenLaboId: number;
-                valeur: string | null;
                 unite: string | null;
+                valeur: string | null;
                 normes: string | null;
+                examenLaboId: number;
             }[];
             prelevePar: {
                 personnel: {
@@ -414,9 +414,9 @@ export declare class LaboratoireService {
             passageId: number;
             patientId: number;
             passagePrestationId: number;
+            conclusion: string | null;
             preleveParId: number | null;
             preleveLe: Date | null;
-            conclusion: string | null;
             valideParId: number | null;
             valideLe: Date | null;
         })[];

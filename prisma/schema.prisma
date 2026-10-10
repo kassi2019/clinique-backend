@@ -15,88 +15,88 @@ datasource db {
 
 // ---------- Établissement (multi-clinique, §16.2) ----------
 model Clinique {
-  id        Int      @id @default(autoincrement())
-  code      String   @unique
-  nom       String
-  adresse   String?
-  telephone String?
-  statut    String   @default("ACTIF") // ACTIF / INACTIF
+  id                         Int      @id @default(autoincrement())
+  code                       String   @unique
+  nom                        String
+  adresse                    String?
+  telephone                  String?
+  statut                     String   @default("ACTIF") // ACTIF / INACTIF
   // ── Rapport SIG mensuel (en-tête officielle, paramétrable) ──
-  immatriculation         String? // n° d'immatriculation de l'établissement
-  districtNom             String? // district sanitaire
-  districtCode            String?
-  regionNom               String? // région sanitaire
-  regionCode              String?
-  populationDesservie     Int?
+  immatriculation            String? // n° d'immatriculation de l'établissement
+  districtNom                String? // district sanitaire
+  districtCode               String?
+  regionNom                  String? // région sanitaire
+  regionCode                 String?
+  populationDesservie        Int?
   responsableRapportNom      String? // « rapport réalisé par »
   responsableRapportFonction String?
   responsableRapportContact  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
 
-  services    Service[]
-  personnel   Personnel[]
-  prestations Prestation[]
-  parametre   Parametre?
-  impressionFiles ImpressionFile[]
-  nationalites Nationalite[]
-  residences Residence[]
-  diagnostics Diagnostic[]
-  pathologies Pathologie[]
-  fournisseurs Fournisseur[]
-  fonctions Fonction[]
-  posologies Posologie[]
-  patients    Patient[]
-  passages    Passage[]
-  paiements   Paiement[]
-  creditTickets CreditTicket[]
-  fichesReference FicheReference[]
-  journalActions JournalAction[]
-  medicaments Medicament[]
-  consommables Consommable[]
-  examensLabo ExamenLabo[]
-  examensImagerie ExamenImagerie[]
-  chambres Chambre[]
-  hospitalisations Hospitalisation[]
-  typesChambres TypeChambre[]
-  imprimantes Imprimante[]
-  affectations Affectation[]
-  assurances Assurance[]
-  grossesses Grossesse[]
-  soins Soin[]
-  rapportsSig RapportSig[]
-  professions Profession[]
-  motifsConsultation MotifConsultation[]
-  quartiers Quartier[]
+  services                 Service[]
+  personnel                Personnel[]
+  prestations              Prestation[]
+  parametre                Parametre?
+  impressionFiles          ImpressionFile[]
+  nationalites             Nationalite[]
+  residences               Residence[]
+  diagnostics              Diagnostic[]
+  pathologies              Pathologie[]
+  fournisseurs             Fournisseur[]
+  fonctions                Fonction[]
+  posologies               Posologie[]
+  patients                 Patient[]
+  passages                 Passage[]
+  paiements                Paiement[]
+  creditTickets            CreditTicket[]
+  fichesReference          FicheReference[]
+  journalActions           JournalAction[]
+  medicaments              Medicament[]
+  consommables             Consommable[]
+  examensLabo              ExamenLabo[]
+  examensImagerie          ExamenImagerie[]
+  chambres                 Chambre[]
+  hospitalisations         Hospitalisation[]
+  typesChambres            TypeChambre[]
+  imprimantes              Imprimante[]
+  affectations             Affectation[]
+  assurances               Assurance[]
+  grossesses               Grossesse[]
+  soins                    Soin[]
+  rapportsSig              RapportSig[]
+  professions              Profession[]
+  motifsConsultation       MotifConsultation[]
+  quartiers                Quartier[]
   antecedentsMedicauxListe AntecedentMedical[]
-  autresExamensListe AutreExamen[]
-  cpons ConsultationPostnatale[]
-  consultationsPf ConsultationPf[]
-  certificatsArret CertificatArret[]
-  fichesEchographie FicheEchographie[]
-  fichesExamenImagerie FicheExamenImagerie[]
+  autresExamensListe       AutreExamen[]
+  cpons                    ConsultationPostnatale[]
+  consultationsPf          ConsultationPf[]
+  certificatsArret         CertificatArret[]
+  fichesEchographie        FicheEchographie[]
+  fichesExamenImagerie     FicheExamenImagerie[]
 
   @@map("cliniques")
 }
 
 // ---------- Patients ----------
 model Patient {
-  id            Int       @id @default(autoincrement())
-  cliniqueId    Int
-  numeroDossier String // unique par clinique
-  creeParId     Int? // agent d'accueil ayant créé le dossier (traçabilité)
-  code          String    @unique // code unique PERMANENT du patient (ex. P-9N7Z5A) : clé de recherche à vie
-  nom           String
-  prenom        String
-  age           String?
-  dateNaissance DateTime? @db.Date // date de naissance (calculée depuis l'âge et inversement)
-  numeroCni     String?  // numéro de la carte nationale d'identité
-  numeroCmu     String?  // numéro CMU (couverture maladie universelle)
-  sexe          String? // M / F
-  ville         String?
-  quartier      String?
-  profession    String?
-  telephone     String?
+  id                  Int       @id @default(autoincrement())
+  cliniqueId          Int
+  numeroDossier       String // unique par clinique
+  creeParId           Int? // agent d'accueil ayant créé le dossier (traçabilité)
+  code                String    @unique // code unique PERMANENT du patient (ex. P-9N7Z5A) : clé de recherche à vie
+  nom                 String
+  prenom              String
+  age                 String?
+  dateNaissance       DateTime? @db.Date // date de naissance (calculée depuis l'âge et inversement)
+  numeroCni           String? // numéro de la carte nationale d'identité
+  numeroCmu           String? // numéro CMU (couverture maladie universelle)
+  sexe                String? // M / F
+  ville               String?
+  quartier            String?
+  profession          String?
+  telephone           String?
   // Données administratives de la fiche de consultation curative
   nationalite         String?
   scolarisation       String? // OUI / NON / NA
@@ -106,25 +106,25 @@ model Patient {
   protectionSociale   String? // NON_ASSURE / CMU / ASSURANCE_PRIVEE / CMU_AP / INDIGENT
   residenceHabituelle String?
   residenceActuelle   String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  clinique Clinique  @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  creePar Utilisateur? @relation("PatientsCrees", fields: [creeParId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  creePar  Utilisateur? @relation("PatientsCrees", fields: [creeParId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   passages Passage[]
 
-  consultations Consultation[]
-  examensLabo  ExamenLabo[]
-  examensImagerie ExamenImagerie[]
-  hospitalisations Hospitalisation[]
-  assurances   PatientAssurance[]
-  grossesses   Grossesse[]
-  soins        Soin[]
-  cpons        ConsultationPostnatale[]
-  consultationsPf ConsultationPf[]
-  certificatsArret CertificatArret[]
+  consultations        Consultation[]
+  examensLabo          ExamenLabo[]
+  examensImagerie      ExamenImagerie[]
+  hospitalisations     Hospitalisation[]
+  assurances           PatientAssurance[]
+  grossesses           Grossesse[]
+  soins                Soin[]
+  cpons                ConsultationPostnatale[]
+  consultationsPf      ConsultationPf[]
+  certificatsArret     CertificatArret[]
   fichesExamenImagerie FicheExamenImagerie[]
-  fichesReference FicheReference[]
+  fichesReference      FicheReference[]
 
   @@unique([cliniqueId, numeroDossier])
   @@map("patients")
@@ -132,50 +132,50 @@ model Patient {
 
 // ---------- Passages (le N° d'ordre expire après 10 jours ; le code du patient est permanent) ----------
 model Passage {
-  id                Int      @id @default(autoincrement())
-  cliniqueId        Int
-  patientId         Int
-  numeroOrdre       String // ex. MED-001092026 (code service + ordre/mois/année)
-  serviceId         Int
-  typePatient       String   @default("INTERNE") // INTERNE / EXTERNE
-  motif             String?
-  referent          String? // patient externe : structure/professionnel référent
+  id                 Int       @id @default(autoincrement())
+  cliniqueId         Int
+  patientId          Int
+  numeroOrdre        String // ex. MED-001092026 (code service + ordre/mois/année)
+  serviceId          Int
+  typePatient        String    @default("INTERNE") // INTERNE / EXTERNE
+  motif              String?
+  referent           String? // patient externe : structure/professionnel référent
   prestationDemandee String? // patient externe : prestation demandée
-  statut            String   @default("EN_ATTENTE_PAIEMENT") // CREE, EN_ATTENTE_PAIEMENT, ACTIF, UTILISE, CLOTURE, EXPIRE
-  agentId           Int? // dernier agent d'accueil ayant créé/mis à jour le passage (constantes)
+  statut             String    @default("EN_ATTENTE_PAIEMENT") // CREE, EN_ATTENTE_PAIEMENT, ACTIF, UTILISE, CLOTURE, EXPIRE
+  agentId            Int? // dernier agent d'accueil ayant créé/mis à jour le passage (constantes)
   // Constantes saisies à l'accueil (§5.1)
-  taille            String?
-  temperature       Decimal? @db.Decimal(4, 1)
-  pouls             Int?
-  tensionGauche     String? // ex. 12/8
-  tensionDroite     String?
-  poids             Decimal? @db.Decimal(5, 1)
-  perimetreBrachial String?  // cm — constante saisie à l'accueil
-  perimetreCranien  String?  // cm — constante saisie à l'accueil
-  materniteTraiteLe DateTime? // module maternité : date de fin de prise en charge (« patients terminés »)
-  expireLe          DateTime // validité : 10 jours (§4.3)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  taille             String?
+  temperature        Decimal?  @db.Decimal(4, 1)
+  pouls              Int?
+  tensionGauche      String? // ex. 12/8
+  tensionDroite      String?
+  poids              Decimal?  @db.Decimal(5, 1)
+  perimetreBrachial  String? // cm — constante saisie à l'accueil
+  perimetreCranien   String? // cm — constante saisie à l'accueil
+  materniteTraiteLe  DateTime? // module maternité : date de fin de prise en charge (« patients terminés »)
+  expireLe           DateTime // validité : 10 jours (§4.3)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  patient  Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  service  Service  @relation(fields: [serviceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  clinique Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  agent Utilisateur? @relation("PassagesAccueil", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  patient  Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  service  Service      @relation(fields: [serviceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agent    Utilisateur? @relation("PassagesAccueil", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  prestations  PassagePrestation[]
-  paiements    Paiement[]
-  consultations Consultation[]
-  examensLabo  ExamenLabo[]
-  examensImagerie ExamenImagerie[]
-  hospitalisation Hospitalisation?
-  affectation Affectation?
-  soins Soin[]
-  cpons ConsultationPostnatale[]
-  consultationsPf ConsultationPf[]
-  certificatsArret CertificatArret[]
+  prestations          PassagePrestation[]
+  paiements            Paiement[]
+  consultations        Consultation[]
+  examensLabo          ExamenLabo[]
+  examensImagerie      ExamenImagerie[]
+  hospitalisation      Hospitalisation?
+  affectation          Affectation?
+  soins                Soin[]
+  cpons                ConsultationPostnatale[]
+  consultationsPf      ConsultationPf[]
+  certificatsArret     CertificatArret[]
   fichesExamenImagerie FicheExamenImagerie[]
-  credits CreditTicket[]
-  fichesReference FicheReference[]
+  credits              CreditTicket[]
+  fichesReference      FicheReference[]
 
   @@unique([cliniqueId, numeroOrdre])
   @@map("passages")
@@ -198,19 +198,40 @@ model PassagePrestation {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  passage    Passage    @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  passage         Passage          @relation(fields: [passageId], references: [id], onDelete: Cascade)
   // NoAction : évite les chemins de cascade multiples (l'annulation d'un paiement est douce)
-  paiement   Paiement?  @relation(fields: [paiementId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  credit     CreditTicket? @relation(fields: [creditId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  agent      Utilisateur? @relation("LignesPrestationsAgent", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  prestation Prestation? @relation(fields: [prestationId], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  service    Service?   @relation(fields: [serviceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  examenLabo ExamenLabo?
-  examenImagerie ExamenImagerie?
+  paiement        Paiement?        @relation(fields: [paiementId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  credit          CreditTicket?    @relation(fields: [creditId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agent           Utilisateur?     @relation("LignesPrestationsAgent", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  prestation      Prestation?      @relation(fields: [prestationId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  service         Service?         @relation(fields: [serviceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  examenLabo      ExamenLabo?
+  examenImagerie  ExamenImagerie?
   hospitalisation Hospitalisation? @relation("LignesHospitalisation")
-  soin Soin?
+  soin            Soin?
+  resultatExterne ResultatExterne?
 
   @@map("passages_prestations")
+}
+
+// ---------- Résultat scanné d'un examen réalisé hors clinique ----------
+model ResultatExterne {
+  id                  Int       @id @default(autoincrement())
+  passagePrestationId Int       @unique // ligne d'examen « hors clinique » prescrite par le médecin
+  nomFichier          String
+  typeMime            String // image/jpeg, image/png, application/pdf…
+  contenu             String    @db.NVarChar(Max) // document au format data URL (base64)
+  tailleOctets        Int       @default(0)
+  dateExamen          DateTime? @db.Date
+  lieu                String? // laboratoire / centre où l'examen a été fait
+  conclusion          String?   @db.NVarChar(Max)
+  utilisateurId       Int? // médecin ayant joint le document
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  ligne PassagePrestation @relation(fields: [passagePrestationId], references: [id], onDelete: Cascade)
+
+  @@map("resultats_examens_externes")
 }
 
 // ---------- Ticket de crédit / cas social (caisse §6) ----------
@@ -221,76 +242,75 @@ model CreditTicket {
   cliniqueId   Int
   passageId    Int
   numero       String   @unique @db.NVarChar(100) // CRE-0001 (crédit) / SOC-0001 (cas social)
-  type         String   // CREDIT / CAS_SOCIAL
-  motif        String?  // ex. « Argent pas encore disponible », « Indigent »…
+  type         String // CREDIT / CAS_SOCIAL
+  motif        String? // ex. « Argent pas encore disponible », « Indigent »…
   montantTotal Decimal  @db.Decimal(18, 2)
   statut       String   @default("EN_COURS") // EN_COURS / SOLDEE / ANNULEE
   agentId      Int? // utilisateur ayant émis le ticket
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  clinique Clinique          @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  passage  Passage           @relation(fields: [passageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  agent    Utilisateur?      @relation("CreditAgent", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique Clinique            @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  passage  Passage             @relation(fields: [passageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agent    Utilisateur?        @relation("CreditAgent", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   lignes   PassagePrestation[]
 
   @@map("credit_tickets")
 }
 
-
 // ---------- Fiche de référence / contre-référence (évacuation du patient) ----------
 model FicheReference {
-  id            Int      @id @default(autoincrement())
-  cliniqueId    Int
-  passageId     Int
-  patientId     Int
-  numero        String   @unique // REF-0001…
+  id                      Int       @id @default(autoincrement())
+  cliniqueId              Int
+  passageId               Int
+  patientId               Int
+  numero                  String    @unique // REF-0001…
   // ── 1. Informations de référence ──
-  transfertUrgent  Boolean?
-  nomPrenoms       String?
-  age              String?
-  sexe             String?
-  numeroSecu       String?
-  adresseTel       String?
-  numeroRegistreSig String?
-  districtSanitaire String?
-  dateAdmission    DateTime?
-  heureAdmission   String?
-  agentNom         String?
-  agentPrenom      String?
-  agentContact     String?
-  institutionReference String?
-  serviceReference String?
-  dateHeureDecision String?
-  diagnostic       String?
-  examensCliniques String?
-  antecedentsMedicaux String?
+  transfertUrgent         Boolean?
+  nomPrenoms              String?
+  age                     String?
+  sexe                    String?
+  numeroSecu              String?
+  adresseTel              String?
+  numeroRegistreSig       String?
+  districtSanitaire       String?
+  dateAdmission           DateTime?
+  heureAdmission          String?
+  agentNom                String?
+  agentPrenom             String?
+  agentContact            String?
+  institutionReference    String?
+  serviceReference        String?
+  dateHeureDecision       String?
+  diagnostic              String?
+  examensCliniques        String?
+  antecedentsMedicaux     String?
   antecedentsChirurgicaux String?
-  antecedentsGyneco String?
-  allergie         String?
-  groupeSanguin    String?
-  motifReference   String?
-  traitementRecu   String?
-  depuisQuand      String?
-  modeEvacuation   String? // AMBULANCE / VEHICULE_PERSONNEL / AUTRE
-  modeEvacuationAutre String?
-  dateHeureDepart  String?
+  antecedentsGyneco       String?
+  allergie                String?
+  groupeSanguin           String?
+  motifReference          String?
+  traitementRecu          String?
+  depuisQuand             String?
+  modeEvacuation          String? // AMBULANCE / VEHICULE_PERSONNEL / AUTRE
+  modeEvacuationAutre     String?
+  dateHeureDepart         String?
   // ── 2. Informations de contre-référence (complétées au retour) ──
-  contreNomPrenoms    String?
-  contreNumeroDossier String?
-  contreDateArrivee   String?
-  contreDiagnostic    String?
-  contreHospitalise   Boolean?
-  contreTraitement    String?
-  contreMedecin       String?
-  contreDateSignature String?
-  etabliParId     Int? // utilisateur ayant établi la fiche
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  contreNomPrenoms        String?
+  contreNumeroDossier     String?
+  contreDateArrivee       String?
+  contreDiagnostic        String?
+  contreHospitalise       Boolean?
+  contreTraitement        String?
+  contreMedecin           String?
+  contreDateSignature     String?
+  etabliParId             Int? // utilisateur ayant établi la fiche
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
 
-  clinique  Clinique    @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  passage   Passage     @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  patient   Patient     @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique  Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  passage   Passage      @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  patient   Patient      @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   etabliPar Utilisateur? @relation("FichesReference", fields: [etabliParId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("fiches_reference")
@@ -330,7 +350,7 @@ model Medicament {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  clinique     Clinique      @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique      Clinique            @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   prescriptions Prescription[]
   lots          Lot[]
   mouvements    MouvementStock[]
@@ -342,18 +362,18 @@ model Medicament {
 
 // ---------- Lots de médicaments (§9.2) ----------
 model Lot {
-  id                Int      @id @default(autoincrement())
-  medicamentId      Int
-  numeroLot         String
-  quantiteInitiale  Int
-  quantiteRestante  Int
-  datePeremption    DateTime @db.Date
-  prixAchat         Decimal? @db.Decimal(18, 2)
-  fournisseur       String?  // fournisseur du lot (saisi à l'entrée de stock)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id               Int      @id @default(autoincrement())
+  medicamentId     Int
+  numeroLot        String
+  quantiteInitiale Int
+  quantiteRestante Int
+  datePeremption   DateTime @db.Date
+  prixAchat        Decimal? @db.Decimal(18, 2)
+  fournisseur      String? // fournisseur du lot (saisi à l'entrée de stock)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  medicament Medicament      @relation(fields: [medicamentId], references: [id], onDelete: Cascade)
+  medicament Medicament       @relation(fields: [medicamentId], references: [id], onDelete: Cascade)
   mouvements MouvementStock[]
 
   @@map("lots")
@@ -365,14 +385,16 @@ model MouvementStock {
   medicamentId  Int
   type          String // ENTREE / SORTIE / INVENTAIRE
   quantite      Int // signée : + entrée, - sortie, ± ajustement d'inventaire
+  stockAvant    Int? // inventaire : stock théorique avant comptage
+  stockApres    Int? // inventaire : stock réel compté
   lotId         Int?
   reference     String? // n° de lot, ordonnance, fournisseur...
   utilisateurId Int?
   commentaire   String?
   createdAt     DateTime @default(now())
 
-  medicament Medicament   @relation(fields: [medicamentId], references: [id], onDelete: Cascade)
-  lot        Lot?         @relation(fields: [lotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  medicament  Medicament   @relation(fields: [medicamentId], references: [id], onDelete: Cascade)
+  lot         Lot?         @relation(fields: [lotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   utilisateur Utilisateur? @relation(fields: [utilisateurId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("mouvements_stock")
@@ -380,20 +402,23 @@ model MouvementStock {
 
 // ---------- Dispensations (ordonnances servies, §9.1) ----------
 model Dispensation {
-  id             Int      @id @default(autoincrement())
+  id             Int       @id @default(autoincrement())
   consultationId Int
+  ordonnanceId   Int? // ordonnance servie
   pharmacienId   Int // utilisateur qui dispense
-  statut         String   @default("EN_COURS") // EN_COURS / CLOTUREE
-  montantTotal   Decimal  @db.Decimal(18, 2) @default(0)
+  statut         String    @default("EN_COURS") // EN_COURS / CLOTUREE
+  montantTotal   Decimal   @default(0) @db.Decimal(18, 2)
   clotureeLe     DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  consultation Consultation       @relation(fields: [consultationId], references: [id], onDelete: Cascade)
-  pharmacien   Utilisateur        @relation(fields: [pharmacienId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  consultation Consultation        @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  ordonnance   Ordonnance?         @relation(fields: [ordonnanceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  pharmacien   Utilisateur         @relation(fields: [pharmacienId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   lignes       LigneDispensation[]
   paiement     PharmaciePaiement?
 
+  @@index([ordonnanceId])
   @@map("dispensations")
 }
 
@@ -410,7 +435,7 @@ model LigneDispensation {
   prixUnitaire      Decimal @db.Decimal(18, 2)
   montant           Decimal @db.Decimal(18, 2)
 
-  dispensation Dispensation @relation(fields: [dispensationId], references: [id], onDelete: Cascade)
+  dispensation Dispensation  @relation(fields: [dispensationId], references: [id], onDelete: Cascade)
   prescription Prescription? @relation(fields: [prescriptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   medicament   Medicament?   @relation(fields: [medicamentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -419,19 +444,31 @@ model LigneDispensation {
 
 // ---------- Paiements de la caisse pharmacie (§9.1) ----------
 model PharmaciePaiement {
-  id              Int      @id @default(autoincrement())
-  dispensationId  Int      @unique
-  caissierId      Int // utilisateur qui encaisse (pharmacien)
-  numeroRecu      String
-  montantTotal    Decimal  @db.Decimal(18, 2)
-  modePaiement    String   @default("ESPECES") // ESPECES / MOBILE_MONEY / CARTE
-  statut          String   @default("VALIDE") // VALIDE / ANNULE
-  motifAnnulation String?
-  dateAnnulation  DateTime?
-  createdAt       DateTime @default(now())
+  id               Int       @id @default(autoincrement())
+  dispensationId   Int       @unique
+  caissierId       Int // utilisateur qui encaisse (pharmacien)
+  numeroRecu       String
+  montantTotal     Decimal   @db.Decimal(18, 2)
+  modePaiement     String    @default("ESPECES") // ESPECES / MOBILE_MONEY / CARTE
+  statut           String    @default("VALIDE") // VALIDE / ANNULE
+  // Règlement : comptant, à crédit (payé plus tard) ou cas social (non remboursable)
+  type             String    @default("COMPTANT") // COMPTANT / CREDIT / CAS_SOCIAL
+  montantAssurance Decimal   @default(0) @db.Decimal(18, 2) // part facturée à l'assurance
+  montantPatient   Decimal?  @db.Decimal(18, 2) // part due par le patient
+  montantEncaisse  Decimal?  @db.Decimal(18, 2) // réellement encaissé (0 tant qu'un crédit n'est pas réglé)
+  assuranceId      Int?
+  formuleId        Int?
+  tauxAssurance    Int? // taux appliqué (%)
+  motif            String? // motif du crédit / du cas social
+  regleLe          DateTime? // date d'encaissement (crédit : à la régularisation)
+  motifAnnulation  String?
+  dateAnnulation   DateTime?
+  createdAt        DateTime  @default(now())
 
-  dispensation Dispensation @relation(fields: [dispensationId], references: [id], onDelete: Cascade)
-  caissier     Utilisateur  @relation(fields: [caissierId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dispensation Dispensation      @relation(fields: [dispensationId], references: [id], onDelete: Cascade)
+  caissier     Utilisateur       @relation(fields: [caissierId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assurance    Assurance?        @relation(fields: [assuranceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  formule      FormuleAssurance? @relation(fields: [formuleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("pharmacie_paiements")
 }
@@ -448,7 +485,7 @@ model Consommable {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  clinique  Clinique             @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique   Clinique               @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   mouvements MouvementConsommable[]
 
   @@unique([cliniqueId, nom])
@@ -457,14 +494,14 @@ model Consommable {
 
 // ---------- Mouvements de consommables ----------
 model MouvementConsommable {
-  id             Int      @id @default(autoincrement())
-  consommableId  Int
-  type           String // ENTREE / SORTIE / INVENTAIRE
-  quantite       Int // signée
-  reference      String?
-  utilisateurId  Int?
-  commentaire    String?
-  createdAt      DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  consommableId Int
+  type          String // ENTREE / SORTIE / INVENTAIRE
+  quantite      Int // signée
+  reference     String?
+  utilisateurId Int?
+  commentaire   String?
+  createdAt     DateTime @default(now())
 
   consommable Consommable  @relation(fields: [consommableId], references: [id], onDelete: Cascade)
   utilisateur Utilisateur? @relation(fields: [utilisateurId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -474,85 +511,107 @@ model MouvementConsommable {
 
 // ---------- Consultations (§7) ----------
 model Consultation {
-  id                   Int      @id @default(autoincrement())
-  passageId            Int      @unique
-  patientId            Int
-  medecinId            Int // utilisateur médecin
-  motif                String?
-  observation          String? // examen physique
-  diagnostic           String?
-  hospitalisation      Boolean  @default(false)
-  hospitalisationDuree String?
+  id                        Int       @id @default(autoincrement())
+  passageId                 Int       @unique
+  patientId                 Int
+  medecinId                 Int // utilisateur médecin
+  motif                     String?
+  observation               String? // examen physique
+  diagnostic                String?
+  hospitalisation           Boolean   @default(false)
+  hospitalisationDuree      String?
   // Hospitalisation (§13) : type + durée en jours + chambre choisie par le médecin
-  typeHospitalisation   String? // MISE_EN_OBSERVATION (0-3 j) / MOYENNE (3-10 j) / LONGUE (> 10 j)
+  typeHospitalisation       String? // MISE_EN_OBSERVATION (0-3 j) / MOYENNE (3-10 j) / LONGUE (> 10 j)
   hospitalisationDureeJours Int?
-  litId                Int?
-  statut               String   @default("EN_COURS") // EN_COURS / VALIDEE
-  valideeLe            DateTime?
-  ordonnanceSauveeLe   DateTime? // date de sauvegarde explicite de l'ordonnance
-  numeroOrdonnance     String? // ORD-00045 (généré à la première prescription)
-  ordonnanceStatut     String   @default("EN_ATTENTE") // EN_ATTENTE / TRAITEE (pharmacie)
+  litId                     Int?
+  statut                    String    @default("EN_COURS") // EN_COURS / VALIDEE
+  valideeLe                 DateTime?
+  ordonnanceSauveeLe        DateTime? // date de sauvegarde explicite de l'ordonnance
+  numeroOrdonnance          String? // ORD-00045 (généré à la première prescription)
+  ordonnanceStatut          String    @default("EN_ATTENTE") // EN_ATTENTE / TRAITEE (pharmacie)
   // ── Fiche de consultation curative ──
-  modeEntree           String? // VENUE_DIRECTE / REFERE_CENTRE / REFERE_MEDECIN / AUTRE
-  modeEntreeAutre      String?
-  traitementAnterieur  String?
-  hta                  Boolean?
-  diabete              Boolean?
-  antecedentsMedicaux  String?
-  antecedentsChirurgicaux String?
-  chirurgie            Boolean? // antécédents chirurgicaux Oui / Non (précision dans antecedentsChirurgicaux)
-  prescriptionMedicaments Boolean? // Prescription de médicaments : Oui / Non
-  ddr                  String? // date des dernières règles
-  grossesseEnCours     Boolean?
-  tabac                Boolean?
-  alcool               Boolean?
-  typeSuivi            String?
-  consultantType       String? // CONTROLE / SOINS
-  imc                  String?
-  zscore               String?
-  frequenceRespiratoire String?
-  perimetreBrachial    String?
-  perimetreCranien     String?
-  rechercheTB          String? // OUI / NON / NA
-  pathologiesAssociees String?
-  tdrPaludisme         String? // POSITIF / NEGATIF / NON_REALISE / NA
-  goutteEpaisse        String? // POSITIVE / NEGATIVE / NON_REALISEE / NA
-  mildaEligible        String? // OUI / NON / NA
-  mildaRemise          String? // OUI / NON / NA
-  cdipPropose          Boolean?
-  cdipRealise          Boolean?
-  codeDepistage        String?
-  glycemieAjeun        String?
-  glycemieNonAjeun     String?
-  tauxHemoglobine      String? // g/dl
-  testSyphilis         String? // POSITIF / NEGATIF / NON_REALISE
-  testHepatite         String? // POSITIF / NEGATIF / NON_REALISE
-  autresExamens        String?
-  conduiteTenir        String? // traitement : médicaments, posologie, voie, durée, conseils
-  issueSortie          String? // HOSPITALISE / MO / REFERE_INTERNE / REFERE_EXTERNE
-  casPresumeTB         String? // A_REVOIR / DECEDE
-  moDureeHeures        Int?
-  moDureeMinutes       Int?
-  moDebut              DateTime?
-  moFin                DateTime?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  modeEntree                String? // VENUE_DIRECTE / REFERE_CENTRE / REFERE_MEDECIN / AUTRE
+  modeEntreeAutre           String?
+  traitementAnterieur       String?
+  hta                       Boolean?
+  diabete                   Boolean?
+  antecedentsMedicaux       String?
+  antecedentsChirurgicaux   String?
+  chirurgie                 Boolean? // antécédents chirurgicaux Oui / Non (précision dans antecedentsChirurgicaux)
+  prescriptionMedicaments   Boolean? // Prescription de médicaments : Oui / Non
+  ddr                       String? // date des dernières règles
+  grossesseEnCours          Boolean?
+  tabac                     Boolean?
+  alcool                    Boolean?
+  typeSuivi                 String?
+  consultantType            String? // CONTROLE / SOINS
+  imc                       String?
+  zscore                    String?
+  frequenceRespiratoire     String?
+  perimetreBrachial         String?
+  perimetreCranien          String?
+  rechercheTB               String? // OUI / NON / NA
+  pathologiesAssociees      String?
+  tdrPaludisme              String? // POSITIF / NEGATIF / NON_REALISE / NA
+  goutteEpaisse             String? // POSITIVE / NEGATIVE / NON_REALISEE / NA
+  mildaEligible             String? // OUI / NON / NA
+  mildaRemise               String? // OUI / NON / NA
+  cdipPropose               Boolean?
+  cdipRealise               Boolean?
+  codeDepistage             String?
+  glycemieAjeun             String?
+  glycemieNonAjeun          String?
+  tauxHemoglobine           String? // g/dl
+  testSyphilis              String? // POSITIF / NEGATIF / NON_REALISE
+  testHepatite              String? // POSITIF / NEGATIF / NON_REALISE
+  autresExamens             String?
+  conduiteTenir             String? // traitement : médicaments, posologie, voie, durée, conseils
+  issueSortie               String? // HOSPITALISE / MO / REFERE_INTERNE / REFERE_EXTERNE
+  casPresumeTB              String? // A_REVOIR / DECEDE
+  moDureeHeures             Int?
+  moDureeMinutes            Int?
+  moDebut                   DateTime?
+  moFin                     DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
 
-  passage     Passage       @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  patient     Patient       @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  medecin     Utilisateur   @relation(fields: [medecinId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  lit         Lit?          @relation(fields: [litId], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  medicaments Prescription[]
-  dispensations Dispensation[]
+  passage          Passage           @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  patient          Patient           @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  medecin          Utilisateur       @relation(fields: [medecinId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lit              Lit?              @relation(fields: [litId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  medicaments      Prescription[]
+  ordonnances      Ordonnance[]
+  dispensations    Dispensation[]
   certificatsArret CertificatArret[]
 
   @@map("consultations")
+}
+
+// ---------- Ordonnances (plusieurs par consultation, indépendantes) ----------
+model Ordonnance {
+  id             Int       @id @default(autoincrement())
+  cliniqueId     Int
+  consultationId Int
+  numero         String // ORD-00045 (séquentiel par clinique)
+  statut         String    @default("EN_ATTENTE") // EN_ATTENTE / TRAITEE (délivrée et payée à la pharmacie)
+  sauveeLe       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  consultation  Consultation   @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  medicaments   Prescription[]
+  dispensations Dispensation[]
+
+  @@index([consultationId])
+  @@index([cliniqueId, numero])
+  @@map("ordonnances")
 }
 
 // ---------- Prescriptions de médicaments ----------
 model Prescription {
   id             Int      @id @default(autoincrement())
   consultationId Int
+  ordonnanceId   Int? // ordonnance qui porte ce médicament
   medicamentId   Int?
   medicamentNom  String // copie du nom au moment de la prescription
   prixUnitaire   Decimal? @db.Decimal(18, 2) // prix affiché sur l'ordonnance (tests automatiques)
@@ -562,10 +621,12 @@ model Prescription {
   duree          String?
   createdAt      DateTime @default(now())
 
-  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
-  medicament   Medicament?  @relation(fields: [medicamentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  consultation Consultation        @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  ordonnance   Ordonnance?         @relation(fields: [ordonnanceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  medicament   Medicament?         @relation(fields: [medicamentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   lignes       LigneDispensation[]
 
+  @@index([ordonnanceId])
   @@map("prescriptions")
 }
 
@@ -646,11 +707,11 @@ model ExamenImagerie {
 model Imprimante {
   id         Int      @id @default(autoincrement())
   cliniqueId Int
-  poste      String   // TICKET / RECU / PHARMACIE / ORDONNANCE / IMAGERIE
-  libelle    String   // ex. « Imprimante de tickets »
+  poste      String // TICKET / RECU / PHARMACIE / ORDONNANCE / IMAGERIE
+  libelle    String // ex. « Imprimante de tickets »
   type       String   @default("WINDOWS") // WINDOWS / NETWORK / BLUETOOTH / NONE
-  nom        String?  // nom Windows
-  partage    String?  // nom du partage Windows (impression brute fidèle)
+  nom        String? // nom Windows
+  partage    String? // nom du partage Windows (impression brute fidèle)
   ip         String?
   port       Int      @default(9100)
   largeur    Int      @default(42)
@@ -670,17 +731,17 @@ model Imprimante {
 // sont donc déposés ici et un « agent » installé à la clinique les
 // récupère et les imprime (type AGENT dans la config des imprimantes).
 model ImpressionFile {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   cliniqueId Int
-  poste      String   // TICKET / RECU / PHARMACIE / ORDONNANCE / IMAGERIE
-  libelle    String?  // description (ex. « Reçu de paiement REC-0001 »)
-  contenu    String   @db.NVarChar(Max) // texte ESC/POS (thermique) ou HTML (A4) à imprimer
-  format     String   @default("THERMIQUE") // THERMIQUE / A4
-  partage    String?  // nom du partage Windows cible (snapshot au moment de l'ajout)
-  nom        String?  // nom Windows de l'imprimante cible (snapshot)
-  statut     String   @default("EN_ATTENTE") // EN_ATTENTE / EN_COURS (pris par l'agent) / IMPRIMEE / ECHEC
+  poste      String // TICKET / RECU / PHARMACIE / ORDONNANCE / IMAGERIE
+  libelle    String? // description (ex. « Reçu de paiement REC-0001 »)
+  contenu    String    @db.NVarChar(Max) // texte ESC/POS (thermique) ou HTML (A4) à imprimer
+  format     String    @default("THERMIQUE") // THERMIQUE / A4
+  partage    String? // nom du partage Windows cible (snapshot au moment de l'ajout)
+  nom        String? // nom Windows de l'imprimante cible (snapshot)
+  statut     String    @default("EN_ATTENTE") // EN_ATTENTE / EN_COURS (pris par l'agent) / IMPRIMEE / ECHEC
   erreur     String?
-  createdAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
   printedAt  DateTime?
 
   clinique Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -701,6 +762,7 @@ model Nationalite {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@unique([cliniqueId, libelle])
   @@map("nationalites")
 }
@@ -713,6 +775,7 @@ model Residence {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@unique([cliniqueId, libelle])
   @@map("residences")
 }
@@ -725,6 +788,7 @@ model Diagnostic {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@unique([cliniqueId, libelle])
   @@map("diagnostics")
 }
@@ -737,6 +801,7 @@ model Pathologie {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@unique([cliniqueId, libelle])
   @@map("pathologies")
 }
@@ -749,6 +814,7 @@ model Fournisseur {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@unique([cliniqueId, libelle])
   @@map("fournisseurs")
 }
@@ -761,6 +827,7 @@ model Fonction {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@unique([cliniqueId, libelle])
   @@map("fonctions")
 }
@@ -773,6 +840,7 @@ model Posologie {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@unique([cliniqueId, libelle])
   @@map("posologies")
 }
@@ -795,18 +863,18 @@ model TypeChambre {
 
 // ---------- Hospitalisation (§13) ----------
 model Chambre {
-  id         Int      @id @default(autoincrement())
-  cliniqueId Int
-  numero     String // 101, 102…
-  typeChambreId Int? // type paramétrable (Simple, Double, Suite…)
+  id              Int      @id @default(autoincrement())
+  cliniqueId      Int
+  numero          String // 101, 102…
+  typeChambreId   Int? // type paramétrable (Simple, Double, Suite…)
   tarifJournalier Decimal? @db.Decimal(18, 2) // tarif par nuit (sinon tarif HOSP-JOUR)
-  actif      Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  actif           Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  clinique Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique    Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   typeChambre TypeChambre? @relation(fields: [typeChambreId], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  lits     Lit[]
+  lits        Lit[]
 
   @@unique([cliniqueId, numero])
   @@map("chambres")
@@ -819,9 +887,9 @@ model Lit {
   numero    String // A, B… (affiché "101-A")
   actif     Boolean @default(true)
 
-  chambre         Chambre          @relation(fields: [chambreId], references: [id], onDelete: Cascade)
+  chambre          Chambre           @relation(fields: [chambreId], references: [id], onDelete: Cascade)
   hospitalisations Hospitalisation[]
-  consultations   Consultation[]
+  consultations    Consultation[]
 
   @@unique([chambreId, numero])
   @@map("lits")
@@ -829,32 +897,32 @@ model Lit {
 
 // ---------- Séjours d'hospitalisation (§13) ----------
 model Hospitalisation {
-  id                Int      @id @default(autoincrement())
-  passageId         Int      @unique // un séjour par passage (v1)
-  cliniqueId        Int
-  patientId         Int
-  litId             Int
-  dateEntree        DateTime
-  dateSortie        DateTime?
-  dureePrevue       String? // copie de la durée prévue (fiche médecin)
-  motif             String? // motif d'hospitalisation
-  observations      String? // suivi du séjour
-  statut            String   @default("EN_COURS") // EN_COURS / SORTI
-  sortieMotif       String? // EXEAT / TRANSFERT / DECES / AUTRE
-  agentId           Int? // agent ayant réalisé l'admission
-  sortieParId       Int?
-  nbJoursFactures   Int? // jours calculés à la sortie
-  montantJournalier Decimal? @db.Decimal(18, 2) // copie du tarif à la sortie
-  passagePrestationId Int? @unique // ligne de prestation créée à la sortie (payable à la caisse)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                  Int       @id @default(autoincrement())
+  passageId           Int       @unique // un séjour par passage (v1)
+  cliniqueId          Int
+  patientId           Int
+  litId               Int
+  dateEntree          DateTime
+  dateSortie          DateTime?
+  dureePrevue         String? // copie de la durée prévue (fiche médecin)
+  motif               String? // motif d'hospitalisation
+  observations        String? // suivi du séjour
+  statut              String    @default("EN_COURS") // EN_COURS / SORTI
+  sortieMotif         String? // EXEAT / TRANSFERT / DECES / AUTRE
+  agentId             Int? // agent ayant réalisé l'admission
+  sortieParId         Int?
+  nbJoursFactures     Int? // jours calculés à la sortie
+  montantJournalier   Decimal?  @db.Decimal(18, 2) // copie du tarif à la sortie
+  passagePrestationId Int?      @unique // ligne de prestation créée à la sortie (payable à la caisse)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  passage     Passage      @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  clinique    Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  lit         Lit          @relation(fields: [litId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  agent       Utilisateur? @relation("AdmissionsHospitalisations", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sortiePar   Utilisateur? @relation("SortiesHospitalisations", fields: [sortieParId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  passage     Passage            @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  clinique    Clinique           @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  patient     Patient            @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lit         Lit                @relation(fields: [litId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agent       Utilisateur?       @relation("AdmissionsHospitalisations", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sortiePar   Utilisateur?       @relation("SortiesHospitalisations", fields: [sortieParId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ligneCaisse PassagePrestation? @relation("LignesHospitalisation", fields: [passagePrestationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("hospitalisations")
@@ -862,14 +930,14 @@ model Hospitalisation {
 
 // ---------- Paiements (caisse, §6) ----------
 model Paiement {
-  id              Int      @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
   cliniqueId      Int
   passageId       Int
   caissierId      Int // utilisateur ayant encaissé
   numeroRecu      String // unique par clinique
-  montantTotal    Decimal  @db.Decimal(18, 2)
-  modePaiement    String   @default("ESPECES") // ESPECES / MOBILE_MONEY / CARTE
-  statut          String   @default("VALIDE") // VALIDE / ANNULE
+  montantTotal    Decimal   @db.Decimal(18, 2)
+  modePaiement    String    @default("ESPECES") // ESPECES / MOBILE_MONEY / CARTE
+  statut          String    @default("VALIDE") // VALIDE / ANNULE
   motifAnnulation String?
   dateAnnulation  DateTime?
   // Prise en charge assurance
@@ -877,18 +945,18 @@ model Paiement {
   formuleLibelle  String? // copie du libellé de la formule
   tauxParametre   Int?
   tauxApplique    Int?
-  partAssurance   Decimal? @db.Decimal(18, 2)
-  partPatient     Decimal? @db.Decimal(18, 2)
+  partAssurance   Decimal?  @db.Decimal(18, 2)
+  partPatient     Decimal?  @db.Decimal(18, 2)
   motifTaux       String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  clinique Clinique    @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  passage  Passage     @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  caissier Utilisateur @relation(fields: [caissierId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  lignes   PassagePrestation[]
+  clinique      Clinique            @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  passage       Passage             @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  caissier      Utilisateur         @relation(fields: [caissierId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lignes        PassagePrestation[]
   priseEnCharge PriseEnCharge[]
-  assurance Assurance? @relation("PaiementsAssurance", fields: [assuranceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assurance     Assurance?          @relation("PaiementsAssurance", fields: [assuranceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([cliniqueId, numeroRecu])
   @@map("paiements")
@@ -896,16 +964,16 @@ model Paiement {
 
 // ---------- Paramètres de la clinique (ex. image de la page de connexion) ----------
 model Parametre {
-  id         Int      @id @default(autoincrement())
-  cliniqueId Int      @unique
-  loginImage String?  @db.NVarChar(Max) // image au format data URL (base64)
+  id                Int      @id @default(autoincrement())
+  cliniqueId        Int      @unique
+  loginImage        String?  @db.NVarChar(Max) // image au format data URL (base64)
   // ── Rapport SIG : logos de la page de garde (data URL, paramétrables) ──
-  logoRapportGauche String? @db.NVarChar(Max) // logo en haut à gauche (armoiries…)
-  logoRapportCentre String? @db.NVarChar(Max) // emblème au centre, entre DIIS et SIG
-  logoRapportDroit  String? @db.NVarChar(Max) // logo en haut à droite
-  sigVersion        String? @default("A")     // lettre de version du rapport (A)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  logoRapportGauche String?  @db.NVarChar(Max) // logo en haut à gauche (armoiries…)
+  logoRapportCentre String?  @db.NVarChar(Max) // emblème au centre, entre DIIS et SIG
+  logoRapportDroit  String?  @db.NVarChar(Max) // logo en haut à droite
+  sigVersion        String?  @default("A") // lettre de version du rapport (A)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   clinique Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -924,7 +992,7 @@ model Service {
   updatedAt   DateTime @updatedAt
 
   // NoAction : évite les chemins de cascade multiples (SQL Server)
-  clinique    Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique    Clinique            @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   personnel   Personnel[]
   prestations Prestation[]
   passages    Passage[]
@@ -942,7 +1010,7 @@ model Personnel {
   nom          String
   prenom       String
   sexe         String? // M / F
-  photo        String?  @db.NVarChar(Max) // photo du membre du personnel (data URL base64)
+  photo        String?   @db.NVarChar(Max) // photo du membre du personnel (data URL base64)
   fonction     String // médecin, agent d'accueil, pharmacien...
   serviceId    Int?
   telephone    String?
@@ -975,34 +1043,34 @@ model Utilisateur {
   personnel Personnel @relation(fields: [personnelId], references: [id], onDelete: Cascade)
   role      Role      @relation(fields: [roleId], references: [id])
 
-  paiements     Paiement[]
-  consultations Consultation[]
-  dispensations Dispensation[]
-  paiementsPharma PharmaciePaiement[]
-  mouvementsStock MouvementStock[]
-  visitesCpn VisiteCpn[] @relation("VisitesCpn")
-  accouchements Accouchement[] @relation("Accouchements")
-  realisationsSoins RealisationSoin[] @relation("RealisationsSoins")
-  cpons ConsultationPostnatale[] @relation("Cpons")
-  consultationsPf ConsultationPf[] @relation("Cpf")
-  certificatsArret CertificatArret[] @relation("CertificatsArret")
-  fichesExamenImagerie FicheExamenImagerie[] @relation("FichesEcho")
-  mouvementsConsommables MouvementConsommable[]
-  prelevements  ExamenLabo[] @relation("Prelevements")
-  validations   ExamenLabo[] @relation("Validations")
-  validationsImagerie ExamenImagerie[] @relation("ValidationsImagerie")
-  sortiesHospitalisations Hospitalisation[] @relation("SortiesHospitalisations")
-  affectations  Affectation[] @relation("AffectationsMedecin")
-  creditsEtablis CreditTicket[] @relation("CreditAgent")
-  patientsCrees   Patient[] @relation("PatientsCrees")
-  passagesAccueil Passage[] @relation("PassagesAccueil")
-  lignesPrestations PassagePrestation[] @relation("LignesPrestationsAgent")
-  admissionsHospitalisations Hospitalisation[] @relation("AdmissionsHospitalisations")
-  saisiesImagerie ExamenImagerie[] @relation("SaisiesImagerie")
-  fichesReference FicheReference[] @relation("FichesReference")
-  journalActions JournalAction[] @relation("JournalActions")
-  disponibilite String @default("INDISPONIBLE") // DISPONIBLE / INDISPONIBLE (médecins)
-  derniereActivite DateTime? // signal de vie : le poste du médecin est allumé (heartbeat)
+  paiements                  Paiement[]
+  consultations              Consultation[]
+  dispensations              Dispensation[]
+  paiementsPharma            PharmaciePaiement[]
+  mouvementsStock            MouvementStock[]
+  visitesCpn                 VisiteCpn[]              @relation("VisitesCpn")
+  accouchements              Accouchement[]           @relation("Accouchements")
+  realisationsSoins          RealisationSoin[]        @relation("RealisationsSoins")
+  cpons                      ConsultationPostnatale[] @relation("Cpons")
+  consultationsPf            ConsultationPf[]         @relation("Cpf")
+  certificatsArret           CertificatArret[]        @relation("CertificatsArret")
+  fichesExamenImagerie       FicheExamenImagerie[]    @relation("FichesEcho")
+  mouvementsConsommables     MouvementConsommable[]
+  prelevements               ExamenLabo[]             @relation("Prelevements")
+  validations                ExamenLabo[]             @relation("Validations")
+  validationsImagerie        ExamenImagerie[]         @relation("ValidationsImagerie")
+  sortiesHospitalisations    Hospitalisation[]        @relation("SortiesHospitalisations")
+  affectations               Affectation[]            @relation("AffectationsMedecin")
+  creditsEtablis             CreditTicket[]           @relation("CreditAgent")
+  patientsCrees              Patient[]                @relation("PatientsCrees")
+  passagesAccueil            Passage[]                @relation("PassagesAccueil")
+  lignesPrestations          PassagePrestation[]      @relation("LignesPrestationsAgent")
+  admissionsHospitalisations Hospitalisation[]        @relation("AdmissionsHospitalisations")
+  saisiesImagerie            ExamenImagerie[]         @relation("SaisiesImagerie")
+  fichesReference            FicheReference[]         @relation("FichesReference")
+  journalActions             JournalAction[]          @relation("JournalActions")
+  disponibilite              String                   @default("INDISPONIBLE") // DISPONIBLE / INDISPONIBLE (médecins)
+  derniereActivite           DateTime? // signal de vie : le poste du médecin est allumé (heartbeat)
 
   @@map("utilisateurs")
 }
@@ -1063,14 +1131,35 @@ model Assurance {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  clinique Clinique          @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  formules FormuleAssurance[]
+  clinique          Clinique           @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  formules          FormuleAssurance[]
   patientAssurances PatientAssurance[]
-  priseEnCharges PriseEnCharge[]
-  paiements Paiement[] @relation("PaiementsAssurance")
+  priseEnCharges    PriseEnCharge[]
+  paiements         Paiement[]         @relation("PaiementsAssurance")
+  pharmaciePaiements PharmaciePaiement[]
+  reglements ReglementAssurance[]
 
   @@unique([cliniqueId, code])
   @@map("assurances")
+}
+
+// Règlements reçus des compagnies d'assurance (suivi du recouvrement)
+model ReglementAssurance {
+  id            Int      @id @default(autoincrement())
+  cliniqueId    Int
+  assuranceId   Int
+  dateReglement DateTime @db.Date
+  montant       Decimal  @db.Decimal(18, 2)
+  modeReglement String? // VIREMENT / CHEQUE / ESPECES
+  reference     String? // n° de chèque, de virement, de bordereau…
+  commentaire   String?
+  utilisateurId Int?
+  createdAt     DateTime @default(now())
+
+  assurance Assurance @relation(fields: [assuranceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([cliniqueId, assuranceId])
+  @@map("reglements_assurance")
 }
 
 model FormuleAssurance {
@@ -1079,16 +1168,18 @@ model FormuleAssurance {
   code        String // STANDARD, PREMIUM…
   libelle     String
   description String?
+  tauxPharmacie Int? // couverture des médicaments à la pharmacie (0-100 %)
   dateDebut   DateTime? @db.Date
   dateFin     DateTime? @db.Date
   statut      String    @default("ACTIF") // ACTIF / INACTIF
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  assurance   Assurance              @relation(fields: [assuranceId], references: [id], onDelete: Cascade)
-  couvertures CouverturePrestation[]
+  assurance         Assurance              @relation(fields: [assuranceId], references: [id], onDelete: Cascade)
+  couvertures       CouverturePrestation[]
   patientAssurances PatientAssurance[]
-  priseEnCharges PriseEnCharge[]
+  pharmaciePaiements PharmaciePaiement[]
+  priseEnCharges    PriseEnCharge[]
 
   @@unique([assuranceId, code])
   @@map("assurance_formules")
@@ -1136,22 +1227,22 @@ model PatientAssurance {
 }
 
 model PriseEnCharge {
-  id               Int       @id @default(autoincrement())
-  paiementId       Int
-  ligneId          Int // passagePrestationId facturée
-  assuranceId      Int?
-  formuleId        Int?
-  tauxParametre    Int // taux paramétré au moment de la facturation
-  tauxApplique     Int // taux réellement appliqué (modification exceptionnelle possible)
-  montantTotal     Decimal   @db.Decimal(18, 2)
-  montantAssurance Decimal   @db.Decimal(18, 2)
-  montantPatient   Decimal   @db.Decimal(18, 2)
+  id                Int      @id @default(autoincrement())
+  paiementId        Int
+  ligneId           Int // passagePrestationId facturée
+  assuranceId       Int?
+  formuleId         Int?
+  tauxParametre     Int // taux paramétré au moment de la facturation
+  tauxApplique      Int // taux réellement appliqué (modification exceptionnelle possible)
+  montantTotal      Decimal  @db.Decimal(18, 2)
+  montantAssurance  Decimal  @db.Decimal(18, 2)
+  montantPatient    Decimal  @db.Decimal(18, 2)
   motifModification String?
-  utilisateurId    Int? // caissière ayant facturé
-  createdAt        DateTime  @default(now())
+  utilisateurId     Int? // caissière ayant facturé
+  createdAt         DateTime @default(now())
 
-  paiement  Paiement     @relation(fields: [paiementId], references: [id], onDelete: Cascade)
-  assurance Assurance?   @relation(fields: [assuranceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  paiement  Paiement          @relation(fields: [paiementId], references: [id], onDelete: Cascade)
+  assurance Assurance?        @relation(fields: [assuranceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   formule   FormuleAssurance? @relation(fields: [formuleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("prise_en_charges")
@@ -1159,14 +1250,14 @@ model PriseEnCharge {
 
 // ---------- Affectation automatique patient → médecin ----------
 model Affectation {
-  id              Int       @id @default(autoincrement())
+  id              Int      @id @default(autoincrement())
   cliniqueId      Int
-  passageId       Int       @unique
-  medecinId       Int?      // null = file globale non affectée
-  dateAffectation DateTime  @default(now())
-  statut          String    @default("EN_ATTENTE") // EN_ATTENTE / EN_CONSULTATION / TERMINE / ANNULE
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  passageId       Int      @unique
+  medecinId       Int? // null = file globale non affectée
+  dateAffectation DateTime @default(now())
+  statut          String   @default("EN_ATTENTE") // EN_ATTENTE / EN_CONSULTATION / TERMINE / ANNULE
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   passage  Passage      @relation(fields: [passageId], references: [id], onDelete: Cascade)
   clinique Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -1191,7 +1282,7 @@ model Prestation {
   clinique Clinique @relation(fields: [cliniqueId], references: [id], onDelete: Cascade)
   service  Service  @relation(fields: [serviceId], references: [id])
 
-  lignes PassagePrestation[]
+  lignes      PassagePrestation[]
   couvertures CouverturePrestation[]
 
   @@unique([cliniqueId, code])
@@ -1208,29 +1299,29 @@ model Grossesse {
   cliniqueId              Int
   patientId               Int
   numero                  String    @unique // GRO-0001… généré automatiquement
-  numeroGestante          String?   // N° gestante du registre CPN (ex : 08/B/2026/CPN1/R1/P10)
+  numeroGestante          String? // N° gestante du registre CPN (ex : 08/B/2026/CPN1/R1/P10)
   ddr                     DateTime? @db.Date // date des dernières règles (inconnue pour un accouchement en urgence)
   dpa                     DateTime? @db.Date // date prévue d'accouchement (DDR + 280 j)
   dateDerniereCpn         DateTime? @db.Date // dernière CPN connue (saisie au calendrier, suivie ailleurs éventuellement)
-  gravidite               Int?      // nombre de grossesses (y compris celle-ci)
-  parite                  Int?      // nombre d'accouchements antérieurs
-  antecedentsObstetricaux String?   // césarienne, HTA gravidique, fausses couches…
+  gravidite               Int? // nombre de grossesses (y compris celle-ci)
+  parite                  Int? // nombre d'accouchements antérieurs
+  antecedentsObstetricaux String? // césarienne, HTA gravidique, fausses couches…
   facteursRisque          String?
   statut                  String    @default("EN_COURS") // EN_COURS / ACCOUCHEE / TERMINEE
   // ── Registre CPN officiel (version août 2020) ──
-  modeEntree             String?   // VENUE_DIRECTE / REFERE_CENTRE / REFERE_TRADIPRATICIEN / AUTRE
-  antecedentsMedicaux    String?   // pathologies chroniques, HTA, diabète…
+  modeEntree              String? // VENUE_DIRECTE / REFERE_CENTRE / REFERE_TRADIPRATICIEN / AUTRE
+  antecedentsMedicaux     String? // pathologies chroniques, HTA, diabète…
   antecedentsChirurgicaux String?
-  enfantsVivants         Int?
-  enfantsDecedes         Int?
-  cesariennes            Int?
-  avortements            Int?
-  toxemie                String?   // OUI / NON
-  vatStatut              String?   // NON_VACCINEE / INCOMPLETEMENT_VACCINEE / CORRECTEMENT_VACCINEE
-  vat1                   DateTime? @db.Date
-  vat2                   DateTime? @db.Date
-  vatRappel              DateTime? @db.Date
-  statutVih              String?   // POSITIF / NEGATIF / INCONNU
+  enfantsVivants          Int?
+  enfantsDecedes          Int?
+  cesariennes             Int?
+  avortements             Int?
+  toxemie                 String? // OUI / NON
+  vatStatut               String? // NON_VACCINEE / INCOMPLETEMENT_VACCINEE / CORRECTEMENT_VACCINEE
+  vat1                    DateTime? @db.Date
+  vat2                    DateTime? @db.Date
+  vatRappel               DateTime? @db.Date
+  statutVih               String? // POSITIF / NEGATIF / INCONNU
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
 
@@ -1245,35 +1336,35 @@ model Grossesse {
 model VisiteCpn {
   id                Int       @id @default(autoincrement())
   grossesseId       Int
-  numero            Int       // CPN1, CPN2…
+  numero            Int // CPN1, CPN2…
   date              DateTime  @db.Date
-  ageGestationnelSA String?   // ex. « 16 SA + 3 j »
+  ageGestationnelSA String? // ex. « 16 SA + 3 j »
   poids             Decimal?  @db.Decimal(5, 1)
-  taille            String?   // cm — examen du registre CPN
+  taille            String? // cm — examen du registre CPN
   tensionGauche     String?
   tensionDroite     String?
   hauteurUterine    String?
-  bcf               String?   // bruits du cœur fœtal
-  mouvementsActifs  String?   // Oui / Non
-  oedemes           String?   // Oui / Non
+  bcf               String? // bruits du cœur fœtal
+  mouvementsActifs  String? // Oui / Non
+  oedemes           String? // Oui / Non
   albumine          String?
   sucre             String?
   presentation      String?
-  tv                String?   // toucher vaginal
-  conseils          String?   // fer, acide folique, MILDA, VAT…
+  tv                String? // toucher vaginal
+  conseils          String? // fer, acide folique, MILDA, VAT…
   prochaineVisite   DateTime? @db.Date
-  agentId           Int?      // sage-femme ayant réalisé la visite
+  agentId           Int? // sage-femme ayant réalisé la visite
   // ── Registre CPN — données du rapport SIG mensuel (T4 et T5) ──
-  risqueDepiste       Boolean? // grossesse à risque dépistée en CPN1
-  malnutrition        Boolean? // femme enceinte malnutrie dépistée en CPN
-  anemie              Boolean? // femme enceinte anémiée dépistée en CPN
-  syphilisPositif     Boolean? // dépistée positive à la syphilis en CPN
-  agHbsPositif        Boolean? // dépistée positive à l'AgHBs en CPN
-  spDose              Int?     // n° de dose de SP donnée à cette visite (1-5)
-  mildaRemise         Boolean? // MILDA remise à cette visite
-  ferFolate           Boolean? // mise sous Fer + Folate à cette visite
-  deparasitee         Boolean? // déparasitée à cette visite
-  counselingPfppi     Boolean? // counseling PFPPI + conseils nutritionnels
+  risqueDepiste     Boolean? // grossesse à risque dépistée en CPN1
+  malnutrition      Boolean? // femme enceinte malnutrie dépistée en CPN
+  anemie            Boolean? // femme enceinte anémiée dépistée en CPN
+  syphilisPositif   Boolean? // dépistée positive à la syphilis en CPN
+  agHbsPositif      Boolean? // dépistée positive à l'AgHBs en CPN
+  spDose            Int? // n° de dose de SP donnée à cette visite (1-5)
+  mildaRemise       Boolean? // MILDA remise à cette visite
+  ferFolate         Boolean? // mise sous Fer + Folate à cette visite
+  deparasitee       Boolean? // déparasitée à cette visite
+  counselingPfppi   Boolean? // counseling PFPPI + conseils nutritionnels
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -1284,69 +1375,69 @@ model VisiteCpn {
 }
 
 model Accouchement {
-  id            Int       @id @default(autoincrement())
-  grossesseId   Int       @unique
-  dateHeure     DateTime
-  voie          String    @default("VOIE_BASSE") // VOIE_BASSE / CESARIENNE
-  termeSA       String?
-  sexeEnfant    String?   // M / F
-  poidsEnfant   Decimal?  @db.Decimal(5, 2) // en kg
-  apgar         String?   // ex. « 8/10 à 5 min »
-  issueMere     String?   // Vivante / Décédée / Transférée
-  issueEnfant   String?   // Né vivant / Mort-né / Transféré
-  complications String?
-  lieu          String?   // salle d'accouchement, bloc opératoire…
-  agentId       Int?      // sage-femme/médecin ayant accouché
+  id                             Int       @id @default(autoincrement())
+  grossesseId                    Int       @unique
+  dateHeure                      DateTime
+  voie                           String    @default("VOIE_BASSE") // VOIE_BASSE / CESARIENNE
+  termeSA                        String?
+  sexeEnfant                     String? // M / F
+  poidsEnfant                    Decimal?  @db.Decimal(5, 2) // en kg
+  apgar                          String? // ex. « 8/10 à 5 min »
+  issueMere                      String? // Vivante / Décédée / Transférée
+  issueEnfant                    String? // Né vivant / Mort-né / Transféré
+  complications                  String?
+  lieu                           String? // salle d'accouchement, bloc opératoire…
+  agentId                        Int? // sage-femme/médecin ayant accouché
   // ── Registre d'accouchement — données du rapport SIG mensuel (T7 à T10) ──
-  vatStatut                     String? // CORRECTEMENT_VACCINEE / INCOMPLETEMENT_VACCINEE / NON_VACCINEE
-  mortNeType                    String? // FRAIS / MACERE (si mort-né)
+  vatStatut                      String? // CORRECTEMENT_VACCINEE / INCOMPLETEMENT_VACCINEE / NON_VACCINEE
+  mortNeType                     String? // FRAIS / MACERE (si mort-né)
   declarationNaissanceRenseignee Boolean? // fiche de déclaration de naissance renseignée
   declarationNaissanceComplete   Boolean? // fiche avec les « informations nécessaires »
-  evacueeAvant                  Boolean? // mère évacuée avant l'accouchement
-  evacueeApres                  Boolean? // mère évacuée après l'accouchement
-  nouveauNeEvacue               Boolean? // nouveau-né évacué
-  nouveauNeProtegeTetanos       Boolean? // nouveau-né protégé à la naissance contre le tétanos
-  accouchementMultiple          Boolean? // naissance multiple (jumeaux…)
+  evacueeAvant                   Boolean? // mère évacuée avant l'accouchement
+  evacueeApres                   Boolean? // mère évacuée après l'accouchement
+  nouveauNeEvacue                Boolean? // nouveau-né évacué
+  nouveauNeProtegeTetanos        Boolean? // nouveau-né protégé à la naissance contre le tétanos
+  accouchementMultiple           Boolean? // naissance multiple (jumeaux…)
   // ── Registre d'accouchement officiel (version août 2020, 12 pages) ──
-  modeEntree                String?  // VENUE_DIRECTE / REFERE_CENTRE / REFERE_TRADIPRATICIEN / AUTRE
-  numeroAccouchement        Int?     // numéro d'ordre annuel dans la structure
-  heureArrivee              DateTime? // date + heure d'arrivée de la parturiente
-  motifAdmission            String?
-  enTravail                 Boolean?
-  contractions              String?  // OUI_REGULIERES / OUI_IRREGULIERES / NON
-  pocheEauxIntacte          Boolean?
-  ruptureHeures             Int?     // heures écoulées depuis la rupture des membranes
-  liquideAspect             String?  // CLAIR / TEINTE / MECONIAL
-  antecedentsMedicaux       String?
-  htaConnue                 Boolean?
-  diabeteConnu              Boolean?
-  antecedentsChirurgicaux   String?
-  gemellite                 Int?     // nombre d'accouchements gémellaires antérieurs
-  prematurite               Int?     // nombre d'accouchements prématurés antérieurs
-  enfantsVivants            Int?
-  enfantsDecedes            Int?
-  cesariennes               Int?
-  avortements               Int?
-  toxemie                   String?  // OUI / NON
-  statutVihAccueil          String?  // POSITIF / NEGATIF / INCONNU
-  sousTarvCpn               Boolean? // femme VIH+ sous TARV pendant la grossesse
-  numeroPec                 String?  // numéro de prise en charge VIH
-  ageGrossessePremiereCpn   String?  // ex. « 3 mois » ou « 14 SA »
-  nombreCpn                 Int?
-  offreTestVih              Boolean? // proposition de test VIH
-  resultatTestVih           String?  // POSITIF / NEGATIF
-  delivranceLe              DateTime? // heure de la délivrance
-  revisionUterine           Boolean?
-  ubt                       Boolean? // hémorragie traitée avec ballonnet UBT
-  hppi                      Boolean? // hémorragie du post-partum immédiat
-  perimetreCranienEnfant    String?  // cm
-  reanimationNn             Boolean? // réanimation du nouveau-né
-  decedeMaternite           Boolean? // enfant décédé à la maternité
-  interventionMedecin       String?  // motif/description de l'intervention du médecin
-  sortieMereLe              DateTime? // date de sortie de la mère
-  sortieMereMode            String?  // NORMALE / TRANSFERT / DECES…
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  modeEntree                     String? // VENUE_DIRECTE / REFERE_CENTRE / REFERE_TRADIPRATICIEN / AUTRE
+  numeroAccouchement             Int? // numéro d'ordre annuel dans la structure
+  heureArrivee                   DateTime? // date + heure d'arrivée de la parturiente
+  motifAdmission                 String?
+  enTravail                      Boolean?
+  contractions                   String? // OUI_REGULIERES / OUI_IRREGULIERES / NON
+  pocheEauxIntacte               Boolean?
+  ruptureHeures                  Int? // heures écoulées depuis la rupture des membranes
+  liquideAspect                  String? // CLAIR / TEINTE / MECONIAL
+  antecedentsMedicaux            String?
+  htaConnue                      Boolean?
+  diabeteConnu                   Boolean?
+  antecedentsChirurgicaux        String?
+  gemellite                      Int? // nombre d'accouchements gémellaires antérieurs
+  prematurite                    Int? // nombre d'accouchements prématurés antérieurs
+  enfantsVivants                 Int?
+  enfantsDecedes                 Int?
+  cesariennes                    Int?
+  avortements                    Int?
+  toxemie                        String? // OUI / NON
+  statutVihAccueil               String? // POSITIF / NEGATIF / INCONNU
+  sousTarvCpn                    Boolean? // femme VIH+ sous TARV pendant la grossesse
+  numeroPec                      String? // numéro de prise en charge VIH
+  ageGrossessePremiereCpn        String? // ex. « 3 mois » ou « 14 SA »
+  nombreCpn                      Int?
+  offreTestVih                   Boolean? // proposition de test VIH
+  resultatTestVih                String? // POSITIF / NEGATIF
+  delivranceLe                   DateTime? // heure de la délivrance
+  revisionUterine                Boolean?
+  ubt                            Boolean? // hémorragie traitée avec ballonnet UBT
+  hppi                           Boolean? // hémorragie du post-partum immédiat
+  perimetreCranienEnfant         String? // cm
+  reanimationNn                  Boolean? // réanimation du nouveau-né
+  decedeMaternite                Boolean? // enfant décédé à la maternité
+  interventionMedecin            String? // motif/description de l'intervention du médecin
+  sortieMereLe                   DateTime? // date de sortie de la mère
+  sortieMereMode                 String? // NORMALE / TRANSFERT / DECES…
+  createdAt                      DateTime  @default(now())
+  updatedAt                      DateTime  @updatedAt
 
   grossesse Grossesse    @relation(fields: [grossesseId], references: [id], onDelete: Cascade)
   agent     Utilisateur? @relation("Accouchements", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -1365,7 +1456,7 @@ model Soin {
   passagePrestationId Int      @unique // ligne de prestation SOIN payée
   cliniqueId          Int
   patientId           Int
-  libelle             String   // copie du libellé de la prestation
+  libelle             String // copie du libellé de la prestation
   statut              String   @default("EN_ATTENTE") // EN_ATTENTE / REALISE
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -1384,11 +1475,11 @@ model RealisationSoin {
   soinId       Int
   date         DateTime
   observations String?
-  agentId      Int?     // agent ayant réalisé le soin
+  agentId      Int? // agent ayant réalisé le soin
   createdAt    DateTime @default(now())
 
-  soin  Soin          @relation(fields: [soinId], references: [id], onDelete: Cascade)
-  agent Utilisateur?  @relation("RealisationsSoins", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  soin  Soin         @relation(fields: [soinId], references: [id], onDelete: Cascade)
+  agent Utilisateur? @relation("RealisationsSoins", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("realisations_soins")
 }
@@ -1398,29 +1489,29 @@ model RealisationSoin {
 // clinique à la création (paramétrable et modifiable sur chaque rapport).
 // Les valeurs des tableaux sont stockées ligne/colonne par tableau.
 model RapportSig {
-  id          Int    @id @default(autoincrement())
-  cliniqueId  Int
-  mois        Int    // 1-12
-  annee       Int    // ex. 2026
-  statut      String @default("BROUILLON") // BROUILLON / VALIDE
+  id                  Int      @id @default(autoincrement())
+  cliniqueId          Int
+  mois                Int // 1-12
+  annee               Int // ex. 2026
+  statut              String   @default("BROUILLON") // BROUILLON / VALIDE
   // En-tête (préremplie depuis la clinique, modifiable)
-  etablissement         String?
-  immatriculation       String?
-  districtNom           String?
-  districtCode          String?
-  regionNom             String?
-  regionCode            String?
-  populationDesservie   Int?
-  realiseParNom         String?
-  realiseParFonction    String?
-  realiseParContact     String?
-  observations          String?
+  etablissement       String?
+  immatriculation     String?
+  districtNom         String?
+  districtCode        String?
+  regionNom           String?
+  regionCode          String?
+  populationDesservie Int?
+  realiseParNom       String?
+  realiseParFonction  String?
+  realiseParContact   String?
+  observations        String?
   // Portes Oui/Non des sections (null = non renseignée)
-  portes                String? // JSON { ACTIVITES:true, CPN:true, ... }
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  portes              String? // JSON { ACTIVITES:true, CPN:true, ... }
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  clinique Clinique          @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique Clinique           @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   valeurs  RapportSigValeur[]
 
   @@unique([cliniqueId, mois, annee])
@@ -1428,12 +1519,12 @@ model RapportSig {
 }
 
 model RapportSigValeur {
-  id        Int     @id @default(autoincrement())
+  id        Int    @id @default(autoincrement())
   rapportId Int
-  tableau   String  // code du tableau : T1…T47
-  ligne     Int     // index de ligne (0-based)
-  colonne   Int     // index de colonne (0-based)
-  valeur    Int?    // toutes les valeurs du SIG sont des nombres entiers
+  tableau   String // code du tableau : T1…T47
+  ligne     Int // index de ligne (0-based)
+  colonne   Int // index de colonne (0-based)
+  valeur    Int? // toutes les valeurs du SIG sont des nombres entiers
 
   rapport RapportSig @relation(fields: [rapportId], references: [id], onDelete: Cascade)
 
@@ -1449,6 +1540,7 @@ model Profession {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@unique([cliniqueId, libelle])
   @@map("professions")
 }
@@ -1461,6 +1553,7 @@ model MotifConsultation {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@unique([cliniqueId, libelle])
   @@map("motifs_consultation")
 }
@@ -1473,6 +1566,7 @@ model Quartier {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@unique([cliniqueId, libelle])
   @@map("quartiers")
 }
@@ -1485,6 +1579,7 @@ model AntecedentMedical {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@unique([cliniqueId, libelle])
   @@map("antecedents_medicaux")
 }
@@ -1497,6 +1592,7 @@ model AutreExamen {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@unique([cliniqueId, libelle])
   @@map("autres_examens")
 }
@@ -1505,61 +1601,61 @@ model AutreExamen {
 // Une consultation postnatale est rattachée à un passage (prise en charge
 // maternité) et, si elle est connue, à la grossesse (report du N° gestante).
 model ConsultationPostnatale {
-  id                Int       @id @default(autoincrement())
-  cliniqueId        Int
-  passageId         Int
-  patientId         Int
-  grossesseId       Int?      // dossier grossesse (colonne simple : pas de FK pour éviter les cascades multiples)
-  date              DateTime  @db.Date
-  modeEntree        String?   // VENUE_DIRECTE / REFERE_CENTRE / REFERE_TRADIPRATICIEN / AUTRE
+  id                   Int       @id @default(autoincrement())
+  cliniqueId           Int
+  passageId            Int
+  patientId            Int
+  grossesseId          Int? // dossier grossesse (colonne simple : pas de FK pour éviter les cascades multiples)
+  date                 DateTime  @db.Date
+  modeEntree           String? // VENUE_DIRECTE / REFERE_CENTRE / REFERE_TRADIPRATICIEN / AUTRE
   numeroGestanteReport String? // N° gestante de la dernière CPN (R/D selon l'origine)
-  typeCpon          String?   // IMMEDIATE_6_72H / 6_10_JOURS / AUTRES_PERIODES / 6_8_SEMAINES
-  dateAccouchement  DateTime? @db.Date
-  lieuAccouchement  String?   // ETABLISSEMENT / DOMICILE
-  modeAccouchement  String?   // VOIE_BASSE / CESARIENNE
-  numeroDepistagePec String?  // n° de dépistage ou de PEC VIH
-  statutVih         String?   // POSITIF / NEGATIF / INCONNU
-  examenMere        String?   // examen clinique de la mère
-  examenEnfant      String?   // examen du nouveau-né
-  conseils          String?
-  observations      String?
-  agentId           Int?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  typeCpon             String? // IMMEDIATE_6_72H / 6_10_JOURS / AUTRES_PERIODES / 6_8_SEMAINES
+  dateAccouchement     DateTime? @db.Date
+  lieuAccouchement     String? // ETABLISSEMENT / DOMICILE
+  modeAccouchement     String? // VOIE_BASSE / CESARIENNE
+  numeroDepistagePec   String? // n° de dépistage ou de PEC VIH
+  statutVih            String? // POSITIF / NEGATIF / INCONNU
+  examenMere           String? // examen clinique de la mère
+  examenEnfant         String? // examen du nouveau-né
+  conseils             String?
+  observations         String?
+  agentId              Int?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
-  clinique  Clinique          @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  passage   Passage           @relation(fields: [passageId], references: [id], onDelete: Cascade)
-  patient   Patient           @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  agent     Utilisateur?      @relation("Cpons", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  passage  Passage      @relation(fields: [passageId], references: [id], onDelete: Cascade)
+  patient  Patient      @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  agent    Utilisateur? @relation("Cpons", fields: [agentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("consultations_postnatales")
 }
 
 // ─── Registre PF (consultations de planification familiale) ────────────────
 model ConsultationPf {
-  id                 Int       @id @default(autoincrement())
-  cliniqueId         Int
-  passageId          Int
-  patientId          Int
-  date               DateTime  @db.Date
-  methode            String    // méthode contraceptive (libellé)
-  nouvelleUtilisatrice Boolean  @default(true)
-  protégée           Boolean   @default(false)
-  perdueDeVue        Boolean   @default(false)
-  abandon            Boolean   @default(false)
-  arretRetrait       Boolean   @default(false)
-  conseilPostpartum  Boolean   @default(false) // counseling PF dans le post-partum
-  produitPostpartumImmediat Boolean @default(false)
-  produitPostAbortum Boolean   @default(false)
-  femmesFormeesAutoInjection Boolean @default(false)
-  istPresente        Boolean   @default(false)
-  seropositive       Boolean   @default(false) // femme VIH+ sous contraception moderne
-  nourrisson0_6      Boolean   @default(false) // nourrisson 0-6 mois, conseils nutritionnels
-  nourrisson6        Boolean   @default(false) // nourrisson 6 mois, alimentation complémentaire
-  observations       String?
-  agentId            Int?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  id                         Int      @id @default(autoincrement())
+  cliniqueId                 Int
+  passageId                  Int
+  patientId                  Int
+  date                       DateTime @db.Date
+  methode                    String // méthode contraceptive (libellé)
+  nouvelleUtilisatrice       Boolean  @default(true)
+  protégée                 Boolean  @default(false)
+  perdueDeVue                Boolean  @default(false)
+  abandon                    Boolean  @default(false)
+  arretRetrait               Boolean  @default(false)
+  conseilPostpartum          Boolean  @default(false) // counseling PF dans le post-partum
+  produitPostpartumImmediat  Boolean  @default(false)
+  produitPostAbortum         Boolean  @default(false)
+  femmesFormeesAutoInjection Boolean  @default(false)
+  istPresente                Boolean  @default(false)
+  seropositive               Boolean  @default(false) // femme VIH+ sous contraception moderne
+  nourrisson0_6              Boolean  @default(false) // nourrisson 0-6 mois, conseils nutritionnels
+  nourrisson6                Boolean  @default(false) // nourrisson 6 mois, alimentation complémentaire
+  observations               String?
+  agentId                    Int?
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
 
   clinique Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   passage  Passage      @relation(fields: [passageId], references: [id], onDelete: Cascade)
@@ -1579,7 +1675,7 @@ model CertificatArret {
   passageId      Int
   patientId      Int
   numero         String   @unique // CERT-0001… (séquentiel annuel)
-  civilite       String   // Mme / Mlle / M.
+  civilite       String // Mme / Mlle / M.
   nomPatient     String
   dateNaissance  String?
   profession     String?
@@ -1588,7 +1684,7 @@ model CertificatArret {
   fin            DateTime @db.Date
   medecin        String
   lieu           String?
-  medecinId      Int?     // utilisateur ayant établi le certificat
+  medecinId      Int? // utilisateur ayant établi le certificat
   createdAt      DateTime @default(now())
 
   clinique     Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -1609,15 +1705,15 @@ model FicheEchographie {
   id         Int      @id @default(autoincrement())
   cliniqueId Int
   libelle    String
-  titre      String?  // titre de l'examen imprimé (ex. « ECHOGRAPHIE ABDOMINALE »)
-  titre2     String?  // seconde ligne de titre (affichée sous le titre à l'impression)
+  titre      String? // titre de l'examen imprimé (ex. « ECHOGRAPHIE ABDOMINALE »)
+  titre2     String? // seconde ligne de titre (affichée sous le titre à l'impression)
   texte      String   @db.NVarChar(Max) // texte prérempli du compte rendu (marqueurs {code})
   champs     String?  @db.NVarChar(Max) // JSON : champs de saisie [{code, libelle, type, unite?, options?, defaut?, multiligne?}]
   actif      Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  clinique Clinique           @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clinique Clinique              @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   fiches   FicheExamenImagerie[]
 
   @@unique([cliniqueId, libelle])
@@ -1625,19 +1721,19 @@ model FicheEchographie {
 }
 
 model FicheExamenImagerie {
-  id          Int      @id @default(autoincrement())
-  cliniqueId  Int
-  passageId   Int
-  patientId   Int
-  typeFicheId Int      // type de fiche utilisé (paramétré)
-  libelleType String   // copie du libellé au moment de l'enregistrement
-  texte       String   @db.NVarChar(Max) // texte du compte rendu (généré puis modifié)
-  valeurs     String?  @db.NVarChar(Max) // JSON : valeurs saisies des champs {code: valeur}
-  indication  String?
+  id           Int      @id @default(autoincrement())
+  cliniqueId   Int
+  passageId    Int
+  patientId    Int
+  typeFicheId  Int // type de fiche utilisé (paramétré)
+  libelleType  String // copie du libellé au moment de l'enregistrement
+  texte        String   @db.NVarChar(Max) // texte du compte rendu (généré puis modifié)
+  valeurs      String?  @db.NVarChar(Max) // JSON : valeurs saisies des champs {code: valeur}
+  indication   String?
   prescripteur String?
-  medecinId   Int?     // utilisateur ayant établi la fiche
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  medecinId    Int? // utilisateur ayant établi la fiche
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   clinique  Clinique         @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   passage   Passage          @relation(fields: [passageId], references: [id], onDelete: NoAction, onUpdate: NoAction)

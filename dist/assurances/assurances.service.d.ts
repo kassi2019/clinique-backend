@@ -18,11 +18,11 @@ export declare class AssurancesService {
                 statut: string;
                 updatedAt: Date;
                 prestationId: number;
+                formuleId: number;
                 dateDebut: Date | null;
                 dateFin: Date | null;
                 tauxCouverture: number;
                 plafond: Prisma.Decimal | null;
-                formuleId: number;
             })[];
         } & {
             createdAt: Date;
@@ -33,6 +33,7 @@ export declare class AssurancesService {
             assuranceId: number;
             code: string;
             description: string | null;
+            tauxPharmacie: number | null;
             dateDebut: Date | null;
             dateFin: Date | null;
         })[];
@@ -108,6 +109,21 @@ export declare class AssurancesService {
         assuranceId: number;
         code: string;
         description: string | null;
+        tauxPharmacie: number | null;
+        dateDebut: Date | null;
+        dateFin: Date | null;
+    }>;
+    private tauxValide;
+    definirTauxPharmacie(id: number, taux: any): Promise<{
+        createdAt: Date;
+        id: number;
+        statut: string;
+        updatedAt: Date;
+        libelle: string;
+        assuranceId: number;
+        code: string;
+        description: string | null;
+        tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
     }>;
@@ -120,6 +136,7 @@ export declare class AssurancesService {
         assuranceId: number;
         code: string;
         description: string | null;
+        tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
     }>;
@@ -132,6 +149,7 @@ export declare class AssurancesService {
         assuranceId: number;
         code: string;
         description: string | null;
+        tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
     }>;
@@ -141,11 +159,11 @@ export declare class AssurancesService {
         statut: string;
         updatedAt: Date;
         prestationId: number;
+        formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
         tauxCouverture: number;
         plafond: Prisma.Decimal | null;
-        formuleId: number;
     }>;
     modifierCouverture(id: number, dto: any): Promise<{
         createdAt: Date;
@@ -153,11 +171,11 @@ export declare class AssurancesService {
         statut: string;
         updatedAt: Date;
         prestationId: number;
+        formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
         tauxCouverture: number;
         plafond: Prisma.Decimal | null;
-        formuleId: number;
     }>;
     desactiverCouverture(id: number): Promise<{
         createdAt: Date;
@@ -165,11 +183,11 @@ export declare class AssurancesService {
         statut: string;
         updatedAt: Date;
         prestationId: number;
+        formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
         tauxCouverture: number;
         plafond: Prisma.Decimal | null;
-        formuleId: number;
     }>;
     assurancesDuPatient(patientId: number): Promise<({
         assurance: {
@@ -189,9 +207,9 @@ export declare class AssurancesService {
         updatedAt: Date;
         assuranceId: number;
         patientId: number;
+        formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
-        formuleId: number;
         numeroAssure: string | null;
         numeroCarte: string | null;
         nomAssurePrincipal: string | null;
@@ -231,11 +249,11 @@ export declare class AssurancesService {
                 statut: string;
                 updatedAt: Date;
                 prestationId: number;
+                formuleId: number;
                 dateDebut: Date | null;
                 dateFin: Date | null;
                 tauxCouverture: number;
                 plafond: Prisma.Decimal | null;
-                formuleId: number;
             })[];
         } & {
             createdAt: Date;
@@ -246,6 +264,7 @@ export declare class AssurancesService {
             assuranceId: number;
             code: string;
             description: string | null;
+            tauxPharmacie: number | null;
             dateDebut: Date | null;
             dateFin: Date | null;
         };
@@ -256,9 +275,9 @@ export declare class AssurancesService {
         updatedAt: Date;
         assuranceId: number;
         patientId: number;
+        formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
-        formuleId: number;
         numeroAssure: string | null;
         numeroCarte: string | null;
         nomAssurePrincipal: string | null;
@@ -271,9 +290,9 @@ export declare class AssurancesService {
         updatedAt: Date;
         assuranceId: number;
         patientId: number;
+        formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
-        formuleId: number;
         numeroAssure: string | null;
         numeroCarte: string | null;
         nomAssurePrincipal: string | null;
@@ -286,18 +305,20 @@ export declare class AssurancesService {
         updatedAt: Date;
         assuranceId: number;
         patientId: number;
+        formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
-        formuleId: number;
         numeroAssure: string | null;
         numeroCarte: string | null;
         nomAssurePrincipal: string | null;
         typeBeneficiaire: string | null;
     }>;
+    private lignesAssurance;
     facturation(cliniqueId: number, opts: {
         debut?: string;
         fin?: string;
         assuranceId?: number;
+        patientId?: number;
         page?: number;
         perPage?: number;
     }): Promise<{
@@ -306,7 +327,8 @@ export declare class AssurancesService {
             fin: string;
         };
         lignes: {
-            id: number;
+            id: string;
+            source: string;
             createdAt: Date;
             numeroRecu: string;
             patient: {
@@ -342,6 +364,99 @@ export declare class AssurancesService {
             totalPatient: number;
             totalFacture: number;
             nbLignes: number;
+        }[];
+    }>;
+    recouvrement(cliniqueId: number): Promise<{
+        parAssurance: {
+            assuranceId: number;
+            assurance: string;
+            code: string;
+            nbFactures: number;
+            facture: number;
+            recu: number;
+            reste: number;
+        }[];
+        totaux: {
+            facture: number;
+            recu: number;
+            reste: number;
+        };
+        reglements: {
+            montant: number;
+            assurance: {
+                id: number;
+                libelle: string;
+                code: string;
+            };
+            createdAt: Date;
+            id: number;
+            cliniqueId: number;
+            utilisateurId: number | null;
+            assuranceId: number;
+            dateReglement: Date;
+            modeReglement: string | null;
+            reference: string | null;
+            commentaire: string | null;
+        }[];
+    }>;
+    creerReglement(dto: any, utilisateurId: number): Promise<{
+        montant: number;
+        createdAt: Date;
+        id: number;
+        cliniqueId: number;
+        utilisateurId: number | null;
+        assuranceId: number;
+        dateReglement: Date;
+        modeReglement: string | null;
+        reference: string | null;
+        commentaire: string | null;
+    }>;
+    supprimerReglement(id: number): Promise<{
+        ok: boolean;
+    }>;
+    assures(cliniqueId: number, opts?: {
+        assuranceId?: number;
+        search?: string;
+    }): Promise<{
+        assures: ({
+            patient: {
+                id: number;
+                nom: string;
+                prenom: string;
+                sexe: string;
+                telephone: string;
+                code: string;
+                age: string;
+            };
+            assurance: {
+                id: number;
+                libelle: string;
+                code: string;
+            };
+            formule: {
+                id: number;
+                libelle: string;
+                code: string;
+            };
+        } & {
+            createdAt: Date;
+            id: number;
+            statut: string;
+            updatedAt: Date;
+            assuranceId: number;
+            patientId: number;
+            formuleId: number;
+            dateDebut: Date | null;
+            dateFin: Date | null;
+            numeroAssure: string | null;
+            numeroCarte: string | null;
+            nomAssurePrincipal: string | null;
+            typeBeneficiaire: string | null;
+        })[];
+        total: number;
+        parAssurance: {
+            assurance: string;
+            nbAssures: number;
         }[];
     }>;
     tauxApplicable(patientId: number, prestationId: number): Promise<{

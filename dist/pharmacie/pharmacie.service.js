@@ -33,44 +33,48 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 ? new Date(`${filtres.fin}T23:59:59.999`)
                 : new Date(new Date().setHours(23, 59, 59, 999));
             const where = {
-                passage: { cliniqueId },
+                cliniqueId,
                 medicaments: { some: {} },
                 createdAt: { gte: debut, lte: fin },
+                statut: filtres.statut === 'TRAITEE' ? 'TRAITEE' : 'EN_ATTENTE',
             };
-            if (filtres.statut === 'EN_ATTENTE' || filtres.statut === 'TRAITEE') {
-                where.ordonnanceStatut = filtres.statut;
-            }
-            else {
-                where.ordonnanceStatut = 'EN_ATTENTE';
-            }
             if (filtres.medecinId)
-                where.medecinId = filtres.medecinId;
-            const consultations = await this.prisma.consultation.findMany({
+                where.consultation = { medecinId: filtres.medecinId };
+            const ordonnances = await this.prisma.ordonnance.findMany({
                 where,
                 include: {
-                    medecin: {
-                        select: { matricule: true, personnel: { select: { nom: true, prenom: true } } },
+                    consultation: {
+                        select: {
+                            id: true,
+                            medecin: {
+                                select: { matricule: true, personnel: { select: { nom: true, prenom: true } } },
+                            },
+                            patient: { select: { nom: true, prenom: true, code: true } },
+                            passage: { select: { numeroOrdre: true } },
+                        },
                     },
-                    patient: { select: { nom: true, prenom: true, code: true } },
-                    passage: { select: { numeroOrdre: true } },
                     _count: { select: { medicaments: true } },
                 },
                 orderBy: { createdAt: 'desc' },
             });
             return {
                 liste: true,
-                ordonnances: consultations.map((c) => ({
-                    id: c.id,
-                    numeroOrdonnance: c.numeroOrdonnance ?? '—',
-                    ordonnanceStatut: c.ordonnanceStatut,
-                    createdAt: c.createdAt,
-                    patient: c.patient,
-                    passage: c.passage,
-                    medecin: c.medecin,
-                    nbMedicaments: c._count.medicaments,
+                ordonnances: ordonnances.map((o) => ({
+                    id: o.id,
+                    consultationId: o.consultation.id,
+                    numeroOrdonnance: o.numero,
+                    ordonnanceStatut: o.statut,
+                    createdAt: o.createdAt,
+                    patient: o.consultation.patient,
+                    passage: o.consultation.passage,
+                    medecin: o.consultation.medecin,
+                    nbMedicaments: o._count.medicaments,
                 })),
             };
         }
+        const chiffresOrdo = refSans.match(/^(?:ORD)?(\d+)$/)?.[1];
+        const numerosOrdo = [ref, ...(chiffresOrdo ? [`ORD-${chiffresOrdo.padStart(5, '0')}`] : [])];
+        const correspondOrdo = (numero) => numerosOrdo.some((n) => numero.toUpperCase().includes(n));
         const passages = await this.prisma.passage.findMany({
             where: {
                 cliniqueId,
@@ -78,15 +82,23 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                     { numeroOrdre: { contains: ref } },
                     { patient: { is: { code: refSans } } },
                     { patient: { is: (0, recherche_patient_1.critereNomPrenoms)(ref) } },
+                    {
+                        consultations: {
+                            some: { ordonnances: { some: { OR: numerosOrdo.map((n) => ({ numero: { contains: n } })) } } },
+                        },
+                    },
                 ],
             },
             include: {
                 patient: true,
                 consultations: {
                     include: {
-                        medicaments: true,
-                        dispensations: {
-                            include: { lignes: true, paiement: true },
+                        ordonnances: {
+                            include: {
+                                medicaments: true,
+                                dispensations: { include: { lignes: true, paiement: true } },
+                            },
+                            orderBy: { id: 'asc' },
                         },
                     },
                 },
@@ -94,45 +106,68 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             orderBy: { createdAt: 'desc' },
             take: 10,
         });
+        const parNumero = refSans.startsWith('ORD') &&
+            passages.some((p) => p.consultations.some((c) => c.ordonnances.some((o) => correspondOrdo(o.numero))));
         return passages
-            .filter((p) => p.consultations.some((c) => c.medicaments.length > 0))
             .map((p) => ({
             liste: false,
             id: p.id,
             numeroOrdre: p.numeroOrdre,
             createdAt: p.createdAt,
             patient: p.patient,
-            consultations: p.consultations.map((c) => ({
-                id: c.id,
+            ordonnances: p.consultations.flatMap((c) => c.ordonnances
+                .filter((o) => o.medicaments.length > 0 && (!parNumero || correspondOrdo(o.numero)))
+                .map((o) => ({
+                id: o.id,
+                consultationId: c.id,
                 statut: c.statut,
                 valideeLe: c.valideeLe,
-                numeroOrdonnance: c.numeroOrdonnance,
-                ordonnanceStatut: c.ordonnanceStatut,
-                medicaments: c.medicaments,
-                dispensations: c.dispensations.map((d) => ({
+                createdAt: o.createdAt,
+                numeroOrdonnance: o.numero,
+                ordonnanceStatut: o.statut,
+                medicaments: o.medicaments,
+                dispensations: o.dispensations.map((d) => ({
                     ...d,
                     montantTotal: N(d.montantTotal),
                     lignes: d.lignes.map((l) => ({ ...l, montant: N(l.montant), prixUnitaire: N(l.prixUnitaire) })),
                     paiement: d.paiement ? { ...d.paiement, montantTotal: N(d.paiement.montantTotal) } : null,
                 })),
-            })),
-        }));
+            }))),
+        }))
+            .filter((p) => p.ordonnances.length > 0);
     }
-    async detailOrdonnance(consultationId) {
-        const consultation = await this.prisma.consultation.findUnique({
-            where: { id: consultationId },
+    async ordonnanceDeConsultation(consultationId) {
+        const ordonnance = (await this.prisma.ordonnance.findFirst({
+            where: { consultationId, statut: 'EN_ATTENTE', medicaments: { some: {} } },
+            orderBy: { id: 'asc' },
+        })) ??
+            (await this.prisma.ordonnance.findFirst({
+                where: { consultationId },
+                orderBy: { id: 'desc' },
+            }));
+        if (!ordonnance)
+            throw new common_1.NotFoundException('Ordonnance introuvable.');
+        return ordonnance.id;
+    }
+    async detailOrdonnance(ordonnanceId) {
+        const ordonnance = await this.prisma.ordonnance.findUnique({
+            where: { id: ordonnanceId },
             include: {
-                patient: true,
-                passage: {
+                consultation: {
                     include: {
-                        service: { select: { nom: true } },
                         patient: true,
-                    },
-                },
-                medecin: {
-                    select: {
-                        matricule: true,
-                        personnel: { select: { nom: true, prenom: true } },
+                        passage: {
+                            include: {
+                                service: { select: { nom: true } },
+                                patient: true,
+                            },
+                        },
+                        medecin: {
+                            select: {
+                                matricule: true,
+                                personnel: { select: { nom: true, prenom: true } },
+                            },
+                        },
                     },
                 },
                 medicaments: {
@@ -148,12 +183,32 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 },
             },
         });
-        if (!consultation)
+        if (!ordonnance)
             throw new common_1.NotFoundException('Ordonnance introuvable.');
-        if (consultation.medicaments.length === 0) {
-            throw new common_1.BadRequestException('Cette consultation ne contient aucune prescription de médicament.');
+        if (ordonnance.medicaments.length === 0) {
+            throw new common_1.BadRequestException('Cette ordonnance ne contient aucun médicament.');
         }
+        const consultation = {
+            ...ordonnance.consultation,
+            medicaments: ordonnance.medicaments,
+            dispensations: ordonnance.dispensations,
+        };
+        const couverture = await this.couverturePharmacie(consultation.patientId);
         return {
+            ordonnance: {
+                id: ordonnance.id,
+                numero: ordonnance.numero,
+                statut: ordonnance.statut,
+                createdAt: ordonnance.createdAt,
+            },
+            assurance: couverture
+                ? {
+                    assurance: couverture.assurance.libelle,
+                    formule: couverture.formule.libelle,
+                    numeroAssure: couverture.numeroAssure,
+                    taux: couverture.formule.tauxPharmacie ?? 0,
+                }
+                : null,
             consultation: {
                 id: consultation.id,
                 statut: consultation.statut,
@@ -196,19 +251,21 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             })),
         };
     }
-    async dispenser(consultationId, lignes, pharmacienId) {
-        const consultation = await this.prisma.consultation.findUnique({
-            where: { id: consultationId },
-            include: { passage: true },
+    async dispenser(ordonnanceId, lignes, pharmacienId) {
+        const ordonnance = await this.prisma.ordonnance.findUnique({
+            where: { id: ordonnanceId },
+            include: { consultation: { include: { passage: true } } },
         });
-        if (!consultation)
+        if (!ordonnance)
             throw new common_1.NotFoundException('Ordonnance introuvable.');
+        const consultation = ordonnance.consultation;
+        const consultationId = consultation.id;
         let dispensation = await this.prisma.dispensation.findFirst({
-            where: { consultationId, statut: 'EN_COURS' },
+            where: { ordonnanceId, statut: 'EN_COURS' },
         });
         if (!dispensation) {
             dispensation = await this.prisma.dispensation.create({
-                data: { consultationId, pharmacienId },
+                data: { consultationId, ordonnanceId, pharmacienId },
             });
         }
         let total = 0;
@@ -219,7 +276,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 where: { id: ligne.prescriptionId },
                 include: { medicament: true },
             });
-            if (!prescription || prescription.consultationId !== consultationId) {
+            if (!prescription || prescription.ordonnanceId !== ordonnanceId) {
                 throw new common_1.BadRequestException('Prescription invalide.');
             }
             if (!prescription.medicamentId) {
@@ -304,7 +361,22 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             data: { statut: 'CLOTUREE', clotureeLe: new Date() },
         });
     }
-    async payer(dispensationId, modePaiement, caissierId) {
+    async couverturePharmacie(patientId) {
+        const aujourdHui = new Date();
+        const actifs = await this.prisma.patientAssurance.findMany({
+            where: {
+                patientId,
+                statut: 'ACTIF',
+                assurance: { statut: 'ACTIF' },
+                formule: { statut: 'ACTIF' },
+                OR: [{ dateDebut: null }, { dateDebut: { lte: aujourdHui } }],
+            },
+            include: { assurance: true, formule: true },
+            orderBy: { createdAt: 'desc' },
+        });
+        return actifs.find((a) => !a.dateFin || new Date(a.dateFin) >= aujourdHui) ?? null;
+    }
+    async payer(dispensationId, modePaiement, caissierId, options = {}) {
         const dispensation = await this.prisma.dispensation.findUnique({
             where: { id: dispensationId },
             include: { paiement: true, consultation: { include: { passage: true } } },
@@ -314,6 +386,16 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         if (dispensation.paiement && dispensation.paiement.statut === 'VALIDE') {
             throw new common_1.BadRequestException('Cette dispensation est déjà payée.');
         }
+        const type = ['CREDIT', 'CAS_SOCIAL'].includes(options.type ?? '') ? options.type : 'COMPTANT';
+        if (type !== 'COMPTANT' && !options.motif?.trim()) {
+            throw new common_1.BadRequestException('Indiquez le motif du crédit ou du cas social.');
+        }
+        const total = N(dispensation.montantTotal);
+        const couverture = await this.couverturePharmacie(dispensation.consultation.patientId);
+        const taux = Math.min(100, Math.max(0, couverture?.formule.tauxPharmacie ?? 0));
+        const montantAssurance = Math.round((total * taux) / 100);
+        const montantPatient = type === 'CAS_SOCIAL' ? 0 : total - montantAssurance;
+        const montantEncaisse = type === 'COMPTANT' ? montantPatient : 0;
         const annee = new Date().getFullYear();
         const nb = await this.prisma.pharmaciePaiement.count({
             where: { numeroRecu: { contains: `P${annee}-` } },
@@ -325,16 +407,38 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 caissierId,
                 numeroRecu,
                 montantTotal: dispensation.montantTotal,
-                modePaiement,
+                modePaiement: type === 'COMPTANT' ? modePaiement : type,
+                type,
+                montantAssurance,
+                montantPatient,
+                montantEncaisse,
+                assuranceId: taux > 0 ? couverture.assuranceId : null,
+                formuleId: taux > 0 ? couverture.formuleId : null,
+                tauxAssurance: taux > 0 ? taux : null,
+                motif: options.motif?.trim() || null,
+                regleLe: type === 'CREDIT' ? null : new Date(),
             },
         });
         await this.prisma.dispensation.update({
             where: { id: dispensationId },
             data: { statut: 'CLOTUREE', clotureeLe: new Date() },
         });
+        if (dispensation.ordonnanceId) {
+            await this.prisma.ordonnance.update({
+                where: { id: dispensation.ordonnanceId },
+                data: { statut: 'TRAITEE' },
+            });
+        }
+        const enAttente = await this.prisma.ordonnance.count({
+            where: {
+                consultationId: dispensation.consultationId,
+                statut: 'EN_ATTENTE',
+                medicaments: { some: {} },
+            },
+        });
         await this.prisma.consultation.update({
             where: { id: dispensation.consultationId },
-            data: { ordonnanceStatut: 'TRAITEE' },
+            data: { ordonnanceStatut: enAttente === 0 ? 'TRAITEE' : 'EN_ATTENTE' },
         });
         let impression = null;
         if ((await this.impressionService.getConfigPoste(dispensation.consultation.passage.cliniqueId, 'PHARMACIE')).autoPrint) {
@@ -350,7 +454,14 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             orderBy: { id: 'asc' },
         });
         return {
-            paiement: { ...paiement, montantTotal: N(paiement.montantTotal) },
+            paiement: {
+                ...paiement,
+                montantTotal: N(paiement.montantTotal),
+                montantAssurance: N(paiement.montantAssurance),
+                montantPatient: N(paiement.montantPatient ?? paiement.montantTotal),
+                montantEncaisse: N(paiement.montantEncaisse ?? paiement.montantTotal),
+                assurance: couverture && taux > 0 ? couverture.assurance.libelle : null,
+            },
             lignes: lignes.map((l) => ({
                 id: l.id,
                 medicamentNom: l.medicamentNom,
@@ -374,6 +485,72 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             where: { id: paiementId },
             data: { statut: 'ANNULE', motifAnnulation: motif, dateAnnulation: new Date() },
         });
+    }
+    async credits(cliniqueId) {
+        const paiements = await this.prisma.pharmaciePaiement.findMany({
+            where: {
+                statut: 'VALIDE',
+                dispensation: { consultation: { passage: { cliniqueId } } },
+                OR: [{ type: 'CREDIT', regleLe: null }, { type: 'CAS_SOCIAL' }],
+            },
+            include: {
+                dispensation: {
+                    select: {
+                        ordonnance: { select: { numero: true } },
+                        consultation: {
+                            select: {
+                                patient: { select: { nom: true, prenom: true, code: true, telephone: true } },
+                                passage: { select: { numeroOrdre: true } },
+                            },
+                        },
+                    },
+                },
+                caissier: { select: { personnel: { select: { nom: true, prenom: true } } } },
+                assurance: { select: { libelle: true } },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 200,
+        });
+        const lignes = paiements.map((p) => ({
+            id: p.id,
+            type: p.type,
+            numeroRecu: p.numeroRecu,
+            createdAt: p.createdAt,
+            motif: p.motif,
+            montantTotal: N(p.montantTotal),
+            montantAssurance: N(p.montantAssurance),
+            montantPatient: N(p.montantPatient ?? 0),
+            assurance: p.assurance?.libelle ?? null,
+            numeroOrdonnance: p.dispensation.ordonnance?.numero ?? null,
+            numeroOrdre: p.dispensation.consultation.passage.numeroOrdre,
+            patient: p.dispensation.consultation.patient,
+            par: p.caissier?.personnel ? `${p.caissier.personnel.nom} ${p.caissier.personnel.prenom}` : '—',
+        }));
+        const credits = lignes.filter((l) => l.type === 'CREDIT');
+        return {
+            credits,
+            casSociaux: lignes.filter((l) => l.type === 'CAS_SOCIAL'),
+            totalCredits: credits.reduce((s, l) => s + l.montantPatient, 0),
+        };
+    }
+    async reglerCredit(paiementId, modePaiement) {
+        const paiement = await this.prisma.pharmaciePaiement.findUnique({ where: { id: paiementId } });
+        if (!paiement)
+            throw new common_1.NotFoundException('Paiement introuvable.');
+        if (paiement.type !== 'CREDIT' || paiement.statut !== 'VALIDE') {
+            throw new common_1.BadRequestException("Ce reçu n'est pas un crédit en cours.");
+        }
+        if (paiement.regleLe)
+            throw new common_1.BadRequestException('Ce crédit est déjà réglé.');
+        const maj = await this.prisma.pharmaciePaiement.update({
+            where: { id: paiementId },
+            data: {
+                montantEncaisse: paiement.montantPatient ?? paiement.montantTotal,
+                modePaiement: modePaiement || 'ESPECES',
+                regleLe: new Date(),
+            },
+        });
+        return { ...maj, montantTotal: N(maj.montantTotal), montantEncaisse: N(maj.montantEncaisse) };
     }
     async stocks(cliniqueId, search) {
         const where = { cliniqueId };
@@ -445,18 +622,18 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         if (!medicament)
             throw new common_1.NotFoundException('Médicament introuvable.');
         const ecart = dto.quantiteReelle - medicament.stock;
-        if (ecart !== 0) {
-            await this.prisma.mouvementStock.create({
-                data: {
-                    medicamentId: dto.medicamentId,
-                    type: 'INVENTAIRE',
-                    quantite: ecart,
-                    reference: 'Inventaire',
-                    utilisateurId,
-                    commentaire: dto.commentaire,
-                },
-            });
-        }
+        await this.prisma.mouvementStock.create({
+            data: {
+                medicamentId: dto.medicamentId,
+                type: 'INVENTAIRE',
+                quantite: ecart,
+                stockAvant: medicament.stock,
+                stockApres: dto.quantiteReelle,
+                reference: 'Inventaire',
+                utilisateurId,
+                commentaire: dto.commentaire,
+            },
+        });
         return this.prisma.medicament.update({
             where: { id: dto.medicamentId },
             data: { stock: dto.quantiteReelle },
@@ -520,19 +697,19 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         if (!lot)
             throw new common_1.NotFoundException('Lot introuvable.');
         const ecart = quantiteReelle - lot.quantiteRestante;
-        if (ecart !== 0) {
-            await this.prisma.mouvementStock.create({
-                data: {
-                    medicamentId: lot.medicamentId,
-                    type: 'INVENTAIRE',
-                    quantite: ecart,
-                    lotId,
-                    reference: `Inventaire lot ${lot.numeroLot}`,
-                    utilisateurId,
-                    commentaire,
-                },
-            });
-        }
+        await this.prisma.mouvementStock.create({
+            data: {
+                medicamentId: lot.medicamentId,
+                type: 'INVENTAIRE',
+                quantite: ecart,
+                stockAvant: lot.quantiteRestante,
+                stockApres: quantiteReelle,
+                lotId,
+                reference: `Inventaire lot ${lot.numeroLot}`,
+                utilisateurId,
+                commentaire,
+            },
+        });
         await this.prisma.lot.update({
             where: { id: lotId },
             data: { quantiteRestante: quantiteReelle },
@@ -555,17 +732,19 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 continue;
             const quantiteReelle = Number(l.quantiteReelle) || 0;
             const ecart = quantiteReelle - lot.quantiteRestante;
+            await this.prisma.mouvementStock.create({
+                data: {
+                    medicamentId: lot.medicamentId,
+                    type: 'INVENTAIRE',
+                    quantite: ecart,
+                    stockAvant: lot.quantiteRestante,
+                    stockApres: quantiteReelle,
+                    lotId: lot.id,
+                    reference: `Inventaire lot ${lot.numeroLot}`,
+                    utilisateurId,
+                },
+            });
             if (ecart !== 0) {
-                await this.prisma.mouvementStock.create({
-                    data: {
-                        medicamentId: lot.medicamentId,
-                        type: 'INVENTAIRE',
-                        quantite: ecart,
-                        lotId: lot.id,
-                        reference: `Inventaire lot ${lot.numeroLot}`,
-                        utilisateurId,
-                    },
-                });
                 await this.prisma.lot.update({
                     where: { id: lot.id },
                     data: { quantiteRestante: quantiteReelle },
@@ -585,6 +764,63 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             });
         }
         return { ajustes, total: lignes.length };
+    }
+    async ficheInventaire(cliniqueId, debut, fin) {
+        const jourDebut = debut
+            ? new Date(`${debut}T00:00:00`)
+            : new Date(new Date().setHours(0, 0, 0, 0));
+        const dernierJour = fin ?? debut;
+        const jourFin = dernierJour
+            ? new Date(`${dernierJour}T23:59:59.999`)
+            : new Date(new Date().setHours(23, 59, 59, 999));
+        const mouvements = await this.prisma.mouvementStock.findMany({
+            where: {
+                type: 'INVENTAIRE',
+                medicament: { cliniqueId },
+                createdAt: { gte: jourDebut, lte: jourFin },
+            },
+            include: {
+                medicament: { select: { nom: true, dosage: true, forme: true, prixVente: true } },
+                lot: { select: { numeroLot: true, datePeremption: true, prixAchat: true } },
+                utilisateur: {
+                    select: { matricule: true, personnel: { select: { nom: true, prenom: true } } },
+                },
+            },
+            orderBy: [{ medicament: { nom: 'asc' } }, { createdAt: 'asc' }],
+        });
+        const lignes = mouvements.map((m) => {
+            const prix = Number(m.lot?.prixAchat ?? m.medicament.prixVente ?? 0);
+            return {
+                id: m.id,
+                date: m.createdAt,
+                medicament: `${m.medicament.nom} ${m.medicament.dosage ?? ''}`.trim(),
+                forme: m.medicament.forme,
+                lot: m.lot?.numeroLot ?? '—',
+                peremption: m.lot?.datePeremption ?? null,
+                stockAvant: m.stockAvant,
+                stockApres: m.stockApres,
+                ecart: m.quantite,
+                prixUnitaire: prix,
+                valeurEcart: m.quantite * prix,
+                par: m.utilisateur?.personnel
+                    ? `${m.utilisateur.personnel.nom} ${m.utilisateur.personnel.prenom}`
+                    : 'Système',
+                commentaire: m.commentaire ?? '',
+            };
+        });
+        const avecEcart = lignes.filter((l) => l.ecart !== 0);
+        return {
+            lignes,
+            resume: {
+                lotsComptes: lignes.length,
+                lotsAvecEcart: avecEcart.length,
+                lotsConformes: lignes.length - avecEcart.length,
+                manquants: avecEcart.filter((l) => l.ecart < 0).reduce((s, l) => s + l.ecart, 0),
+                excedents: avecEcart.filter((l) => l.ecart > 0).reduce((s, l) => s + l.ecart, 0),
+                valeurEcarts: lignes.reduce((s, l) => s + l.valeurEcart, 0),
+                agents: [...new Set(lignes.map((l) => l.par))],
+            },
+        };
     }
     async mouvements(medicamentId) {
         const mouvements = await this.prisma.mouvementStock.findMany({
@@ -876,7 +1112,12 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         }
         if (type === 'correctifs') {
             const inv = await this.prisma.mouvementStock.findMany({
-                where: { type: 'INVENTAIRE', medicament: { cliniqueId }, ...dansPeriode('createdAt') },
+                where: {
+                    type: 'INVENTAIRE',
+                    quantite: { not: 0 },
+                    medicament: { cliniqueId },
+                    ...dansPeriode('createdAt'),
+                },
                 include: {
                     medicament: { select: { nom: true, dosage: true, prixVente: true } },
                     lot: { select: { numeroLot: true, prixAchat: true } },

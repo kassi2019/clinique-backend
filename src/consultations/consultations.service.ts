@@ -12,8 +12,23 @@ import {
 } from './dto/consultation.dto';
 import { critereNomPrenoms } from '../common/recherche-patient';
 
+/** Document joint à un examen hors clinique : tout sauf le contenu (chargé à la demande). */
+const metaResultatExterne = {
+  select: {
+    id: true,
+    nomFichier: true,
+    typeMime: true,
+    tailleOctets: true,
+    dateExamen: true,
+    lieu: true,
+    conclusion: true,
+    createdAt: true,
+  },
+} as const;
+
 const includeConsultation = {
   medicaments: true,
+  ordonnances: { orderBy: { id: 'asc' } },
   medecin: {
     select: {
       matricule: true,
@@ -125,6 +140,7 @@ export class ConsultationsService {
           include: {
             service: { select: { id: true, code: true, nom: true } },
             prestation: { select: { type: true } },
+            resultatExterne: metaResultatExterne,
           },
           orderBy: { createdAt: 'asc' },
         },
@@ -177,6 +193,7 @@ export class ConsultationsService {
       where: { patientId: passage.patientId },
       include: {
         medicaments: true,
+        ordonnances: { orderBy: { id: 'asc' } },
         medecin: {
           select: {
             matricule: true,
@@ -187,6 +204,38 @@ export class ConsultationsService {
           select: {
             numeroOrdre: true,
             createdAt: true,
+            // Constantes du passage : affichées dans le compte rendu de l'historique
+            taille: true,
+            temperature: true,
+            pouls: true,
+            tensionGauche: true,
+            tensionDroite: true,
+            poids: true,
+            // Examens prescrits hors clinique (avec le document joint, s'il y en a un)
+            // + tous les examens (labo / imagerie) prescrits sur ce passage, réalisés ou
+            // non : l'historique montre aussi ce qui a été prescrit et pas encore fait.
+            prestations: {
+              where: {
+                OR: [
+                  { statut: 'EXTERNE' },
+                  {
+                    statut: { notIn: ['NON_PRESCRITE', 'ANNULEE'] },
+                    prestation: { type: { in: ['EXAMEN_LABO', 'IMAGERIE'] } },
+                  },
+                ],
+              },
+              select: {
+                id: true,
+                libelle: true,
+                statut: true,
+                createdAt: true,
+                prestation: { select: { type: true } },
+                examenLabo: { select: { id: true } },
+                examenImagerie: { select: { id: true } },
+                resultatExterne: metaResultatExterne,
+              },
+              orderBy: { createdAt: 'asc' },
+            },
             service: { select: { nom: true } },
             examensLabo: {
               include: {
@@ -300,6 +349,12 @@ export class ConsultationsService {
       });
     }
 
+    // « Autres examens » avant modification : sert à retirer ceux que le médecin décoche
+    const precedente = await this.prisma.consultation.findUnique({
+      where: { passageId },
+      select: { autresExamens: true },
+    });
+
     const { patient: _patient, moDebut, moFin, ...donnees } = dto;
     const consultation = await this.prisma.consultation.upsert({
       where: { passageId },
@@ -322,6 +377,15 @@ export class ConsultationsService {
     // Facturation de l'hospitalisation à l'entrée (§13) : la ligne payable
     // est créée dès que le médecin valide la prescription (lit + jours).
     await this.synchroniserFactureHospitalisation(passage.cliniqueId, passageId, dto, medecinId);
+
+    // « Autres examens » cochés → inscrits sur la prescription d'examens (labo / imagerie)
+    await this.synchroniserAutresExamens(
+      passageId,
+      passage.cliniqueId,
+      precedente?.autresExamens ?? null,
+      consultation.autresExamens,
+      medecinId,
+    );
 
     // Tests cochés dans la fiche (TDR, CDIP, hémoglobine…) → inscrits sur l'ordonnance
     if (await this.synchroniserTestsOrdonnance(consultation, passage.cliniqueId)) {
@@ -408,6 +472,94 @@ export class ConsultationsService {
   }
 
   /**
+   * « Autres examens » de la fiche reportés automatiquement sur la prescription
+   * d'examens, sans ressaisie :
+   * - examen du catalogue (laboratoire / imagerie, même libellé) → ligne payable
+   *   à la caisse, transmise ensuite au service ;
+   * - examen absent du catalogue → ligne « hors clinique », non facturable ;
+   * - examen décoché → ligne retirée tant qu'elle n'est pas payée.
+   */
+  private async synchroniserAutresExamens(
+    passageId: number,
+    cliniqueId: number,
+    avant: string | null,
+    apres: string | null,
+    utilisateurId: number,
+  ) {
+    const separer = (t: string | null) =>
+      (t ?? '')
+        .split(';')
+        .map((x) => x.trim())
+        .filter(Boolean);
+    const cle = (t: string) =>
+      t
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+    const voulus = separer(apres);
+    const retires = separer(avant).filter((a) => !voulus.some((v) => cle(v) === cle(a)));
+    if (voulus.length === 0 && retires.length === 0) return;
+
+    const catalogue = await this.prisma.prestation.findMany({
+      where: { cliniqueId, actif: true, type: { in: ['EXAMEN_LABO', 'IMAGERIE'] } },
+    });
+    const prestationDe = (libelle: string) => catalogue.find((c) => cle(c.libelle) === cle(libelle));
+    const lignes = await this.prisma.passagePrestation.findMany({ where: { passageId } });
+    const ligneDe = (libelle: string) => {
+      const prestation = prestationDe(libelle);
+      return prestation
+        ? lignes.find((l) => l.prestationId === prestation.id)
+        : lignes.find((l) => l.prestationId === null && cle(l.libelle) === cle(libelle));
+    };
+
+    for (const libelle of voulus) {
+      const prestation = prestationDe(libelle);
+      const ligne = ligneDe(libelle);
+      if (ligne) {
+        // Proposée à l'accueil mais pas encore prescrite → prescrite
+        if (ligne.statut === 'NON_PRESCRITE') {
+          await this.prisma.passagePrestation.update({
+            where: { id: ligne.id },
+            data: { statut: 'EN_ATTENTE' },
+          });
+        }
+        continue;
+      }
+      await this.prisma.passagePrestation.create({
+        data: prestation
+          ? {
+              passageId,
+              prestationId: prestation.id,
+              libelle: prestation.libelle,
+              montant: prestation.montant,
+              serviceId: prestation.serviceId,
+              agentId: utilisateurId,
+              source: 'PRESCRIPTION',
+              statut: 'EN_ATTENTE',
+            }
+          : {
+              passageId,
+              libelle,
+              montant: 0,
+              agentId: utilisateurId,
+              source: 'PRESCRIPTION',
+              statut: 'EXTERNE', // hors catalogue : non facturable à la caisse
+            },
+      });
+    }
+
+    for (const libelle of retires) {
+      const ligne = ligneDe(libelle);
+      // On ne retire que ce que le médecin a prescrit et qui n'est pas encore payé
+      if (ligne && ligne.source === 'PRESCRIPTION' && ['EN_ATTENTE', 'EXTERNE'].includes(ligne.statut)) {
+        await this.prisma.passagePrestation.delete({ where: { id: ligne.id } });
+      }
+    }
+  }
+
+  /**
    * Tests de la fiche reportés automatiquement sur l'ordonnance :
    * TDR positif/négatif, CDIP réalisé, taux d'hémoglobine renseigné,
    * syphilis/hépatite positif/négatif. La ligne est ajoutée une seule fois et
@@ -449,12 +601,13 @@ export class ConsultationsService {
     let change = false;
     for (const r of regles) {
       const ligne = existantes.find((p) => cle(p.medicamentNom) === cle(r.libelle));
-      if (r.actif && (!ligne || ligne.prixUnitaire == null)) {
-        // Prix : produit du catalogue du même nom (kit vendu à la pharmacie) si
-        // paramétré, à défaut prestation du même libellé — affiché sur l'ordonnance.
-        const produit = await this.prisma.medicament.findFirst({
-          where: { cliniqueId, nom: r.libelle },
-        });
+      if (r.actif && (!ligne || ligne.prixUnitaire == null || ligne.medicamentId == null)) {
+        // Le test est un PRODUIT DU CATALOGUE de la pharmacie (créé automatiquement
+        // s'il manque) : il n'est plus « hors catalogue », son stock et son prix se
+        // gèrent comme ceux des autres produits.
+        // Prix affiché sur l'ordonnance : celui du produit, à défaut celui de la
+        // prestation du même libellé.
+        const produit = await this.produitTest(cliniqueId, r.libelle);
         const prestation = produit?.prixVente
           ? null
           : await this.prisma.prestation.findFirst({
@@ -462,9 +615,11 @@ export class ConsultationsService {
             });
         const prix = produit?.prixVente ?? prestation?.montant ?? null;
         if (!ligne) {
+          const ordonnance = await this.ordonnanceEnCours(consultation.id, cliniqueId);
           await this.prisma.prescription.create({
             data: {
               consultationId: consultation.id,
+              ordonnanceId: ordonnance.id,
               medicamentId: produit?.id ?? null,
               medicamentNom: produit?.nom ?? r.libelle,
               forme: produit?.forme ?? null,
@@ -473,11 +628,15 @@ export class ConsultationsService {
             },
           });
           change = true;
-        } else if (prix != null) {
-          // Ligne déjà inscrite avant que le prix ne soit paramétré : on le complète
+        } else if (prix != null || ligne.medicamentId == null) {
+          // Ligne déjà inscrite avant que le produit ou son prix ne soit paramétré : on la complète
           await this.prisma.prescription.update({
             where: { id: ligne.id },
-            data: { prixUnitaire: prix, medicamentId: ligne.medicamentId ?? produit?.id ?? null },
+            data: {
+              prixUnitaire: ligne.prixUnitaire ?? prix,
+              medicamentId: ligne.medicamentId ?? produit?.id ?? null,
+              forme: ligne.forme ?? produit?.forme ?? null,
+            },
           });
           change = true;
         }
@@ -486,21 +645,81 @@ export class ConsultationsService {
         change = true;
       }
     }
-    if (change && !consultation.numeroOrdonnance) {
-      await this.attribuerNumeroOrdonnance(consultation.id, cliniqueId);
-    }
     return change;
   }
 
-  /** Numéro d'ordonnance (ORD-XXXXX par clinique), attribué à la première prescription. */
-  private async attribuerNumeroOrdonnance(consultationId: number, cliniqueId: number) {
-    const nb = await this.prisma.consultation.count({
-      where: { numeroOrdonnance: { not: null }, passage: { cliniqueId } },
+  /** Produit du catalogue correspondant à un test de la fiche (créé s'il n'existe pas encore). */
+  private async produitTest(cliniqueId: number, nom: string) {
+    const existant = await this.prisma.medicament.findFirst({ where: { cliniqueId, nom } });
+    if (existant) return existant;
+    try {
+      return await this.prisma.medicament.create({
+        data: { cliniqueId, nom, forme: 'Test', uniteVente: 'BOITE' },
+      });
+    } catch {
+      // Créé entre-temps par un autre poste (nom unique par clinique)
+      return this.prisma.medicament.findFirst({ where: { cliniqueId, nom } });
+    }
+  }
+
+  /** Crée une ordonnance vide pour la consultation (numéro ORD-XXXXX séquentiel par clinique). */
+  private async creerOrdonnance(consultationId: number, cliniqueId: number) {
+    let n = (await this.prisma.ordonnance.count({ where: { cliniqueId } })) + 1;
+    let numero = `ORD-${String(n).padStart(5, '0')}`;
+    // Le numéro doit rester unique dans la clinique
+    while (await this.prisma.ordonnance.findFirst({ where: { cliniqueId, numero } })) {
+      n += 1;
+      numero = `ORD-${String(n).padStart(5, '0')}`;
+    }
+    const ordonnance = await this.prisma.ordonnance.create({
+      data: { cliniqueId, consultationId, numero },
     });
-    await this.prisma.consultation.update({
+    // La consultation garde le numéro de sa première ordonnance (compatibilité)
+    await this.prisma.consultation.updateMany({
+      where: { id: consultationId, numeroOrdonnance: null },
+      data: { numeroOrdonnance: numero },
+    });
+    return ordonnance;
+  }
+
+  /**
+   * Ordonnance qui reçoit les nouveaux médicaments : celle demandée, sinon la
+   * dernière encore EN_ATTENTE, sinon une nouvelle. Une ordonnance déjà
+   * délivrée (TRAITEE) n'est plus modifiable : la suite va sur une nouvelle.
+   */
+  private async ordonnanceEnCours(consultationId: number, cliniqueId: number, ordonnanceId?: number) {
+    if (ordonnanceId) {
+      const demandee = await this.prisma.ordonnance.findUnique({ where: { id: ordonnanceId } });
+      if (!demandee || demandee.consultationId !== consultationId) {
+        throw new BadRequestException('Ordonnance introuvable pour cette consultation.');
+      }
+      if (demandee.statut === 'TRAITEE') {
+        throw new BadRequestException(
+          `L'ordonnance ${demandee.numero} a déjà été délivrée par la pharmacie : créez une nouvelle ordonnance.`,
+        );
+      }
+      return demandee;
+    }
+    const ouverte = await this.prisma.ordonnance.findFirst({
+      where: { consultationId, statut: 'EN_ATTENTE' },
+      orderBy: { id: 'desc' },
+    });
+    return ouverte ?? this.creerOrdonnance(consultationId, cliniqueId);
+  }
+
+  /** Nouvelle ordonnance indépendante pour la même consultation. */
+  async nouvelleOrdonnance(consultationId: number) {
+    const consultation = await this.prisma.consultation.findUnique({
       where: { id: consultationId },
-      data: { numeroOrdonnance: `ORD-${String(nb + 1).padStart(5, '0')}` },
+      include: { passage: { select: { cliniqueId: true } } },
     });
+    if (!consultation) throw new NotFoundException('Consultation introuvable.');
+    // Une ordonnance encore vide est réutilisée (pas de numéro gaspillé)
+    const vide = await this.prisma.ordonnance.findFirst({
+      where: { consultationId, statut: 'EN_ATTENTE', medicaments: { none: {} } },
+      orderBy: { id: 'desc' },
+    });
+    return vide ?? this.creerOrdonnance(consultationId, consultation.passage.cliniqueId);
   }
 
   /** Ajoute une prescription de médicament (catalogue ou saisie libre). */
@@ -535,9 +754,15 @@ export class ConsultationsService {
     }
     if (!nom) throw new BadRequestException('Nom du médicament requis.');
 
-    const prescription = await this.prisma.prescription.create({
+    const ordonnance = await this.ordonnanceEnCours(
+      consultationId,
+      consultation.passage.cliniqueId,
+      dto.ordonnanceId,
+    );
+    return this.prisma.prescription.create({
       data: {
         consultationId,
+        ordonnanceId: ordonnance.id,
         medicamentId,
         medicamentNom: nom,
         forme,
@@ -546,20 +771,19 @@ export class ConsultationsService {
         duree: dto.duree,
       },
     });
-
-    // Numéro d'ordonnance généré à la première prescription (ORD-XXXXX par clinique)
-    if (!consultation.numeroOrdonnance) {
-      await this.attribuerNumeroOrdonnance(consultationId, consultation.passage.cliniqueId);
-    }
-
-    return prescription;
   }
 
   async retirerMedicament(prescriptionId: number) {
     const prescription = await this.prisma.prescription.findUnique({
       where: { id: prescriptionId },
+      include: { ordonnance: true, _count: { select: { lignes: true } } },
     });
     if (!prescription) throw new NotFoundException('Prescription introuvable.');
+    if (prescription.ordonnance?.statut === 'TRAITEE' || prescription._count.lignes > 0) {
+      throw new BadRequestException(
+        'Ce médicament a déjà été délivré par la pharmacie : il ne peut plus être retiré.',
+      );
+    }
     return this.prisma.prescription.delete({ where: { id: prescriptionId } });
   }
 
@@ -689,7 +913,7 @@ export class ConsultationsService {
       where: { id: ligneId },
     });
     if (!ligne) throw new NotFoundException('Ligne introuvable.');
-    const libreExterne = ligne.source === 'PRESCRIPTION' && ligne.statut === 'EXTERNE';
+    const libreExterne = ligne.statut === 'EXTERNE';
     if (ligne.statut !== 'EN_ATTENTE' && !libreExterne) {
       throw new BadRequestException(
         'Cette prestation est déjà payée : impossible de retirer la prescription.',
@@ -705,12 +929,110 @@ export class ConsultationsService {
     });
   }
 
+  // ── Résultat scanné d'un examen réalisé hors clinique ──
+
+  /** Joint (ou remplace) le document scanné du résultat d'un examen hors clinique. */
+  async joindreResultatExterne(
+    ligneId: number,
+    dto: { nomFichier?: string; contenu?: string; dateExamen?: string; lieu?: string; conclusion?: string },
+    utilisateurId?: number,
+  ) {
+    const ligne = await this.prisma.passagePrestation.findUnique({
+      where: { id: ligneId },
+      include: {
+        resultatExterne: { select: { id: true } },
+        prestation: { select: { type: true } },
+        examenLabo: { select: { id: true } },
+        examenImagerie: { select: { id: true } },
+      },
+    });
+    if (!ligne) throw new NotFoundException('Examen introuvable.');
+    // Examen prescrit à la clinique, pas encore payé ni réalisé ici : le patient l'a fait ailleurs
+    const prescritNonRealise =
+      ligne.statut === 'EN_ATTENTE' &&
+      ['EXAMEN_LABO', 'IMAGERIE'].includes(ligne.prestation?.type ?? '') &&
+      !ligne.examenLabo &&
+      !ligne.examenImagerie;
+    if (ligne.statut !== 'EXTERNE' && !prescritNonRealise) {
+      throw new BadRequestException(
+        "Un document ne se joint qu'à un examen réalisé hors clinique (cet examen est payé ou fait à la clinique).",
+      );
+    }
+    const infos = {
+      dateExamen: dto.dateExamen ? new Date(`${dto.dateExamen}T00:00:00`) : null,
+      lieu: dto.lieu?.trim() || null,
+      conclusion: dto.conclusion?.trim() || null,
+    };
+
+    // Sans nouveau fichier : simple mise à jour des informations du document existant
+    if (!dto.contenu) {
+      if (!ligne.resultatExterne) throw new BadRequestException('Choisissez le fichier du résultat.');
+      return this.prisma.resultatExterne.update({
+        where: { passagePrestationId: ligneId },
+        data: infos,
+        ...metaResultatExterne,
+      });
+    }
+
+    const m = /^data:([a-zA-Z0-9.+/-]+);base64,/.exec(dto.contenu);
+    const TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!m || !TYPES.includes(m[1])) {
+      throw new BadRequestException('Format non accepté : choisissez une image (JPG, PNG) ou un PDF.');
+    }
+    const tailleOctets = Math.floor(((dto.contenu.length - m[0].length) * 3) / 4);
+    if (tailleOctets > 7 * 1024 * 1024) {
+      throw new BadRequestException('Fichier trop volumineux (7 Mo maximum).');
+    }
+    // Le résultat vient d'ailleurs : l'examen devient « hors clinique » et n'est plus facturé à la caisse
+    if (prescritNonRealise) {
+      await this.prisma.passagePrestation.update({
+        where: { id: ligneId },
+        data: { statut: 'EXTERNE' },
+      });
+    }
+    const donnees = {
+      nomFichier: dto.nomFichier?.trim() || 'resultat',
+      typeMime: m[1],
+      contenu: dto.contenu,
+      tailleOctets,
+      utilisateurId: utilisateurId ?? null,
+      ...infos,
+    };
+    return this.prisma.resultatExterne.upsert({
+      where: { passagePrestationId: ligneId },
+      create: { passagePrestationId: ligneId, ...donnees },
+      update: donnees,
+      ...metaResultatExterne,
+    });
+  }
+
+  /** Document complet (avec son contenu) pour l'affichage ou l'impression. */
+  async resultatExterne(ligneId: number) {
+    const doc = await this.prisma.resultatExterne.findUnique({
+      where: { passagePrestationId: ligneId },
+      include: { ligne: { select: { libelle: true } } },
+    });
+    if (!doc) throw new NotFoundException('Aucun document joint à cet examen.');
+    return doc;
+  }
+
+  async supprimerResultatExterne(ligneId: number) {
+    const doc = await this.prisma.resultatExterne.findUnique({ where: { passagePrestationId: ligneId } });
+    if (!doc) throw new NotFoundException('Aucun document joint à cet examen.');
+    await this.prisma.resultatExterne.delete({ where: { id: doc.id } });
+    return { ok: true };
+  }
+
   /** Sauvegarde explicite de l'ordonnance (horodatée, traçable). */
   async sauvegarderOrdonnance(consultationId: number) {
     const consultation = await this.prisma.consultation.findUnique({
       where: { id: consultationId },
     });
     if (!consultation) throw new NotFoundException('Consultation introuvable.');
+    await this.prisma.ordonnance.updateMany({
+      where: { consultationId, statut: 'EN_ATTENTE' },
+      data: { sauveeLe: new Date() },
+    });
     return this.prisma.consultation.update({
       where: { id: consultationId },
       data: { ordonnanceSauveeLe: new Date() },

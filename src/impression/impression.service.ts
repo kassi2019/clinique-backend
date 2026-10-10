@@ -681,6 +681,23 @@ export class ImpressionService {
         deuxColonnes('TOTAL', `${Number(paiement.montantTotal)} FCFA`) +
         CMDS.BOLD_OFF,
     );
+    // Part assurance, crédit ou cas social : le patient voit ce qu'il doit réellement
+    if (Number(paiement.montantAssurance) > 0) {
+      lignes.push(deuxColonnes(`Assurance (${paiement.tauxAssurance ?? 0} %)`, `-${Number(paiement.montantAssurance)} FCFA`));
+    }
+    if (paiement.type === 'CAS_SOCIAL') {
+      lignes.push(CMDS.BOLD_ON + deuxColonnes('CAS SOCIAL', 'PRIS EN CHARGE') + CMDS.BOLD_OFF);
+    } else if (paiement.type === 'CREDIT') {
+      lignes.push(
+        CMDS.BOLD_ON +
+          deuxColonnes(paiement.regleLe ? 'CREDIT REGLE' : 'CREDIT - RESTE DU', `${Number(paiement.montantPatient ?? 0)} FCFA`) +
+          CMDS.BOLD_OFF,
+      );
+    } else if (Number(paiement.montantAssurance) > 0) {
+      lignes.push(
+        CMDS.BOLD_ON + deuxColonnes('NET PAYE', `${Number(paiement.montantPatient ?? 0)} FCFA`) + CMDS.BOLD_OFF,
+      );
+    }
     lignes.push(deuxColonnes('Mode', paiement.modePaiement));
     lignes.push(
       deuxColonnes(

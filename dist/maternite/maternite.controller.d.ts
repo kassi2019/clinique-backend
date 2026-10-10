@@ -222,6 +222,7 @@ export declare class MaterniteController {
                     createdAt: Date;
                     id: number;
                     consultationId: number;
+                    ordonnanceId: number | null;
                     medicamentId: number | null;
                     medicamentNom: string;
                     prixUnitaire: import("@prisma/client/runtime/library").Decimal | null;

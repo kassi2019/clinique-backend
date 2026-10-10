@@ -39,19 +39,41 @@ export class PharmacieController {
     });
   }
 
-  @Get('consultations/:id')
+  /** Détail d'une ordonnance (par identifiant d'ordonnance). */
+  @Get('ordonnances/:id')
   detailOrdonnance(@Param('id', ParseIntPipe) id: number) {
     return this.pharmacieService.detailOrdonnance(id);
   }
 
-  /** Dispense des médicaments (sortie de stock FEFO). */
-  @Post('dispensations/:consultationId')
+  /** Dispense les médicaments d'une ordonnance (sortie de stock FEFO). */
+  @Post('ordonnances/:id/dispenser')
   dispenser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { lignes: { prescriptionId: number; quantiteDelivree: number }[] },
+    @Req() req,
+  ) {
+    return this.pharmacieService.dispenser(id, dto.lignes ?? [], req.user.id);
+  }
+
+  // Anciennes routes (par consultation), gardées pour les applications non mises à jour
+  @Get('consultations/:id')
+  async detailOrdonnanceConsultation(@Param('id', ParseIntPipe) id: number) {
+    return this.pharmacieService.detailOrdonnance(
+      await this.pharmacieService.ordonnanceDeConsultation(id),
+    );
+  }
+
+  @Post('dispensations/:consultationId')
+  async dispenserConsultation(
     @Param('consultationId', ParseIntPipe) consultationId: number,
     @Body() dto: { lignes: { prescriptionId: number; quantiteDelivree: number }[] },
     @Req() req,
   ) {
-    return this.pharmacieService.dispenser(consultationId, dto.lignes ?? [], req.user.id);
+    return this.pharmacieService.dispenser(
+      await this.pharmacieService.ordonnanceDeConsultation(consultationId),
+      dto.lignes ?? [],
+      req.user.id,
+    );
   }
 
   @Post('dispensations/:id/cloturer')
@@ -63,10 +85,28 @@ export class PharmacieController {
   @Post('dispensations/:id/payer')
   payer(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: { modePaiement: string },
+    @Body() dto: { modePaiement: string; type?: string; motif?: string },
     @Req() req,
   ) {
-    return this.pharmacieService.payer(id, dto.modePaiement, req.user.id);
+    return this.pharmacieService.payer(id, dto.modePaiement, req.user.id, {
+      type: dto.type,
+      motif: dto.motif,
+    });
+  }
+
+  /** Crédits pharmacie non réglés + cas sociaux. */
+  @Get('credits')
+  credits(@Query('cliniqueId', ParseIntPipe) cliniqueId: number) {
+    return this.pharmacieService.credits(cliniqueId);
+  }
+
+  /** Encaisse un crédit pharmacie. */
+  @Post('paiements/:id/regler')
+  reglerCredit(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { modePaiement: string },
+  ) {
+    return this.pharmacieService.reglerCredit(id, dto.modePaiement);
   }
 
   @UseGuards(RolesGuard)
@@ -98,6 +138,16 @@ export class PharmacieController {
   @Post('inventaire')
   inventaire(@Body() dto: any, @Req() req) {
     return this.pharmacieService.inventaire(dto, req.user.id);
+  }
+
+  /** Fiche d'inventaire : lots comptés sur la période (jour courant par défaut). */
+  @Get('inventaires/fiche')
+  ficheInventaire(
+    @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
+    @Query('debut') debut?: string,
+    @Query('fin') fin?: string,
+  ) {
+    return this.pharmacieService.ficheInventaire(cliniqueId, debut, fin);
   }
 
   /** Inventaire groupé : valide plusieurs lots en une seule fois. */

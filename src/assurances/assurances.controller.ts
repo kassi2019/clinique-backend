@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -34,6 +35,7 @@ export class AssurancesController {
     @Query('debut') debut?: string,
     @Query('fin') fin?: string,
     @Query('assuranceId') assuranceId?: string,
+    @Query('patientId') patientId?: string,
     @Query('page') page?: string,
     @Query('perPage') perPage?: string,
   ) {
@@ -42,8 +44,45 @@ export class AssurancesController {
       debut,
       fin,
       assuranceId: assuranceId ? Number(assuranceId) : undefined,
+      patientId: patientId ? Number(patientId) : undefined,
       page: page ? Number(page) : 1,
-      perPage: perPage ? Number(perPage) : 20,
+      perPage: perPage !== undefined && perPage !== '' ? Number(perPage) : 20,
+    });
+  }
+
+  // ── Recouvrement ──
+  /** Facturé / reçu / reste à recouvrer par assurance + règlements reçus. */
+  @Get('recouvrement')
+  recouvrement(@Query('cliniqueId') cliniqueId?: string) {
+    if (!cliniqueId) return { parAssurance: [], totaux: { facture: 0, recu: 0, reste: 0 }, reglements: [] };
+    return this.assurancesService.recouvrement(Number(cliniqueId));
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles('ADMINISTRATEUR')
+  @Post('reglements')
+  creerReglement(@Body() dto: any, @Req() req) {
+    return this.assurancesService.creerReglement(dto, req.user.id);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles('ADMINISTRATEUR')
+  @Delete('reglements/:id')
+  supprimerReglement(@Param('id', ParseIntPipe) id: number) {
+    return this.assurancesService.supprimerReglement(id);
+  }
+
+  /** Liste des patients assurés (filtre par compagnie, recherche par nom ou code). */
+  @Get('assures')
+  assures(
+    @Query('cliniqueId') cliniqueId?: string,
+    @Query('assuranceId') assuranceId?: string,
+    @Query('search') search?: string,
+  ) {
+    if (!cliniqueId) return { assures: [], total: 0, parAssurance: [] };
+    return this.assurancesService.assures(Number(cliniqueId), {
+      assuranceId: assuranceId ? Number(assuranceId) : undefined,
+      search,
     });
   }
 
@@ -81,6 +120,14 @@ export class AssurancesController {
   @Post('formules')
   creerFormule(@Body() dto: any) {
     return this.assurancesService.creerFormule(Number(dto.assuranceId), dto);
+  }
+
+  /** Taux de couverture des médicaments (pharmacie) d'une formule. */
+  @UseGuards(RolesGuard)
+  @Roles('ADMINISTRATEUR')
+  @Patch('formules/:id/taux-pharmacie')
+  definirTauxPharmacie(@Param('id', ParseIntPipe) id: number, @Body() dto: { tauxPharmacie: any }) {
+    return this.assurancesService.definirTauxPharmacie(id, dto.tauxPharmacie);
   }
 
   @UseGuards(RolesGuard)

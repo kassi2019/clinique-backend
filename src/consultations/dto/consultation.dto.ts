@@ -263,6 +263,11 @@ export class PrescriptionDto {
   @IsInt()
   medicamentId?: number;
 
+  /** Ordonnance qui reçoit le médicament (par défaut : l'ordonnance en cours). */
+  @IsOptional()
+  @IsInt()
+  ordonnanceId?: number;
+
   /** Nom saisi librement si le médicament n'est pas au catalogue. */
   @IsOptional()
   @IsString()
