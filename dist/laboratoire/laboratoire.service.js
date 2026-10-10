@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LaboratoireService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const recherche_patient_1 = require("../common/recherche-patient");
 const N = (x) => Number(x);
 const includeExamen = {
     lignes: true,
@@ -102,8 +103,7 @@ let LaboratoireService = class LaboratoireService {
                 OR: [
                     { numeroOrdre: { contains: ref } },
                     { patient: { is: { code: refSans } } },
-                    { patient: { is: { nom: { contains: ref } } } },
-                    { patient: { is: { prenom: { contains: ref } } } },
+                    { patient: { is: (0, recherche_patient_1.critereNomPrenoms)(ref) } },
                 ],
                 prestations: { some: filtreLabPayees },
             },

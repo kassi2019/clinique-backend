@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AdmissionDto, CreerChambreDto, CreerLitDto, CreerTypeChambreDto, SortieDto, SuiviDto } from './dto/hospitalisation.dto';
+import { critereNomPrenoms } from '../common/recherche-patient';
 
 const N = (x: any) => Number(x);
 
@@ -207,8 +208,7 @@ export class HospitalisationService {
         OR: [
           { numeroOrdre: { contains: ref } },
           { patient: { is: { code: refSans } } },
-          { patient: { is: { nom: { contains: ref } } } },
-          { patient: { is: { prenom: { contains: ref } } } },
+          { patient: { is: critereNomPrenoms(ref) } },
         ],
         consultations: { some: { hospitalisation: true } },
       },

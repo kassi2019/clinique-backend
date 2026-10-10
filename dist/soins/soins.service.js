@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SoinsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const recherche_patient_1 = require("../common/recherche-patient");
 const includeRealisation = {
     agent: {
         select: {
@@ -74,8 +75,7 @@ let SoinsService = class SoinsService {
                 OR: [
                     { numeroOrdre: { contains: ref } },
                     { patient: { is: { code: refSans } } },
-                    { patient: { is: { nom: { contains: ref } } } },
-                    { patient: { is: { prenom: { contains: ref } } } },
+                    { patient: { is: (0, recherche_patient_1.critereNomPrenoms)(ref) } },
                 ],
             },
             include: {

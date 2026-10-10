@@ -56,7 +56,7 @@ let AffectationService = AffectationService_1 = class AffectationService {
         const existante = await this.prisma.affectation.findUnique({
             where: { passageId },
         });
-        if (existante)
+        if (existante && existante.statut !== 'ANNULE')
             return existante;
         const medecins = await this.medecinsDisponibles(passage.cliniqueId);
         let medecinId = null;
@@ -67,13 +67,15 @@ let AffectationService = AffectationService_1 = class AffectationService {
                 (b.affectations[0]?.dateAffectation?.getTime() ?? 0));
             medecinId = candidats[0].id;
         }
-        return this.prisma.affectation.create({
-            data: {
+        return this.prisma.affectation.upsert({
+            where: { passageId },
+            create: {
                 cliniqueId: passage.cliniqueId,
                 passageId,
                 medecinId,
                 statut: 'EN_ATTENTE',
             },
+            update: { medecinId, statut: 'EN_ATTENTE', dateAffectation: new Date() },
             include: {
                 medecin: {
                     select: { matricule: true, personnel: { select: { nom: true, prenom: true } } },

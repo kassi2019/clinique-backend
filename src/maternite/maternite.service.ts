@@ -13,6 +13,7 @@ import {
   UpdatePfDto,
   UpdateVisiteCpnDto,
 } from './dto/maternite.dto';
+import { critereNomPrenoms } from '../common/recherche-patient';
 
 const includeVisite = {
   agent: {
@@ -135,8 +136,7 @@ export class MaterniteService {
     if (recherche) {
       where.OR = [
         { numero: { contains: recherche } },
-        { patient: { is: { nom: { contains: recherche } } } },
-        { patient: { is: { prenom: { contains: recherche } } } },
+        { patient: { is: critereNomPrenoms(recherche) } },
         { patient: { is: { code: { contains: recherche.replace(/[\s-]/g, '') } } } },
       ];
     }
@@ -502,8 +502,7 @@ export class MaterniteService {
         OR: [
           { numeroOrdre: { contains: ref } },
           { patient: { is: { code: refSans } } },
-          { patient: { is: { nom: { contains: ref } } } },
-          { patient: { is: { prenom: { contains: ref } } } },
+          { patient: { is: critereNomPrenoms(ref) } },
         ],
       },
       include: {

@@ -11,6 +11,7 @@ import {
   CreatePassageDto,
   UpdatePassageDto,
 } from './dto/create-passage.dto';
+import { critereNomPrenoms } from '../common/recherche-patient';
 
 const includePassage = {
   patient: true,
@@ -37,6 +38,8 @@ export class AccueilService {
     const criteres: Prisma.PatientWhereInput[] = [
       { nom: { contains: search } },
       { prenom: { contains: search } },
+      // « NOM PRÉNOMS » saisis ensemble, dans n'importe quel ordre
+      critereNomPrenoms(search),
       { numeroDossier: { contains: search } },
       // Code patient PERMANENT (ex. P-9N7Z5A) : on tolère la saisie sans tirets
       { code: { contains: search.replace(/[\s-]/g, '') } },

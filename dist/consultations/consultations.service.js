@@ -13,6 +13,7 @@ exports.ConsultationsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const affectation_service_1 = require("../affectation/affectation.service");
+const recherche_patient_1 = require("../common/recherche-patient");
 const includeConsultation = {
     medicaments: true,
     medecin: {
@@ -62,8 +63,27 @@ let ConsultationsService = class ConsultationsService {
                 });
             }
         }
-        if (!passage)
-            return [];
+        if (!passage) {
+            const passages = await this.prisma.passage.findMany({
+                where: { cliniqueId, patient: { is: (0, recherche_patient_1.critereNomPrenoms)(ref) }, ...estConsultation },
+                include: {
+                    patient: true,
+                    service: { select: { id: true, code: true, nom: true } },
+                },
+                orderBy: { createdAt: 'desc' },
+                take: 20,
+            });
+            return passages.map((p) => ({
+                id: p.id,
+                numeroOrdre: p.numeroOrdre,
+                statut: p.statut,
+                typePatient: p.typePatient,
+                createdAt: p.createdAt,
+                patient: p.patient,
+                service: p.service,
+                consultable: p.statut === 'ACTIF',
+            }));
+        }
         return [
             {
                 id: passage.id,

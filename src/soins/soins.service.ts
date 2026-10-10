@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { critereNomPrenoms } from '../common/recherche-patient';
 
 const includeRealisation = {
   agent: {
@@ -72,8 +73,7 @@ export class SoinsService {
         OR: [
           { numeroOrdre: { contains: ref } },
           { patient: { is: { code: refSans } } },
-          { patient: { is: { nom: { contains: ref } } } },
-          { patient: { is: { prenom: { contains: ref } } } },
+          { patient: { is: critereNomPrenoms(ref) } },
         ],
       },
       include: {

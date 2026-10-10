@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EnregistrerCrDto } from './dto/imagerie.dto';
+import { critereNomPrenoms } from '../common/recherche-patient';
 
 const N = (x: any) => Number(x);
 
@@ -97,8 +98,7 @@ export class ImagerieService {
         OR: [
           { numeroOrdre: { contains: ref } },
           { patient: { is: { code: refSans } } },
-          { patient: { is: { nom: { contains: ref } } } },
-          { patient: { is: { prenom: { contains: ref } } } },
+          { patient: { is: critereNomPrenoms(ref) } },
         ],
         prestations: { some: filtreImaPayes },
       },

@@ -55,7 +55,8 @@ export class AffectationService {
     const existante = await this.prisma.affectation.findUnique({
       where: { passageId },
     });
-    if (existante) return existante; // idempotent
+    // idempotent ; une affectation annulée (paiement/ticket annulé) est réactivée
+    if (existante && existante.statut !== 'ANNULE') return existante;
 
     const medecins = await this.medecinsDisponibles(passage.cliniqueId);
 
@@ -72,13 +73,15 @@ export class AffectationService {
       medecinId = candidats[0].id;
     }
 
-    return this.prisma.affectation.create({
-      data: {
+    return this.prisma.affectation.upsert({
+      where: { passageId },
+      create: {
         cliniqueId: passage.cliniqueId,
         passageId,
         medecinId,
         statut: 'EN_ATTENTE',
       },
+      update: { medecinId, statut: 'EN_ATTENTE', dateAffectation: new Date() },
       include: {
         medecin: {
           select: { matricule: true, personnel: { select: { nom: true, prenom: true } } },

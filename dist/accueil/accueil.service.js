@@ -14,6 +14,7 @@ exports.AccueilService = void 0;
 const common_1 = require("@nestjs/common");
 const impression_service_1 = require("../impression/impression.service");
 const prisma_service_1 = require("../prisma/prisma.service");
+const recherche_patient_1 = require("../common/recherche-patient");
 const includePassage = {
     patient: true,
     service: { select: { id: true, code: true, nom: true } },
@@ -33,6 +34,7 @@ let AccueilService = AccueilService_1 = class AccueilService {
         const criteres = [
             { nom: { contains: search } },
             { prenom: { contains: search } },
+            (0, recherche_patient_1.critereNomPrenoms)(search),
             { numeroDossier: { contains: search } },
             { code: { contains: search.replace(/[\s-]/g, '') } },
             { code: { contains: search } },

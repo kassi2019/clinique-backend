@@ -13,6 +13,7 @@ exports.MaterniteService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const accueil_service_1 = require("../accueil/accueil.service");
+const recherche_patient_1 = require("../common/recherche-patient");
 const includeVisite = {
     agent: {
         select: {
@@ -114,8 +115,7 @@ let MaterniteService = class MaterniteService {
         if (recherche) {
             where.OR = [
                 { numero: { contains: recherche } },
-                { patient: { is: { nom: { contains: recherche } } } },
-                { patient: { is: { prenom: { contains: recherche } } } },
+                { patient: { is: (0, recherche_patient_1.critereNomPrenoms)(recherche) } },
                 { patient: { is: { code: { contains: recherche.replace(/[\s-]/g, '') } } } },
             ];
         }
@@ -465,8 +465,7 @@ let MaterniteService = class MaterniteService {
                 OR: [
                     { numeroOrdre: { contains: ref } },
                     { patient: { is: { code: refSans } } },
-                    { patient: { is: { nom: { contains: ref } } } },
-                    { patient: { is: { prenom: { contains: ref } } } },
+                    { patient: { is: (0, recherche_patient_1.critereNomPrenoms)(ref) } },
                 ],
             },
             include: {

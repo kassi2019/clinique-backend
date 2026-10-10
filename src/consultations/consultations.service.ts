@@ -10,6 +10,7 @@ import {
   CreerConsultationDto,
   PrescriptionDto,
 } from './dto/consultation.dto';
+import { critereNomPrenoms } from '../common/recherche-patient';
 
 const includeConsultation = {
   medicaments: true,
@@ -74,7 +75,29 @@ export class ConsultationsService {
         });
       }
     }
-    if (!passage) return [];
+
+    // 3. Nom et/ou prénoms → derniers passages de consultation correspondants
+    if (!passage) {
+      const passages = await this.prisma.passage.findMany({
+        where: { cliniqueId, patient: { is: critereNomPrenoms(ref) }, ...estConsultation },
+        include: {
+          patient: true,
+          service: { select: { id: true, code: true, nom: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      });
+      return passages.map((p) => ({
+        id: p.id,
+        numeroOrdre: p.numeroOrdre,
+        statut: p.statut,
+        typePatient: p.typePatient,
+        createdAt: p.createdAt,
+        patient: p.patient,
+        service: p.service,
+        consultable: p.statut === 'ACTIF',
+      }));
+    }
 
     return [
       {

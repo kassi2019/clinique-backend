@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AffectationService } from '../affectation/affectation.service';
 import { AssurancesService } from '../assurances/assurances.service';
 import { EncaisserDto } from './dto/encaisser.dto';
+import { critereNomPrenoms } from '../common/recherche-patient';
 
 const formatMontant = (x: any) => Number(x);
 
@@ -35,8 +36,7 @@ export class CaisseService {
         cliniqueId,
         OR: [
           { numeroOrdre: { contains: s } },
-          { patient: { is: { nom: { contains: s } } } },
-          { patient: { is: { prenom: { contains: s } } } },
+          { patient: { is: critereNomPrenoms(s) } },
           { patient: { is: { code: { contains: s } } } },
         ],
       },
@@ -571,6 +571,21 @@ export class CaisseService {
       data: { statut: 'ACTIF' },
     });
 
+    // Comme pour un paiement : consultation prise en charge → file du médecin
+    const consultationPriseEnCharge = await this.prisma.passagePrestation.findFirst({
+      where: {
+        id: { in: lignes.map((l) => l.id) },
+        prestation: { type: 'CONSULTATION' },
+      },
+    });
+    if (consultationPriseEnCharge) {
+      try {
+        await this.affectationService.assignerPassage(passage.id);
+      } catch (err: any) {
+        this.logger.warn(`Affectation auto #${passage.id}: ${err.message}`);
+      }
+    }
+
     return ticket;
   }
 
@@ -612,6 +627,22 @@ export class CaisseService {
       where: { creditId: id, statut: { in: ['CREDIT', 'CAS_SOCIAL'] } },
       data: { statut: 'EN_ATTENTE', creditId: null },
     });
+
+    // Plus aucune consultation réglée ou prise en charge et non validée → retrait de la file
+    const consultationCouverte = await this.prisma.passagePrestation.count({
+      where: {
+        passageId: ticket.passageId,
+        prestation: { type: 'CONSULTATION' },
+        statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] },
+      },
+    });
+    const consultation = await this.prisma.consultation.findUnique({
+      where: { passageId: ticket.passageId },
+    });
+    if (consultationCouverte === 0 && consultation?.statut !== 'VALIDEE') {
+      await this.affectationService.annulerAffectation(ticket.passageId);
+    }
+
     return this.prisma.creditTicket.update({
       where: { id },
       data: { statut: 'ANNULEE' },

@@ -16,6 +16,7 @@ const impression_service_1 = require("../impression/impression.service");
 const prisma_service_1 = require("../prisma/prisma.service");
 const affectation_service_1 = require("../affectation/affectation.service");
 const assurances_service_1 = require("../assurances/assurances.service");
+const recherche_patient_1 = require("../common/recherche-patient");
 const formatMontant = (x) => Number(x);
 let CaisseService = CaisseService_1 = class CaisseService {
     constructor(prisma, impressionService, affectationService, assurancesService) {
@@ -34,8 +35,7 @@ let CaisseService = CaisseService_1 = class CaisseService {
                 cliniqueId,
                 OR: [
                     { numeroOrdre: { contains: s } },
-                    { patient: { is: { nom: { contains: s } } } },
-                    { patient: { is: { prenom: { contains: s } } } },
+                    { patient: { is: (0, recherche_patient_1.critereNomPrenoms)(s) } },
                     { patient: { is: { code: { contains: s } } } },
                 ],
             },
@@ -490,6 +490,20 @@ let CaisseService = CaisseService_1 = class CaisseService {
             where: { id: passage.id },
             data: { statut: 'ACTIF' },
         });
+        const consultationPriseEnCharge = await this.prisma.passagePrestation.findFirst({
+            where: {
+                id: { in: lignes.map((l) => l.id) },
+                prestation: { type: 'CONSULTATION' },
+            },
+        });
+        if (consultationPriseEnCharge) {
+            try {
+                await this.affectationService.assignerPassage(passage.id);
+            }
+            catch (err) {
+                this.logger.warn(`Affectation auto #${passage.id}: ${err.message}`);
+            }
+        }
         return ticket;
     }
     async credits(cliniqueId, page = 1, perPage = 20) {
@@ -528,6 +542,19 @@ let CaisseService = CaisseService_1 = class CaisseService {
             where: { creditId: id, statut: { in: ['CREDIT', 'CAS_SOCIAL'] } },
             data: { statut: 'EN_ATTENTE', creditId: null },
         });
+        const consultationCouverte = await this.prisma.passagePrestation.count({
+            where: {
+                passageId: ticket.passageId,
+                prestation: { type: 'CONSULTATION' },
+                statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] },
+            },
+        });
+        const consultation = await this.prisma.consultation.findUnique({
+            where: { passageId: ticket.passageId },
+        });
+        if (consultationCouverte === 0 && consultation?.statut !== 'VALIDEE') {
+            await this.affectationService.annulerAffectation(ticket.passageId);
+        }
         return this.prisma.creditTicket.update({
             where: { id },
             data: { statut: 'ANNULEE' },

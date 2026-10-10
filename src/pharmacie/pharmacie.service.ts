@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ImpressionService } from '../impression/impression.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { critereNomPrenoms } from '../common/recherche-patient';
 
 const N = (x: any) => Number(x);
 
@@ -91,8 +92,7 @@ export class PharmacieService {
         OR: [
           { numeroOrdre: { contains: ref } },
           { patient: { is: { code: refSans } } },
-          { patient: { is: { nom: { contains: ref } } } },
-          { patient: { is: { prenom: { contains: ref } } } },
+          { patient: { is: critereNomPrenoms(ref) } },
         ],
       },
       include: {

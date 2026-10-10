@@ -13,6 +13,7 @@ exports.HospitalisationService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../prisma/prisma.service");
+const recherche_patient_1 = require("../common/recherche-patient");
 const N = (x) => Number(x);
 const includeSejour = {
     lit: { include: { chambre: { include: { typeChambre: true } } } },
@@ -201,8 +202,7 @@ let HospitalisationService = class HospitalisationService {
                 OR: [
                     { numeroOrdre: { contains: ref } },
                     { patient: { is: { code: refSans } } },
-                    { patient: { is: { nom: { contains: ref } } } },
-                    { patient: { is: { prenom: { contains: ref } } } },
+                    { patient: { is: (0, recherche_patient_1.critereNomPrenoms)(ref) } },
                 ],
                 consultations: { some: { hospitalisation: true } },
             },
