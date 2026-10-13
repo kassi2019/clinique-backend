@@ -44,6 +44,8 @@ export declare class NouveauPatientDto {
     quartier?: string;
     profession?: string;
     telephone?: string;
+    residenceHabituelle?: string;
+    residenceActuelle?: string;
 }
 export declare class CreatePassageDto {
     cliniqueId: number;

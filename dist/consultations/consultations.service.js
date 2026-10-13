@@ -299,6 +299,7 @@ let ConsultationsService = class ConsultationsService {
                     populationsRisque: dto.patient.populationsRisque,
                     protectionSociale: dto.patient.protectionSociale,
                     residenceHabituelle: dto.patient.residenceHabituelle,
+                    ville: dto.patient.residenceHabituelle,
                     residenceActuelle: dto.patient.residenceActuelle,
                 },
             });

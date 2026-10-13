@@ -344,6 +344,8 @@ export class ConsultationsService {
           populationsRisque: dto.patient.populationsRisque,
           protectionSociale: dto.patient.protectionSociale,
           residenceHabituelle: dto.patient.residenceHabituelle,
+          // même information que la « résidence » saisie à l'accueil
+          ville: dto.patient.residenceHabituelle,
           residenceActuelle: dto.patient.residenceActuelle,
         },
       });

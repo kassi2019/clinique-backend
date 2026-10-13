@@ -70,6 +70,7 @@ model Clinique {
   quartiers                Quartier[]
   antecedentsMedicauxListe AntecedentMedical[]
   autresExamensListe       AutreExamen[]
+  interventionsChirurgicalesListe InterventionChirurgicale[]
   cpons                    ConsultationPostnatale[]
   consultationsPf          ConsultationPf[]
   certificatsArret         CertificatArret[]
@@ -1582,6 +1583,20 @@ model AntecedentMedical {
 
   @@unique([cliniqueId, libelle])
   @@map("antecedents_medicaux")
+}
+
+// Types d'intervention chirurgicale (antécédents chirurgicaux de la fiche)
+model InterventionChirurgicale {
+  id         Int      @id @default(autoincrement())
+  cliniqueId Int
+  libelle    String
+  actif      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  clinique   Clinique @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([cliniqueId, libelle])
+  @@map("interventions_chirurgicales")
 }
 
 model AutreExamen {

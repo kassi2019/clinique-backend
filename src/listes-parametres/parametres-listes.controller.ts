@@ -288,4 +288,26 @@ export class ParametresListesController {
   basculerAutreExamen(@Param('id', ParseIntPipe) id: number) {
     return this.listes.desactiver(id, 'EXAMEN');
   }
+
+  // ── INTERVENTIONS CHIRURGICALES (antécédents chirurgicaux) ──
+  @UseGuards(JwtAuthGuard)
+  @Get('interventions-chirurgicales')
+  interventions(@Query('cliniqueId', ParseIntPipe) cliniqueId: number, @Query('tous') tous?: string, @Query('page') page?: string, @Query('perPage') perPage?: string) {
+    return this.listes.findAll(cliniqueId, 'INTERVENTION', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('interventions-chirurgicales')
+  creerIntervention(@Body() b: { cliniqueId: number; libelle: string }) {
+    return this.listes.creer(Number(b.cliniqueId), 'INTERVENTION', b.libelle);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Patch('interventions-chirurgicales/:id')
+  modifierIntervention(@Param('id', ParseIntPipe) id: number, @Body() b: { libelle: string }) {
+    return this.listes.modifier(id, 'INTERVENTION', b.libelle ?? '');
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Delete('interventions-chirurgicales/:id')
+  basculerIntervention(@Param('id', ParseIntPipe) id: number) {
+    return this.listes.desactiver(id, 'INTERVENTION');
+  }
 }

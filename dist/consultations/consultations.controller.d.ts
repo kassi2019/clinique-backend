@@ -10,25 +10,25 @@ export declare class ConsultationsController {
         typePatient: string;
         createdAt: Date;
         patient: {
+            nationalite: string | null;
+            profession: string | null;
+            quartier: string | null;
+            createdAt: Date;
             id: number;
             cliniqueId: number;
-            createdAt: Date;
             updatedAt: Date;
-            numeroDossier: string;
-            creeParId: number | null;
-            code: string;
             nom: string;
             prenom: string;
+            sexe: string | null;
+            telephone: string | null;
+            code: string;
+            numeroDossier: string;
+            creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
             numeroCni: string | null;
             numeroCmu: string | null;
-            sexe: string | null;
             ville: string | null;
-            quartier: string | null;
-            profession: string | null;
-            telephone: string | null;
-            nationalite: string | null;
             scolarisation: string | null;
             statutConjugal: string | null;
             typePopulation: string | null;
@@ -39,8 +39,8 @@ export declare class ConsultationsController {
         };
         service: {
             id: number;
-            code: string;
             nom: string;
+            code: string;
         };
         consultable: boolean;
     }[]>;
@@ -62,25 +62,25 @@ export declare class ConsultationsController {
                 perimetreCranien: string;
             };
             patient: {
+                nationalite: string | null;
+                profession: string | null;
+                quartier: string | null;
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                createdAt: Date;
                 updatedAt: Date;
-                numeroDossier: string;
-                creeParId: number | null;
-                code: string;
                 nom: string;
                 prenom: string;
+                sexe: string | null;
+                telephone: string | null;
+                code: string;
+                numeroDossier: string;
+                creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
                 numeroCni: string | null;
                 numeroCmu: string | null;
-                sexe: string | null;
                 ville: string | null;
-                quartier: string | null;
-                profession: string | null;
-                telephone: string | null;
-                nationalite: string | null;
                 scolarisation: string | null;
                 statutConjugal: string | null;
                 typePopulation: string | null;
@@ -91,22 +91,14 @@ export declare class ConsultationsController {
             };
             service: {
                 id: number;
-                code: string;
                 nom: string;
+                code: string;
             };
             prestations: {
                 montant: number;
-                service: {
-                    id: number;
-                    code: string;
-                    nom: string;
-                };
-                prestation: {
-                    type: string;
-                };
                 resultatExterne: {
-                    id: number;
                     createdAt: Date;
+                    id: number;
                     nomFichier: string;
                     typeMime: string;
                     tailleOctets: number;
@@ -114,14 +106,22 @@ export declare class ConsultationsController {
                     lieu: string;
                     conclusion: string;
                 };
-                id: number;
-                serviceId: number | null;
-                statut: string;
-                agentId: number | null;
+                service: {
+                    id: number;
+                    nom: string;
+                    code: string;
+                };
+                prestation: {
+                    type: string;
+                };
                 createdAt: Date;
+                id: number;
+                statut: string;
                 updatedAt: Date;
+                serviceId: number | null;
                 libelle: string;
                 passageId: number;
+                agentId: number | null;
                 prestationId: number | null;
                 source: string;
                 gratuit: boolean;
@@ -130,15 +130,15 @@ export declare class ConsultationsController {
             }[];
             consultation: {
                 medicaments: {
-                    id: number;
+                    posologie: string | null;
                     createdAt: Date;
+                    id: number;
                     consultationId: number;
                     ordonnanceId: number | null;
                     medicamentId: number | null;
                     medicamentNom: string;
                     prixUnitaire: import("@prisma/client/runtime/library").Decimal | null;
                     forme: string | null;
-                    posologie: string | null;
                     quantite: string | null;
                     duree: string | null;
                 }[];
@@ -150,29 +150,29 @@ export declare class ConsultationsController {
                     matricule: string;
                 };
                 ordonnances: {
+                    createdAt: Date;
                     id: number;
                     cliniqueId: number;
                     statut: string;
-                    createdAt: Date;
                     updatedAt: Date;
                     consultationId: number;
                     numero: string;
                     sauveeLe: Date | null;
                 }[];
             } & {
+                diagnostic: string | null;
+                hospitalisation: boolean;
+                createdAt: Date;
                 id: number;
+                statut: string;
+                updatedAt: Date;
+                passageId: number;
                 patientId: number;
                 motif: string | null;
-                statut: string;
                 perimetreBrachial: string | null;
                 perimetreCranien: string | null;
-                createdAt: Date;
-                updatedAt: Date;
-                hospitalisation: boolean;
-                passageId: number;
                 medecinId: number;
                 observation: string | null;
-                diagnostic: string | null;
                 hospitalisationDuree: string | null;
                 typeHospitalisation: string | null;
                 hospitalisationDureeJours: number | null;
@@ -224,8 +224,8 @@ export declare class ConsultationsController {
             };
             examensLabo: ({
                 lignes: {
-                    id: number;
                     parametre: string;
+                    id: number;
                     examenLaboId: number;
                     valeur: string | null;
                     unite: string | null;
@@ -239,14 +239,14 @@ export declare class ConsultationsController {
                     matricule: string;
                 };
             } & {
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                patientId: number;
                 statut: string;
-                createdAt: Date;
                 updatedAt: Date;
                 libelle: string;
                 passageId: number;
+                patientId: number;
                 passagePrestationId: number;
                 conclusion: string | null;
                 preleveParId: number | null;
@@ -263,16 +263,16 @@ export declare class ConsultationsController {
                     matricule: string;
                 };
             } & {
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
-                patientId: number;
                 statut: string;
-                createdAt: Date;
                 updatedAt: Date;
                 libelle: string;
                 passageId: number;
-                indication: string | null;
+                patientId: number;
                 passagePrestationId: number;
+                indication: string | null;
                 conclusion: string | null;
                 valideParId: number | null;
                 valideLe: Date | null;
@@ -281,50 +281,37 @@ export declare class ConsultationsController {
                 resultat: string | null;
             })[];
             fiches: {
-                id: number;
                 createdAt: Date;
-                libelleType: string;
-                texte: string;
-                indication: string;
-                prescripteur: string;
+                id: number;
                 medecin: {
                     personnel: {
                         nom: string;
                         prenom: string;
                     };
                 };
+                libelleType: string;
+                texte: string;
+                indication: string;
+                prescripteur: string;
             }[];
         };
         historique: ({
             passage: {
-                numeroOrdre: string;
-                taille: string;
-                temperature: import("@prisma/client/runtime/library").Decimal;
-                pouls: number;
-                tensionGauche: string;
-                tensionDroite: string;
-                poids: import("@prisma/client/runtime/library").Decimal;
-                createdAt: Date;
                 service: {
                     nom: string;
                 };
-                prestations: {
-                    id: number;
-                    statut: string;
+                createdAt: Date;
+                fichesExamenImagerie: {
                     createdAt: Date;
-                    libelle: string;
-                    prestation: {
-                        type: string;
-                    };
-                    examenLabo: {
-                        id: number;
-                    };
-                    examenImagerie: {
-                        id: number;
-                    };
+                    id: number;
+                    libelleType: string;
+                    texte: string;
+                    valeurs: string;
+                }[];
+                prestations: {
                     resultatExterne: {
-                        id: number;
                         createdAt: Date;
+                        id: number;
                         nomFichier: string;
                         typeMime: string;
                         tailleOctets: number;
@@ -332,11 +319,24 @@ export declare class ConsultationsController {
                         lieu: string;
                         conclusion: string;
                     };
+                    examenLabo: {
+                        id: number;
+                    };
+                    examenImagerie: {
+                        id: number;
+                    };
+                    prestation: {
+                        type: string;
+                    };
+                    createdAt: Date;
+                    id: number;
+                    statut: string;
+                    libelle: string;
                 }[];
                 examensLabo: ({
                     lignes: {
-                        id: number;
                         parametre: string;
+                        id: number;
                         examenLaboId: number;
                         valeur: string | null;
                         unite: string | null;
@@ -350,14 +350,14 @@ export declare class ConsultationsController {
                         matricule: string;
                     };
                 } & {
+                    createdAt: Date;
                     id: number;
                     cliniqueId: number;
-                    patientId: number;
                     statut: string;
-                    createdAt: Date;
                     updatedAt: Date;
                     libelle: string;
                     passageId: number;
+                    patientId: number;
                     passagePrestationId: number;
                     conclusion: string | null;
                     preleveParId: number | null;
@@ -374,16 +374,16 @@ export declare class ConsultationsController {
                         matricule: string;
                     };
                 } & {
+                    createdAt: Date;
                     id: number;
                     cliniqueId: number;
-                    patientId: number;
                     statut: string;
-                    createdAt: Date;
                     updatedAt: Date;
                     libelle: string;
                     passageId: number;
-                    indication: string | null;
+                    patientId: number;
                     passagePrestationId: number;
+                    indication: string | null;
                     conclusion: string | null;
                     valideParId: number | null;
                     valideLe: Date | null;
@@ -391,24 +391,24 @@ export declare class ConsultationsController {
                     technique: string | null;
                     resultat: string | null;
                 })[];
-                fichesExamenImagerie: {
-                    id: number;
-                    createdAt: Date;
-                    libelleType: string;
-                    texte: string;
-                    valeurs: string;
-                }[];
+                numeroOrdre: string;
+                taille: string;
+                temperature: import("@prisma/client/runtime/library").Decimal;
+                pouls: number;
+                tensionGauche: string;
+                tensionDroite: string;
+                poids: import("@prisma/client/runtime/library").Decimal;
             };
             medicaments: {
-                id: number;
+                posologie: string | null;
                 createdAt: Date;
+                id: number;
                 consultationId: number;
                 ordonnanceId: number | null;
                 medicamentId: number | null;
                 medicamentNom: string;
                 prixUnitaire: import("@prisma/client/runtime/library").Decimal | null;
                 forme: string | null;
-                posologie: string | null;
                 quantite: string | null;
                 duree: string | null;
             }[];
@@ -420,29 +420,29 @@ export declare class ConsultationsController {
                 matricule: string;
             };
             ordonnances: {
+                createdAt: Date;
                 id: number;
                 cliniqueId: number;
                 statut: string;
-                createdAt: Date;
                 updatedAt: Date;
                 consultationId: number;
                 numero: string;
                 sauveeLe: Date | null;
             }[];
         } & {
+            diagnostic: string | null;
+            hospitalisation: boolean;
+            createdAt: Date;
             id: number;
+            statut: string;
+            updatedAt: Date;
+            passageId: number;
             patientId: number;
             motif: string | null;
-            statut: string;
             perimetreBrachial: string | null;
             perimetreCranien: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            hospitalisation: boolean;
-            passageId: number;
             medecinId: number;
             observation: string | null;
-            diagnostic: string | null;
             hospitalisationDuree: string | null;
             typeHospitalisation: string | null;
             hospitalisationDureeJours: number | null;
@@ -495,15 +495,15 @@ export declare class ConsultationsController {
     }>;
     creerOuMaj(id: number, dto: CreerConsultationDto, req: any): Promise<{
         medicaments: {
-            id: number;
+            posologie: string | null;
             createdAt: Date;
+            id: number;
             consultationId: number;
             ordonnanceId: number | null;
             medicamentId: number | null;
             medicamentNom: string;
             prixUnitaire: import("@prisma/client/runtime/library").Decimal | null;
             forme: string | null;
-            posologie: string | null;
             quantite: string | null;
             duree: string | null;
         }[];
@@ -515,29 +515,29 @@ export declare class ConsultationsController {
             matricule: string;
         };
         ordonnances: {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
             statut: string;
-            createdAt: Date;
             updatedAt: Date;
             consultationId: number;
             numero: string;
             sauveeLe: Date | null;
         }[];
     } & {
+        diagnostic: string | null;
+        hospitalisation: boolean;
+        createdAt: Date;
         id: number;
+        statut: string;
+        updatedAt: Date;
+        passageId: number;
         patientId: number;
         motif: string | null;
-        statut: string;
         perimetreBrachial: string | null;
         perimetreCranien: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        hospitalisation: boolean;
-        passageId: number;
         medecinId: number;
         observation: string | null;
-        diagnostic: string | null;
         hospitalisationDuree: string | null;
         typeHospitalisation: string | null;
         hospitalisationDureeJours: number | null;
@@ -588,74 +588,74 @@ export declare class ConsultationsController {
         moFin: Date | null;
     }>;
     ajouterMedicament(id: number, dto: PrescriptionDto): Promise<{
-        id: number;
+        posologie: string | null;
         createdAt: Date;
+        id: number;
         consultationId: number;
         ordonnanceId: number | null;
         medicamentId: number | null;
         medicamentNom: string;
         prixUnitaire: import("@prisma/client/runtime/library").Decimal | null;
         forme: string | null;
-        posologie: string | null;
         quantite: string | null;
         duree: string | null;
     }>;
     retirerMedicament(id: number): Promise<{
-        id: number;
+        posologie: string | null;
         createdAt: Date;
+        id: number;
         consultationId: number;
         ordonnanceId: number | null;
         medicamentId: number | null;
         medicamentNom: string;
         prixUnitaire: import("@prisma/client/runtime/library").Decimal | null;
         forme: string | null;
-        posologie: string | null;
         quantite: string | null;
         duree: string | null;
     }>;
     prescrireExamens(id: number, dto: PrescrireExamensDto): Promise<{
-        id: number;
-        serviceId: number | null;
-        statut: string;
-        agentId: number | null;
         createdAt: Date;
+        id: number;
+        statut: string;
         updatedAt: Date;
+        serviceId: number | null;
         libelle: string;
-        montant: import("@prisma/client/runtime/library").Decimal;
         passageId: number;
+        agentId: number | null;
         prestationId: number | null;
+        montant: import("@prisma/client/runtime/library").Decimal;
         source: string;
         gratuit: boolean;
         paiementId: number | null;
         creditId: number | null;
     }[]>;
     ajouterExamen(id: number, dto: PrescrireExamenDto, req: any): Promise<{
-        id: number;
-        serviceId: number | null;
-        statut: string;
-        agentId: number | null;
         createdAt: Date;
+        id: number;
+        statut: string;
         updatedAt: Date;
+        serviceId: number | null;
         libelle: string;
-        montant: import("@prisma/client/runtime/library").Decimal;
         passageId: number;
+        agentId: number | null;
         prestationId: number | null;
+        montant: import("@prisma/client/runtime/library").Decimal;
         source: string;
         gratuit: boolean;
         paiementId: number | null;
         creditId: number | null;
     }>;
     retirerExamen(id: number): Promise<{
-        id: number;
-        serviceId: number | null;
-        statut: string;
-        agentId: number | null;
         createdAt: Date;
+        id: number;
+        statut: string;
         updatedAt: Date;
+        serviceId: number | null;
         libelle: string;
-        montant: import("@prisma/client/runtime/library").Decimal;
         passageId: number;
+        agentId: number | null;
         prestationId: number | null;
+        montant: import("@prisma/client/runtime/library").Decimal;
         source: string;
         gratuit: boolean;
         paiementId: number | null;
@@ -668,8 +668,8 @@ export declare class ConsultationsController {
         lieu?: string;
         conclusion?: string;
     }, req: any): Promise<{
-        id: number;
         createdAt: Date;
+        id: number;
         nomFichier: string;
         typeMime: string;
         tailleOctets: number;
@@ -682,27 +682,27 @@ export declare class ConsultationsController {
             libelle: string;
         };
     } & {
-        id: number;
         createdAt: Date;
+        id: number;
+        utilisateurId: number | null;
         updatedAt: Date;
+        contenu: string;
         passagePrestationId: number;
         nomFichier: string;
         typeMime: string;
-        contenu: string;
         tailleOctets: number;
         dateExamen: Date | null;
         lieu: string | null;
         conclusion: string | null;
-        utilisateurId: number | null;
     }>;
     supprimerResultatExterne(id: number): Promise<{
         ok: boolean;
     }>;
     nouvelleOrdonnance(id: number): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
         statut: string;
-        createdAt: Date;
         updatedAt: Date;
         consultationId: number;
         numero: string;
@@ -710,15 +710,15 @@ export declare class ConsultationsController {
     }>;
     sauvegarderOrdonnance(id: number): Promise<{
         medicaments: {
-            id: number;
+            posologie: string | null;
             createdAt: Date;
+            id: number;
             consultationId: number;
             ordonnanceId: number | null;
             medicamentId: number | null;
             medicamentNom: string;
             prixUnitaire: import("@prisma/client/runtime/library").Decimal | null;
             forme: string | null;
-            posologie: string | null;
             quantite: string | null;
             duree: string | null;
         }[];
@@ -730,29 +730,29 @@ export declare class ConsultationsController {
             matricule: string;
         };
         ordonnances: {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
             statut: string;
-            createdAt: Date;
             updatedAt: Date;
             consultationId: number;
             numero: string;
             sauveeLe: Date | null;
         }[];
     } & {
+        diagnostic: string | null;
+        hospitalisation: boolean;
+        createdAt: Date;
         id: number;
+        statut: string;
+        updatedAt: Date;
+        passageId: number;
         patientId: number;
         motif: string | null;
-        statut: string;
         perimetreBrachial: string | null;
         perimetreCranien: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        hospitalisation: boolean;
-        passageId: number;
         medecinId: number;
         observation: string | null;
-        diagnostic: string | null;
         hospitalisationDuree: string | null;
         typeHospitalisation: string | null;
         hospitalisationDureeJours: number | null;
@@ -813,54 +813,54 @@ export declare class ConsultationsController {
         medecin: string;
         lieu?: string;
     }, req: any): Promise<{
+        profession: string | null;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        patientId: number;
-        createdAt: Date;
-        dateNaissance: string | null;
-        profession: string | null;
         passageId: number;
+        patientId: number;
+        dateNaissance: string | null;
         medecinId: number | null;
         medecin: string;
         consultationId: number;
+        debut: Date;
+        fin: Date;
         numero: string;
         lieu: string | null;
         civilite: string;
         nomPatient: string;
         dureeJours: number;
-        debut: Date;
-        fin: Date;
     }>;
     certificatsArret(id: number): Promise<{
+        profession: string | null;
+        createdAt: Date;
         id: number;
         cliniqueId: number;
-        patientId: number;
-        createdAt: Date;
-        dateNaissance: string | null;
-        profession: string | null;
         passageId: number;
+        patientId: number;
+        dateNaissance: string | null;
         medecinId: number | null;
         medecin: string;
         consultationId: number;
+        debut: Date;
+        fin: Date;
         numero: string;
         lieu: string | null;
         civilite: string;
         nomPatient: string;
         dureeJours: number;
-        debut: Date;
-        fin: Date;
     }[]>;
     valider(id: number): Promise<{
         medicaments: {
-            id: number;
+            posologie: string | null;
             createdAt: Date;
+            id: number;
             consultationId: number;
             ordonnanceId: number | null;
             medicamentId: number | null;
             medicamentNom: string;
             prixUnitaire: import("@prisma/client/runtime/library").Decimal | null;
             forme: string | null;
-            posologie: string | null;
             quantite: string | null;
             duree: string | null;
         }[];
@@ -872,29 +872,29 @@ export declare class ConsultationsController {
             matricule: string;
         };
         ordonnances: {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
             statut: string;
-            createdAt: Date;
             updatedAt: Date;
             consultationId: number;
             numero: string;
             sauveeLe: Date | null;
         }[];
     } & {
+        diagnostic: string | null;
+        hospitalisation: boolean;
+        createdAt: Date;
         id: number;
+        statut: string;
+        updatedAt: Date;
+        passageId: number;
         patientId: number;
         motif: string | null;
-        statut: string;
         perimetreBrachial: string | null;
         perimetreCranien: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        hospitalisation: boolean;
-        passageId: number;
         medecinId: number;
         observation: string | null;
-        diagnostic: string | null;
         hospitalisationDuree: string | null;
         typeHospitalisation: string | null;
         hospitalisationDureeJours: number | null;
@@ -956,26 +956,26 @@ export declare class ConsultationsController {
         disponibilite: string;
         enAttente: ({
             passage: {
-                id: number;
-                numeroOrdre: string;
-                statut: string;
-                createdAt: Date;
                 patient: {
-                    code: string;
                     nom: string;
                     prenom: string;
-                    age: string;
                     sexe: string;
+                    code: string;
+                    age: string;
                 };
                 service: {
                     nom: string;
                 };
+                createdAt: Date;
+                id: number;
+                statut: string;
+                numeroOrdre: string;
             };
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
             statut: string;
-            createdAt: Date;
             updatedAt: Date;
             passageId: number;
             medecinId: number | null;
@@ -983,25 +983,25 @@ export declare class ConsultationsController {
         })[];
         terminees: ({
             passage: {
-                id: number;
-                numeroOrdre: string;
                 patient: {
-                    code: string;
                     nom: string;
                     prenom: string;
-                    age: string;
                     sexe: string;
+                    code: string;
+                    age: string;
                 };
+                id: number;
                 consultations: {
                     statut: string;
                     valideeLe: Date;
                 }[];
+                numeroOrdre: string;
             };
         } & {
+            createdAt: Date;
             id: number;
             cliniqueId: number;
             statut: string;
-            createdAt: Date;
             updatedAt: Date;
             passageId: number;
             medecinId: number | null;
@@ -1009,20 +1009,20 @@ export declare class ConsultationsController {
         })[];
     }>;
     ouvrirAffectation(id: number): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
         statut: string;
-        createdAt: Date;
         updatedAt: Date;
         passageId: number;
         medecinId: number | null;
         dateAffectation: Date;
     }>;
     fermerAffectation(id: number): Promise<{
+        createdAt: Date;
         id: number;
         cliniqueId: number;
         statut: string;
-        createdAt: Date;
         updatedAt: Date;
         passageId: number;
         medecinId: number | null;

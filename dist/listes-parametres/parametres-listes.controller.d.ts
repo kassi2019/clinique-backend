@@ -110,4 +110,13 @@ export declare class ParametresListesController {
         libelle: string;
     }): Promise<any>;
     basculerAutreExamen(id: number): Promise<any>;
+    interventions(cliniqueId: number, tous?: string, page?: string, perPage?: string): Promise<any>;
+    creerIntervention(b: {
+        cliniqueId: number;
+        libelle: string;
+    }): Promise<any>;
+    modifierIntervention(id: number, b: {
+        libelle: string;
+    }): Promise<any>;
+    basculerIntervention(id: number): Promise<any>;
 }

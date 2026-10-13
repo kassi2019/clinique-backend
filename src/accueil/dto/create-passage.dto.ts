@@ -180,6 +180,16 @@ export class NouveauPatientDto {
   @IsOptional()
   @IsString()
   telephone?: string;
+
+  /** Résidence habituelle (même valeur que « ville », conservée pour la fiche de consultation). */
+  @IsOptional()
+  @IsString()
+  residenceHabituelle?: string;
+
+  /** Résidence actuelle (où le patient loge en ce moment). */
+  @IsOptional()
+  @IsString()
+  residenceActuelle?: string;
 }
 
 export class CreatePassageDto {

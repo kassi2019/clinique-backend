@@ -166,6 +166,18 @@ let ParametresListesController = class ParametresListesController {
     basculerAutreExamen(id) {
         return this.listes.desactiver(id, 'EXAMEN');
     }
+    interventions(cliniqueId, tous, page, perPage) {
+        return this.listes.findAll(cliniqueId, 'INTERVENTION', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+    }
+    creerIntervention(b) {
+        return this.listes.creer(Number(b.cliniqueId), 'INTERVENTION', b.libelle);
+    }
+    modifierIntervention(id, b) {
+        return this.listes.modifier(id, 'INTERVENTION', b.libelle ?? '');
+    }
+    basculerIntervention(id) {
+        return this.listes.desactiver(id, 'INTERVENTION');
+    }
 };
 exports.ParametresListesController = ParametresListesController;
 __decorate([
@@ -631,6 +643,44 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], ParametresListesController.prototype, "basculerAutreExamen", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('interventions-chirurgicales'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('tous')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('perPage')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String, String]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "interventions", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('interventions-chirurgicales'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "creerIntervention", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Patch)('interventions-chirurgicales/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "modifierIntervention", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Delete)('interventions-chirurgicales/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "basculerIntervention", null);
 exports.ParametresListesController = ParametresListesController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [listes_parametres_service_1.ListesParametresService])

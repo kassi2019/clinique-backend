@@ -179,10 +179,10 @@ export declare class LaboratoireService {
                 lignes: {
                     parametre: string;
                     id: number;
-                    unite: string | null;
-                    valeur: string | null;
-                    normes: string | null;
                     examenLaboId: number;
+                    valeur: string | null;
+                    unite: string | null;
+                    normes: string | null;
                 }[];
                 prelevePar: {
                     personnel: {
@@ -226,10 +226,10 @@ export declare class LaboratoireService {
             lignes: {
                 parametre: string;
                 id: number;
-                unite: string | null;
-                valeur: string | null;
-                normes: string | null;
                 examenLaboId: number;
+                valeur: string | null;
+                unite: string | null;
+                normes: string | null;
             }[];
         } & {
             createdAt: Date;
@@ -252,10 +252,10 @@ export declare class LaboratoireService {
         lignes: {
             parametre: string;
             id: number;
-            unite: string | null;
-            valeur: string | null;
-            normes: string | null;
             examenLaboId: number;
+            valeur: string | null;
+            unite: string | null;
+            normes: string | null;
         }[];
         prelevePar: {
             personnel: {
@@ -291,10 +291,10 @@ export declare class LaboratoireService {
         lignes: {
             parametre: string;
             id: number;
-            unite: string | null;
-            valeur: string | null;
-            normes: string | null;
             examenLaboId: number;
+            valeur: string | null;
+            unite: string | null;
+            normes: string | null;
         }[];
         prelevePar: {
             personnel: {
@@ -330,10 +330,10 @@ export declare class LaboratoireService {
         lignes: {
             parametre: string;
             id: number;
-            unite: string | null;
-            valeur: string | null;
-            normes: string | null;
             examenLaboId: number;
+            valeur: string | null;
+            unite: string | null;
+            normes: string | null;
         }[];
         prelevePar: {
             personnel: {
@@ -387,10 +387,10 @@ export declare class LaboratoireService {
             lignes: {
                 parametre: string;
                 id: number;
-                unite: string | null;
-                valeur: string | null;
-                normes: string | null;
                 examenLaboId: number;
+                valeur: string | null;
+                unite: string | null;
+                normes: string | null;
             }[];
             prelevePar: {
                 personnel: {
