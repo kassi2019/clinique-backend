@@ -44,8 +44,9 @@ export class ImpressionController {
   /** Imprime l'ordonnance d'une consultation sur l'imprimante des ordonnances. */
   @UseGuards(JwtAuthGuard)
   @Post('consultations/:id')
-  imprimerOrdonnance(@Param('id', ParseIntPipe) id: number) {
-    return this.impressionService.imprimerOrdonnance(id);
+  imprimerOrdonnance(@Param('id', ParseIntPipe) id: number, @Query('ordonnanceId') ordonnanceId?: string) {
+    // ordonnanceId : n'imprime que cette ordonnance (une consultation peut en porter plusieurs)
+    return this.impressionService.imprimerOrdonnance(id, ordonnanceId ? Number(ordonnanceId) : undefined);
   }
 
   /** Imprime le reçu de la caisse pharmacie. */

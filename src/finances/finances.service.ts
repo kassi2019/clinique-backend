@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
+import { AffectationService } from '../affectation/affectation.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 const N = (x: any) => Number(x ?? 0);
@@ -25,17 +26,45 @@ const includeAgent = {
 export class FinancesService {
   private readonly logger = new Logger(FinancesService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private affectationService: AffectationService,
+  ) {}
 
   // ═══════════════ POINTAGE DE SERVICE ═══════════════
 
   private async utilisateur(utilisateurId: number) {
     const u = await this.prisma.utilisateur.findUnique({
       where: { id: utilisateurId },
-      include: { personnel: { select: { id: true, cliniqueId: true, nom: true, prenom: true } } },
+      include: {
+        role: { select: { code: true } },
+        personnel: { select: { id: true, cliniqueId: true, nom: true, prenom: true } },
+      },
     });
     if (!u) throw new NotFoundException('Utilisateur introuvable.');
     return u;
+  }
+
+  /**
+   * Un médecin ne reçoit des patients que pendant son service :
+   * prise de service → Disponible (+ redistribution), fin de service → Indisponible.
+   */
+  private async synchroniserDisponibilite(
+    u: { id: number; role: { code: string }; personnel: { cliniqueId: number } | null },
+    disponibilite: 'DISPONIBLE' | 'INDISPONIBLE',
+  ) {
+    if (u.role.code !== 'MEDECIN') return;
+    await this.prisma.utilisateur.update({
+      where: { id: u.id },
+      data: { disponibilite, derniereActivite: new Date() },
+    });
+    if (disponibilite === 'DISPONIBLE' && u.personnel?.cliniqueId) {
+      try {
+        await this.affectationService.redistribuerNonAffectees(u.personnel.cliniqueId);
+      } catch {
+        /* la redistribution est tolérante */
+      }
+    }
   }
 
   /** Service en cours de l'utilisateur connecté (null s'il n'est pas en service). */
@@ -64,11 +93,13 @@ export class FinancesService {
         derniereActivite: maintenant,
       },
     });
+    await this.synchroniserDisponibilite(u, 'DISPONIBLE');
     return { service: this.formaterService(service) };
   }
 
   /** « Terminer mon service ». */
   async terminerService(utilisateurId: number) {
+    const u = await this.utilisateur(utilisateurId);
     const ouvert = await this.prisma.serviceAgent.findFirst({
       where: { utilisateurId, statut: 'EN_COURS' },
     });
@@ -77,6 +108,7 @@ export class FinancesService {
       where: { id: ouvert.id },
       data: { fin: new Date(), statut: 'TERMINE' },
     });
+    await this.synchroniserDisponibilite(u, 'INDISPONIBLE');
     return { service: this.formaterService(service) };
   }
 
@@ -119,6 +151,7 @@ export class FinancesService {
           fermetureAuto: true,
         },
       });
+      await this.synchroniserDisponibilite(await this.utilisateur(s.utilisateurId), 'INDISPONIBLE');
     }
     if (oublies.length) this.logger.warn(`${oublies.length} service(s) oublié(s) fermé(s) automatiquement.`);
     return oublies.length;

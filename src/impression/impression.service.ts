@@ -501,7 +501,7 @@ export class ImpressionService {
   }
 
   /** Imprime l'ordonnance d'une consultation (§7). */
-  async imprimerOrdonnance(consultationId: number): Promise<ResultatImpression> {
+  async imprimerOrdonnance(consultationId: number, ordonnanceId?: number): Promise<ResultatImpression> {
     const consultation = await this.prisma.consultation.findUnique({
       where: { id: consultationId },
       include: {
@@ -522,7 +522,8 @@ export class ImpressionService {
             personnel: { select: { nom: true, prenom: true } },
           },
         },
-        medicaments: true,
+        medicaments: ordonnanceId ? { where: { ordonnanceId } } : true,
+        ordonnances: ordonnanceId ? { where: { id: ordonnanceId } } : { orderBy: { id: 'asc' } },
       },
     });
     if (!consultation) throw new NotFoundException('Consultation introuvable.');
@@ -549,6 +550,7 @@ export class ImpressionService {
     }
     lignes.push(trait());
     lignes.push(centrer('ORDONNANCE'));
+    if (ordonnanceId && consultation.ordonnances[0]) lignes.push(centrer(`N° ${consultation.ordonnances[0].numero}`));
     lignes.push(trait());
     lignes.push(
       deuxColonnes('Patient', `${p.nom} ${p.prenom}`.toUpperCase()),

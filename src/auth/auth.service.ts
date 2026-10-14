@@ -101,20 +101,30 @@ export class AuthService {
       throw new UnauthorizedException('Matricule ou mot de passe incorrect.');
     }
 
+    // Un médecin n'est Disponible que pendant son service (pointage) :
+    // à la connexion, il le redevient seulement s'il a déjà un service en cours.
+    const estMedecin = utilisateur.role.code === 'MEDECIN';
+    const enService =
+      estMedecin &&
+      (await this.prisma.serviceAgent.count({
+        where: { utilisateurId: utilisateur.id, statut: 'EN_COURS' },
+      })) > 0;
+
     await this.prisma.utilisateur.update({
       where: { id: utilisateur.id },
       data: {
         derniereConnexion: new Date(),
-        // Un médecin qui se connecte est automatiquement Disponible
-        // (il peut ensuite se mettre Indisponible avec le bouton).
-        disponibilite:
-          utilisateur.role.code === 'MEDECIN' ? 'DISPONIBLE' : utilisateur.disponibilite,
+        disponibilite: estMedecin
+          ? enService
+            ? 'DISPONIBLE'
+            : 'INDISPONIBLE'
+          : utilisateur.disponibilite,
         derniereActivite: new Date(),
       },
     });
 
     // Redistribution immédiate des patients non affectés vers ce médecin
-    if (utilisateur.role.code === 'MEDECIN' && utilisateur.personnel?.cliniqueId) {
+    if (enService && utilisateur.personnel?.cliniqueId) {
       try {
         await this.affectationService.redistribuerNonAffectees(
           utilisateur.personnel.cliniqueId,

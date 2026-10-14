@@ -1107,6 +1107,16 @@ export class ConsultationsService {
 
   /** Change la disponibilité du médecin connecté ; DISPONIBLE → redistribution des non affectés. */
   async changerDisponibilite(utilisateurId: number, disponibilite: 'DISPONIBLE' | 'INDISPONIBLE') {
+    if (disponibilite === 'DISPONIBLE') {
+      const enService = await this.prisma.serviceAgent.count({
+        where: { utilisateurId, statut: 'EN_COURS' },
+      });
+      if (!enService) {
+        throw new BadRequestException(
+          'Prenez d’abord votre service (bouton « Prendre mon service » sur l’accueil) pour recevoir des patients.',
+        );
+      }
+    }
     const utilisateur = await this.prisma.utilisateur.update({
       where: { id: utilisateurId },
       data: {

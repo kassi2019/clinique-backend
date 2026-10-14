@@ -10,7 +10,10 @@ export class AffectationService {
 
   constructor(private prisma: PrismaService) {}
 
-  /** Médecins éligibles : rôle MEDECIN, compte actif, DISPONIBLE et poste allumé (heartbeat). */
+  /**
+   * Médecins éligibles : rôle MEDECIN, compte actif, en service (pointage),
+   * DISPONIBLE et poste allumé (heartbeat).
+   */
   private async medecinsDisponibles(cliniqueId: number) {
     const limite = new Date(Date.now() - AffectationService.SEUIL_ACTIVITE_MS);
     return this.prisma.utilisateur.findMany({
@@ -18,6 +21,7 @@ export class AffectationService {
         statut: 'ACTIF',
         disponibilite: 'DISPONIBLE',
         derniereActivite: { gte: limite },
+        servicesAgent: { some: { statut: 'EN_COURS' } },
         role: { code: 'MEDECIN' },
         personnel: { cliniqueId },
       },
