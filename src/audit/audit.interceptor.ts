@@ -31,7 +31,9 @@ export class AuditInterceptor implements NestInterceptor {
       !['POST', 'PATCH', 'PUT', 'DELETE'].includes(methode) ||
       !route.startsWith('/api/') ||
       route.startsWith('/api/auth') ||
-      route.startsWith('/api/journal')
+      route.startsWith('/api/journal') ||
+      route.endsWith('/ping') ||
+      route.endsWith('/presence')
     ) {
       return next.handle();
     }

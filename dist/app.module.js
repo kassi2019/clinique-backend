@@ -38,6 +38,7 @@ const utilisateurs_module_1 = require("./utilisateurs/utilisateurs.module");
 const listes_parametres_module_1 = require("./listes-parametres/listes-parametres.module");
 const maternite_module_1 = require("./maternite/maternite.module");
 const soins_module_1 = require("./soins/soins.module");
+const finances_module_1 = require("./finances/finances.module");
 const rapports_module_1 = require("./rapports/rapports.module");
 const references_module_1 = require("./references/references.module");
 let AppModule = class AppModule {
@@ -71,6 +72,7 @@ exports.AppModule = AppModule = __decorate([
             listes_parametres_module_1.ListesParametresModule,
             maternite_module_1.MaterniteModule,
             soins_module_1.SoinsModule,
+            finances_module_1.FinancesModule,
             rapports_module_1.RapportsModule,
             references_module_1.ReferencesModule,
         ],

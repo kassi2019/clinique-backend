@@ -26,7 +26,9 @@ let AuditInterceptor = class AuditInterceptor {
             !['POST', 'PATCH', 'PUT', 'DELETE'].includes(methode) ||
             !route.startsWith('/api/') ||
             route.startsWith('/api/auth') ||
-            route.startsWith('/api/journal')) {
+            route.startsWith('/api/journal') ||
+            route.endsWith('/ping') ||
+            route.endsWith('/presence')) {
             return next.handle();
         }
         return next.handle().pipe((0, operators_1.tap)(async () => {

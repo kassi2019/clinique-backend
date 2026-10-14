@@ -1024,6 +1024,7 @@ model Personnel {
   clinique    Clinique     @relation(fields: [cliniqueId], references: [id], onDelete: Cascade)
   service     Service?     @relation(fields: [serviceId], references: [id])
   utilisateur Utilisateur?
+  fichesVacation FicheVacation[]
 
   @@unique([cliniqueId, matricule])
   @@map("personnel")
@@ -1070,6 +1071,9 @@ model Utilisateur {
   saisiesImagerie            ExamenImagerie[]         @relation("SaisiesImagerie")
   fichesReference            FicheReference[]         @relation("FichesReference")
   journalActions             JournalAction[]          @relation("JournalActions")
+  servicesAgent  ServiceAgent[] @relation("ServicesAgent")
+  servicesValides ServiceAgent[] @relation("ServicesValides")
+  fichesValidees FicheVacation[] @relation("FichesValidees")
   disponibilite              String                   @default("INDISPONIBLE") // DISPONIBLE / INDISPONIBLE (médecins)
   derniereActivite           DateTime? // signal de vie : le poste du médecin est allumé (heartbeat)
 
@@ -1757,4 +1761,83 @@ model FicheExamenImagerie {
   medecin   Utilisateur?     @relation("FichesEcho", fields: [medecinId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("fiches_examen_imagerie")
+}
+
+// ═══════════════ Finances : pointage de service et vacations ═══════════════
+
+// Tarif d'un agent rémunéré à la vacation ou à l'heure
+model RemunerationAgent {
+  id                  Int      @id @default(autoincrement())
+  cliniqueId          Int
+  personnelId         Int      @unique
+  statut              String   @default("VACATAIRE") // VACATAIRE / SALARIE
+  mode                String   @default("VACATION") // VACATION / HEURE
+  tarif               Decimal  @default(0) @db.Decimal(18, 2) // FCFA par vacation ou par heure
+  dureeVacationHeures Int      @default(24) // durée d'une vacation
+  actif               Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("remunerations_agents")
+}
+
+// Service pointé par un agent (« Prendre / Terminer mon service »)
+model ServiceAgent {
+  id                Int       @id @default(autoincrement())
+  cliniqueId        Int
+  utilisateurId     Int
+  personnelId       Int
+  debut             DateTime
+  fin               DateTime?
+  statut            String    @default("EN_COURS") // EN_COURS / TERMINE / A_VERIFIER / VALIDE / REJETE
+  fermetureAuto     Boolean   @default(false) // service oublié, fermé automatiquement après 26 h
+  derniereActivite  DateTime? // dernier signal de présence du poste
+  minutesPresence   Int       @default(0) // temps de présence mesuré sur le poste
+  heuresRetenues    Decimal?  @db.Decimal(10, 2) // correction du responsable
+  vacationsRetenues Decimal?  @db.Decimal(10, 2) // correction du responsable
+  motifCorrection   String?
+  valideParId       Int?
+  valideLe          DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  utilisateur Utilisateur  @relation("ServicesAgent", fields: [utilisateurId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  validePar   Utilisateur? @relation("ServicesValides", fields: [valideParId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([cliniqueId, statut])
+  @@index([personnelId, debut])
+  @@map("services_agents")
+}
+
+// Fiche de vacation mensuelle (brouillon → validée → payée)
+model FicheVacation {
+  id                  Int       @id @default(autoincrement())
+  cliniqueId          Int
+  personnelId         Int
+  mois                String    @db.NVarChar(7) // AAAA-MM
+  nbServices          Int       @default(0)
+  nbAVerifier         Int       @default(0)
+  heures              Decimal   @default(0) @db.Decimal(10, 2)
+  vacations           Decimal   @default(0) @db.Decimal(10, 2)
+  mode                String // VACATION / HEURE (au moment du calcul)
+  tarif               Decimal   @db.Decimal(18, 2) // tarif appliqué (figé avec la fiche)
+  dureeVacationHeures Int       @default(24)
+  montantBase         Decimal   @default(0) @db.Decimal(18, 2)
+  primes              Decimal   @default(0) @db.Decimal(18, 2)
+  retenues            Decimal   @default(0) @db.Decimal(18, 2)
+  montantTotal        Decimal   @default(0) @db.Decimal(18, 2)
+  commentaire         String?
+  statut              String    @default("BROUILLON") // BROUILLON / VALIDEE / PAYEE
+  valideParId         Int?
+  valideLe            DateTime?
+  payeLe              DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  personnel Personnel    @relation(fields: [personnelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  validePar Utilisateur? @relation("FichesValidees", fields: [valideParId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([personnelId, mois])
+  @@index([cliniqueId, mois])
+  @@map("fiches_vacation")
 }

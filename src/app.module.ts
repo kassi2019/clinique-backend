@@ -29,6 +29,7 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
 import { ListesParametresModule } from './listes-parametres/listes-parametres.module';
 import { MaterniteModule } from './maternite/maternite.module';
 import { SoinsModule } from './soins/soins.module';
+import { FinancesModule } from './finances/finances.module';
 import { RapportsModule } from './rapports/rapports.module';
 import { ReferencesModule } from './references/references.module';
 
@@ -59,6 +60,7 @@ import { ReferencesModule } from './references/references.module';
     ListesParametresModule,
     MaterniteModule,
     SoinsModule,
+    FinancesModule,
     RapportsModule,
     ReferencesModule,
   ],
