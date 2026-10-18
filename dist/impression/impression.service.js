@@ -379,7 +379,7 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
             libelle: `Reçu de paiement ${paiement.numeroRecu}`,
         });
     }
-    async imprimerOrdonnance(consultationId) {
+    async imprimerOrdonnance(consultationId, ordonnanceId) {
         const consultation = await this.prisma.consultation.findUnique({
             where: { id: consultationId },
             include: {
@@ -400,7 +400,8 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
                         personnel: { select: { nom: true, prenom: true } },
                     },
                 },
-                medicaments: true,
+                medicaments: ordonnanceId ? { where: { ordonnanceId } } : true,
+                ordonnances: ordonnanceId ? { where: { id: ordonnanceId } } : { orderBy: { id: 'asc' } },
             },
         });
         if (!consultation)
@@ -421,6 +422,8 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         }
         lignes.push(trait());
         lignes.push(centrer('ORDONNANCE'));
+        if (ordonnanceId && consultation.ordonnances[0])
+            lignes.push(centrer(`N° ${consultation.ordonnances[0].numero}`));
         lignes.push(trait());
         lignes.push(deuxColonnes('Patient', `${p.nom} ${p.prenom}`.toUpperCase()));
         lignes.push(deuxColonnes('Code', p.code));

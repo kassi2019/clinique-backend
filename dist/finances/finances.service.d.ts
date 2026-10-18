@@ -1,9 +1,12 @@
+import { AffectationService } from '../affectation/affectation.service';
 import { PrismaService } from '../prisma/prisma.service';
 export declare class FinancesService {
     private prisma;
+    private affectationService;
     private readonly logger;
-    constructor(prisma: PrismaService);
+    constructor(prisma: PrismaService, affectationService: AffectationService);
     private utilisateur;
+    private synchroniserDisponibilite;
     monService(utilisateurId: number): Promise<{
         service: any;
     }>;

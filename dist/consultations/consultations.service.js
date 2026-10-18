@@ -883,6 +883,14 @@ let ConsultationsService = class ConsultationsService {
         });
     }
     async changerDisponibilite(utilisateurId, disponibilite) {
+        if (disponibilite === 'DISPONIBLE') {
+            const enService = await this.prisma.serviceAgent.count({
+                where: { utilisateurId, statut: 'EN_COURS' },
+            });
+            if (!enService) {
+                throw new common_1.BadRequestException('Prenez d’abord votre service (bouton « Prendre mon service » sur l’accueil) pour recevoir des patients.');
+            }
+        }
         const utilisateur = await this.prisma.utilisateur.update({
             where: { id: utilisateurId },
             data: {

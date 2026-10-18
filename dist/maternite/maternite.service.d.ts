@@ -238,8 +238,8 @@ export declare class MaterniteService {
                 tensionDroite: string | null;
                 poids: import("@prisma/client/runtime/library").Decimal | null;
                 mildaRemise: boolean | null;
-                date: Date;
                 numero: number;
+                date: Date;
                 ageGestationnelSA: string | null;
                 hauteurUterine: string | null;
                 bcf: string | null;
@@ -414,8 +414,8 @@ export declare class MaterniteService {
             tensionDroite: string | null;
             poids: import("@prisma/client/runtime/library").Decimal | null;
             mildaRemise: boolean | null;
-            date: Date;
             numero: number;
+            date: Date;
             ageGestationnelSA: string | null;
             hauteurUterine: string | null;
             bcf: string | null;
@@ -486,8 +486,8 @@ export declare class MaterniteService {
         tensionDroite: string | null;
         poids: import("@prisma/client/runtime/library").Decimal | null;
         mildaRemise: boolean | null;
-        date: Date;
         numero: number;
+        date: Date;
         ageGestationnelSA: string | null;
         hauteurUterine: string | null;
         bcf: string | null;
@@ -528,8 +528,8 @@ export declare class MaterniteService {
         tensionDroite: string | null;
         poids: import("@prisma/client/runtime/library").Decimal | null;
         mildaRemise: boolean | null;
-        date: Date;
         numero: number;
+        date: Date;
         ageGestationnelSA: string | null;
         hauteurUterine: string | null;
         bcf: string | null;
@@ -1200,8 +1200,8 @@ export declare class MaterniteService {
                 tensionDroite: string | null;
                 poids: import("@prisma/client/runtime/library").Decimal | null;
                 mildaRemise: boolean | null;
-                date: Date;
                 numero: number;
+                date: Date;
                 ageGestationnelSA: string | null;
                 hauteurUterine: string | null;
                 bcf: string | null;
@@ -1489,8 +1489,8 @@ export declare class MaterniteService {
             tensionDroite: string | null;
             poids: import("@prisma/client/runtime/library").Decimal | null;
             mildaRemise: boolean | null;
-            date: Date;
             numero: number;
+            date: Date;
             ageGestationnelSA: string | null;
             hauteurUterine: string | null;
             bcf: string | null;

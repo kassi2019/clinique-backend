@@ -13,6 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FinancesService = void 0;
 const common_1 = require("@nestjs/common");
 const schedule_1 = require("@nestjs/schedule");
+const affectation_service_1 = require("../affectation/affectation.service");
 const prisma_service_1 = require("../prisma/prisma.service");
 const N = (x) => Number(x ?? 0);
 const arrondi2 = (x) => Math.round(x * 100) / 100;
@@ -29,18 +30,37 @@ const includeAgent = {
     },
 };
 let FinancesService = FinancesService_1 = class FinancesService {
-    constructor(prisma) {
+    constructor(prisma, affectationService) {
         this.prisma = prisma;
+        this.affectationService = affectationService;
         this.logger = new common_1.Logger(FinancesService_1.name);
     }
     async utilisateur(utilisateurId) {
         const u = await this.prisma.utilisateur.findUnique({
             where: { id: utilisateurId },
-            include: { personnel: { select: { id: true, cliniqueId: true, nom: true, prenom: true } } },
+            include: {
+                role: { select: { code: true } },
+                personnel: { select: { id: true, cliniqueId: true, nom: true, prenom: true } },
+            },
         });
         if (!u)
             throw new common_1.NotFoundException('Utilisateur introuvable.');
         return u;
+    }
+    async synchroniserDisponibilite(u, disponibilite) {
+        if (u.role.code !== 'MEDECIN')
+            return;
+        await this.prisma.utilisateur.update({
+            where: { id: u.id },
+            data: { disponibilite, derniereActivite: new Date() },
+        });
+        if (disponibilite === 'DISPONIBLE' && u.personnel?.cliniqueId) {
+            try {
+                await this.affectationService.redistribuerNonAffectees(u.personnel.cliniqueId);
+            }
+            catch {
+            }
+        }
     }
     async monService(utilisateurId) {
         const service = await this.prisma.serviceAgent.findFirst({
@@ -66,9 +86,11 @@ let FinancesService = FinancesService_1 = class FinancesService {
                 derniereActivite: maintenant,
             },
         });
+        await this.synchroniserDisponibilite(u, 'DISPONIBLE');
         return { service: this.formaterService(service) };
     }
     async terminerService(utilisateurId) {
+        const u = await this.utilisateur(utilisateurId);
         const ouvert = await this.prisma.serviceAgent.findFirst({
             where: { utilisateurId, statut: 'EN_COURS' },
         });
@@ -78,6 +100,7 @@ let FinancesService = FinancesService_1 = class FinancesService {
             where: { id: ouvert.id },
             data: { fin: new Date(), statut: 'TERMINE' },
         });
+        await this.synchroniserDisponibilite(u, 'INDISPONIBLE');
         return { service: this.formaterService(service) };
     }
     async presence(utilisateurId) {
@@ -109,6 +132,7 @@ let FinancesService = FinancesService_1 = class FinancesService {
                     fermetureAuto: true,
                 },
             });
+            await this.synchroniserDisponibilite(await this.utilisateur(s.utilisateurId), 'INDISPONIBLE');
         }
         if (oublies.length)
             this.logger.warn(`${oublies.length} service(s) oublié(s) fermé(s) automatiquement.`);
@@ -442,6 +466,7 @@ __decorate([
 ], FinancesService.prototype, "fermerServicesOublies", null);
 exports.FinancesService = FinancesService = FinancesService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        affectation_service_1.AffectationService])
 ], FinancesService);
 //# sourceMappingURL=finances.service.js.map

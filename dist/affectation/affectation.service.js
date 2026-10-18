@@ -25,6 +25,7 @@ let AffectationService = AffectationService_1 = class AffectationService {
                 statut: 'ACTIF',
                 disponibilite: 'DISPONIBLE',
                 derniereActivite: { gte: limite },
+                servicesAgent: { some: { statut: 'EN_COURS' } },
                 role: { code: 'MEDECIN' },
                 personnel: { cliniqueId },
             },

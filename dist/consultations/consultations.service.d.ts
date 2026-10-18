@@ -835,9 +835,9 @@ export declare class ConsultationsService {
         medecinId: number | null;
         medecin: string;
         consultationId: number;
+        numero: string;
         debut: Date;
         fin: Date;
-        numero: string;
         lieu: string | null;
         civilite: string;
         nomPatient: string;
@@ -854,9 +854,9 @@ export declare class ConsultationsService {
         medecinId: number | null;
         medecin: string;
         consultationId: number;
+        numero: string;
         debut: Date;
         fin: Date;
-        numero: string;
         lieu: string | null;
         civilite: string;
         nomPatient: string;

@@ -70,15 +70,24 @@ let AuthService = class AuthService {
         if (!motDePasseValide) {
             throw new common_1.UnauthorizedException('Matricule ou mot de passe incorrect.');
         }
+        const estMedecin = utilisateur.role.code === 'MEDECIN';
+        const enService = estMedecin &&
+            (await this.prisma.serviceAgent.count({
+                where: { utilisateurId: utilisateur.id, statut: 'EN_COURS' },
+            })) > 0;
         await this.prisma.utilisateur.update({
             where: { id: utilisateur.id },
             data: {
                 derniereConnexion: new Date(),
-                disponibilite: utilisateur.role.code === 'MEDECIN' ? 'DISPONIBLE' : utilisateur.disponibilite,
+                disponibilite: estMedecin
+                    ? enService
+                        ? 'DISPONIBLE'
+                        : 'INDISPONIBLE'
+                    : utilisateur.disponibilite,
                 derniereActivite: new Date(),
             },
         });
-        if (utilisateur.role.code === 'MEDECIN' && utilisateur.personnel?.cliniqueId) {
+        if (enService && utilisateur.personnel?.cliniqueId) {
             try {
                 await this.affectationService.redistribuerNonAffectees(utilisateur.personnel.cliniqueId);
             }

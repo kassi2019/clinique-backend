@@ -89,7 +89,7 @@ export declare class ImpressionService {
         };
     }, largeur: number): string;
     imprimerRecuPaiement(paiementId: number): Promise<ResultatImpression>;
-    imprimerOrdonnance(consultationId: number): Promise<ResultatImpression>;
+    imprimerOrdonnance(consultationId: number, ordonnanceId?: number): Promise<ResultatImpression>;
     imprimerRecuPharmacie(paiementId: number): Promise<ResultatImpression>;
     imprimerTicketPassage(passageId: number): Promise<ResultatImpression>;
     imprimer(texte: string, config: ConfigImprimante, infos?: {
