@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePersonnelDto } from './dto/create-personnel.dto';
 import { UpdatePersonnelDto } from './dto/update-personnel.dto';
+import { prefixeMatricule, prochainMatricule } from './matricule';
 
 const includeUtilisateur = {
   utilisateur: {
@@ -80,11 +81,11 @@ export class PersonnelService {
       return await this.prisma.personnel.create({
         data: {
           cliniqueId: dto.cliniqueId,
-          // Matricule généré si absent : 3 premières lettres du code du
-          // service + numéro d'ordre sur 4 chiffres (ex. MED0001, MED0002…).
+          // Matricule généré si absent : préfixe de la fonction + numéro
+          // d'ordre sur 3 chiffres (ex. MED001, INF001, SFDE001…).
           matricule:
             dto.matricule?.trim() ||
-            (await this.genererMatricule(dto.cliniqueId, dto.serviceId)),
+            (await this.genererMatricule(dto.cliniqueId, dto.fonction, dto.serviceId)),
           nom: dto.nom,
           prenom: dto.prenom,
           sexe: dto.sexe,
@@ -108,25 +109,32 @@ export class PersonnelService {
     }
   }
 
-  /** Génère le prochain matricule : PREFIXE_SERVICE + 0001 (increment par service). */
-  private async genererMatricule(cliniqueId: number, serviceId?: number | null): Promise<string> {
-    let prefixe = 'PER';
-    if (serviceId) {
-      const service = await this.prisma.service.findUnique({ where: { id: serviceId } });
-      if (service?.code) {
-        prefixe = service.code.trim().toUpperCase().slice(0, 3) || 'PER';
-      }
-    }
-    const existants = await this.prisma.personnel.findMany({
-      where: { cliniqueId, matricule: { startsWith: prefixe } },
-      select: { matricule: true },
-    });
-    let max = 0;
-    for (const p of existants) {
-      const n = parseInt(p.matricule.replace(prefixe, ''), 10);
-      if (!isNaN(n) && n > max) max = n;
-    }
-    return `${prefixe}${String(max + 1).padStart(4, '0')}`;
+  /** Génère le prochain matricule : PRÉFIXE_FONCTION + 001 (voir matricule.ts). */
+  private async genererMatricule(
+    cliniqueId: number,
+    fonction?: string | null,
+    serviceId?: number | null,
+  ): Promise<string> {
+    const service = serviceId
+      ? await this.prisma.service.findUnique({ where: { id: serviceId } })
+      : null;
+    const prefixe = prefixeMatricule(fonction, service?.code);
+    // Les logins sont uniques sur toute la base : on tient compte aussi
+    // des matricules de connexion pour ne jamais proposer un doublon.
+    const [personnels, utilisateurs] = await Promise.all([
+      this.prisma.personnel.findMany({
+        where: { cliniqueId, matricule: { startsWith: prefixe } },
+        select: { matricule: true },
+      }),
+      this.prisma.utilisateur.findMany({
+        where: { matricule: { startsWith: prefixe } },
+        select: { matricule: true },
+      }),
+    ]);
+    return prochainMatricule(
+      prefixe,
+      [...personnels, ...utilisateurs].map((x) => x.matricule),
+    );
   }
 
   async update(id: number, dto: UpdatePersonnelDto) {

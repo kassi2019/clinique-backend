@@ -13,6 +13,7 @@ exports.PersonnelService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../prisma/prisma.service");
+const matricule_1 = require("./matricule");
 const includeUtilisateur = {
     utilisateur: {
         select: {
@@ -79,7 +80,7 @@ let PersonnelService = class PersonnelService {
                 data: {
                     cliniqueId: dto.cliniqueId,
                     matricule: dto.matricule?.trim() ||
-                        (await this.genererMatricule(dto.cliniqueId, dto.serviceId)),
+                        (await this.genererMatricule(dto.cliniqueId, dto.fonction, dto.serviceId)),
                     nom: dto.nom,
                     prenom: dto.prenom,
                     sexe: dto.sexe,
@@ -101,25 +102,22 @@ let PersonnelService = class PersonnelService {
             throw e;
         }
     }
-    async genererMatricule(cliniqueId, serviceId) {
-        let prefixe = 'PER';
-        if (serviceId) {
-            const service = await this.prisma.service.findUnique({ where: { id: serviceId } });
-            if (service?.code) {
-                prefixe = service.code.trim().toUpperCase().slice(0, 3) || 'PER';
-            }
-        }
-        const existants = await this.prisma.personnel.findMany({
-            where: { cliniqueId, matricule: { startsWith: prefixe } },
-            select: { matricule: true },
-        });
-        let max = 0;
-        for (const p of existants) {
-            const n = parseInt(p.matricule.replace(prefixe, ''), 10);
-            if (!isNaN(n) && n > max)
-                max = n;
-        }
-        return `${prefixe}${String(max + 1).padStart(4, '0')}`;
+    async genererMatricule(cliniqueId, fonction, serviceId) {
+        const service = serviceId
+            ? await this.prisma.service.findUnique({ where: { id: serviceId } })
+            : null;
+        const prefixe = (0, matricule_1.prefixeMatricule)(fonction, service?.code);
+        const [personnels, utilisateurs] = await Promise.all([
+            this.prisma.personnel.findMany({
+                where: { cliniqueId, matricule: { startsWith: prefixe } },
+                select: { matricule: true },
+            }),
+            this.prisma.utilisateur.findMany({
+                where: { matricule: { startsWith: prefixe } },
+                select: { matricule: true },
+            }),
+        ]);
+        return (0, matricule_1.prochainMatricule)(prefixe, [...personnels, ...utilisateurs].map((x) => x.matricule));
     }
     async update(id, dto) {
         await this.findOne(id);
