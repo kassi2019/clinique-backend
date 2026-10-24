@@ -1,8 +1,10 @@
+export declare const TYPES_PIECE_IDENTITE: string[];
 export declare class UpdatePatientDto {
     nom?: string;
     prenom?: string;
     age?: string | number;
     dateNaissance?: string;
+    typePieceIdentite?: string;
     numeroCni?: string;
     numeroCmu?: string;
     sexe?: string;
@@ -37,6 +39,7 @@ export declare class NouveauPatientDto {
     prenom: string;
     age?: string | number;
     dateNaissance?: string;
+    typePieceIdentite?: string;
     numeroCni?: string;
     numeroCmu?: string;
     sexe?: string;

@@ -239,6 +239,9 @@ let AccueilService = AccueilService_1 = class AccueilService {
                     dateNaissance: dto.nouveauPatient.dateNaissance
                         ? new Date(dto.nouveauPatient.dateNaissance)
                         : undefined,
+                    typePieceIdentite: dto.nouveauPatient.numeroCni?.trim()
+                        ? dto.nouveauPatient.typePieceIdentite ?? 'CNI'
+                        : dto.nouveauPatient.typePieceIdentite,
                     numeroCni: dto.nouveauPatient.numeroCni,
                     numeroCmu: dto.nouveauPatient.numeroCmu,
                     sexe: dto.nouveauPatient.sexe,
@@ -376,6 +379,7 @@ let AccueilService = AccueilService_1 = class AccueilService {
                     dateNaissance: dto.patient.dateNaissance
                         ? new Date(dto.patient.dateNaissance)
                         : undefined,
+                    typePieceIdentite: dto.patient.typePieceIdentite,
                     numeroCni: dto.patient.numeroCni,
                     numeroCmu: dto.patient.numeroCmu,
                     sexe: dto.patient.sexe,

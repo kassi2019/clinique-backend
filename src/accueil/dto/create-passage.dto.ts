@@ -10,6 +10,15 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+// Types de pièce d'identité acceptés à l'accueil
+export const TYPES_PIECE_IDENTITE = [
+  'CNI',
+  'PASSEPORT',
+  'CARTE_CONSULAIRE',
+  'ATTESTATION',
+  'AUTRE',
+];
+
 export class UpdatePatientDto {
   @IsOptional()
   @IsString()
@@ -26,6 +35,10 @@ export class UpdatePatientDto {
   @IsOptional()
   @IsDateString()
   dateNaissance?: string;
+
+  @IsOptional()
+  @IsIn(TYPES_PIECE_IDENTITE)
+  typePieceIdentite?: string;
 
   @IsOptional()
   @IsString()
@@ -152,6 +165,10 @@ export class NouveauPatientDto {
   @IsOptional()
   @IsDateString()
   dateNaissance?: string;
+
+  @IsOptional()
+  @IsIn(TYPES_PIECE_IDENTITE)
+  typePieceIdentite?: string;
 
   @IsOptional()
   @IsString()

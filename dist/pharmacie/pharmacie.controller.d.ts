@@ -24,6 +24,7 @@ export declare class PharmacieController {
             creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
+            typePieceIdentite: string | null;
             numeroCni: string | null;
             numeroCmu: string | null;
             ville: string | null;
@@ -164,6 +165,7 @@ export declare class PharmacieController {
                 creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
+                typePieceIdentite: string | null;
                 numeroCni: string | null;
                 numeroCmu: string | null;
                 ville: string | null;
@@ -341,6 +343,7 @@ export declare class PharmacieController {
                 creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
+                typePieceIdentite: string | null;
                 numeroCni: string | null;
                 numeroCmu: string | null;
                 ville: string | null;

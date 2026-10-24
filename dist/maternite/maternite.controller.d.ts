@@ -23,6 +23,7 @@ export declare class MaterniteController {
             creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
+            typePieceIdentite: string | null;
             numeroCni: string | null;
             numeroCmu: string | null;
             ville: string | null;
@@ -75,6 +76,14 @@ export declare class MaterniteController {
             id: number;
             numeroOrdre: string;
             patientId: number;
+            patient: {
+                id: number;
+                nom: string;
+                prenom: string;
+                sexe: string;
+                code: string;
+                age: string;
+            };
         };
         dossier: {
             id: number;
@@ -131,6 +140,7 @@ export declare class MaterniteController {
             creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
+            typePieceIdentite: string | null;
             numeroCni: string | null;
             numeroCmu: string | null;
             ville: string | null;
@@ -170,6 +180,7 @@ export declare class MaterniteController {
                 creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
+                typePieceIdentite: string | null;
                 numeroCni: string | null;
                 numeroCmu: string | null;
                 ville: string | null;
@@ -310,6 +321,7 @@ export declare class MaterniteController {
                 creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
+                typePieceIdentite: string | null;
                 numeroCni: string | null;
                 numeroCmu: string | null;
                 ville: string | null;
@@ -918,6 +930,7 @@ export declare class MaterniteController {
                 creeParId: number | null;
                 age: string | null;
                 dateNaissance: Date | null;
+                typePieceIdentite: string | null;
                 numeroCni: string | null;
                 numeroCmu: string | null;
                 ville: string | null;
@@ -1081,6 +1094,7 @@ export declare class MaterniteController {
             creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
+            typePieceIdentite: string | null;
             numeroCni: string | null;
             numeroCmu: string | null;
             ville: string | null;
@@ -1253,6 +1267,7 @@ export declare class MaterniteController {
             creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
+            typePieceIdentite: string | null;
             numeroCni: string | null;
             numeroCmu: string | null;
             ville: string | null;
@@ -1312,6 +1327,7 @@ export declare class MaterniteController {
             creeParId: number | null;
             age: string | null;
             dateNaissance: Date | null;
+            typePieceIdentite: string | null;
             numeroCni: string | null;
             numeroCmu: string | null;
             ville: string | null;
@@ -1583,6 +1599,7 @@ export declare class MaterniteController {
                     creeParId: number | null;
                     age: string | null;
                     dateNaissance: Date | null;
+                    typePieceIdentite: string | null;
                     numeroCni: string | null;
                     numeroCmu: string | null;
                     ville: string | null;

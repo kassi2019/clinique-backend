@@ -44,7 +44,7 @@ export class AccueilService {
       // Code patient PERMANENT (ex. P-9N7Z5A) : on tolère la saisie sans tirets
       { code: { contains: search.replace(/[\s-]/g, '') } },
       { code: { contains: search } },
-      // Téléphone, N° CNI et N° CMU : retrouvés même si le code est oublié
+      // Téléphone, N° de pièce d'identité et N° CMU : retrouvés même si le code est oublié
       { telephone: { contains: search } },
       { numeroCni: { contains: search } },
       { numeroCmu: { contains: search } },
@@ -251,7 +251,7 @@ export class AccueilService {
       if (!existant) throw new BadRequestException('Patient introuvable.');
       patient = existant;
     } else if (dto.nouveauPatient) {
-      // Garde anti-doublon : le N° CNI et le N° CMU sont uniques —
+      // Garde anti-doublon : le N° de pièce d'identité et le N° CMU sont uniques —
       // si un patient existe déjà avec l'un de ces numéros, on refuse la
       // création et on indique le dossier existant.
       const cni = dto.nouveauPatient.numeroCni?.trim();
@@ -290,6 +290,9 @@ export class AccueilService {
           dateNaissance: dto.nouveauPatient.dateNaissance
             ? new Date(dto.nouveauPatient.dateNaissance)
             : undefined,
+          typePieceIdentite: dto.nouveauPatient.numeroCni?.trim()
+            ? dto.nouveauPatient.typePieceIdentite ?? 'CNI'
+            : dto.nouveauPatient.typePieceIdentite,
           numeroCni: dto.nouveauPatient.numeroCni,
           numeroCmu: dto.nouveauPatient.numeroCmu,
           sexe: dto.nouveauPatient.sexe,
@@ -477,6 +480,7 @@ export class AccueilService {
           dateNaissance: dto.patient.dateNaissance
             ? new Date(dto.patient.dateNaissance)
             : undefined,
+          typePieceIdentite: dto.patient.typePieceIdentite,
           numeroCni: dto.patient.numeroCni,
           numeroCmu: dto.patient.numeroCmu,
           sexe: dto.patient.sexe,

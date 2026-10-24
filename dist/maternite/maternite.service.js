@@ -773,8 +773,12 @@ let MaterniteService = class MaterniteService {
             motif: 'Accouchement (urgence)',
         }, utilisateurId);
         const dossier = await this.obtenirOuCreerDossier(passage.patientId, dto.cliniqueId);
+        const patient = await this.prisma.patient.findUnique({
+            where: { id: passage.patientId },
+            select: { id: true, nom: true, prenom: true, code: true, age: true, sexe: true },
+        });
         return {
-            passage: { id: passage.id, numeroOrdre: passage.numeroOrdre, patientId: passage.patientId },
+            passage: { id: passage.id, numeroOrdre: passage.numeroOrdre, patientId: passage.patientId, patient },
             dossier: { id: dossier.id, numero: dossier.numero },
         };
     }
