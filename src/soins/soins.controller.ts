@@ -51,6 +51,21 @@ export class SoinsController {
     );
   }
 
+  /** Confirme une administration d'un soin prescrit par le médecin. */
+  @Post('prescrits/:id/administrer')
+  administrer(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { date?: string; observations?: string },
+    @Req() req,
+  ) {
+    return this.soinsService.administrer(
+      id,
+      body.date ?? new Date().toISOString(),
+      body.observations,
+      req.user.id,
+    );
+  }
+
   /** Historique des réalisations de soins. */
   @Get('realisations')
   realisations(

@@ -142,6 +142,18 @@ let ParametresListesController = class ParametresListesController {
     basculerQuartier(id) {
         return this.listes.desactiver(id, 'QUARTIER');
     }
+    typesSoins(cliniqueId, tous, page, perPage) {
+        return this.listes.findAll(cliniqueId, 'TYPE_SOIN', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+    }
+    creerTypeSoin(b) {
+        return this.listes.creer(Number(b.cliniqueId), 'TYPE_SOIN', b.libelle);
+    }
+    modifierTypeSoin(id, b) {
+        return this.listes.modifier(id, 'TYPE_SOIN', b.libelle ?? '');
+    }
+    basculerTypeSoin(id) {
+        return this.listes.desactiver(id, 'TYPE_SOIN');
+    }
     antecedentsmedicaux(cliniqueId, tous, page, perPage) {
         return this.listes.findAll(cliniqueId, 'ANTECEDENT', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
     }
@@ -567,6 +579,45 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], ParametresListesController.prototype, "basculerQuartier", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('types-soins'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('tous')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('perPage')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String, String]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "typesSoins", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Post)('types-soins'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "creerTypeSoin", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Patch)('types-soins/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "modifierTypeSoin", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Delete)('types-soins/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ParametresListesController.prototype, "basculerTypeSoin", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)('antecedents-medicaux'),

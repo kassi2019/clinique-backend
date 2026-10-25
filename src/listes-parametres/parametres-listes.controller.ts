@@ -245,6 +245,28 @@ export class ParametresListesController {
     return this.listes.desactiver(id, 'QUARTIER');
   }
 
+  // ── TYPES DE SOINS (onglet Soins de la consultation) ──
+  @UseGuards(JwtAuthGuard)
+  @Get('types-soins')
+  typesSoins(@Query('cliniqueId', ParseIntPipe) cliniqueId: number, @Query('tous') tous?: string, @Query('page') page?: string, @Query('perPage') perPage?: string) {
+    return this.listes.findAll(cliniqueId, 'TYPE_SOIN', tous === '1', page ? Number(page) : undefined, perPage ? Number(perPage) : undefined);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Post('types-soins')
+  creerTypeSoin(@Body() b: { cliniqueId: number; libelle: string }) {
+    return this.listes.creer(Number(b.cliniqueId), 'TYPE_SOIN', b.libelle);
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Patch('types-soins/:id')
+  modifierTypeSoin(@Param('id', ParseIntPipe) id: number, @Body() b: { libelle: string }) {
+    return this.listes.modifier(id, 'TYPE_SOIN', b.libelle ?? '');
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles('ADMINISTRATEUR')
+  @Delete('types-soins/:id')
+  basculerTypeSoin(@Param('id', ParseIntPipe) id: number) {
+    return this.listes.desactiver(id, 'TYPE_SOIN');
+  }
+
   // ── ANTÉCÉDENTS MÉDICAUX ──
   @UseGuards(JwtAuthGuard)
   @Get('antecedents-medicaux')

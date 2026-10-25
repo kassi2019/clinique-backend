@@ -1,7 +1,66 @@
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AffectationService } from '../affectation/affectation.service';
-import { CreerConsultationDto, PrescriptionDto } from './dto/consultation.dto';
+import { CreerConsultationDto, PrescriptionDto, PrescrireSoinDto } from './dto/consultation.dto';
+export declare const includeSoinsPrescrits: {
+    include: {
+        lignes: {
+            include: {
+                prescription: {
+                    select: {
+                        _count: {
+                            select: {
+                                lignes: true;
+                            };
+                        };
+                    };
+                };
+            };
+            orderBy: {
+                id: "asc";
+            };
+        };
+        administrations: {
+            include: {
+                agent: {
+                    select: {
+                        matricule: true;
+                        personnel: {
+                            select: {
+                                nom: true;
+                                prenom: true;
+                            };
+                        };
+                    };
+                };
+            };
+            orderBy: {
+                date: "desc";
+            };
+        };
+        ordonnance: {
+            select: {
+                id: true;
+                numero: true;
+                statut: true;
+            };
+        };
+        medecin: {
+            select: {
+                matricule: true;
+                personnel: {
+                    select: {
+                        nom: true;
+                        prenom: true;
+                    };
+                };
+            };
+        };
+    };
+    orderBy: {
+        id: "asc";
+    };
+};
 export declare class ConsultationsService {
     private prisma;
     private affectationService;
@@ -134,7 +193,11 @@ export declare class ConsultationsService {
                 creditId: number | null;
             }[];
             consultation: {
-                medicaments: {
+                medicaments: ({
+                    medicament: {
+                        uniteVente: string;
+                    };
+                } & {
                     posologie: string | null;
                     createdAt: Date;
                     id: number;
@@ -146,7 +209,75 @@ export declare class ConsultationsService {
                     forme: string | null;
                     quantite: string | null;
                     duree: string | null;
-                }[];
+                })[];
+                soins: ({
+                    ordonnance: {
+                        id: number;
+                        statut: string;
+                        numero: string;
+                    };
+                    lignes: ({
+                        prescription: {
+                            _count: {
+                                lignes: number;
+                            };
+                        };
+                    } & {
+                        posologie: string | null;
+                        createdAt: Date;
+                        id: number;
+                        medicamentId: number | null;
+                        medicamentNom: string;
+                        forme: string | null;
+                        prescriptionId: number | null;
+                        dose: string;
+                        unite: string | null;
+                        voie: string | null;
+                        quantitePharmacie: number;
+                        prescriptionSoinId: number;
+                    })[];
+                    medecin: {
+                        personnel: {
+                            nom: string;
+                            prenom: string;
+                        };
+                        matricule: string;
+                    };
+                    administrations: ({
+                        agent: {
+                            personnel: {
+                                nom: string;
+                                prenom: string;
+                            };
+                            matricule: string;
+                        };
+                    } & {
+                        createdAt: Date;
+                        id: number;
+                        agentId: number | null;
+                        date: Date;
+                        observations: string | null;
+                        prescriptionSoinId: number;
+                    })[];
+                } & {
+                    typeSoin: string;
+                    createdAt: Date;
+                    id: number;
+                    cliniqueId: number;
+                    statut: string;
+                    updatedAt: Date;
+                    passageId: number;
+                    patientId: number;
+                    medecinId: number;
+                    consultationId: number;
+                    ordonnanceId: number | null;
+                    typeSoinId: number | null;
+                    foisParJour: number;
+                    dureeJours: number;
+                    instructions: string | null;
+                    nbAdministrations: number;
+                    arreteLe: Date | null;
+                })[];
                 medecin: {
                     personnel: {
                         nom: string;
@@ -160,6 +291,7 @@ export declare class ConsultationsService {
                     cliniqueId: number;
                     statut: string;
                     updatedAt: Date;
+                    type: string;
                     consultationId: number;
                     numero: string;
                     sauveeLe: Date | null;
@@ -231,9 +363,9 @@ export declare class ConsultationsService {
                 lignes: {
                     parametre: string;
                     id: number;
+                    unite: string | null;
                     examenLaboId: number;
                     valeur: string | null;
-                    unite: string | null;
                     normes: string | null;
                 }[];
                 validePar: {
@@ -342,9 +474,9 @@ export declare class ConsultationsService {
                     lignes: {
                         parametre: string;
                         id: number;
+                        unite: string | null;
                         examenLaboId: number;
                         valeur: string | null;
-                        unite: string | null;
                         normes: string | null;
                     }[];
                     validePar: {
@@ -430,6 +562,7 @@ export declare class ConsultationsService {
                 cliniqueId: number;
                 statut: string;
                 updatedAt: Date;
+                type: string;
                 consultationId: number;
                 numero: string;
                 sauveeLe: Date | null;
@@ -499,7 +632,11 @@ export declare class ConsultationsService {
         })[];
     }>;
     creerOuMaj(passageId: number, medecinId: number, dto: CreerConsultationDto): Promise<{
-        medicaments: {
+        medicaments: ({
+            medicament: {
+                uniteVente: string;
+            };
+        } & {
             posologie: string | null;
             createdAt: Date;
             id: number;
@@ -511,7 +648,75 @@ export declare class ConsultationsService {
             forme: string | null;
             quantite: string | null;
             duree: string | null;
-        }[];
+        })[];
+        soins: ({
+            ordonnance: {
+                id: number;
+                statut: string;
+                numero: string;
+            };
+            lignes: ({
+                prescription: {
+                    _count: {
+                        lignes: number;
+                    };
+                };
+            } & {
+                posologie: string | null;
+                createdAt: Date;
+                id: number;
+                medicamentId: number | null;
+                medicamentNom: string;
+                forme: string | null;
+                prescriptionId: number | null;
+                dose: string;
+                unite: string | null;
+                voie: string | null;
+                quantitePharmacie: number;
+                prescriptionSoinId: number;
+            })[];
+            medecin: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+            administrations: ({
+                agent: {
+                    personnel: {
+                        nom: string;
+                        prenom: string;
+                    };
+                    matricule: string;
+                };
+            } & {
+                createdAt: Date;
+                id: number;
+                agentId: number | null;
+                date: Date;
+                observations: string | null;
+                prescriptionSoinId: number;
+            })[];
+        } & {
+            typeSoin: string;
+            createdAt: Date;
+            id: number;
+            cliniqueId: number;
+            statut: string;
+            updatedAt: Date;
+            passageId: number;
+            patientId: number;
+            medecinId: number;
+            consultationId: number;
+            ordonnanceId: number | null;
+            typeSoinId: number | null;
+            foisParJour: number;
+            dureeJours: number;
+            instructions: string | null;
+            nbAdministrations: number;
+            arreteLe: Date | null;
+        })[];
         medecin: {
             personnel: {
                 nom: string;
@@ -525,6 +730,7 @@ export declare class ConsultationsService {
             cliniqueId: number;
             statut: string;
             updatedAt: Date;
+            type: string;
             consultationId: number;
             numero: string;
             sauveeLe: Date | null;
@@ -604,6 +810,7 @@ export declare class ConsultationsService {
         cliniqueId: number;
         statut: string;
         updatedAt: Date;
+        type: string;
         consultationId: number;
         numero: string;
         sauveeLe: Date | null;
@@ -723,7 +930,11 @@ export declare class ConsultationsService {
         ok: boolean;
     }>;
     sauvegarderOrdonnance(consultationId: number): Promise<{
-        medicaments: {
+        medicaments: ({
+            medicament: {
+                uniteVente: string;
+            };
+        } & {
             posologie: string | null;
             createdAt: Date;
             id: number;
@@ -735,7 +946,75 @@ export declare class ConsultationsService {
             forme: string | null;
             quantite: string | null;
             duree: string | null;
-        }[];
+        })[];
+        soins: ({
+            ordonnance: {
+                id: number;
+                statut: string;
+                numero: string;
+            };
+            lignes: ({
+                prescription: {
+                    _count: {
+                        lignes: number;
+                    };
+                };
+            } & {
+                posologie: string | null;
+                createdAt: Date;
+                id: number;
+                medicamentId: number | null;
+                medicamentNom: string;
+                forme: string | null;
+                prescriptionId: number | null;
+                dose: string;
+                unite: string | null;
+                voie: string | null;
+                quantitePharmacie: number;
+                prescriptionSoinId: number;
+            })[];
+            medecin: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+            administrations: ({
+                agent: {
+                    personnel: {
+                        nom: string;
+                        prenom: string;
+                    };
+                    matricule: string;
+                };
+            } & {
+                createdAt: Date;
+                id: number;
+                agentId: number | null;
+                date: Date;
+                observations: string | null;
+                prescriptionSoinId: number;
+            })[];
+        } & {
+            typeSoin: string;
+            createdAt: Date;
+            id: number;
+            cliniqueId: number;
+            statut: string;
+            updatedAt: Date;
+            passageId: number;
+            patientId: number;
+            medecinId: number;
+            consultationId: number;
+            ordonnanceId: number | null;
+            typeSoinId: number | null;
+            foisParJour: number;
+            dureeJours: number;
+            instructions: string | null;
+            nbAdministrations: number;
+            arreteLe: Date | null;
+        })[];
         medecin: {
             personnel: {
                 nom: string;
@@ -749,6 +1028,7 @@ export declare class ConsultationsService {
             cliniqueId: number;
             statut: string;
             updatedAt: Date;
+            type: string;
             consultationId: number;
             numero: string;
             sauveeLe: Date | null;
@@ -816,6 +1096,213 @@ export declare class ConsultationsService {
         moDebut: Date | null;
         moFin: Date | null;
     }>;
+    soinsPrescrits(consultationId: number): Promise<({
+        ordonnance: {
+            id: number;
+            statut: string;
+            numero: string;
+        };
+        lignes: ({
+            prescription: {
+                _count: {
+                    lignes: number;
+                };
+            };
+        } & {
+            posologie: string | null;
+            createdAt: Date;
+            id: number;
+            medicamentId: number | null;
+            medicamentNom: string;
+            forme: string | null;
+            prescriptionId: number | null;
+            dose: string;
+            unite: string | null;
+            voie: string | null;
+            quantitePharmacie: number;
+            prescriptionSoinId: number;
+        })[];
+        medecin: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+        administrations: ({
+            agent: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+        } & {
+            createdAt: Date;
+            id: number;
+            agentId: number | null;
+            date: Date;
+            observations: string | null;
+            prescriptionSoinId: number;
+        })[];
+    } & {
+        typeSoin: string;
+        createdAt: Date;
+        id: number;
+        cliniqueId: number;
+        statut: string;
+        updatedAt: Date;
+        passageId: number;
+        patientId: number;
+        medecinId: number;
+        consultationId: number;
+        ordonnanceId: number | null;
+        typeSoinId: number | null;
+        foisParJour: number;
+        dureeJours: number;
+        instructions: string | null;
+        nbAdministrations: number;
+        arreteLe: Date | null;
+    })[]>;
+    prescrireSoin(consultationId: number, medecinId: number, dto: PrescrireSoinDto): Promise<{
+        ordonnance: {
+            id: number;
+            statut: string;
+            numero: string;
+        };
+        lignes: ({
+            prescription: {
+                _count: {
+                    lignes: number;
+                };
+            };
+        } & {
+            posologie: string | null;
+            createdAt: Date;
+            id: number;
+            medicamentId: number | null;
+            medicamentNom: string;
+            forme: string | null;
+            prescriptionId: number | null;
+            dose: string;
+            unite: string | null;
+            voie: string | null;
+            quantitePharmacie: number;
+            prescriptionSoinId: number;
+        })[];
+        medecin: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+        administrations: ({
+            agent: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+        } & {
+            createdAt: Date;
+            id: number;
+            agentId: number | null;
+            date: Date;
+            observations: string | null;
+            prescriptionSoinId: number;
+        })[];
+    } & {
+        typeSoin: string;
+        createdAt: Date;
+        id: number;
+        cliniqueId: number;
+        statut: string;
+        updatedAt: Date;
+        passageId: number;
+        patientId: number;
+        medecinId: number;
+        consultationId: number;
+        ordonnanceId: number | null;
+        typeSoinId: number | null;
+        foisParJour: number;
+        dureeJours: number;
+        instructions: string | null;
+        nbAdministrations: number;
+        arreteLe: Date | null;
+    }>;
+    retirerSoin(id: number): Promise<{
+        ok: boolean;
+    }>;
+    arreterSoin(id: number): Promise<{
+        ordonnance: {
+            id: number;
+            statut: string;
+            numero: string;
+        };
+        lignes: ({
+            prescription: {
+                _count: {
+                    lignes: number;
+                };
+            };
+        } & {
+            posologie: string | null;
+            createdAt: Date;
+            id: number;
+            medicamentId: number | null;
+            medicamentNom: string;
+            forme: string | null;
+            prescriptionId: number | null;
+            dose: string;
+            unite: string | null;
+            voie: string | null;
+            quantitePharmacie: number;
+            prescriptionSoinId: number;
+        })[];
+        medecin: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+        administrations: ({
+            agent: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+        } & {
+            createdAt: Date;
+            id: number;
+            agentId: number | null;
+            date: Date;
+            observations: string | null;
+            prescriptionSoinId: number;
+        })[];
+    } & {
+        typeSoin: string;
+        createdAt: Date;
+        id: number;
+        cliniqueId: number;
+        statut: string;
+        updatedAt: Date;
+        passageId: number;
+        patientId: number;
+        medecinId: number;
+        consultationId: number;
+        ordonnanceId: number | null;
+        typeSoinId: number | null;
+        foisParJour: number;
+        dureeJours: number;
+        instructions: string | null;
+        nbAdministrations: number;
+        arreteLe: Date | null;
+    }>;
     enregistrerCertificat(consultationId: number, dto: {
         civilite: string;
         nomPatient: string;
@@ -840,10 +1327,10 @@ export declare class ConsultationsService {
         numero: string;
         debut: Date;
         fin: Date;
+        dureeJours: number;
         lieu: string | null;
         civilite: string;
         nomPatient: string;
-        dureeJours: number;
     }>;
     certificatsArret(consultationId: number): Promise<{
         profession: string | null;
@@ -859,10 +1346,10 @@ export declare class ConsultationsService {
         numero: string;
         debut: Date;
         fin: Date;
+        dureeJours: number;
         lieu: string | null;
         civilite: string;
         nomPatient: string;
-        dureeJours: number;
     }[]>;
     changerDisponibilite(utilisateurId: number, disponibilite: 'DISPONIBLE' | 'INDISPONIBLE'): Promise<{
         disponibilite: string;
@@ -947,7 +1434,11 @@ export declare class ConsultationsService {
         dateAffectation: Date;
     }>;
     valider(consultationId: number): Promise<{
-        medicaments: {
+        medicaments: ({
+            medicament: {
+                uniteVente: string;
+            };
+        } & {
             posologie: string | null;
             createdAt: Date;
             id: number;
@@ -959,7 +1450,75 @@ export declare class ConsultationsService {
             forme: string | null;
             quantite: string | null;
             duree: string | null;
-        }[];
+        })[];
+        soins: ({
+            ordonnance: {
+                id: number;
+                statut: string;
+                numero: string;
+            };
+            lignes: ({
+                prescription: {
+                    _count: {
+                        lignes: number;
+                    };
+                };
+            } & {
+                posologie: string | null;
+                createdAt: Date;
+                id: number;
+                medicamentId: number | null;
+                medicamentNom: string;
+                forme: string | null;
+                prescriptionId: number | null;
+                dose: string;
+                unite: string | null;
+                voie: string | null;
+                quantitePharmacie: number;
+                prescriptionSoinId: number;
+            })[];
+            medecin: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+            administrations: ({
+                agent: {
+                    personnel: {
+                        nom: string;
+                        prenom: string;
+                    };
+                    matricule: string;
+                };
+            } & {
+                createdAt: Date;
+                id: number;
+                agentId: number | null;
+                date: Date;
+                observations: string | null;
+                prescriptionSoinId: number;
+            })[];
+        } & {
+            typeSoin: string;
+            createdAt: Date;
+            id: number;
+            cliniqueId: number;
+            statut: string;
+            updatedAt: Date;
+            passageId: number;
+            patientId: number;
+            medecinId: number;
+            consultationId: number;
+            ordonnanceId: number | null;
+            typeSoinId: number | null;
+            foisParJour: number;
+            dureeJours: number;
+            instructions: string | null;
+            nbAdministrations: number;
+            arreteLe: Date | null;
+        })[];
         medecin: {
             personnel: {
                 nom: string;
@@ -973,6 +1532,7 @@ export declare class ConsultationsService {
             cliniqueId: number;
             statut: string;
             updatedAt: Date;
+            type: string;
             consultationId: number;
             numero: string;
             sauveeLe: Date | null;

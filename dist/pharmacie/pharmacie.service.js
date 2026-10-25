@@ -16,6 +16,10 @@ const impression_service_1 = require("../impression/impression.service");
 const prisma_service_1 = require("../prisma/prisma.service");
 const recherche_patient_1 = require("../common/recherche-patient");
 const N = (x) => Number(x);
+function quantiteDemandee(q) {
+    const t = (q ?? '').trim();
+    return /^\d+$/.test(t) ? Number(t) : null;
+}
 let PharmacieService = PharmacieService_1 = class PharmacieService {
     constructor(prisma, impressionService) {
         this.prisma = prisma;
@@ -63,6 +67,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                     id: o.id,
                     consultationId: o.consultation.id,
                     numeroOrdonnance: o.numero,
+                    ordonnanceType: o.type,
                     ordonnanceStatut: o.statut,
                     createdAt: o.createdAt,
                     patient: o.consultation.patient,
@@ -124,6 +129,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 valideeLe: c.valideeLe,
                 createdAt: o.createdAt,
                 numeroOrdonnance: o.numero,
+                ordonnanceType: o.type,
                 ordonnanceStatut: o.statut,
                 medicaments: o.medicaments,
                 dispensations: o.dispensations.map((d) => ({
@@ -198,6 +204,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             ordonnance: {
                 id: ordonnance.id,
                 numero: ordonnance.numero,
+                type: ordonnance.type,
                 statut: ordonnance.statut,
                 createdAt: ordonnance.createdAt,
             },
@@ -217,28 +224,38 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 service: consultation.passage.service,
                 medecin: consultation.medecin,
             },
-            prescriptions: consultation.medicaments.map((p) => ({
-                id: p.id,
-                medicamentNom: p.medicamentNom,
-                forme: p.forme,
-                posologie: p.posologie,
-                quantite: p.quantite,
-                duree: p.duree,
-                medicament: p.medicament
-                    ? {
-                        id: p.medicament.id,
-                        stock: p.medicament.stock,
-                        prixVente: p.medicament.prixVente ? N(p.medicament.prixVente) : null,
-                        uniteVente: p.medicament.uniteVente,
-                        lots: p.medicament.lots.map((l) => ({
-                            id: l.id,
-                            numeroLot: l.numeroLot,
-                            quantiteRestante: l.quantiteRestante,
-                            datePeremption: l.datePeremption,
-                        })),
-                    }
-                    : null,
-            })),
+            prescriptions: consultation.medicaments.map((p) => {
+                const demandee = quantiteDemandee(p.quantite);
+                const dejaDelivree = consultation.dispensations
+                    .flatMap((d) => d.lignes)
+                    .filter((l) => l.prescriptionId === p.id)
+                    .reduce((s, l) => s + l.quantiteDelivree, 0);
+                return {
+                    id: p.id,
+                    medicamentNom: p.medicamentNom,
+                    forme: p.forme,
+                    posologie: p.posologie,
+                    quantite: p.quantite,
+                    duree: p.duree,
+                    dejaDelivree,
+                    quantiteMax: demandee == null ? null : Math.max(0, demandee - dejaDelivree),
+                    medicament: p.medicament
+                        ? {
+                            id: p.medicament.id,
+                            stock: p.medicament.stock,
+                            consommable: p.medicament.consommable,
+                            prixVente: p.medicament.prixVente ? N(p.medicament.prixVente) : null,
+                            uniteVente: p.medicament.uniteVente,
+                            lots: p.medicament.lots.map((l) => ({
+                                id: l.id,
+                                numeroLot: l.numeroLot,
+                                quantiteRestante: l.quantiteRestante,
+                                datePeremption: l.datePeremption,
+                            })),
+                        }
+                        : null,
+                };
+            }),
             dispensations: consultation.dispensations.map((d) => ({
                 ...d,
                 montantTotal: N(d.montantTotal),
@@ -260,6 +277,26 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             throw new common_1.NotFoundException('Ordonnance introuvable.');
         const consultation = ordonnance.consultation;
         const consultationId = consultation.id;
+        for (const ligne of lignes) {
+            if (!ligne.quantiteDelivree || ligne.quantiteDelivree <= 0)
+                continue;
+            const p = await this.prisma.prescription.findUnique({
+                where: { id: ligne.prescriptionId },
+                include: { medicament: { select: { uniteVente: true } } },
+            });
+            const demandee = quantiteDemandee(p?.quantite);
+            if (!p || demandee == null)
+                continue;
+            const deja = await this.prisma.ligneDispensation.aggregate({
+                where: { prescriptionId: p.id },
+                _sum: { quantiteDelivree: true },
+            });
+            const reste = Math.max(0, demandee - (deja._sum.quantiteDelivree ?? 0));
+            if (ligne.quantiteDelivree > reste) {
+                const unite = p.medicament?.uniteVente === 'PLAQUE' ? 'plaquette(s)' : 'boîte(s)';
+                throw new common_1.BadRequestException(`« ${p.medicamentNom} » : la quantité délivrée (${ligne.quantiteDelivree}) dépasse la quantité demandée par le médecin (${reste} ${unite} restant à délivrer).`);
+            }
+        }
         let dispensation = await this.prisma.dispensation.findFirst({
             where: { ordonnanceId, statut: 'EN_COURS' },
         });

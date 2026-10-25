@@ -78,3 +78,19 @@ export declare class PrescrireExamenDto {
     prestationId?: number;
     libelle?: string;
 }
+export declare const VOIES_SOIN: string[];
+export declare class LigneSoinDto {
+    medicamentId: number;
+    dose: string;
+    unite?: string;
+    voie?: string;
+    posologie?: string;
+    quantitePharmacie: number;
+}
+export declare class PrescrireSoinDto {
+    typeSoinId: number;
+    foisParJour: number;
+    dureeJours: number;
+    instructions?: string;
+    lignes: LigneSoinDto[];
+}

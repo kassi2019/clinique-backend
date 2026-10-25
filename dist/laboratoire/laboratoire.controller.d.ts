@@ -181,9 +181,9 @@ export declare class LaboratoireController {
                 lignes: {
                     parametre: string;
                     id: number;
+                    unite: string | null;
                     examenLaboId: number;
                     valeur: string | null;
-                    unite: string | null;
                     normes: string | null;
                 }[];
                 prelevePar: {
@@ -228,9 +228,9 @@ export declare class LaboratoireController {
             lignes: {
                 parametre: string;
                 id: number;
+                unite: string | null;
                 examenLaboId: number;
                 valeur: string | null;
-                unite: string | null;
                 normes: string | null;
             }[];
         } & {
@@ -254,9 +254,9 @@ export declare class LaboratoireController {
         lignes: {
             parametre: string;
             id: number;
+            unite: string | null;
             examenLaboId: number;
             valeur: string | null;
-            unite: string | null;
             normes: string | null;
         }[];
         prelevePar: {
@@ -293,9 +293,9 @@ export declare class LaboratoireController {
         lignes: {
             parametre: string;
             id: number;
+            unite: string | null;
             examenLaboId: number;
             valeur: string | null;
-            unite: string | null;
             normes: string | null;
         }[];
         prelevePar: {
@@ -332,9 +332,9 @@ export declare class LaboratoireController {
         lignes: {
             parametre: string;
             id: number;
+            unite: string | null;
             examenLaboId: number;
             valeur: string | null;
-            unite: string | null;
             normes: string | null;
         }[];
         prelevePar: {
@@ -383,9 +383,9 @@ export declare class LaboratoireController {
             lignes: {
                 parametre: string;
                 id: number;
+                unite: string | null;
                 examenLaboId: number;
                 valeur: string | null;
-                unite: string | null;
                 normes: string | null;
             }[];
             prelevePar: {

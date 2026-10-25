@@ -34,6 +34,9 @@ let SoinsController = class SoinsController {
     realiser(id, body, req) {
         return this.soinsService.realiser(Number(body.passagePrestationId), body.date ?? new Date().toISOString(), body.observations, req.user.id);
     }
+    administrer(id, body, req) {
+        return this.soinsService.administrer(id, body.date ?? new Date().toISOString(), body.observations, req.user.id);
+    }
     realisations(cliniqueId, page, perPage, jour, recherche) {
         return this.soinsService.realisations(cliniqueId, page ? Number(page) : 1, perPage ? Number(perPage) : 10, jour, recherche);
     }
@@ -70,6 +73,15 @@ __decorate([
     __metadata("design:paramtypes", [Number, Object, Object]),
     __metadata("design:returntype", void 0)
 ], SoinsController.prototype, "realiser", null);
+__decorate([
+    (0, common_1.Post)('prescrits/:id/administrer'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object, Object]),
+    __metadata("design:returntype", void 0)
+], SoinsController.prototype, "administrer", null);
 __decorate([
     (0, common_1.Get)('realisations'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),

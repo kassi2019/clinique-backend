@@ -398,6 +398,7 @@ export declare class MaterniteController {
                 modeEntree: string | null;
                 antecedentsMedicaux: string | null;
                 antecedentsChirurgicaux: string | null;
+                voie: string;
                 lieu: string | null;
                 enfantsVivants: number | null;
                 enfantsDecedes: number | null;
@@ -406,7 +407,6 @@ export declare class MaterniteController {
                 toxemie: string | null;
                 vatStatut: string | null;
                 dateHeure: Date;
-                voie: string;
                 termeSA: string | null;
                 sexeEnfant: string | null;
                 poidsEnfant: import("@prisma/client/runtime/library").Decimal | null;
@@ -687,6 +687,7 @@ export declare class MaterniteController {
             modeEntree: string | null;
             antecedentsMedicaux: string | null;
             antecedentsChirurgicaux: string | null;
+            voie: string;
             lieu: string | null;
             enfantsVivants: number | null;
             enfantsDecedes: number | null;
@@ -695,7 +696,6 @@ export declare class MaterniteController {
             toxemie: string | null;
             vatStatut: string | null;
             dateHeure: Date;
-            voie: string;
             termeSA: string | null;
             sexeEnfant: string | null;
             poidsEnfant: import("@prisma/client/runtime/library").Decimal | null;
@@ -950,6 +950,7 @@ export declare class MaterniteController {
                 modeEntree: string | null;
                 antecedentsMedicaux: string | null;
                 antecedentsChirurgicaux: string | null;
+                voie: string;
                 lieu: string | null;
                 enfantsVivants: number | null;
                 enfantsDecedes: number | null;
@@ -958,7 +959,6 @@ export declare class MaterniteController {
                 toxemie: string | null;
                 vatStatut: string | null;
                 dateHeure: Date;
-                voie: string;
                 termeSA: string | null;
                 sexeEnfant: string | null;
                 poidsEnfant: import("@prisma/client/runtime/library").Decimal | null;
@@ -1122,6 +1122,7 @@ export declare class MaterniteController {
             modeEntree: string | null;
             antecedentsMedicaux: string | null;
             antecedentsChirurgicaux: string | null;
+            voie: string;
             lieu: string | null;
             enfantsVivants: number | null;
             enfantsDecedes: number | null;
@@ -1130,7 +1131,6 @@ export declare class MaterniteController {
             toxemie: string | null;
             vatStatut: string | null;
             dateHeure: Date;
-            voie: string;
             termeSA: string | null;
             sexeEnfant: string | null;
             poidsEnfant: import("@prisma/client/runtime/library").Decimal | null;
@@ -1461,6 +1461,7 @@ export declare class MaterniteController {
         modeEntree: string | null;
         antecedentsMedicaux: string | null;
         antecedentsChirurgicaux: string | null;
+        voie: string;
         lieu: string | null;
         enfantsVivants: number | null;
         enfantsDecedes: number | null;
@@ -1469,7 +1470,6 @@ export declare class MaterniteController {
         toxemie: string | null;
         vatStatut: string | null;
         dateHeure: Date;
-        voie: string;
         termeSA: string | null;
         sexeEnfant: string | null;
         poidsEnfant: import("@prisma/client/runtime/library").Decimal | null;
@@ -1524,6 +1524,7 @@ export declare class MaterniteController {
         modeEntree: string | null;
         antecedentsMedicaux: string | null;
         antecedentsChirurgicaux: string | null;
+        voie: string;
         lieu: string | null;
         enfantsVivants: number | null;
         enfantsDecedes: number | null;
@@ -1532,7 +1533,6 @@ export declare class MaterniteController {
         toxemie: string | null;
         vatStatut: string | null;
         dateHeure: Date;
-        voie: string;
         termeSA: string | null;
         sexeEnfant: string | null;
         poidsEnfant: import("@prisma/client/runtime/library").Decimal | null;
@@ -1649,6 +1649,7 @@ export declare class MaterniteController {
             modeEntree: string | null;
             antecedentsMedicaux: string | null;
             antecedentsChirurgicaux: string | null;
+            voie: string;
             lieu: string | null;
             enfantsVivants: number | null;
             enfantsDecedes: number | null;
@@ -1657,7 +1658,6 @@ export declare class MaterniteController {
             toxemie: string | null;
             vatStatut: string | null;
             dateHeure: Date;
-            voie: string;
             termeSA: string | null;
             sexeEnfant: string | null;
             poidsEnfant: import("@prisma/client/runtime/library").Decimal | null;

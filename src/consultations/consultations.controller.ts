@@ -17,6 +17,7 @@ import {
   CreerConsultationDto,
   PrescriptionDto,
   PrescrireExamenDto,
+  PrescrireSoinDto,
   PrescrireExamensDto,
 } from './dto/consultation.dto';
 
@@ -62,6 +63,32 @@ export class ConsultationsController {
   @Delete('medicaments/:id')
   retirerMedicament(@Param('id', ParseIntPipe) id: number) {
     return this.consultationsService.retirerMedicament(id);
+  }
+
+  /** Soins prescrits de la consultation (onglet « Soins »). */
+  @Get(':id/soins')
+  soins(@Param('id', ParseIntPipe) id: number) {
+    return this.consultationsService.soinsPrescrits(id);
+  }
+
+  /** Prescrit un soin : visible tout de suite dans le module Soins. */
+  @Post(':id/soins')
+  prescrireSoin(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: PrescrireSoinDto,
+    @Req() req,
+  ) {
+    return this.consultationsService.prescrireSoin(id, req.user.id, dto);
+  }
+
+  @Delete('soins/:id')
+  retirerSoin(@Param('id', ParseIntPipe) id: number) {
+    return this.consultationsService.retirerSoin(id);
+  }
+
+  @Post('soins/:id/arreter')
+  arreterSoin(@Param('id', ParseIntPipe) id: number) {
+    return this.consultationsService.arreterSoin(id);
   }
 
   /** Prescrit des examens (lignes NON_PRESCRITE → EN_ATTENTE pour la caisse). */

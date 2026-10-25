@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PrescrireExamenDto = exports.PrescrireExamensDto = exports.PrescriptionDto = exports.CreerConsultationDto = exports.PatientAdminDto = void 0;
+exports.PrescrireSoinDto = exports.LigneSoinDto = exports.VOIES_SOIN = exports.PrescrireExamenDto = exports.PrescrireExamensDto = exports.PrescriptionDto = exports.CreerConsultationDto = exports.PatientAdminDto = void 0;
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 class PatientAdminDto {
@@ -378,4 +378,68 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], PrescrireExamenDto.prototype, "libelle", void 0);
+exports.VOIES_SOIN = ['IM', 'IV', 'SC', 'ID', 'PO', 'LOCALE', 'AUTRE'];
+class LigneSoinDto {
+}
+exports.LigneSoinDto = LigneSoinDto;
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], LigneSoinDto.prototype, "medicamentId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], LigneSoinDto.prototype, "dose", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], LigneSoinDto.prototype, "unite", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(exports.VOIES_SOIN),
+    __metadata("design:type", String)
+], LigneSoinDto.prototype, "voie", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], LigneSoinDto.prototype, "posologie", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    __metadata("design:type", Number)
+], LigneSoinDto.prototype, "quantitePharmacie", void 0);
+class PrescrireSoinDto {
+}
+exports.PrescrireSoinDto = PrescrireSoinDto;
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], PrescrireSoinDto.prototype, "typeSoinId", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(24),
+    __metadata("design:type", Number)
+], PrescrireSoinDto.prototype, "foisParJour", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(365),
+    __metadata("design:type", Number)
+], PrescrireSoinDto.prototype, "dureeJours", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], PrescrireSoinDto.prototype, "instructions", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayMaxSize)(20),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => LigneSoinDto),
+    __metadata("design:type", Array)
+], PrescrireSoinDto.prototype, "lignes", void 0);
 //# sourceMappingURL=consultation.dto.js.map

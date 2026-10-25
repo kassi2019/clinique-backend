@@ -31,6 +31,7 @@ let ListesParametresService = class ListesParametresService {
             case 'ANTECEDENT': return this.prisma.antecedentMedical;
             case 'EXAMEN': return this.prisma.autreExamen;
             case 'INTERVENTION': return this.prisma.interventionChirurgicale;
+            case 'TYPE_SOIN': return this.prisma.typeSoin;
             default: throw new common_1.BadRequestException(`Code de liste inconnu : ${code}`);
         }
     }

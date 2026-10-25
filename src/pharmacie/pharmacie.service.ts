@@ -10,6 +10,12 @@ import { critereNomPrenoms } from '../common/recherche-patient';
 
 const N = (x: any) => Number(x);
 
+/** Quantité demandée par le médecin (nombre entier) ; null pour une ancienne saisie libre. */
+function quantiteDemandee(q?: string | null): number | null {
+  const t = (q ?? '').trim();
+  return /^\d+$/.test(t) ? Number(t) : null;
+}
+
 @Injectable()
 export class PharmacieService {
   private readonly logger = new Logger(PharmacieService.name);
@@ -79,6 +85,7 @@ export class PharmacieService {
           id: o.id,
           consultationId: o.consultation.id,
           numeroOrdonnance: o.numero,
+          ordonnanceType: o.type,
           ordonnanceStatut: o.statut,
           createdAt: o.createdAt,
           patient: o.consultation.patient,
@@ -153,6 +160,7 @@ export class PharmacieService {
               valideeLe: c.valideeLe,
               createdAt: o.createdAt,
               numeroOrdonnance: o.numero,
+              ordonnanceType: o.type,
               ordonnanceStatut: o.statut,
               medicaments: o.medicaments,
               dispensations: o.dispensations.map((d) => ({
@@ -237,6 +245,7 @@ export class PharmacieService {
       ordonnance: {
         id: ordonnance.id,
         numero: ordonnance.numero,
+        type: ordonnance.type,
         statut: ordonnance.statut,
         createdAt: ordonnance.createdAt,
       },
@@ -257,17 +266,27 @@ export class PharmacieService {
         service: consultation.passage.service,
         medecin: consultation.medecin,
       },
-      prescriptions: consultation.medicaments.map((p) => ({
+      prescriptions: consultation.medicaments.map((p) => {
+        const demandee = quantiteDemandee(p.quantite);
+        const dejaDelivree = consultation.dispensations
+          .flatMap((d) => d.lignes)
+          .filter((l) => l.prescriptionId === p.id)
+          .reduce((s, l) => s + l.quantiteDelivree, 0);
+        return {
         id: p.id,
         medicamentNom: p.medicamentNom,
         forme: p.forme,
         posologie: p.posologie,
         quantite: p.quantite,
         duree: p.duree,
+        dejaDelivree,
+        // Maximum encore délivrable (null : ancienne saisie libre, non contrôlée)
+        quantiteMax: demandee == null ? null : Math.max(0, demandee - dejaDelivree),
         medicament: p.medicament
           ? {
               id: p.medicament.id,
               stock: p.medicament.stock,
+              consommable: p.medicament.consommable,
               prixVente: p.medicament.prixVente ? N(p.medicament.prixVente) : null,
               uniteVente: p.medicament.uniteVente,
               lots: p.medicament.lots.map((l) => ({
@@ -278,7 +297,8 @@ export class PharmacieService {
               })),
             }
           : null,
-      })),
+        };
+      }),
       dispensations: consultation.dispensations.map((d) => ({
         ...d,
         montantTotal: N(d.montantTotal),
@@ -308,6 +328,29 @@ export class PharmacieService {
     if (!ordonnance) throw new NotFoundException('Ordonnance introuvable.');
     const consultation = ordonnance.consultation;
     const consultationId = consultation.id;
+
+    // La quantité délivrée ne peut pas dépasser la quantité demandée par le médecin
+    // (déduction faite de ce qui a déjà été délivré). Contrôle avant toute écriture.
+    for (const ligne of lignes) {
+      if (!ligne.quantiteDelivree || ligne.quantiteDelivree <= 0) continue;
+      const p = await this.prisma.prescription.findUnique({
+        where: { id: ligne.prescriptionId },
+        include: { medicament: { select: { uniteVente: true } } },
+      });
+      const demandee = quantiteDemandee(p?.quantite);
+      if (!p || demandee == null) continue;
+      const deja = await this.prisma.ligneDispensation.aggregate({
+        where: { prescriptionId: p.id },
+        _sum: { quantiteDelivree: true },
+      });
+      const reste = Math.max(0, demandee - (deja._sum.quantiteDelivree ?? 0));
+      if (ligne.quantiteDelivree > reste) {
+        const unite = p.medicament?.uniteVente === 'PLAQUE' ? 'plaquette(s)' : 'boîte(s)';
+        throw new BadRequestException(
+          `« ${p.medicamentNom} » : la quantité délivrée (${ligne.quantiteDelivree}) dépasse la quantité demandée par le médecin (${reste} ${unite} restant à délivrer).`,
+        );
+      }
+    }
 
     // Chaque ordonnance a sa propre dispensation (et donc son propre paiement)
     let dispensation = await this.prisma.dispensation.findFirst({

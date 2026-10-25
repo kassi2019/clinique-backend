@@ -41,6 +41,7 @@ export declare class SoinsService {
         createdAt: Date;
         nbSoins: number;
     }[]>;
+    private nbSoinsAFaire;
     rechercher(reference: string, cliniqueId: number): Promise<{
         id: number;
         numeroOrdre: string;
@@ -185,6 +186,142 @@ export declare class SoinsService {
             patientId: number;
             passagePrestationId: number;
         })[];
+        prescrits: ({
+            ordonnance: {
+                id: number;
+                statut: string;
+                numero: string;
+            };
+            lignes: ({
+                prescription: {
+                    _count: {
+                        lignes: number;
+                    };
+                };
+            } & {
+                posologie: string | null;
+                createdAt: Date;
+                id: number;
+                medicamentId: number | null;
+                medicamentNom: string;
+                forme: string | null;
+                prescriptionId: number | null;
+                dose: string;
+                unite: string | null;
+                voie: string | null;
+                quantitePharmacie: number;
+                prescriptionSoinId: number;
+            })[];
+            medecin: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+            administrations: ({
+                agent: {
+                    personnel: {
+                        nom: string;
+                        prenom: string;
+                    };
+                    matricule: string;
+                };
+            } & {
+                createdAt: Date;
+                id: number;
+                agentId: number | null;
+                date: Date;
+                observations: string | null;
+                prescriptionSoinId: number;
+            })[];
+        } & {
+            typeSoin: string;
+            createdAt: Date;
+            id: number;
+            cliniqueId: number;
+            statut: string;
+            updatedAt: Date;
+            passageId: number;
+            patientId: number;
+            medecinId: number;
+            consultationId: number;
+            ordonnanceId: number | null;
+            typeSoinId: number | null;
+            foisParJour: number;
+            dureeJours: number;
+            instructions: string | null;
+            nbAdministrations: number;
+            arreteLe: Date | null;
+        })[];
+    }>;
+    administrer(prescriptionSoinId: number, date: string, observations: string | undefined, agentId: number): Promise<{
+        ordonnance: {
+            id: number;
+            statut: string;
+            numero: string;
+        };
+        lignes: ({
+            prescription: {
+                _count: {
+                    lignes: number;
+                };
+            };
+        } & {
+            posologie: string | null;
+            createdAt: Date;
+            id: number;
+            medicamentId: number | null;
+            medicamentNom: string;
+            forme: string | null;
+            prescriptionId: number | null;
+            dose: string;
+            unite: string | null;
+            voie: string | null;
+            quantitePharmacie: number;
+            prescriptionSoinId: number;
+        })[];
+        medecin: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+        administrations: ({
+            agent: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+        } & {
+            createdAt: Date;
+            id: number;
+            agentId: number | null;
+            date: Date;
+            observations: string | null;
+            prescriptionSoinId: number;
+        })[];
+    } & {
+        typeSoin: string;
+        createdAt: Date;
+        id: number;
+        cliniqueId: number;
+        statut: string;
+        updatedAt: Date;
+        passageId: number;
+        patientId: number;
+        medecinId: number;
+        consultationId: number;
+        ordonnanceId: number | null;
+        typeSoinId: number | null;
+        foisParJour: number;
+        dureeJours: number;
+        instructions: string | null;
+        nbAdministrations: number;
+        arreteLe: Date | null;
     }>;
     realiser(passagePrestationId: number, date: string, observations: string | undefined, agentId: number): Promise<{
         realisations: ({
@@ -215,7 +352,7 @@ export declare class SoinsService {
         passagePrestationId: number;
     }>;
     realisations(cliniqueId: number, page?: number, perPage?: number, jour?: string, recherche?: string): Promise<{
-        data: ({
+        data: (({
             soin: {
                 patient: {
                     nom: string;
@@ -250,6 +387,28 @@ export declare class SoinsService {
             date: Date;
             observations: string | null;
             soinId: number;
+        }) | {
+            id: string;
+            date: Date;
+            observations: string;
+            agent: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+            soin: {
+                libelle: string;
+                patient: {
+                    nom: string;
+                    prenom: string;
+                    code: string;
+                };
+                passage: {
+                    numeroOrdre: string;
+                };
+            };
         })[];
         total: number;
         page: number;

@@ -545,9 +545,15 @@ export class AccueilService {
       });
       prefixe = 'INT';
     }
-    return `${prefixe}-${String(nb + 1).padStart(3, '0')}${String(
-      d.getMonth() + 1,
-    ).padStart(2, '0')}${d.getFullYear()}`;
+    const numero = (n: number) =>
+      `${prefixe}-${String(n).padStart(3, '0')}${String(d.getMonth() + 1).padStart(2, '0')}${d.getFullYear()}`;
+    // Après une suppression de passage, le compteur retombe sur un numéro
+    // déjà attribué : on avance jusqu'au premier numéro libre.
+    let n = nb + 1;
+    while (await this.prisma.passage.findFirst({ where: { numeroOrdre: numero(n) }, select: { id: true } })) {
+      n += 1;
+    }
+    return numero(n);
   }
 
   /**

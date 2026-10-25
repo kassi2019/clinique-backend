@@ -9,6 +9,7 @@ import { AffectationService } from '../affectation/affectation.service';
 import {
   CreerConsultationDto,
   PrescriptionDto,
+  PrescrireSoinDto,
 } from './dto/consultation.dto';
 import { critereNomPrenoms } from '../common/recherche-patient';
 
@@ -26,9 +27,38 @@ const metaResultatExterne = {
   },
 } as const;
 
+/** Soins prescrits : médicaments (avec état de délivrance pharmacie) + administrations. */
+export const includeSoinsPrescrits = {
+  include: {
+    lignes: {
+      include: { prescription: { select: { _count: { select: { lignes: true } } } } },
+      orderBy: { id: 'asc' },
+    },
+    administrations: {
+      include: {
+        agent: {
+          select: { matricule: true, personnel: { select: { nom: true, prenom: true } } },
+        },
+      },
+      orderBy: { date: 'desc' },
+    },
+    ordonnance: { select: { id: true, numero: true, statut: true } },
+    medecin: {
+      select: { matricule: true, personnel: { select: { nom: true, prenom: true } } },
+    },
+  },
+  orderBy: { id: 'asc' },
+} satisfies Prisma.Consultation$soinsArgs;
+
 const includeConsultation = {
-  medicaments: true,
-  ordonnances: { orderBy: { id: 'asc' } },
+  // L'onglet Médicaments ne montre pas les ordonnances SOINS (gérées dans l'onglet Soins)
+  medicaments: {
+    where: { OR: [{ ordonnanceId: null }, { ordonnance: { type: 'MEDICAMENTS' } }] },
+    // Unité de vente (boîte / plaquette) pour afficher « 2 plaquettes »
+    include: { medicament: { select: { uniteVente: true } } },
+  },
+  ordonnances: { where: { type: 'MEDICAMENTS' }, orderBy: { id: 'asc' } },
+  soins: includeSoinsPrescrits,
   medecin: {
     select: {
       matricule: true,
@@ -665,7 +695,11 @@ export class ConsultationsService {
   }
 
   /** Crée une ordonnance vide pour la consultation (numéro ORD-XXXXX séquentiel par clinique). */
-  private async creerOrdonnance(consultationId: number, cliniqueId: number) {
+  private async creerOrdonnance(
+    consultationId: number,
+    cliniqueId: number,
+    type: 'MEDICAMENTS' | 'SOINS' = 'MEDICAMENTS',
+  ) {
     let n = (await this.prisma.ordonnance.count({ where: { cliniqueId } })) + 1;
     let numero = `ORD-${String(n).padStart(5, '0')}`;
     // Le numéro doit rester unique dans la clinique
@@ -674,8 +708,9 @@ export class ConsultationsService {
       numero = `ORD-${String(n).padStart(5, '0')}`;
     }
     const ordonnance = await this.prisma.ordonnance.create({
-      data: { cliniqueId, consultationId, numero },
+      data: { cliniqueId, consultationId, numero, type },
     });
+    if (type === 'SOINS') return ordonnance;
     // La consultation garde le numéro de sa première ordonnance (compatibilité)
     await this.prisma.consultation.updateMany({
       where: { id: consultationId, numeroOrdonnance: null },
@@ -692,7 +727,7 @@ export class ConsultationsService {
   private async ordonnanceEnCours(consultationId: number, cliniqueId: number, ordonnanceId?: number) {
     if (ordonnanceId) {
       const demandee = await this.prisma.ordonnance.findUnique({ where: { id: ordonnanceId } });
-      if (!demandee || demandee.consultationId !== consultationId) {
+      if (!demandee || demandee.consultationId !== consultationId || demandee.type !== 'MEDICAMENTS') {
         throw new BadRequestException('Ordonnance introuvable pour cette consultation.');
       }
       if (demandee.statut === 'TRAITEE') {
@@ -703,7 +738,7 @@ export class ConsultationsService {
       return demandee;
     }
     const ouverte = await this.prisma.ordonnance.findFirst({
-      where: { consultationId, statut: 'EN_ATTENTE' },
+      where: { consultationId, statut: 'EN_ATTENTE', type: 'MEDICAMENTS' },
       orderBy: { id: 'desc' },
     });
     return ouverte ?? this.creerOrdonnance(consultationId, cliniqueId);
@@ -718,7 +753,7 @@ export class ConsultationsService {
     if (!consultation) throw new NotFoundException('Consultation introuvable.');
     // Une ordonnance encore vide est réutilisée (pas de numéro gaspillé)
     const vide = await this.prisma.ordonnance.findFirst({
-      where: { consultationId, statut: 'EN_ATTENTE', medicaments: { none: {} } },
+      where: { consultationId, statut: 'EN_ATTENTE', type: 'MEDICAMENTS', medicaments: { none: {} } },
       orderBy: { id: 'desc' },
     });
     return vide ?? this.creerOrdonnance(consultationId, consultation.passage.cliniqueId);
@@ -755,6 +790,14 @@ export class ConsultationsService {
       medicamentId = medicament.id;
     }
     if (!nom) throw new BadRequestException('Nom du médicament requis.');
+    if (!dto.posologie?.trim()) throw new BadRequestException('Indiquez la posologie.');
+    // Quantité à acheter (boîtes / plaquettes) : obligatoire, lue par la pharmacie
+    const quantite = Number(String(dto.quantite ?? '').trim());
+    if (!Number.isInteger(quantite) || quantite < 1) {
+      throw new BadRequestException(
+        'Indiquez la quantité à acheter (nombre de boîtes ou de plaquettes).',
+      );
+    }
 
     const ordonnance = await this.ordonnanceEnCours(
       consultationId,
@@ -768,8 +811,8 @@ export class ConsultationsService {
         medicamentId,
         medicamentNom: nom,
         forme,
-        posologie: dto.posologie,
-        quantite: dto.quantite,
+        posologie: dto.posologie.trim(),
+        quantite: String(quantite),
         duree: dto.duree,
       },
     });
@@ -1032,13 +1075,167 @@ export class ConsultationsService {
     });
     if (!consultation) throw new NotFoundException('Consultation introuvable.');
     await this.prisma.ordonnance.updateMany({
-      where: { consultationId, statut: 'EN_ATTENTE' },
+      where: { consultationId, statut: 'EN_ATTENTE', type: 'MEDICAMENTS' },
       data: { sauveeLe: new Date() },
     });
     return this.prisma.consultation.update({
       where: { id: consultationId },
       data: { ordonnanceSauveeLe: new Date() },
       include: includeConsultation,
+    });
+  }
+
+  // ── Soins prescrits (onglet « Soins ») ──
+
+  /** Soins prescrits de la consultation (avec médicaments et administrations). */
+  async soinsPrescrits(consultationId: number) {
+    return this.prisma.prescriptionSoin.findMany({
+      where: { consultationId },
+      ...includeSoinsPrescrits,
+    });
+  }
+
+  /**
+   * Prescrit un soin. Il apparaît tout de suite dans le module Soins (sans
+   * caisse). Ses médicaments consommables partent sur l'ordonnance SOINS de la
+   * consultation : l'infirmier les retire à la pharmacie (stock décrémenté à la
+   * délivrance, montant 0 pour un consommable).
+   */
+  async prescrireSoin(consultationId: number, medecinId: number, dto: PrescrireSoinDto) {
+    const consultation = await this.prisma.consultation.findUnique({
+      where: { id: consultationId },
+      include: { passage: { select: { id: true, cliniqueId: true, patientId: true } } },
+    });
+    if (!consultation) throw new NotFoundException('Consultation introuvable.');
+    const cliniqueId = consultation.passage.cliniqueId;
+
+    const typeSoin = await this.prisma.typeSoin.findUnique({ where: { id: dto.typeSoinId } });
+    if (!typeSoin || typeSoin.cliniqueId !== cliniqueId || !typeSoin.actif) {
+      throw new BadRequestException('Type de soin introuvable.');
+    }
+
+    // Seuls les médicaments consommables actifs, disponibles en stock, sont prescriptibles
+    const medicaments = await this.prisma.medicament.findMany({
+      where: { id: { in: dto.lignes.map((l) => l.medicamentId) } },
+    });
+    for (const l of dto.lignes) {
+      const m = medicaments.find((x) => x.id === l.medicamentId);
+      if (!m || m.cliniqueId !== cliniqueId || !m.actif || !m.consommable) {
+        throw new BadRequestException(
+          'Seuls les médicaments consommables peuvent être prescrits pour un soin.',
+        );
+      }
+      if (m.stock <= 0) {
+        throw new BadRequestException(`« ${m.nom} » est en rupture de stock.`);
+      }
+    }
+
+    const { foisParJour, dureeJours } = dto;
+    const ordonnance = dto.lignes.length
+      ? ((await this.prisma.ordonnance.findFirst({
+          where: { consultationId, type: 'SOINS', statut: 'EN_ATTENTE' },
+          orderBy: { id: 'desc' },
+        })) ?? (await this.creerOrdonnance(consultationId, cliniqueId, 'SOINS')))
+      : null;
+
+    const soin = await this.prisma.$transaction(async (tx) => {
+      const cree = await tx.prescriptionSoin.create({
+        data: {
+          cliniqueId,
+          consultationId,
+          passageId: consultation.passage.id,
+          patientId: consultation.passage.patientId,
+          medecinId,
+          ordonnanceId: ordonnance?.id ?? null,
+          typeSoinId: typeSoin.id,
+          typeSoin: typeSoin.libelle,
+          foisParJour,
+          dureeJours,
+          nbAdministrations: foisParJour * dureeJours,
+          instructions: dto.instructions?.trim() || null,
+        },
+      });
+      for (const l of dto.lignes) {
+        const m = medicaments.find((x) => x.id === l.medicamentId)!;
+        const dose = [l.dose.trim(), l.unite?.trim(), l.voie].filter(Boolean).join(' ');
+        // Ligne de l'ordonnance SOINS lue par la pharmacie
+        const prescription = await tx.prescription.create({
+          data: {
+            consultationId,
+            ordonnanceId: ordonnance!.id,
+            medicamentId: m.id,
+            medicamentNom: m.nom,
+            forme: m.forme,
+            posologie: `Soin ${typeSoin.libelle} : ${dose}, ${foisParJour} fois/jour`,
+            quantite: String(l.quantitePharmacie),
+            duree: `${dureeJours} j`,
+          },
+        });
+        await tx.ligneSoin.create({
+          data: {
+            prescriptionSoinId: cree.id,
+            medicamentId: m.id,
+            medicamentNom: m.nom,
+            forme: m.forme,
+            dose: l.dose.trim(),
+            unite: l.unite?.trim() || null,
+            voie: l.voie || null,
+            posologie: l.posologie?.trim() || null,
+            quantitePharmacie: l.quantitePharmacie,
+            prescriptionId: prescription.id,
+          },
+        });
+      }
+      return cree;
+    });
+
+    return this.prisma.prescriptionSoin.findUnique({
+      where: { id: soin.id },
+      include: includeSoinsPrescrits.include,
+    });
+  }
+
+  /** Retire un soin pas encore commencé, dont les médicaments ne sont pas délivrés. */
+  async retirerSoin(id: number) {
+    const soin = await this.prisma.prescriptionSoin.findUnique({
+      where: { id },
+      include: {
+        _count: { select: { administrations: true } },
+        lignes: { include: { prescription: { select: { _count: { select: { lignes: true } } } } } },
+      },
+    });
+    if (!soin) throw new NotFoundException('Soin introuvable.');
+    if (soin._count.administrations > 0) {
+      throw new BadRequestException(
+        'Ce soin a déjà été administré : utilisez « Arrêter » plutôt que retirer.',
+      );
+    }
+    if (soin.lignes.some((l) => (l.prescription?._count.lignes ?? 0) > 0)) {
+      throw new BadRequestException(
+        'Les médicaments de ce soin ont déjà été délivrés par la pharmacie : utilisez « Arrêter ».',
+      );
+    }
+    const prescriptionsIds = soin.lignes
+      .map((l) => l.prescriptionId)
+      .filter((x): x is number => !!x);
+    await this.prisma.$transaction([
+      this.prisma.prescriptionSoin.delete({ where: { id } }),
+      this.prisma.prescription.deleteMany({ where: { id: { in: prescriptionsIds } } }),
+    ]);
+    return { ok: true };
+  }
+
+  /** Arrête un soin en cours : les administrations restantes ne seront pas faites. */
+  async arreterSoin(id: number) {
+    const soin = await this.prisma.prescriptionSoin.findUnique({ where: { id } });
+    if (!soin) throw new NotFoundException('Soin introuvable.');
+    if (soin.statut !== 'EN_COURS') {
+      throw new BadRequestException("Ce soin n'est plus en cours.");
+    }
+    return this.prisma.prescriptionSoin.update({
+      where: { id },
+      data: { statut: 'ARRETE', arreteLe: new Date() },
+      include: includeSoinsPrescrits.include,
     });
   }
 

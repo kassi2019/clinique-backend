@@ -1,10 +1,15 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
+  IsIn,
   IsInt,
+  IsNotEmpty,
   IsOptional,
   IsString,
+  Max,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
@@ -305,4 +310,62 @@ export class PrescrireExamenDto {
   @IsOptional()
   @IsString()
   libelle?: string;
+}
+
+/** Voies d'administration proposées pour un soin. */
+export const VOIES_SOIN = ['IM', 'IV', 'SC', 'ID', 'PO', 'LOCALE', 'AUTRE'];
+
+/** Médicament consommable à administrer pendant un soin. */
+export class LigneSoinDto {
+  @IsInt()
+  medicamentId: number;
+
+  /** Quantité par administration : « 1 », « 1/2 », « 0,5 »… */
+  @IsString()
+  @IsNotEmpty()
+  dose: string;
+
+  /** ampoule, flacon, ml… */
+  @IsOptional()
+  @IsString()
+  unite?: string;
+
+  @IsOptional()
+  @IsIn(VOIES_SOIN)
+  voie?: string;
+
+  @IsOptional()
+  @IsString()
+  posologie?: string;
+
+  /** Unités à retirer à la pharmacie pour tout le traitement. */
+  @IsInt()
+  @Min(1)
+  quantitePharmacie: number;
+}
+
+/** Soin prescrit par le médecin (onglet « Soins »). */
+export class PrescrireSoinDto {
+  @IsInt()
+  typeSoinId: number;
+
+  @IsInt()
+  @Min(1)
+  @Max(24)
+  foisParJour: number;
+
+  @IsInt()
+  @Min(1)
+  @Max(365)
+  dureeJours: number;
+
+  @IsOptional()
+  @IsString()
+  instructions?: string;
+
+  @IsArray()
+  @ArrayMaxSize(20)
+  @ValidateNested({ each: true })
+  @Type(() => LigneSoinDto)
+  lignes: LigneSoinDto[];
 }

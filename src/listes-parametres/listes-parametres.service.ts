@@ -28,6 +28,7 @@ export class ListesParametresService {
       case 'ANTECEDENT': return this.prisma.antecedentMedical;
       case 'EXAMEN': return this.prisma.autreExamen;
       case 'INTERVENTION': return this.prisma.interventionChirurgicale;
+      case 'TYPE_SOIN': return this.prisma.typeSoin;
       default: throw new BadRequestException(`Code de liste inconnu : ${code}`);
     }
   }

@@ -43,6 +43,7 @@ export declare class PharmacieController {
             valideeLe: Date;
             createdAt: Date;
             numeroOrdonnance: string;
+            ordonnanceType: string;
             ordonnanceStatut: string;
             medicaments: {
                 posologie: string | null;
@@ -108,6 +109,7 @@ export declare class PharmacieController {
             id: number;
             consultationId: number;
             numeroOrdonnance: string;
+            ordonnanceType: string;
             ordonnanceStatut: string;
             createdAt: Date;
             patient: {
@@ -135,6 +137,7 @@ export declare class PharmacieController {
         ordonnance: {
             id: number;
             numero: string;
+            type: string;
             statut: string;
             createdAt: Date;
         };
@@ -195,9 +198,12 @@ export declare class PharmacieController {
             posologie: string;
             quantite: string;
             duree: string;
+            dejaDelivree: number;
+            quantiteMax: number;
             medicament: {
                 id: number;
                 stock: number;
+                consommable: boolean;
                 prixVente: number;
                 uniteVente: string;
                 lots: {
@@ -313,6 +319,7 @@ export declare class PharmacieController {
         ordonnance: {
             id: number;
             numero: string;
+            type: string;
             statut: string;
             createdAt: Date;
         };
@@ -373,9 +380,12 @@ export declare class PharmacieController {
             posologie: string;
             quantite: string;
             duree: string;
+            dejaDelivree: number;
+            quantiteMax: number;
             medicament: {
                 id: number;
                 stock: number;
+                consommable: boolean;
                 prixVente: number;
                 uniteVente: string;
                 lots: {
@@ -978,8 +988,8 @@ export declare class PharmacieController {
         nom: string;
         actif: boolean;
         quantite: number;
-        seuilAlerte: number;
         unite: string | null;
+        seuilAlerte: number;
     }[]>;
     creerConsommable(dto: any): Promise<{
         createdAt: Date;
@@ -989,8 +999,8 @@ export declare class PharmacieController {
         nom: string;
         actif: boolean;
         quantite: number;
-        seuilAlerte: number;
         unite: string | null;
+        seuilAlerte: number;
     }>;
     majConsommable(id: number, dto: any): Promise<{
         createdAt: Date;
@@ -1000,8 +1010,8 @@ export declare class PharmacieController {
         nom: string;
         actif: boolean;
         quantite: number;
-        seuilAlerte: number;
         unite: string | null;
+        seuilAlerte: number;
     }>;
     mouvementConsommable(id: number, dto: {
         type: string;
@@ -1015,8 +1025,8 @@ export declare class PharmacieController {
         nom: string;
         actif: boolean;
         quantite: number;
-        seuilAlerte: number;
         unite: string | null;
+        seuilAlerte: number;
     }>;
     mouvementsConsommable(id: number): Promise<{
         createdAt: Date;

@@ -1,5 +1,5 @@
 import { ConsultationsService } from './consultations.service';
-import { CreerConsultationDto, PrescriptionDto, PrescrireExamenDto, PrescrireExamensDto } from './dto/consultation.dto';
+import { CreerConsultationDto, PrescriptionDto, PrescrireExamenDto, PrescrireSoinDto, PrescrireExamensDto } from './dto/consultation.dto';
 export declare class ConsultationsController {
     private consultationsService;
     constructor(consultationsService: ConsultationsService);
@@ -131,7 +131,11 @@ export declare class ConsultationsController {
                 creditId: number | null;
             }[];
             consultation: {
-                medicaments: {
+                medicaments: ({
+                    medicament: {
+                        uniteVente: string;
+                    };
+                } & {
                     posologie: string | null;
                     createdAt: Date;
                     id: number;
@@ -143,7 +147,75 @@ export declare class ConsultationsController {
                     forme: string | null;
                     quantite: string | null;
                     duree: string | null;
-                }[];
+                })[];
+                soins: ({
+                    ordonnance: {
+                        id: number;
+                        statut: string;
+                        numero: string;
+                    };
+                    lignes: ({
+                        prescription: {
+                            _count: {
+                                lignes: number;
+                            };
+                        };
+                    } & {
+                        posologie: string | null;
+                        createdAt: Date;
+                        id: number;
+                        medicamentId: number | null;
+                        medicamentNom: string;
+                        forme: string | null;
+                        prescriptionId: number | null;
+                        dose: string;
+                        unite: string | null;
+                        voie: string | null;
+                        quantitePharmacie: number;
+                        prescriptionSoinId: number;
+                    })[];
+                    medecin: {
+                        personnel: {
+                            nom: string;
+                            prenom: string;
+                        };
+                        matricule: string;
+                    };
+                    administrations: ({
+                        agent: {
+                            personnel: {
+                                nom: string;
+                                prenom: string;
+                            };
+                            matricule: string;
+                        };
+                    } & {
+                        createdAt: Date;
+                        id: number;
+                        agentId: number | null;
+                        date: Date;
+                        observations: string | null;
+                        prescriptionSoinId: number;
+                    })[];
+                } & {
+                    typeSoin: string;
+                    createdAt: Date;
+                    id: number;
+                    cliniqueId: number;
+                    statut: string;
+                    updatedAt: Date;
+                    passageId: number;
+                    patientId: number;
+                    medecinId: number;
+                    consultationId: number;
+                    ordonnanceId: number | null;
+                    typeSoinId: number | null;
+                    foisParJour: number;
+                    dureeJours: number;
+                    instructions: string | null;
+                    nbAdministrations: number;
+                    arreteLe: Date | null;
+                })[];
                 medecin: {
                     personnel: {
                         nom: string;
@@ -157,6 +229,7 @@ export declare class ConsultationsController {
                     cliniqueId: number;
                     statut: string;
                     updatedAt: Date;
+                    type: string;
                     consultationId: number;
                     numero: string;
                     sauveeLe: Date | null;
@@ -228,9 +301,9 @@ export declare class ConsultationsController {
                 lignes: {
                     parametre: string;
                     id: number;
+                    unite: string | null;
                     examenLaboId: number;
                     valeur: string | null;
-                    unite: string | null;
                     normes: string | null;
                 }[];
                 validePar: {
@@ -339,9 +412,9 @@ export declare class ConsultationsController {
                     lignes: {
                         parametre: string;
                         id: number;
+                        unite: string | null;
                         examenLaboId: number;
                         valeur: string | null;
-                        unite: string | null;
                         normes: string | null;
                     }[];
                     validePar: {
@@ -427,6 +500,7 @@ export declare class ConsultationsController {
                 cliniqueId: number;
                 statut: string;
                 updatedAt: Date;
+                type: string;
                 consultationId: number;
                 numero: string;
                 sauveeLe: Date | null;
@@ -496,7 +570,11 @@ export declare class ConsultationsController {
         })[];
     }>;
     creerOuMaj(id: number, dto: CreerConsultationDto, req: any): Promise<{
-        medicaments: {
+        medicaments: ({
+            medicament: {
+                uniteVente: string;
+            };
+        } & {
             posologie: string | null;
             createdAt: Date;
             id: number;
@@ -508,7 +586,75 @@ export declare class ConsultationsController {
             forme: string | null;
             quantite: string | null;
             duree: string | null;
-        }[];
+        })[];
+        soins: ({
+            ordonnance: {
+                id: number;
+                statut: string;
+                numero: string;
+            };
+            lignes: ({
+                prescription: {
+                    _count: {
+                        lignes: number;
+                    };
+                };
+            } & {
+                posologie: string | null;
+                createdAt: Date;
+                id: number;
+                medicamentId: number | null;
+                medicamentNom: string;
+                forme: string | null;
+                prescriptionId: number | null;
+                dose: string;
+                unite: string | null;
+                voie: string | null;
+                quantitePharmacie: number;
+                prescriptionSoinId: number;
+            })[];
+            medecin: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+            administrations: ({
+                agent: {
+                    personnel: {
+                        nom: string;
+                        prenom: string;
+                    };
+                    matricule: string;
+                };
+            } & {
+                createdAt: Date;
+                id: number;
+                agentId: number | null;
+                date: Date;
+                observations: string | null;
+                prescriptionSoinId: number;
+            })[];
+        } & {
+            typeSoin: string;
+            createdAt: Date;
+            id: number;
+            cliniqueId: number;
+            statut: string;
+            updatedAt: Date;
+            passageId: number;
+            patientId: number;
+            medecinId: number;
+            consultationId: number;
+            ordonnanceId: number | null;
+            typeSoinId: number | null;
+            foisParJour: number;
+            dureeJours: number;
+            instructions: string | null;
+            nbAdministrations: number;
+            arreteLe: Date | null;
+        })[];
         medecin: {
             personnel: {
                 nom: string;
@@ -522,6 +668,7 @@ export declare class ConsultationsController {
             cliniqueId: number;
             statut: string;
             updatedAt: Date;
+            type: string;
             consultationId: number;
             numero: string;
             sauveeLe: Date | null;
@@ -615,6 +762,213 @@ export declare class ConsultationsController {
         quantite: string | null;
         duree: string | null;
     }>;
+    soins(id: number): Promise<({
+        ordonnance: {
+            id: number;
+            statut: string;
+            numero: string;
+        };
+        lignes: ({
+            prescription: {
+                _count: {
+                    lignes: number;
+                };
+            };
+        } & {
+            posologie: string | null;
+            createdAt: Date;
+            id: number;
+            medicamentId: number | null;
+            medicamentNom: string;
+            forme: string | null;
+            prescriptionId: number | null;
+            dose: string;
+            unite: string | null;
+            voie: string | null;
+            quantitePharmacie: number;
+            prescriptionSoinId: number;
+        })[];
+        medecin: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+        administrations: ({
+            agent: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+        } & {
+            createdAt: Date;
+            id: number;
+            agentId: number | null;
+            date: Date;
+            observations: string | null;
+            prescriptionSoinId: number;
+        })[];
+    } & {
+        typeSoin: string;
+        createdAt: Date;
+        id: number;
+        cliniqueId: number;
+        statut: string;
+        updatedAt: Date;
+        passageId: number;
+        patientId: number;
+        medecinId: number;
+        consultationId: number;
+        ordonnanceId: number | null;
+        typeSoinId: number | null;
+        foisParJour: number;
+        dureeJours: number;
+        instructions: string | null;
+        nbAdministrations: number;
+        arreteLe: Date | null;
+    })[]>;
+    prescrireSoin(id: number, dto: PrescrireSoinDto, req: any): Promise<{
+        ordonnance: {
+            id: number;
+            statut: string;
+            numero: string;
+        };
+        lignes: ({
+            prescription: {
+                _count: {
+                    lignes: number;
+                };
+            };
+        } & {
+            posologie: string | null;
+            createdAt: Date;
+            id: number;
+            medicamentId: number | null;
+            medicamentNom: string;
+            forme: string | null;
+            prescriptionId: number | null;
+            dose: string;
+            unite: string | null;
+            voie: string | null;
+            quantitePharmacie: number;
+            prescriptionSoinId: number;
+        })[];
+        medecin: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+        administrations: ({
+            agent: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+        } & {
+            createdAt: Date;
+            id: number;
+            agentId: number | null;
+            date: Date;
+            observations: string | null;
+            prescriptionSoinId: number;
+        })[];
+    } & {
+        typeSoin: string;
+        createdAt: Date;
+        id: number;
+        cliniqueId: number;
+        statut: string;
+        updatedAt: Date;
+        passageId: number;
+        patientId: number;
+        medecinId: number;
+        consultationId: number;
+        ordonnanceId: number | null;
+        typeSoinId: number | null;
+        foisParJour: number;
+        dureeJours: number;
+        instructions: string | null;
+        nbAdministrations: number;
+        arreteLe: Date | null;
+    }>;
+    retirerSoin(id: number): Promise<{
+        ok: boolean;
+    }>;
+    arreterSoin(id: number): Promise<{
+        ordonnance: {
+            id: number;
+            statut: string;
+            numero: string;
+        };
+        lignes: ({
+            prescription: {
+                _count: {
+                    lignes: number;
+                };
+            };
+        } & {
+            posologie: string | null;
+            createdAt: Date;
+            id: number;
+            medicamentId: number | null;
+            medicamentNom: string;
+            forme: string | null;
+            prescriptionId: number | null;
+            dose: string;
+            unite: string | null;
+            voie: string | null;
+            quantitePharmacie: number;
+            prescriptionSoinId: number;
+        })[];
+        medecin: {
+            personnel: {
+                nom: string;
+                prenom: string;
+            };
+            matricule: string;
+        };
+        administrations: ({
+            agent: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+        } & {
+            createdAt: Date;
+            id: number;
+            agentId: number | null;
+            date: Date;
+            observations: string | null;
+            prescriptionSoinId: number;
+        })[];
+    } & {
+        typeSoin: string;
+        createdAt: Date;
+        id: number;
+        cliniqueId: number;
+        statut: string;
+        updatedAt: Date;
+        passageId: number;
+        patientId: number;
+        medecinId: number;
+        consultationId: number;
+        ordonnanceId: number | null;
+        typeSoinId: number | null;
+        foisParJour: number;
+        dureeJours: number;
+        instructions: string | null;
+        nbAdministrations: number;
+        arreteLe: Date | null;
+    }>;
     prescrireExamens(id: number, dto: PrescrireExamensDto): Promise<{
         createdAt: Date;
         id: number;
@@ -706,12 +1060,17 @@ export declare class ConsultationsController {
         cliniqueId: number;
         statut: string;
         updatedAt: Date;
+        type: string;
         consultationId: number;
         numero: string;
         sauveeLe: Date | null;
     }>;
     sauvegarderOrdonnance(id: number): Promise<{
-        medicaments: {
+        medicaments: ({
+            medicament: {
+                uniteVente: string;
+            };
+        } & {
             posologie: string | null;
             createdAt: Date;
             id: number;
@@ -723,7 +1082,75 @@ export declare class ConsultationsController {
             forme: string | null;
             quantite: string | null;
             duree: string | null;
-        }[];
+        })[];
+        soins: ({
+            ordonnance: {
+                id: number;
+                statut: string;
+                numero: string;
+            };
+            lignes: ({
+                prescription: {
+                    _count: {
+                        lignes: number;
+                    };
+                };
+            } & {
+                posologie: string | null;
+                createdAt: Date;
+                id: number;
+                medicamentId: number | null;
+                medicamentNom: string;
+                forme: string | null;
+                prescriptionId: number | null;
+                dose: string;
+                unite: string | null;
+                voie: string | null;
+                quantitePharmacie: number;
+                prescriptionSoinId: number;
+            })[];
+            medecin: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+            administrations: ({
+                agent: {
+                    personnel: {
+                        nom: string;
+                        prenom: string;
+                    };
+                    matricule: string;
+                };
+            } & {
+                createdAt: Date;
+                id: number;
+                agentId: number | null;
+                date: Date;
+                observations: string | null;
+                prescriptionSoinId: number;
+            })[];
+        } & {
+            typeSoin: string;
+            createdAt: Date;
+            id: number;
+            cliniqueId: number;
+            statut: string;
+            updatedAt: Date;
+            passageId: number;
+            patientId: number;
+            medecinId: number;
+            consultationId: number;
+            ordonnanceId: number | null;
+            typeSoinId: number | null;
+            foisParJour: number;
+            dureeJours: number;
+            instructions: string | null;
+            nbAdministrations: number;
+            arreteLe: Date | null;
+        })[];
         medecin: {
             personnel: {
                 nom: string;
@@ -737,6 +1164,7 @@ export declare class ConsultationsController {
             cliniqueId: number;
             statut: string;
             updatedAt: Date;
+            type: string;
             consultationId: number;
             numero: string;
             sauveeLe: Date | null;
@@ -828,10 +1256,10 @@ export declare class ConsultationsController {
         numero: string;
         debut: Date;
         fin: Date;
+        dureeJours: number;
         lieu: string | null;
         civilite: string;
         nomPatient: string;
-        dureeJours: number;
     }>;
     certificatsArret(id: number): Promise<{
         profession: string | null;
@@ -847,13 +1275,17 @@ export declare class ConsultationsController {
         numero: string;
         debut: Date;
         fin: Date;
+        dureeJours: number;
         lieu: string | null;
         civilite: string;
         nomPatient: string;
-        dureeJours: number;
     }[]>;
     valider(id: number): Promise<{
-        medicaments: {
+        medicaments: ({
+            medicament: {
+                uniteVente: string;
+            };
+        } & {
             posologie: string | null;
             createdAt: Date;
             id: number;
@@ -865,7 +1297,75 @@ export declare class ConsultationsController {
             forme: string | null;
             quantite: string | null;
             duree: string | null;
-        }[];
+        })[];
+        soins: ({
+            ordonnance: {
+                id: number;
+                statut: string;
+                numero: string;
+            };
+            lignes: ({
+                prescription: {
+                    _count: {
+                        lignes: number;
+                    };
+                };
+            } & {
+                posologie: string | null;
+                createdAt: Date;
+                id: number;
+                medicamentId: number | null;
+                medicamentNom: string;
+                forme: string | null;
+                prescriptionId: number | null;
+                dose: string;
+                unite: string | null;
+                voie: string | null;
+                quantitePharmacie: number;
+                prescriptionSoinId: number;
+            })[];
+            medecin: {
+                personnel: {
+                    nom: string;
+                    prenom: string;
+                };
+                matricule: string;
+            };
+            administrations: ({
+                agent: {
+                    personnel: {
+                        nom: string;
+                        prenom: string;
+                    };
+                    matricule: string;
+                };
+            } & {
+                createdAt: Date;
+                id: number;
+                agentId: number | null;
+                date: Date;
+                observations: string | null;
+                prescriptionSoinId: number;
+            })[];
+        } & {
+            typeSoin: string;
+            createdAt: Date;
+            id: number;
+            cliniqueId: number;
+            statut: string;
+            updatedAt: Date;
+            passageId: number;
+            patientId: number;
+            medecinId: number;
+            consultationId: number;
+            ordonnanceId: number | null;
+            typeSoinId: number | null;
+            foisParJour: number;
+            dureeJours: number;
+            instructions: string | null;
+            nbAdministrations: number;
+            arreteLe: Date | null;
+        })[];
         medecin: {
             personnel: {
                 nom: string;
@@ -879,6 +1379,7 @@ export declare class ConsultationsController {
             cliniqueId: number;
             statut: string;
             updatedAt: Date;
+            type: string;
             consultationId: number;
             numero: string;
             sauveeLe: Date | null;

@@ -38,6 +38,18 @@ let ConsultationsController = class ConsultationsController {
     retirerMedicament(id) {
         return this.consultationsService.retirerMedicament(id);
     }
+    soins(id) {
+        return this.consultationsService.soinsPrescrits(id);
+    }
+    prescrireSoin(id, dto, req) {
+        return this.consultationsService.prescrireSoin(id, req.user.id, dto);
+    }
+    retirerSoin(id) {
+        return this.consultationsService.retirerSoin(id);
+    }
+    arreterSoin(id) {
+        return this.consultationsService.arreterSoin(id);
+    }
     prescrireExamens(id, dto) {
         return this.consultationsService.prescrireExamens(id, dto.lignesIds);
     }
@@ -127,6 +139,36 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "retirerMedicament", null);
+__decorate([
+    (0, common_1.Get)(':id/soins'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "soins", null);
+__decorate([
+    (0, common_1.Post)(':id/soins'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, consultation_dto_1.PrescrireSoinDto, Object]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "prescrireSoin", null);
+__decorate([
+    (0, common_1.Delete)('soins/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "retirerSoin", null);
+__decorate([
+    (0, common_1.Post)('soins/:id/arreter'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "arreterSoin", null);
 __decorate([
     (0, common_1.Post)(':id/examens'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),

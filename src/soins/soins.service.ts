@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { critereNomPrenoms } from '../common/recherche-patient';
+import { includeSoinsPrescrits } from '../consultations/consultations.service';
 
 const includeRealisation = {
   agent: {
@@ -11,9 +12,26 @@ const includeRealisation = {
   },
 } as const;
 
+/** Lignes de prestations SOIN payées (anciens soins passés par la caisse). */
+const prestationsSoinPayees = {
+  statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] },
+  prestation: { type: 'SOIN' },
+};
+
+/** Passage relevant du module Soins : soin payé à la caisse OU soin prescrit par le médecin. */
+const passageAvecSoins = (cliniqueId: number) => ({
+  cliniqueId,
+  OR: [
+    { statut: 'ACTIF', prestations: { some: prestationsSoinPayees } },
+    { prescriptionsSoins: { some: {} } },
+  ],
+});
+
 /**
- * Module Soins : prescription (prestation SOIN payée à la caisse) puis
- * réalisation par l'agent avec traçabilité. Même logique que le laboratoire.
+ * Module Soins :
+ * - soins payés à la caisse (prestation SOIN) puis réalisés par l'agent ;
+ * - soins prescrits par le médecin (onglet « Soins » de la consultation),
+ *   visibles tout de suite, administrés une prise après l'autre.
  */
 @Injectable()
 export class SoinsService {
@@ -33,31 +51,45 @@ export class SoinsService {
     const passages = await this.prisma.passage.findMany({
       where: {
         cliniqueId,
-        statut: 'ACTIF',
-        prestations: {
-          some: { statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] }, prestation: { type: 'SOIN' } },
-        },
+        OR: [
+          { statut: 'ACTIF', prestations: { some: prestationsSoinPayees } },
+          { prescriptionsSoins: { some: { statut: 'EN_COURS' } } },
+        ],
       },
       include: {
         patient: true,
         service: { select: { nom: true } },
         prestations: {
-          where: { statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] }, prestation: { type: 'SOIN' } },
+          where: prestationsSoinPayees,
           include: { soin: { select: { statut: true } } },
         },
+        prescriptionsSoins: { where: { statut: 'EN_COURS' }, select: { id: true } },
       },
       orderBy: { createdAt: 'asc' },
     });
     return passages
-      .filter((p) => p.prestations.some((l) => !l.soin || l.soin.statut !== 'REALISE'))
       .map((p) => ({
         id: p.id,
         numeroOrdre: p.numeroOrdre,
         patient: p.patient,
         service: p.service,
         createdAt: p.createdAt,
-        nbSoins: p.prestations.filter((l) => !l.soin || l.soin.statut !== 'REALISE').length,
-      }));
+        nbSoins: this.nbSoinsAFaire(p),
+      }))
+      .filter((p) => p.nbSoins > 0);
+  }
+
+  /** Soins restant à faire : prestations payées non réalisées + soins prescrits en cours. */
+  private nbSoinsAFaire(p: {
+    statut: string;
+    prestations: { soin: { statut: string } | null }[];
+    prescriptionsSoins: { id: number }[];
+  }) {
+    const prestations =
+      p.statut === 'ACTIF'
+        ? p.prestations.filter((l) => !l.soin || l.soin.statut !== 'REALISE').length
+        : 0;
+    return prestations + p.prescriptionsSoins.length;
   }
 
   /** Recherche de passages avec soins payés (code patient, N° d'ordre, nom). */
@@ -67,23 +99,27 @@ export class SoinsService {
     const refSans = ref.replace(/[\s-]/g, '');
     const passages = await this.prisma.passage.findMany({
       where: {
-        cliniqueId,
-        statut: 'ACTIF',
-        prestations: { some: { statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] }, prestation: { type: 'SOIN' } } },
-        OR: [
-          { numeroOrdre: { contains: ref } },
-          { patient: { is: { code: refSans } } },
-          { patient: { is: critereNomPrenoms(ref) } },
+        AND: [
+          passageAvecSoins(cliniqueId),
+          {
+            OR: [
+              { numeroOrdre: { contains: ref } },
+              { patient: { is: { code: refSans } } },
+              { patient: { is: critereNomPrenoms(ref) } },
+            ],
+          },
         ],
       },
       include: {
         patient: true,
         service: { select: { nom: true } },
         prestations: {
-          where: { statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] }, prestation: { type: 'SOIN' } },
+          where: prestationsSoinPayees,
           include: { soin: { select: { statut: true } } },
         },
+        prescriptionsSoins: { where: { statut: 'EN_COURS' }, select: { id: true } },
       },
+      orderBy: { createdAt: 'desc' },
       take: 20,
     });
     return passages.map((p) => ({
@@ -91,11 +127,11 @@ export class SoinsService {
       numeroOrdre: p.numeroOrdre,
       patient: p.patient,
       service: p.service,
-      nbSoins: p.prestations.filter((l) => !l.soin || l.soin.statut !== 'REALISE').length,
+      nbSoins: this.nbSoinsAFaire(p),
     }));
   }
 
-  /** Détail d'un passage : fiche patient + soins payés + réalisations. */
+  /** Détail d'un passage : fiche patient + soins payés + soins prescrits + réalisations. */
   async detailPassage(passageId: number) {
     const passage = await this.prisma.passage.findUnique({
       where: { id: passageId },
@@ -107,7 +143,51 @@ export class SoinsService {
       where: { passageId },
       include: { realisations: { include: includeRealisation, orderBy: { date: 'desc' } } },
     });
-    return { passage, prestations, soins };
+    const prescrits = await this.prisma.prescriptionSoin.findMany({
+      where: { passageId },
+      ...includeSoinsPrescrits,
+    });
+    return { passage, prestations, soins, prescrits };
+  }
+
+  /**
+   * Confirme une administration d'un soin prescrit (une prise). Le soin passe
+   * à TERMINE à la dernière prise prévue.
+   */
+  async administrer(
+    prescriptionSoinId: number,
+    date: string,
+    observations: string | undefined,
+    agentId: number,
+  ) {
+    const soin = await this.prisma.prescriptionSoin.findUnique({
+      where: { id: prescriptionSoinId },
+      include: { _count: { select: { administrations: true } } },
+    });
+    if (!soin) throw new NotFoundException('Soin introuvable.');
+    if (soin.statut !== 'EN_COURS') {
+      throw new BadRequestException(
+        soin.statut === 'ARRETE' ? 'Ce soin a été arrêté par le médecin.' : 'Ce soin est déjà terminé.',
+      );
+    }
+    const faites = soin._count.administrations + 1;
+    await this.prisma.$transaction([
+      this.prisma.administrationSoin.create({
+        data: {
+          prescriptionSoinId,
+          date: new Date(date),
+          observations: observations?.trim() || null,
+          agentId,
+        },
+      }),
+      ...(faites >= soin.nbAdministrations
+        ? [this.prisma.prescriptionSoin.update({ where: { id: prescriptionSoinId }, data: { statut: 'TERMINE' } })]
+        : []),
+    ]);
+    return this.prisma.prescriptionSoin.findUnique({
+      where: { id: prescriptionSoinId },
+      include: includeSoinsPrescrits.include,
+    });
   }
 
   /** Enregistre la réalisation d'un soin (créé à la première réalisation). */
@@ -189,7 +269,27 @@ export class SoinsService {
           }
         : {}),
     };
-    const [data, total] = await Promise.all([
+    // Administrations des soins prescrits : même filtre, même forme de ligne
+    const whereAdmin = {
+      prescriptionSoin: { cliniqueId },
+      ...(debut ? { date: { gte: debut, lte: fin } } : {}),
+      ...(ref
+        ? {
+            OR: [
+              { prescriptionSoin: { typeSoin: { contains: ref } } },
+              { prescriptionSoin: { lignes: { some: { medicamentNom: { contains: ref } } } } },
+              { prescriptionSoin: { passage: { numeroOrdre: { contains: ref } } } },
+              { prescriptionSoin: { patient: { nom: { contains: ref } } } },
+              { prescriptionSoin: { patient: { prenom: { contains: ref } } } },
+              { prescriptionSoin: { patient: { code: { contains: ref.replace(/[\s-]/g, '') } } } },
+            ],
+          }
+        : {}),
+    };
+    const agent = { select: { matricule: true, personnel: { select: { nom: true, prenom: true } } } };
+    // Les deux sources sont fusionnées par date : on lit assez de lignes de chacune
+    const jusqua = page * perPage;
+    const [realisations, administrations, totalR, totalA] = await Promise.all([
       this.prisma.realisationSoin.findMany({
         where,
         include: {
@@ -199,14 +299,50 @@ export class SoinsService {
               passage: { select: { numeroOrdre: true } },
             },
           },
-          agent: { select: { matricule: true, personnel: { select: { nom: true, prenom: true } } } },
+          agent,
         },
         orderBy: { date: 'desc' },
-        skip: (page - 1) * perPage,
-        take: perPage,
+        take: jusqua,
+      }),
+      this.prisma.administrationSoin.findMany({
+        where: whereAdmin,
+        include: {
+          prescriptionSoin: {
+            include: {
+              patient: { select: { nom: true, prenom: true, code: true } },
+              passage: { select: { numeroOrdre: true } },
+              lignes: { select: { medicamentNom: true, dose: true, unite: true, voie: true } },
+            },
+          },
+          agent,
+        },
+        orderBy: { date: 'desc' },
+        take: jusqua,
       }),
       this.prisma.realisationSoin.count({ where }),
+      this.prisma.administrationSoin.count({ where: whereAdmin }),
     ]);
+    const lignes = [
+      ...realisations,
+      ...administrations.map((a) => ({
+        id: `A${a.id}`,
+        date: a.date,
+        observations: a.observations,
+        agent: a.agent,
+        soin: {
+          libelle: [
+            a.prescriptionSoin.typeSoin,
+            ...a.prescriptionSoin.lignes.map((l) =>
+              [l.medicamentNom, l.dose, l.unite, l.voie].filter(Boolean).join(' '),
+            ),
+          ].join(' — '),
+          patient: a.prescriptionSoin.patient,
+          passage: a.prescriptionSoin.passage,
+        },
+      })),
+    ].sort((x, y) => new Date(y.date).getTime() - new Date(x.date).getTime());
+    const total = totalR + totalA;
+    const data = lignes.slice((page - 1) * perPage, jusqua);
     return { data, total, page, perPage, totalPages: Math.ceil(total / perPage) };
   }
 }
