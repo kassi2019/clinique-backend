@@ -295,7 +295,10 @@ let StatistiquesService = class StatistiquesService {
         const lignes = await this.prisma.ligneDispensation.findMany({
             where: {
                 dispensation: {
-                    consultation: { passage: { cliniqueId } },
+                    OR: [
+                        { consultation: { passage: { cliniqueId } } },
+                        { ordonnanceExterne: { cliniqueId } },
+                    ],
                     createdAt: { gte: d, lte: f },
                 },
             },

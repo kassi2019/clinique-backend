@@ -364,10 +364,10 @@ export declare class ConsultationsController {
                         prenom: string;
                     };
                 };
+                prescripteur: string;
                 libelleType: string;
                 texte: string;
                 indication: string;
-                prescripteur: string;
             }[];
         };
         historique: ({

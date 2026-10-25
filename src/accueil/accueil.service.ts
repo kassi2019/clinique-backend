@@ -557,6 +557,33 @@ export class AccueilService {
   }
 
   /**
+   * Création express d'un patient hors circuit d'accueil (ordonnance externe
+   * avec assurance à la pharmacie) : identité minimale, mêmes code et N° de dossier.
+   */
+  async creerPatientExpress(
+    cliniqueId: number,
+    data: { nom: string; prenom: string; sexe?: string; telephone?: string },
+    utilisateurId?: number,
+  ) {
+    if (!data.nom?.trim() || !data.prenom?.trim()) {
+      throw new BadRequestException('Le nom et le prénom du patient sont obligatoires.');
+    }
+    return this.prisma.patient.create({
+      data: {
+        cliniqueId,
+        numeroDossier: await this.prochainNumeroDossier(cliniqueId),
+        creeParId: utilisateurId ?? null,
+        code: await this.genererCodeUnique(),
+        nom: data.nom.trim().toUpperCase(),
+        prenom: data.prenom.trim().toUpperCase(),
+        sexe: data.sexe || null,
+        telephone: data.telephone?.trim() || null,
+        protectionSociale: 'ASSURANCE_PRIVEE',
+      },
+    });
+  }
+
+  /**
    * N° de dossier : DOS-XXXXX calculé sur le plus grand numéro existant
    * (+1), insensible aux suppressions (trous de numérotation).
    */

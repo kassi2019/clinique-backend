@@ -434,6 +434,24 @@ let AccueilService = AccueilService_1 = class AccueilService {
         }
         return numero(n);
     }
+    async creerPatientExpress(cliniqueId, data, utilisateurId) {
+        if (!data.nom?.trim() || !data.prenom?.trim()) {
+            throw new common_1.BadRequestException('Le nom et le prénom du patient sont obligatoires.');
+        }
+        return this.prisma.patient.create({
+            data: {
+                cliniqueId,
+                numeroDossier: await this.prochainNumeroDossier(cliniqueId),
+                creeParId: utilisateurId ?? null,
+                code: await this.genererCodeUnique(),
+                nom: data.nom.trim().toUpperCase(),
+                prenom: data.prenom.trim().toUpperCase(),
+                sexe: data.sexe || null,
+                telephone: data.telephone?.trim() || null,
+                protectionSociale: 'ASSURANCE_PRIVEE',
+            },
+        });
+    }
     async prochainNumeroDossier(cliniqueId) {
         const dernier = await this.prisma.patient.findFirst({
             where: { cliniqueId },

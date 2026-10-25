@@ -12,18 +12,26 @@ var PharmacieService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PharmacieService = void 0;
 const common_1 = require("@nestjs/common");
+const accueil_service_1 = require("../accueil/accueil.service");
 const impression_service_1 = require("../impression/impression.service");
 const prisma_service_1 = require("../prisma/prisma.service");
 const recherche_patient_1 = require("../common/recherche-patient");
 const N = (x) => Number(x);
+const dispensationsDeLaClinique = (cliniqueId) => ({
+    OR: [
+        { consultation: { passage: { cliniqueId } } },
+        { ordonnanceExterne: { cliniqueId } },
+    ],
+});
 function quantiteDemandee(q) {
     const t = (q ?? '').trim();
     return /^\d+$/.test(t) ? Number(t) : null;
 }
 let PharmacieService = PharmacieService_1 = class PharmacieService {
-    constructor(prisma, impressionService) {
+    constructor(prisma, impressionService, accueilService) {
         this.prisma = prisma;
         this.impressionService = impressionService;
+        this.accueilService = accueilService;
         this.logger = new common_1.Logger(PharmacieService_1.name);
     }
     async rechercherOrdonnances(reference, cliniqueId, filtres = {}) {
@@ -320,48 +328,8 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 throw new common_1.BadRequestException(`« ${prescription.medicamentNom} » n'est pas au catalogue : impossible de le délivrer depuis le stock.`);
             }
             const medicament = prescription.medicament;
-            if (medicament.stock < ligne.quantiteDelivree) {
-                throw new common_1.BadRequestException(`Stock insuffisant pour « ${medicament.nom} » (disponible : ${medicament.stock}).`);
-            }
-            let restant = ligne.quantiteDelivree;
-            const lots = await this.prisma.lot.findMany({
-                where: { medicamentId: medicament.id, quantiteRestante: { gt: 0 } },
-                orderBy: { datePeremption: 'asc' },
-            });
-            for (const lot of lots) {
-                if (restant === 0)
-                    break;
-                const prise = Math.min(lot.quantiteRestante, restant);
-                await this.prisma.lot.update({
-                    where: { id: lot.id },
-                    data: { quantiteRestante: { decrement: prise } },
-                });
-                await this.prisma.mouvementStock.create({
-                    data: {
-                        medicamentId: medicament.id,
-                        type: 'SORTIE',
-                        quantite: -prise,
-                        lotId: lot.id,
-                        reference: consultation.passage.numeroOrdre,
-                        utilisateurId: pharmacienId,
-                        commentaire: `Dispensation ${prescription.medicamentNom}`,
-                    },
-                });
-                restant -= prise;
-            }
-            if (restant > 0) {
-                throw new common_1.BadRequestException(`Stock insuffisant pour « ${medicament.nom} » (lots vides après FEFO).`);
-            }
-            await this.prisma.medicament.update({
-                where: { id: medicament.id },
-                data: { stock: { decrement: ligne.quantiteDelivree } },
-            });
-            this.recalculerSeuil(medicament.id).catch(() => undefined);
-            const prixUnitaire = medicament.consommable
-                ? 0
-                : medicament.prixVente
-                    ? N(medicament.prixVente)
-                    : 0;
+            await this.sortirDuStock(medicament, ligne.quantiteDelivree, consultation.passage.numeroOrdre, pharmacienId, `Dispensation ${prescription.medicamentNom}`);
+            const prixUnitaire = this.prixDeVente(medicament);
             const montant = prixUnitaire * ligne.quantiteDelivree;
             await this.prisma.ligneDispensation.create({
                 data: {
@@ -386,6 +354,281 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             where: { id: dispensation.id },
             include: { lignes: true, paiement: true },
         });
+    }
+    async sortirDuStock(medicament, quantite, reference, utilisateurId, commentaire) {
+        if (medicament.stock < quantite) {
+            throw new common_1.BadRequestException(`Stock insuffisant pour « ${medicament.nom} » (disponible : ${medicament.stock}).`);
+        }
+        let restant = quantite;
+        const lots = await this.prisma.lot.findMany({
+            where: { medicamentId: medicament.id, quantiteRestante: { gt: 0 } },
+            orderBy: { datePeremption: 'asc' },
+        });
+        for (const lot of lots) {
+            if (restant === 0)
+                break;
+            const prise = Math.min(lot.quantiteRestante, restant);
+            await this.prisma.lot.update({
+                where: { id: lot.id },
+                data: { quantiteRestante: { decrement: prise } },
+            });
+            await this.prisma.mouvementStock.create({
+                data: {
+                    medicamentId: medicament.id,
+                    type: 'SORTIE',
+                    quantite: -prise,
+                    lotId: lot.id,
+                    reference,
+                    utilisateurId,
+                    commentaire,
+                },
+            });
+            restant -= prise;
+        }
+        if (restant > 0) {
+            throw new common_1.BadRequestException(`Stock insuffisant pour « ${medicament.nom} » (lots vides après FEFO).`);
+        }
+        await this.prisma.medicament.update({
+            where: { id: medicament.id },
+            data: { stock: { decrement: quantite } },
+        });
+        this.recalculerSeuil(medicament.id).catch(() => undefined);
+    }
+    prixDeVente(medicament) {
+        if (medicament.consommable)
+            return 0;
+        return medicament.prixVente ? N(medicament.prixVente) : 0;
+    }
+    async creerOrdonnanceExterne(dto, utilisateurId) {
+        const cliniqueId = Number(dto.cliniqueId);
+        if (!cliniqueId)
+            throw new common_1.BadRequestException('Clinique non précisée.');
+        const avecAssurance = !!dto.avecAssurance;
+        const type = ['CREDIT', 'CAS_SOCIAL'].includes(dto.type ?? '') ? dto.type : 'COMPTANT';
+        if (!avecAssurance && type !== 'COMPTANT') {
+            throw new common_1.BadRequestException('Sans assurance, une ordonnance externe se règle uniquement au comptant.');
+        }
+        const quantites = new Map();
+        for (const l of dto.lignes ?? []) {
+            const q = Math.floor(Number(l.quantite));
+            if (!l.medicamentId || !(q > 0))
+                continue;
+            quantites.set(Number(l.medicamentId), (quantites.get(Number(l.medicamentId)) ?? 0) + q);
+        }
+        if (quantites.size === 0) {
+            throw new common_1.BadRequestException('Ajoutez au moins un médicament avec sa quantité.');
+        }
+        const medicaments = await this.prisma.medicament.findMany({
+            where: { id: { in: [...quantites.keys()] }, cliniqueId },
+        });
+        if (medicaments.length !== quantites.size) {
+            throw new common_1.BadRequestException('Médicament introuvable dans le catalogue de la clinique.');
+        }
+        for (const m of medicaments) {
+            if (m.stock < quantites.get(m.id)) {
+                throw new common_1.BadRequestException(`Stock insuffisant pour « ${m.nom} » (disponible : ${m.stock}).`);
+            }
+        }
+        let patientId = null;
+        if (avecAssurance) {
+            if (dto.patientId) {
+                const patient = await this.prisma.patient.findFirst({
+                    where: { id: Number(dto.patientId), cliniqueId },
+                });
+                if (!patient)
+                    throw new common_1.NotFoundException('Patient introuvable.');
+                patientId = patient.id;
+            }
+            else if (!dto.nouveauPatient) {
+                throw new common_1.BadRequestException('Choisissez le patient ou créez-le.');
+            }
+            const dejaCouvert = patientId ? await this.couverturePharmacie(patientId) : null;
+            if (!dejaCouvert) {
+                const a = dto.assurance;
+                if (!a?.assuranceId || !a?.formuleId) {
+                    throw new common_1.BadRequestException("Choisissez l'assurance et la formule du patient.");
+                }
+                const formule = await this.prisma.formuleAssurance.findFirst({
+                    where: {
+                        id: Number(a.formuleId),
+                        assuranceId: Number(a.assuranceId),
+                        statut: 'ACTIF',
+                        assurance: { cliniqueId, statut: 'ACTIF' },
+                    },
+                });
+                if (!formule)
+                    throw new common_1.BadRequestException('Assurance ou formule invalide (ou inactive).');
+                if (!patientId) {
+                    const cree = await this.accueilService.creerPatientExpress(cliniqueId, dto.nouveauPatient, utilisateurId);
+                    patientId = cree.id;
+                }
+                await this.prisma.patientAssurance.create({
+                    data: {
+                        patientId,
+                        assuranceId: formule.assuranceId,
+                        formuleId: formule.id,
+                        numeroAssure: a.numeroAssure?.trim() || null,
+                    },
+                });
+            }
+        }
+        const dernier = await this.prisma.ordonnanceExterne.findFirst({
+            where: { cliniqueId },
+            orderBy: { id: 'desc' },
+            select: { numero: true },
+        });
+        const suivant = dernier ? parseInt(dernier.numero.replace(/\D/g, ''), 10) + 1 : 1;
+        const numero = `EXT-${String(suivant).padStart(5, '0')}`;
+        const ordonnanceExterne = await this.prisma.ordonnanceExterne.create({
+            data: {
+                cliniqueId,
+                numero,
+                patientId,
+                clientNom: avecAssurance ? null : dto.clientNom?.trim().toUpperCase() || null,
+                prescripteur: dto.prescripteur?.trim() || null,
+                etablissement: dto.etablissement?.trim() || null,
+                dateOrdonnance: dto.dateOrdonnance ? new Date(dto.dateOrdonnance) : null,
+                creeParId: utilisateurId,
+            },
+        });
+        const dispensation = await this.prisma.dispensation.create({
+            data: { ordonnanceExterneId: ordonnanceExterne.id, pharmacienId: utilisateurId },
+        });
+        let total = 0;
+        for (const m of medicaments) {
+            const quantite = quantites.get(m.id);
+            await this.sortirDuStock(m, quantite, numero, utilisateurId, `Ordonnance externe ${m.nom}`);
+            const prixUnitaire = this.prixDeVente(m);
+            const montant = prixUnitaire * quantite;
+            await this.prisma.ligneDispensation.create({
+                data: {
+                    dispensationId: dispensation.id,
+                    medicamentId: m.id,
+                    medicamentNom: m.nom,
+                    quantitePrescrite: String(quantite),
+                    quantiteDelivree: quantite,
+                    uniteVente: m.uniteVente,
+                    prixUnitaire,
+                    montant,
+                },
+            });
+            total += montant;
+        }
+        await this.prisma.dispensation.update({
+            where: { id: dispensation.id },
+            data: { montantTotal: total },
+        });
+        const reglement = await this.payer(dispensation.id, dto.modePaiement || 'ESPECES', utilisateurId, {
+            type,
+            motif: dto.motif,
+        });
+        return { ordonnanceExterne, ...reglement };
+    }
+    async ordonnancesExternes(cliniqueId, debut, fin) {
+        const d = debut && /^\d{4}-\d{2}-\d{2}$/.test(debut)
+            ? new Date(`${debut}T00:00:00`)
+            : new Date(new Date().setHours(0, 0, 0, 0));
+        const f = fin && /^\d{4}-\d{2}-\d{2}$/.test(fin)
+            ? new Date(`${fin}T23:59:59.999`)
+            : new Date(new Date().setHours(23, 59, 59, 999));
+        const liste = await this.prisma.ordonnanceExterne.findMany({
+            where: { cliniqueId, createdAt: { gte: d, lte: f } },
+            include: {
+                patient: { select: { nom: true, prenom: true, code: true, telephone: true } },
+                creePar: { select: { personnel: { select: { nom: true, prenom: true } } } },
+                dispensations: {
+                    include: {
+                        lignes: { orderBy: { id: 'asc' } },
+                        paiement: { include: { assurance: { select: { libelle: true } } } },
+                    },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+        const lignes = liste.map((o) => {
+            const disp = o.dispensations[0];
+            const p = disp?.paiement;
+            const valide = p && p.statut === 'VALIDE';
+            return {
+                id: o.id,
+                numero: o.numero,
+                createdAt: o.createdAt,
+                avecAssurance: !!o.patientId,
+                patient: o.patient,
+                client: o.patient ? `${o.patient.nom} ${o.patient.prenom}` : o.clientNom || 'Client de passage',
+                prescripteur: o.prescripteur,
+                etablissement: o.etablissement,
+                dateOrdonnance: o.dateOrdonnance,
+                medicaments: (disp?.lignes ?? []).map((l) => ({
+                    nom: l.medicamentNom,
+                    quantite: l.quantiteDelivree,
+                    prixUnitaire: N(l.prixUnitaire),
+                    montant: N(l.montant),
+                })),
+                montantTotal: N(disp?.montantTotal ?? 0),
+                montantAssurance: valide ? N(p.montantAssurance) : 0,
+                montantPatient: valide ? N(p.montantPatient ?? p.montantTotal) : 0,
+                montantEncaisse: valide ? N(p.montantEncaisse ?? 0) : 0,
+                assurance: p?.assurance?.libelle ?? null,
+                tauxAssurance: p?.tauxAssurance ?? null,
+                type: p?.type ?? null,
+                modePaiement: p?.modePaiement ?? null,
+                statutPaiement: p?.statut ?? null,
+                regleLe: p?.regleLe ?? null,
+                numeroRecu: p?.numeroRecu ?? null,
+                paiementId: p?.id ?? null,
+                par: o.creePar?.personnel ? `${o.creePar.personnel.nom} ${o.creePar.personnel.prenom}` : '—',
+            };
+        });
+        const valides = lignes.filter((l) => l.statutPaiement === 'VALIDE');
+        return {
+            periode: { debut: d, fin: f },
+            lignes,
+            totaux: {
+                nombre: valides.length,
+                avecAssurance: valides.filter((l) => l.avecAssurance).length,
+                sansAssurance: valides.filter((l) => !l.avecAssurance).length,
+                montantTotal: valides.reduce((s, l) => s + l.montantTotal, 0),
+                montantAssurance: valides.reduce((s, l) => s + l.montantAssurance, 0),
+                montantEncaisse: valides.reduce((s, l) => s + l.montantEncaisse, 0),
+                resteCredits: valides
+                    .filter((l) => l.type === 'CREDIT' && !l.regleLe)
+                    .reduce((s, l) => s + l.montantPatient, 0),
+            },
+        };
+    }
+    async rechercherPatientsExterne(cliniqueId, saisie) {
+        const ref = (saisie ?? '').trim();
+        if (ref.length < 2)
+            return [];
+        const chiffres = ref.replace(/[\s.-]/g, '');
+        const patients = await this.prisma.patient.findMany({
+            where: {
+                cliniqueId,
+                OR: [
+                    { code: ref.toUpperCase() },
+                    (0, recherche_patient_1.critereNomPrenoms)(ref),
+                    ...(/^\d{4,}$/.test(chiffres) ? [{ telephone: { contains: chiffres } }] : []),
+                ],
+            },
+            select: { id: true, nom: true, prenom: true, code: true, telephone: true, sexe: true },
+            orderBy: { nom: 'asc' },
+            take: 10,
+        });
+        return Promise.all(patients.map(async (p) => {
+            const c = await this.couverturePharmacie(p.id);
+            return {
+                ...p,
+                assurance: c
+                    ? {
+                        assurance: c.assurance.libelle,
+                        formule: c.formule.libelle,
+                        numeroAssure: c.numeroAssure,
+                        taux: c.formule.tauxPharmacie ?? 0,
+                    }
+                    : null,
+            };
+        }));
     }
     async cloturer(dispensationId) {
         const dispensation = await this.prisma.dispensation.findUnique({
@@ -416,7 +659,11 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
     async payer(dispensationId, modePaiement, caissierId, options = {}) {
         const dispensation = await this.prisma.dispensation.findUnique({
             where: { id: dispensationId },
-            include: { paiement: true, consultation: { include: { passage: true } } },
+            include: {
+                paiement: true,
+                consultation: { include: { passage: true } },
+                ordonnanceExterne: true,
+            },
         });
         if (!dispensation)
             throw new common_1.NotFoundException('Dispensation introuvable.');
@@ -427,8 +674,13 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         if (type !== 'COMPTANT' && !options.motif?.trim()) {
             throw new common_1.BadRequestException('Indiquez le motif du crédit ou du cas social.');
         }
+        const patientId = dispensation.consultation?.patientId ?? dispensation.ordonnanceExterne?.patientId ?? null;
+        if (!patientId && type !== 'COMPTANT') {
+            throw new common_1.BadRequestException('Crédit et cas social sont réservés à un patient identifié.');
+        }
+        const cliniqueId = dispensation.consultation?.passage.cliniqueId ?? dispensation.ordonnanceExterne.cliniqueId;
         const total = N(dispensation.montantTotal);
-        const couverture = await this.couverturePharmacie(dispensation.consultation.patientId);
+        const couverture = patientId ? await this.couverturePharmacie(patientId) : null;
         const taux = Math.min(100, Math.max(0, couverture?.formule.tauxPharmacie ?? 0));
         const montantAssurance = Math.round((total * taux) / 100);
         const montantPatient = type === 'CAS_SOCIAL' ? 0 : total - montantAssurance;
@@ -466,19 +718,21 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 data: { statut: 'TRAITEE' },
             });
         }
-        const enAttente = await this.prisma.ordonnance.count({
-            where: {
-                consultationId: dispensation.consultationId,
-                statut: 'EN_ATTENTE',
-                medicaments: { some: {} },
-            },
-        });
-        await this.prisma.consultation.update({
-            where: { id: dispensation.consultationId },
-            data: { ordonnanceStatut: enAttente === 0 ? 'TRAITEE' : 'EN_ATTENTE' },
-        });
+        if (dispensation.consultationId) {
+            const enAttente = await this.prisma.ordonnance.count({
+                where: {
+                    consultationId: dispensation.consultationId,
+                    statut: 'EN_ATTENTE',
+                    medicaments: { some: {} },
+                },
+            });
+            await this.prisma.consultation.update({
+                where: { id: dispensation.consultationId },
+                data: { ordonnanceStatut: enAttente === 0 ? 'TRAITEE' : 'EN_ATTENTE' },
+            });
+        }
         let impression = null;
-        if ((await this.impressionService.getConfigPoste(dispensation.consultation.passage.cliniqueId, 'PHARMACIE')).autoPrint) {
+        if ((await this.impressionService.getConfigPoste(cliniqueId, 'PHARMACIE')).autoPrint) {
             try {
                 impression = await this.impressionService.imprimerRecuPharmacie(paiement.id);
             }
@@ -527,7 +781,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         const paiements = await this.prisma.pharmaciePaiement.findMany({
             where: {
                 statut: 'VALIDE',
-                dispensation: { consultation: { passage: { cliniqueId } } },
+                dispensation: dispensationsDeLaClinique(cliniqueId),
                 OR: [{ type: 'CREDIT', regleLe: null }, { type: 'CAS_SOCIAL' }],
             },
             include: {
@@ -538,6 +792,12 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                             select: {
                                 patient: { select: { nom: true, prenom: true, code: true, telephone: true } },
                                 passage: { select: { numeroOrdre: true } },
+                            },
+                        },
+                        ordonnanceExterne: {
+                            select: {
+                                numero: true,
+                                patient: { select: { nom: true, prenom: true, code: true, telephone: true } },
                             },
                         },
                     },
@@ -558,9 +818,10 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             montantAssurance: N(p.montantAssurance),
             montantPatient: N(p.montantPatient ?? 0),
             assurance: p.assurance?.libelle ?? null,
-            numeroOrdonnance: p.dispensation.ordonnance?.numero ?? null,
-            numeroOrdre: p.dispensation.consultation.passage.numeroOrdre,
-            patient: p.dispensation.consultation.patient,
+            numeroOrdonnance: p.dispensation.ordonnance?.numero ?? p.dispensation.ordonnanceExterne?.numero ?? null,
+            externe: !!p.dispensation.ordonnanceExterne,
+            numeroOrdre: p.dispensation.consultation?.passage.numeroOrdre ?? null,
+            patient: p.dispensation.consultation?.patient ?? p.dispensation.ordonnanceExterne?.patient,
             par: p.caissier?.personnel ? `${p.caissier.personnel.nom} ${p.caissier.personnel.prenom}` : '—',
         }));
         const credits = lignes.filter((l) => l.type === 'CREDIT');
@@ -1108,7 +1369,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             const ds = await this.prisma.dispensation.findMany({
                 where: {
                     statut: 'CLOTUREE',
-                    consultation: { passage: { cliniqueId } },
+                    ...dispensationsDeLaClinique(cliniqueId),
                     ...dansPeriode('createdAt'),
                 },
                 include: {
@@ -1122,15 +1383,28 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                             },
                         },
                     },
+                    ordonnanceExterne: {
+                        select: {
+                            numero: true,
+                            clientNom: true,
+                            patient: { select: { nom: true, prenom: true } },
+                        },
+                    },
                 },
                 orderBy: { createdAt: 'desc' },
             });
-            return ds.map((d) => ({
-                date: d.createdAt,
-                patient: `${d.consultation?.passage?.patient?.nom ?? ''} ${d.consultation?.passage?.patient?.prenom ?? ''}`.trim(),
-                numeroOrdre: d.consultation?.passage?.numeroOrdre ?? '—',
-                montant: Number(d.montantTotal),
-            }));
+            return ds.map((d) => {
+                const ext = d.ordonnanceExterne;
+                const patient = d.consultation?.passage?.patient ?? ext?.patient;
+                return {
+                    date: d.createdAt,
+                    patient: patient
+                        ? `${patient.nom} ${patient.prenom}`.trim()
+                        : ext?.clientNom || 'Client de passage',
+                    numeroOrdre: d.consultation?.passage?.numeroOrdre ?? ext?.numero ?? '—',
+                    montant: Number(d.montantTotal),
+                };
+            });
         }
         if (type === 'perdus') {
             const r = await this.retraits(cliniqueId, debut, fin);
@@ -1204,7 +1478,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         const vendusAgg = await this.prisma.dispensation.aggregate({
             where: {
                 statut: 'CLOTUREE',
-                consultation: { passage: { cliniqueId } },
+                ...dispensationsDeLaClinique(cliniqueId),
                 ...dansPeriode('createdAt'),
             },
             _sum: { montantTotal: true },
@@ -1245,6 +1519,7 @@ PharmacieService.MOTIFS_RETRAIT = {
 exports.PharmacieService = PharmacieService = PharmacieService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        impression_service_1.ImpressionService])
+        impression_service_1.ImpressionService,
+        accueil_service_1.AccueilService])
 ], PharmacieService);
 //# sourceMappingURL=pharmacie.service.js.map

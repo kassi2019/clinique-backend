@@ -302,10 +302,20 @@ let AssurancesService = class AssurancesService {
                     assuranceId: filtreAssurance,
                     ...periode,
                     dispensation: {
-                        consultation: {
-                            passage: { cliniqueId },
-                            ...(opts.patientId ? { patientId: opts.patientId } : {}),
-                        },
+                        OR: [
+                            {
+                                consultation: {
+                                    passage: { cliniqueId },
+                                    ...(opts.patientId ? { patientId: opts.patientId } : {}),
+                                },
+                            },
+                            {
+                                ordonnanceExterne: {
+                                    cliniqueId,
+                                    ...(opts.patientId ? { patientId: opts.patientId } : {}),
+                                },
+                            },
+                        ],
                     },
                 },
                 include: {
@@ -315,6 +325,12 @@ let AssurancesService = class AssurancesService {
                                 select: {
                                     patient: { select: { nom: true, prenom: true, code: true } },
                                     passage: { select: { numeroOrdre: true } },
+                                },
+                            },
+                            ordonnanceExterne: {
+                                select: {
+                                    numero: true,
+                                    patient: { select: { nom: true, prenom: true, code: true } },
                                 },
                             },
                         },
@@ -346,8 +362,8 @@ let AssurancesService = class AssurancesService {
                 source: 'PHARMACIE',
                 createdAt: l.createdAt,
                 numeroRecu: l.numeroRecu,
-                patient: l.dispensation.consultation.patient,
-                numeroOrdre: l.dispensation.consultation.passage.numeroOrdre,
+                patient: l.dispensation.consultation?.patient ?? l.dispensation.ordonnanceExterne?.patient,
+                numeroOrdre: l.dispensation.consultation?.passage.numeroOrdre ?? l.dispensation.ordonnanceExterne?.numero ?? '—',
                 assurance: l.assurance,
                 formule: l.formule,
                 tauxParametre: l.tauxAssurance ?? 0,

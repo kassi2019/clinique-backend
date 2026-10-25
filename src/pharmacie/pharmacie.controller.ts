@@ -12,7 +12,7 @@ import {
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
-import { PharmacieService } from './pharmacie.service';
+import { OrdonnanceExterneDto, PharmacieService } from './pharmacie.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('pharmacie')
@@ -53,6 +53,33 @@ export class PharmacieController {
     @Req() req,
   ) {
     return this.pharmacieService.dispenser(id, dto.lignes ?? [], req.user.id);
+  }
+
+  // ── Ordonnances externes (prescrites hors du centre) ──
+
+  /** Saisie + sortie de stock + règlement d'une ordonnance externe, en une validation. */
+  @Post('ordonnances-externes')
+  creerOrdonnanceExterne(@Body() dto: OrdonnanceExterneDto, @Req() req) {
+    return this.pharmacieService.creerOrdonnanceExterne(dto, req.user.id);
+  }
+
+  /** Rapport dédié des ordonnances externes (défaut : aujourd'hui). */
+  @Get('ordonnances-externes')
+  ordonnancesExternes(
+    @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
+    @Query('debut') debut?: string,
+    @Query('fin') fin?: string,
+  ) {
+    return this.pharmacieService.ordonnancesExternes(cliniqueId, debut, fin);
+  }
+
+  /** Recherche rapide d'un patient (nom, code, téléphone) avec son assurance active. */
+  @Get('ordonnances-externes/patients')
+  rechercherPatientsExterne(
+    @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
+    @Query('q') q?: string,
+  ) {
+    return this.pharmacieService.rechercherPatientsExterne(cliniqueId, q ?? '');
   }
 
   // Anciennes routes (par consultation), gardées pour les applications non mises à jour

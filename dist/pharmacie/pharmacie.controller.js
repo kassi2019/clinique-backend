@@ -38,6 +38,15 @@ let PharmacieController = class PharmacieController {
     dispenser(id, dto, req) {
         return this.pharmacieService.dispenser(id, dto.lignes ?? [], req.user.id);
     }
+    creerOrdonnanceExterne(dto, req) {
+        return this.pharmacieService.creerOrdonnanceExterne(dto, req.user.id);
+    }
+    ordonnancesExternes(cliniqueId, debut, fin) {
+        return this.pharmacieService.ordonnancesExternes(cliniqueId, debut, fin);
+    }
+    rechercherPatientsExterne(cliniqueId, q) {
+        return this.pharmacieService.rechercherPatientsExterne(cliniqueId, q ?? '');
+    }
     async detailOrdonnanceConsultation(id) {
         return this.pharmacieService.detailOrdonnance(await this.pharmacieService.ordonnanceDeConsultation(id));
     }
@@ -172,6 +181,31 @@ __decorate([
     __metadata("design:paramtypes", [Number, Object, Object]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "dispenser", null);
+__decorate([
+    (0, common_1.Post)('ordonnances-externes'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "creerOrdonnanceExterne", null);
+__decorate([
+    (0, common_1.Get)('ordonnances-externes'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('debut')),
+    __param(2, (0, common_1.Query)('fin')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "ordonnancesExternes", null);
+__decorate([
+    (0, common_1.Get)('ordonnances-externes/patients'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('q')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "rechercherPatientsExterne", null);
 __decorate([
     (0, common_1.Get)('consultations/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),

@@ -391,12 +391,12 @@ export declare class ImagerieController {
         passageId: number;
         patientId: number;
         medecinId: number | null;
+        prescripteur: string | null;
         typeFicheId: number;
         libelleType: string;
         texte: string;
         valeurs: string | null;
         indication: string | null;
-        prescripteur: string | null;
     }[]>;
     creerFiche(id: number, dto: {
         typeFicheId: number;
@@ -412,12 +412,12 @@ export declare class ImagerieController {
         passageId: number;
         patientId: number;
         medecinId: number | null;
+        prescripteur: string | null;
         typeFicheId: number;
         libelleType: string;
         texte: string;
         valeurs: string | null;
         indication: string | null;
-        prescripteur: string | null;
     }>;
     modifierFiche(id: number, dto: {
         texte?: string;
@@ -432,12 +432,12 @@ export declare class ImagerieController {
         passageId: number;
         patientId: number;
         medecinId: number | null;
+        prescripteur: string | null;
         typeFicheId: number;
         libelleType: string;
         texte: string;
         valeurs: string | null;
         indication: string | null;
-        prescripteur: string | null;
     }>;
     imprimerFiche(id: number): Promise<{
         ok: boolean;

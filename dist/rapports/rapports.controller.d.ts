@@ -36,10 +36,10 @@ export declare class RapportsController {
         regionNom: string | null;
         regionCode: string | null;
         populationDesservie: number | null;
+        etablissement: string | null;
         observations: string | null;
         mois: number;
         annee: number;
-        etablissement: string | null;
         realiseParNom: string | null;
         realiseParFonction: string | null;
         realiseParContact: string | null;
@@ -65,10 +65,10 @@ export declare class RapportsController {
         regionNom: string | null;
         regionCode: string | null;
         populationDesservie: number | null;
+        etablissement: string | null;
         observations: string | null;
         mois: number;
         annee: number;
-        etablissement: string | null;
         realiseParNom: string | null;
         realiseParFonction: string | null;
         realiseParContact: string | null;
@@ -86,10 +86,10 @@ export declare class RapportsController {
         regionNom: string | null;
         regionCode: string | null;
         populationDesservie: number | null;
+        etablissement: string | null;
         observations: string | null;
         mois: number;
         annee: number;
-        etablissement: string | null;
         realiseParNom: string | null;
         realiseParFonction: string | null;
         realiseParContact: string | null;

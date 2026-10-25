@@ -339,7 +339,11 @@ export class StatistiquesService {
     const lignes = await this.prisma.ligneDispensation.findMany({
       where: {
         dispensation: {
-          consultation: { passage: { cliniqueId } },
+          // circuit normal (consultation) + ordonnances externes
+          OR: [
+            { consultation: { passage: { cliniqueId } } },
+            { ordonnanceExterne: { cliniqueId } },
+          ],
           createdAt: { gte: d, lte: f },
         },
       },

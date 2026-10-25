@@ -77,6 +77,7 @@ model Clinique {
   certificatsArret                CertificatArret[]
   fichesEchographie               FicheEchographie[]
   fichesExamenImagerie            FicheExamenImagerie[]
+  ordonnancesExternes             OrdonnanceExterne[]
 
   @@map("cliniques")
 }
@@ -129,6 +130,7 @@ model Patient {
   certificatsArret     CertificatArret[]
   fichesExamenImagerie FicheExamenImagerie[]
   fichesReference      FicheReference[]
+  ordonnancesExternes  OrdonnanceExterne[]
 
   @@unique([cliniqueId, numeroDossier])
   @@map("patients")
@@ -407,25 +409,56 @@ model MouvementStock {
 }
 
 // ---------- Dispensations (ordonnances servies, §9.1) ----------
+// Rattachée soit à une consultation du centre (circuit normal), soit à une
+// ordonnance externe (ordonnance d'un autre établissement, sans consultation).
 model Dispensation {
-  id             Int       @id @default(autoincrement())
-  consultationId Int
-  ordonnanceId   Int? // ordonnance servie
-  pharmacienId   Int // utilisateur qui dispense
-  statut         String    @default("EN_COURS") // EN_COURS / CLOTUREE
-  montantTotal   Decimal   @default(0) @db.Decimal(18, 2)
-  clotureeLe     DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id                  Int       @id @default(autoincrement())
+  consultationId      Int?
+  ordonnanceId        Int? // ordonnance servie
+  ordonnanceExterneId Int? // ordonnance externe servie
+  pharmacienId        Int // utilisateur qui dispense
+  statut              String    @default("EN_COURS") // EN_COURS / CLOTUREE
+  montantTotal        Decimal   @default(0) @db.Decimal(18, 2)
+  clotureeLe          DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  consultation Consultation        @relation(fields: [consultationId], references: [id], onDelete: Cascade)
-  ordonnance   Ordonnance?         @relation(fields: [ordonnanceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  pharmacien   Utilisateur         @relation(fields: [pharmacienId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  lignes       LigneDispensation[]
-  paiement     PharmaciePaiement?
+  consultation      Consultation?       @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  ordonnance        Ordonnance?         @relation(fields: [ordonnanceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ordonnanceExterne OrdonnanceExterne?  @relation(fields: [ordonnanceExterneId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  pharmacien        Utilisateur         @relation(fields: [pharmacienId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lignes            LigneDispensation[]
+  paiement          PharmaciePaiement?
 
   @@index([ordonnanceId])
+  @@index([ordonnanceExterneId])
   @@map("dispensations")
+}
+
+// ---------- Ordonnances externes (prescrites hors du centre, servies à la pharmacie) ----------
+// Avec assurance : rattachée à un patient (créé rapidement si besoin) pour
+// appliquer le taux « médicaments » de sa formule. Sans assurance : simple
+// vente au comptant, aucun dossier patient.
+model OrdonnanceExterne {
+  id             Int       @id @default(autoincrement())
+  cliniqueId     Int
+  numero         String    @db.NVarChar(50) // EXT-00012 (séquentiel par clinique)
+  patientId      Int? // renseigné seulement pour une ordonnance avec assurance
+  clientNom      String? // sans assurance : nom du client (facultatif, imprimé sur le reçu)
+  prescripteur   String? // médecin prescripteur extérieur
+  etablissement  String? // établissement d'origine
+  dateOrdonnance DateTime? @db.Date
+  creeParId      Int
+  createdAt      DateTime  @default(now())
+
+  clinique      Clinique       @relation(fields: [cliniqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  patient       Patient?       @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  creePar       Utilisateur    @relation(fields: [creeParId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dispensations Dispensation[]
+
+  @@unique([cliniqueId, numero])
+  @@index([cliniqueId, createdAt])
+  @@map("ordonnances_externes")
 }
 
 // ---------- Lignes de dispensation ----------
@@ -1068,6 +1101,7 @@ model Utilisateur {
   consultationsPf            ConsultationPf[]         @relation("Cpf")
   certificatsArret           CertificatArret[]        @relation("CertificatsArret")
   fichesExamenImagerie       FicheExamenImagerie[]    @relation("FichesEcho")
+  ordonnancesExternes        OrdonnanceExterne[]
   mouvementsConsommables     MouvementConsommable[]
   prelevements               ExamenLabo[]             @relation("Prelevements")
   validations                ExamenLabo[]             @relation("Validations")

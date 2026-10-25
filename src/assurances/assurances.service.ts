@@ -324,11 +324,22 @@ export class AssurancesService {
           montantAssurance: { gt: 0 },
           assuranceId: filtreAssurance,
           ...periode,
+          // Circuit normal (consultation) + ordonnances externes avec assurance
           dispensation: {
-            consultation: {
-              passage: { cliniqueId },
-              ...(opts.patientId ? { patientId: opts.patientId } : {}),
-            },
+            OR: [
+              {
+                consultation: {
+                  passage: { cliniqueId },
+                  ...(opts.patientId ? { patientId: opts.patientId } : {}),
+                },
+              },
+              {
+                ordonnanceExterne: {
+                  cliniqueId,
+                  ...(opts.patientId ? { patientId: opts.patientId } : {}),
+                },
+              },
+            ],
           },
         },
         include: {
@@ -338,6 +349,12 @@ export class AssurancesService {
                 select: {
                   patient: { select: { nom: true, prenom: true, code: true } },
                   passage: { select: { numeroOrdre: true } },
+                },
+              },
+              ordonnanceExterne: {
+                select: {
+                  numero: true,
+                  patient: { select: { nom: true, prenom: true, code: true } },
                 },
               },
             },
@@ -369,8 +386,10 @@ export class AssurancesService {
         source: 'PHARMACIE',
         createdAt: l.createdAt,
         numeroRecu: l.numeroRecu,
-        patient: l.dispensation.consultation.patient,
-        numeroOrdre: l.dispensation.consultation.passage.numeroOrdre,
+        // Ordonnance externe assurée : toujours un patient ; son N° EXT-… tient lieu de N° d'ordre
+        patient: l.dispensation.consultation?.patient ?? l.dispensation.ordonnanceExterne?.patient!,
+        numeroOrdre:
+          l.dispensation.consultation?.passage.numeroOrdre ?? l.dispensation.ordonnanceExterne?.numero ?? '—',
         assurance: l.assurance,
         formule: l.formule,
         tauxParametre: l.tauxAssurance ?? 0,

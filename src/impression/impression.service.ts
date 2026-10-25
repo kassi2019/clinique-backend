@@ -631,6 +631,10 @@ export class ImpressionService {
                 passage: { include: { patient: true, clinique: { select: { nom: true, adresse: true } } } },
               },
             },
+            // Ordonnance externe : pas de passage, patient facultatif (client de passage)
+            ordonnanceExterne: {
+              include: { patient: true, clinique: { select: { nom: true, adresse: true } } },
+            },
             pharmacien: { select: { matricule: true, personnel: { select: { nom: true, prenom: true } } } },
             lignes: true,
           },
@@ -639,10 +643,10 @@ export class ImpressionService {
     });
     if (!paiement) throw new NotFoundException('Paiement introuvable.');
 
-    const config = await this.getConfigPoste(
-      paiement.dispensation.consultation.passage.cliniqueId,
-      'PHARMACIE',
-    );
+    const passage = paiement.dispensation.consultation?.passage;
+    const externe = paiement.dispensation.ordonnanceExterne;
+    const cliniqueId = passage?.cliniqueId ?? externe!.cliniqueId;
+    const config = await this.getConfigPoste(cliniqueId, 'PHARMACIE');
     const L = config.largeur;
     const trait = (c = '-') => c.repeat(L);
     const centrer = (t: string) =>
@@ -651,8 +655,8 @@ export class ImpressionService {
       gauche + ' '.repeat(Math.max(1, L - gauche.length - droite.length)) + droite;
 
     const COEUR = '\x03';
-    const p = paiement.dispensation.consultation.passage.patient;
-    const clinique = paiement.dispensation.consultation.passage.clinique;
+    const p = passage?.patient ?? externe?.patient ?? null;
+    const clinique = passage?.clinique ?? externe!.clinique;
 
     const lignes: string[] = [];
     lignes.push(centrer(clinique.nom.toUpperCase()));
@@ -661,8 +665,13 @@ export class ImpressionService {
     lignes.push(centrer('RECU PHARMACIE'));
     lignes.push(CMDS.BOLD_ON + centrer(paiement.numeroRecu) + CMDS.BOLD_OFF);
     lignes.push(trait());
-    lignes.push(deuxColonnes('Patient', `${p.nom} ${p.prenom}`.toUpperCase()));
-    lignes.push(deuxColonnes('Code', p.code));
+    if (p) {
+      lignes.push(deuxColonnes('Patient', `${p.nom} ${p.prenom}`.toUpperCase()));
+      lignes.push(deuxColonnes('Code', p.code));
+    } else {
+      lignes.push(deuxColonnes('Client', (externe?.clientNom || 'Client de passage').toUpperCase()));
+    }
+    if (externe) lignes.push(deuxColonnes('Ord. externe', externe.numero));
     lignes.push(trait());
     for (const l of paiement.dispensation.lignes) {
       // Prix unitaire × quantité = total, sur la même ligne que le médicament
@@ -714,7 +723,7 @@ export class ImpressionService {
     const texte = normalizeText(lignes.join('\n'));
     return this.imprimer(texte, config, {
       poste: 'PHARMACIE',
-      cliniqueId: paiement.dispensation.consultation.passage.cliniqueId,
+      cliniqueId,
       libelle: `Reçu pharmacie ${paiement.numeroRecu}`,
     });
   }

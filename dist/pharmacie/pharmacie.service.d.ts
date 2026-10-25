@@ -1,10 +1,39 @@
+import { AccueilService } from '../accueil/accueil.service';
 import { ImpressionService } from '../impression/impression.service';
 import { PrismaService } from '../prisma/prisma.service';
+export interface OrdonnanceExterneDto {
+    cliniqueId: number;
+    avecAssurance?: boolean;
+    patientId?: number;
+    nouveauPatient?: {
+        nom: string;
+        prenom: string;
+        sexe?: string;
+        telephone?: string;
+    };
+    assurance?: {
+        assuranceId: number;
+        formuleId: number;
+        numeroAssure?: string;
+    };
+    clientNom?: string;
+    prescripteur?: string;
+    etablissement?: string;
+    dateOrdonnance?: string;
+    lignes: {
+        medicamentId: number;
+        quantite: number;
+    }[];
+    type?: string;
+    modePaiement?: string;
+    motif?: string;
+}
 export declare class PharmacieService {
     private prisma;
     private impressionService;
+    private accueilService;
     private readonly logger;
-    constructor(prisma: PrismaService, impressionService: ImpressionService);
+    constructor(prisma: PrismaService, impressionService: ImpressionService, accueilService: AccueilService);
     rechercherOrdonnances(reference: string, cliniqueId: number, filtres?: {
         medecinId?: number;
         statut?: string;
@@ -105,8 +134,9 @@ export declare class PharmacieService {
                 id: number;
                 statut: string;
                 updatedAt: Date;
-                consultationId: number;
+                consultationId: number | null;
                 ordonnanceId: number | null;
+                ordonnanceExterneId: number | null;
                 pharmacienId: number;
                 clotureeLe: Date | null;
             }[];
@@ -265,8 +295,9 @@ export declare class PharmacieService {
             id: number;
             statut: string;
             updatedAt: Date;
-            consultationId: number;
+            consultationId: number | null;
             ordonnanceId: number | null;
+            ordonnanceExterneId: number | null;
             pharmacienId: number;
             clotureeLe: Date | null;
         }[];
@@ -314,19 +345,131 @@ export declare class PharmacieService {
         statut: string;
         updatedAt: Date;
         montantTotal: import("@prisma/client/runtime/library").Decimal;
-        consultationId: number;
+        consultationId: number | null;
         ordonnanceId: number | null;
+        ordonnanceExterneId: number | null;
         pharmacienId: number;
         clotureeLe: Date | null;
     }>;
+    private sortirDuStock;
+    private prixDeVente;
+    creerOrdonnanceExterne(dto: OrdonnanceExterneDto, utilisateurId: number): Promise<{
+        paiement: {
+            montantTotal: number;
+            montantAssurance: number;
+            montantPatient: number;
+            montantEncaisse: number;
+            assurance: string;
+            createdAt: Date;
+            id: number;
+            statut: string;
+            type: string;
+            caissierId: number;
+            numeroRecu: string;
+            modePaiement: string;
+            motifAnnulation: string | null;
+            dateAnnulation: Date | null;
+            assuranceId: number | null;
+            motif: string | null;
+            dispensationId: number;
+            formuleId: number | null;
+            tauxAssurance: number | null;
+            regleLe: Date | null;
+        };
+        lignes: {
+            id: number;
+            medicamentNom: string;
+            quantiteDelivree: number;
+            prixUnitaire: number;
+            montant: number;
+        }[];
+        impression: any;
+        ordonnanceExterne: {
+            createdAt: Date;
+            id: number;
+            cliniqueId: number;
+            patientId: number | null;
+            creeParId: number;
+            numero: string;
+            clientNom: string | null;
+            prescripteur: string | null;
+            etablissement: string | null;
+            dateOrdonnance: Date | null;
+        };
+    }>;
+    ordonnancesExternes(cliniqueId: number, debut?: string, fin?: string): Promise<{
+        periode: {
+            debut: Date;
+            fin: Date;
+        };
+        lignes: {
+            id: number;
+            numero: string;
+            createdAt: Date;
+            avecAssurance: boolean;
+            patient: {
+                nom: string;
+                prenom: string;
+                telephone: string;
+                code: string;
+            };
+            client: string;
+            prescripteur: string;
+            etablissement: string;
+            dateOrdonnance: Date;
+            medicaments: {
+                nom: string;
+                quantite: number;
+                prixUnitaire: number;
+                montant: number;
+            }[];
+            montantTotal: number;
+            montantAssurance: number;
+            montantPatient: number;
+            montantEncaisse: number;
+            assurance: string;
+            tauxAssurance: number;
+            type: string;
+            modePaiement: string;
+            statutPaiement: string;
+            regleLe: Date;
+            numeroRecu: string;
+            paiementId: number;
+            par: string;
+        }[];
+        totaux: {
+            nombre: number;
+            avecAssurance: number;
+            sansAssurance: number;
+            montantTotal: number;
+            montantAssurance: number;
+            montantEncaisse: number;
+            resteCredits: number;
+        };
+    }>;
+    rechercherPatientsExterne(cliniqueId: number, saisie: string): Promise<{
+        assurance: {
+            assurance: string;
+            formule: string;
+            numeroAssure: string;
+            taux: number;
+        };
+        id: number;
+        nom: string;
+        prenom: string;
+        sexe: string;
+        telephone: string;
+        code: string;
+    }[]>;
     cloturer(dispensationId: number): Promise<{
         createdAt: Date;
         id: number;
         statut: string;
         updatedAt: Date;
         montantTotal: import("@prisma/client/runtime/library").Decimal;
-        consultationId: number;
+        consultationId: number | null;
         ordonnanceId: number | null;
+        ordonnanceExterneId: number | null;
         pharmacienId: number;
         clotureeLe: Date | null;
     }>;
@@ -399,6 +542,7 @@ export declare class PharmacieService {
             montantPatient: number;
             assurance: string;
             numeroOrdonnance: string;
+            externe: boolean;
             numeroOrdre: string;
             patient: {
                 nom: string;
@@ -419,6 +563,7 @@ export declare class PharmacieService {
             montantPatient: number;
             assurance: string;
             numeroOrdonnance: string;
+            externe: boolean;
             numeroOrdre: string;
             patient: {
                 nom: string;
