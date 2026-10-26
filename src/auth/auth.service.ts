@@ -37,6 +37,7 @@ export class AuthService {
     role: {
       code: string;
       nom: string;
+      signatureAutorisee: boolean;
       habilitations: {
         module: { code: string; nom: string };
         lecture: boolean;
@@ -51,6 +52,8 @@ export class AuthService {
       role: {
         code: u.role.code,
         nom: u.role.nom,
+        // Bouton « Ma signature » et case « Apposer ma signature » (autorisés par l'administrateur)
+        signatureAutorisee: u.role.signatureAutorisee,
         modules: u.role.habilitations.map((h) => ({
           code: h.module.code,
           nom: h.module.nom,

@@ -302,9 +302,9 @@ export declare class ConsultationsController {
                     parametre: string;
                     id: number;
                     unite: string | null;
-                    examenLaboId: number;
                     valeur: string | null;
                     normes: string | null;
+                    examenLaboId: number;
                 }[];
                 validePar: {
                     personnel: {
@@ -413,9 +413,9 @@ export declare class ConsultationsController {
                         parametre: string;
                         id: number;
                         unite: string | null;
-                        examenLaboId: number;
                         valeur: string | null;
                         normes: string | null;
+                        examenLaboId: number;
                     }[];
                     validePar: {
                         personnel: {

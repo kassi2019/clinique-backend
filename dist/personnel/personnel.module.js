@@ -9,14 +9,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PersonnelModule = void 0;
 const common_1 = require("@nestjs/common");
 const personnel_controller_1 = require("./personnel.controller");
+const ma_signature_controller_1 = require("./ma-signature.controller");
 const personnel_service_1 = require("./personnel.service");
+const signature_service_1 = require("./signature.service");
 let PersonnelModule = class PersonnelModule {
 };
 exports.PersonnelModule = PersonnelModule;
 exports.PersonnelModule = PersonnelModule = __decorate([
     (0, common_1.Module)({
-        controllers: [personnel_controller_1.PersonnelController],
-        providers: [personnel_service_1.PersonnelService],
+        controllers: [personnel_controller_1.PersonnelController, ma_signature_controller_1.MaSignatureController],
+        providers: [personnel_service_1.PersonnelService, signature_service_1.SignatureService],
     })
 ], PersonnelModule);
 //# sourceMappingURL=personnel.module.js.map

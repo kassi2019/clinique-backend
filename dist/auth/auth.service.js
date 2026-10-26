@@ -32,6 +32,7 @@ let AuthService = class AuthService {
             role: {
                 code: u.role.code,
                 nom: u.role.nom,
+                signatureAutorisee: u.role.signatureAutorisee,
                 modules: u.role.habilitations.map((h) => ({
                     code: h.module.code,
                     nom: h.module.nom,

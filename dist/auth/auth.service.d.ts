@@ -15,6 +15,7 @@ export declare class AuthService {
             role: {
                 code: string;
                 nom: string;
+                signatureAutorisee: boolean;
                 modules: {
                     code: string;
                     nom: string;
@@ -48,6 +49,7 @@ export declare class AuthService {
         role: {
             code: string;
             nom: string;
+            signatureAutorisee: boolean;
             modules: {
                 code: string;
                 nom: string;

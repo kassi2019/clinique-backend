@@ -8,5 +8,6 @@ export declare class CreateRoleDto {
     code: string;
     nom: string;
     description?: string;
+    signatureAutorisee?: boolean;
     habilitations?: HabilitationDto[];
 }

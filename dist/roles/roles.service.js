@@ -58,6 +58,7 @@ let RolesService = class RolesService {
                     code: dto.code,
                     nom: dto.nom,
                     description: dto.description,
+                    signatureAutorisee: dto.signatureAutorisee,
                     habilitations: dto.habilitations?.length
                         ? {
                             create: dto.habilitations.map((h) => ({
@@ -79,6 +80,14 @@ let RolesService = class RolesService {
             throw e;
         }
     }
+    async autoriserSignature(id, autorisee) {
+        await this.findOne(id);
+        return this.prisma.role.update({
+            where: { id },
+            data: { signatureAutorisee: !!autorisee },
+            include: includeHabilitations,
+        });
+    }
     async update(id, dto) {
         await this.findOne(id);
         try {
@@ -91,6 +100,7 @@ let RolesService = class RolesService {
                     code: dto.code,
                     nom: dto.nom,
                     description: dto.description,
+                    signatureAutorisee: dto.signatureAutorisee,
                     habilitations: dto.habilitations?.length
                         ? {
                             create: dto.habilitations.map((h) => ({

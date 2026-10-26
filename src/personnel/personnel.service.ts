@@ -20,6 +20,9 @@ const includeUtilisateur = {
   },
 } satisfies Prisma.PersonnelInclude;
 
+// Signature et cachet : lus uniquement par l'endpoint dédié (/personnel/:id/signature)
+const sansImages = { signature: true, cachet: true } satisfies Prisma.PersonnelOmit;
+
 const includeBase = {
   service: true,
   clinique: { select: { id: true, code: true, nom: true } },
@@ -53,6 +56,7 @@ export class PersonnelService {
       this.prisma.personnel.findMany({
         where,
         include: includeBase,
+        omit: sansImages,
         orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
         ...(perPage > 0 ? { skip: (page - 1) * perPage, take: perPage } : {}),
       }),
@@ -71,6 +75,7 @@ export class PersonnelService {
     const personnel = await this.prisma.personnel.findUnique({
       where: { id },
       include: includeBase,
+      omit: sansImages,
     });
     if (!personnel) throw new NotFoundException('Personnel introuvable.');
     return personnel;
@@ -98,6 +103,7 @@ export class PersonnelService {
           dateEmbauche: dto.dateEmbauche ? new Date(dto.dateEmbauche) : undefined,
         },
         include: includeBase,
+        omit: sansImages,
       });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
@@ -147,6 +153,7 @@ export class PersonnelService {
           dateEmbauche: dto.dateEmbauche ? new Date(dto.dateEmbauche) : undefined,
         },
         include: includeBase,
+        omit: sansImages,
       });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
@@ -168,6 +175,7 @@ export class PersonnelService {
       where: { id },
       data: { statut: 'INACTIF' },
       include: includeBase,
+      omit: sansImages,
     });
   }
 }

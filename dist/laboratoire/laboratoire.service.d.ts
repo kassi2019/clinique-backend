@@ -183,9 +183,9 @@ export declare class LaboratoireService {
                     parametre: string;
                     id: number;
                     unite: string | null;
-                    examenLaboId: number;
                     valeur: string | null;
                     normes: string | null;
+                    examenLaboId: number;
                 }[];
                 prelevePar: {
                     personnel: {
@@ -230,9 +230,9 @@ export declare class LaboratoireService {
                 parametre: string;
                 id: number;
                 unite: string | null;
-                examenLaboId: number;
                 valeur: string | null;
                 normes: string | null;
+                examenLaboId: number;
             }[];
         } & {
             createdAt: Date;
@@ -256,9 +256,9 @@ export declare class LaboratoireService {
             parametre: string;
             id: number;
             unite: string | null;
-            examenLaboId: number;
             valeur: string | null;
             normes: string | null;
+            examenLaboId: number;
         }[];
         prelevePar: {
             personnel: {
@@ -295,9 +295,9 @@ export declare class LaboratoireService {
             parametre: string;
             id: number;
             unite: string | null;
-            examenLaboId: number;
             valeur: string | null;
             normes: string | null;
+            examenLaboId: number;
         }[];
         prelevePar: {
             personnel: {
@@ -334,9 +334,9 @@ export declare class LaboratoireService {
             parametre: string;
             id: number;
             unite: string | null;
-            examenLaboId: number;
             valeur: string | null;
             normes: string | null;
+            examenLaboId: number;
         }[];
         prelevePar: {
             personnel: {
@@ -391,9 +391,9 @@ export declare class LaboratoireService {
                 parametre: string;
                 id: number;
                 unite: string | null;
-                examenLaboId: number;
                 valeur: string | null;
                 normes: string | null;
+                examenLaboId: number;
             }[];
             prelevePar: {
                 personnel: {

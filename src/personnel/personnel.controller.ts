@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -16,12 +17,16 @@ import { RolesGuard } from '../auth/roles.guard';
 import { CreatePersonnelDto } from './dto/create-personnel.dto';
 import { UpdatePersonnelDto } from './dto/update-personnel.dto';
 import { PersonnelService } from './personnel.service';
+import { SignatureCachetDto, SignatureService } from './signature.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMINISTRATEUR')
 @Controller('personnel')
 export class PersonnelController {
-  constructor(private personnelService: PersonnelService) {}
+  constructor(
+    private personnelService: PersonnelService,
+    private signatureService: SignatureService,
+  ) {}
 
   @Get()
   findAll(
@@ -38,6 +43,17 @@ export class PersonnelController {
       page: page ? Number(page) : undefined,
       perPage: perPage !== undefined ? Number(perPage) : undefined,
     });
+  }
+
+  /** Signature et cachet du prescripteur (fiche du personnel, administrateur). */
+  @Get(':id/signature')
+  signature(@Param('id', ParseIntPipe) id: number) {
+    return this.signatureService.lire(id);
+  }
+
+  @Put(':id/signature')
+  enregistrerSignature(@Param('id', ParseIntPipe) id: number, @Body() dto: SignatureCachetDto) {
+    return this.signatureService.enregistrer(id, dto);
   }
 
   @Get(':id')

@@ -487,7 +487,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 clientNom: avecAssurance ? null : dto.clientNom?.trim().toUpperCase() || null,
                 prescripteur: dto.prescripteur?.trim() || null,
                 etablissement: dto.etablissement?.trim() || null,
-                dateOrdonnance: dto.dateOrdonnance ? new Date(dto.dateOrdonnance) : null,
+                dateOrdonnance: dto.dateOrdonnance ? new Date(dto.dateOrdonnance) : new Date(),
                 creeParId: utilisateurId,
             },
         });
@@ -990,10 +990,36 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             ],
         });
     }
-    async inventaireLot(lotId, quantiteReelle, commentaire, utilisateurId) {
+    correctionLot(lot, correction) {
+        const data = {};
+        const notes = [];
+        const numero = correction.numeroLot?.trim();
+        if (correction.numeroLot !== undefined && !numero) {
+            throw new common_1.BadRequestException('Le numéro de lot ne peut pas être vide.');
+        }
+        if (numero && numero !== lot.numeroLot) {
+            data.numeroLot = numero;
+            notes.push(`N° de lot : ${lot.numeroLot} → ${numero}`);
+        }
+        if (correction.datePeremption) {
+            const date = new Date(`${correction.datePeremption.slice(0, 10)}T00:00:00Z`);
+            if (isNaN(date.getTime()))
+                throw new common_1.BadRequestException('Date de péremption invalide.');
+            const avant = lot.datePeremption.toISOString().slice(0, 10);
+            const apres = date.toISOString().slice(0, 10);
+            if (apres !== avant) {
+                data.datePeremption = date;
+                const jour = (iso) => iso.split('-').reverse().join('/');
+                notes.push(`Péremption : ${jour(avant)} → ${jour(apres)}`);
+            }
+        }
+        return { data, note: notes.join(' ; ') };
+    }
+    async inventaireLot(lotId, quantiteReelle, commentaire, utilisateurId, correction = {}) {
         const lot = await this.prisma.lot.findUnique({ where: { id: lotId } });
         if (!lot)
             throw new common_1.NotFoundException('Lot introuvable.');
+        const { data: corrige, note } = this.correctionLot(lot, correction);
         const ecart = quantiteReelle - lot.quantiteRestante;
         await this.prisma.mouvementStock.create({
             data: {
@@ -1003,14 +1029,14 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 stockAvant: lot.quantiteRestante,
                 stockApres: quantiteReelle,
                 lotId,
-                reference: `Inventaire lot ${lot.numeroLot}`,
+                reference: `Inventaire lot ${corrige.numeroLot ?? lot.numeroLot}`,
                 utilisateurId,
-                commentaire,
+                commentaire: [commentaire, note].filter(Boolean).join(' ; ') || undefined,
             },
         });
         await this.prisma.lot.update({
             where: { id: lotId },
-            data: { quantiteRestante: quantiteReelle },
+            data: { quantiteRestante: quantiteReelle, ...corrige },
         });
         const total = await this.prisma.lot.aggregate({
             where: { medicamentId: lot.medicamentId },
@@ -1028,6 +1054,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             const lot = await this.prisma.lot.findUnique({ where: { id: l.lotId } });
             if (!lot)
                 continue;
+            const { data: corrige, note } = this.correctionLot(lot, l);
             const quantiteReelle = Number(l.quantiteReelle) || 0;
             const ecart = quantiteReelle - lot.quantiteRestante;
             await this.prisma.mouvementStock.create({
@@ -1038,14 +1065,15 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                     stockAvant: lot.quantiteRestante,
                     stockApres: quantiteReelle,
                     lotId: lot.id,
-                    reference: `Inventaire lot ${lot.numeroLot}`,
+                    reference: `Inventaire lot ${corrige.numeroLot ?? lot.numeroLot}`,
                     utilisateurId,
+                    commentaire: note || undefined,
                 },
             });
-            if (ecart !== 0) {
+            if (ecart !== 0 || note) {
                 await this.prisma.lot.update({
                     where: { id: lot.id },
-                    data: { quantiteRestante: quantiteReelle },
+                    data: { quantiteRestante: quantiteReelle, ...corrige },
                 });
                 medicaments.add(lot.medicamentId);
                 ajustes++;

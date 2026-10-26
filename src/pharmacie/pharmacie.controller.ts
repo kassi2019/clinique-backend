@@ -180,7 +180,7 @@ export class PharmacieController {
   /** Inventaire groupé : valide plusieurs lots en une seule fois. */
   @Post('lots/inventaire-multiple')
   inventaireMultiple(
-    @Body() dto: { lignes: { lotId: number; quantiteReelle: number }[] },
+    @Body() dto: { lignes: { lotId: number; quantiteReelle: number; numeroLot?: string; datePeremption?: string }[] },
     @Req() req,
   ) {
     return this.pharmacieService.inventaireMultiple(dto.lignes ?? [], req.user.id);
@@ -202,10 +202,13 @@ export class PharmacieController {
   @Post('lots/:id/inventaire')
   inventaireLot(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: { quantiteReelle: number; commentaire?: string },
+    @Body() dto: { quantiteReelle: number; commentaire?: string; numeroLot?: string; datePeremption?: string },
     @Req() req,
   ) {
-    return this.pharmacieService.inventaireLot(id, Number(dto.quantiteReelle) || 0, dto.commentaire, req.user.id);
+    return this.pharmacieService.inventaireLot(id, Number(dto.quantiteReelle) || 0, dto.commentaire, req.user.id, {
+      numeroLot: dto.numeroLot,
+      datePeremption: dto.datePeremption,
+    });
   }
 
   @Get('mouvements/:medicamentId')

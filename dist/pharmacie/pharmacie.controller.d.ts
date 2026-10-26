@@ -841,6 +841,8 @@ export declare class PharmacieController {
         lignes: {
             lotId: number;
             quantiteReelle: number;
+            numeroLot?: string;
+            datePeremption?: string;
         }[];
     }, req: any): Promise<{
         ajustes: number;
@@ -879,6 +881,8 @@ export declare class PharmacieController {
     inventaireLot(id: number, dto: {
         quantiteReelle: number;
         commentaire?: string;
+        numeroLot?: string;
+        datePeremption?: string;
     }, req: any): Promise<{
         consommable: boolean;
         createdAt: Date;

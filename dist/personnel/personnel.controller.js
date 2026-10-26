@@ -20,9 +20,11 @@ const roles_guard_1 = require("../auth/roles.guard");
 const create_personnel_dto_1 = require("./dto/create-personnel.dto");
 const update_personnel_dto_1 = require("./dto/update-personnel.dto");
 const personnel_service_1 = require("./personnel.service");
+const signature_service_1 = require("./signature.service");
 let PersonnelController = class PersonnelController {
-    constructor(personnelService) {
+    constructor(personnelService, signatureService) {
         this.personnelService = personnelService;
+        this.signatureService = signatureService;
     }
     findAll(search, statut, cliniqueId, page, perPage) {
         return this.personnelService.findAll({
@@ -32,6 +34,12 @@ let PersonnelController = class PersonnelController {
             page: page ? Number(page) : undefined,
             perPage: perPage !== undefined ? Number(perPage) : undefined,
         });
+    }
+    signature(id) {
+        return this.signatureService.lire(id);
+    }
+    enregistrerSignature(id, dto) {
+        return this.signatureService.enregistrer(id, dto);
     }
     findOne(id) {
         return this.personnelService.findOne(id);
@@ -58,6 +66,21 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], PersonnelController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id/signature'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], PersonnelController.prototype, "signature", null);
+__decorate([
+    (0, common_1.Put)(':id/signature'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], PersonnelController.prototype, "enregistrerSignature", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
@@ -91,6 +114,7 @@ exports.PersonnelController = PersonnelController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
     (0, common_1.Controller)('personnel'),
-    __metadata("design:paramtypes", [personnel_service_1.PersonnelService])
+    __metadata("design:paramtypes", [personnel_service_1.PersonnelService,
+        signature_service_1.SignatureService])
 ], PersonnelController);
 //# sourceMappingURL=personnel.controller.js.map

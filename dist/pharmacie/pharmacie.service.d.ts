@@ -711,7 +711,11 @@ export declare class PharmacieService {
         quantiteRestante: number;
         prixAchat: import("@prisma/client/runtime/library").Decimal | null;
     })[]>;
-    inventaireLot(lotId: number, quantiteReelle: number, commentaire: string | undefined, utilisateurId: number): Promise<{
+    private correctionLot;
+    inventaireLot(lotId: number, quantiteReelle: number, commentaire: string | undefined, utilisateurId: number, correction?: {
+        numeroLot?: string;
+        datePeremption?: string;
+    }): Promise<{
         consommable: boolean;
         createdAt: Date;
         id: number;
@@ -729,6 +733,8 @@ export declare class PharmacieService {
     inventaireMultiple(lignes: {
         lotId: number;
         quantiteReelle: number;
+        numeroLot?: string;
+        datePeremption?: string;
     }[], utilisateurId: number): Promise<{
         ajustes: number;
         total: number;

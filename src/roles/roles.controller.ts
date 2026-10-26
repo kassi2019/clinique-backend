@@ -43,6 +43,15 @@ export class RolesController {
     return this.rolesService.create(dto);
   }
 
+  /** Case « ✍️ Signature » de la liste des rôles. */
+  @Patch(':id/signature')
+  autoriserSignature(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { signatureAutorisee: boolean },
+  ) {
+    return this.rolesService.autoriserSignature(id, dto.signatureAutorisee === true);
+  }
+
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: CreateRoleDto) {
     return this.rolesService.update(id, dto);

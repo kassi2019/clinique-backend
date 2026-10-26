@@ -54,6 +54,7 @@ export class RolesService {
           code: dto.code,
           nom: dto.nom,
           description: dto.description,
+          signatureAutorisee: dto.signatureAutorisee,
           habilitations: dto.habilitations?.length
             ? {
                 create: dto.habilitations.map((h) => ({
@@ -75,6 +76,16 @@ export class RolesService {
     }
   }
 
+  /** Autorise (ou non) le rôle à utiliser « Ma signature » — case de la liste des rôles. */
+  async autoriserSignature(id: number, autorisee: boolean) {
+    await this.findOne(id);
+    return this.prisma.role.update({
+      where: { id },
+      data: { signatureAutorisee: !!autorisee },
+      include: includeHabilitations,
+    });
+  }
+
   async update(id: number, dto: CreateRoleDto) {
     await this.findOne(id);
     try {
@@ -88,6 +99,7 @@ export class RolesService {
           code: dto.code,
           nom: dto.nom,
           description: dto.description,
+          signatureAutorisee: dto.signatureAutorisee,
           habilitations: dto.habilitations?.length
             ? {
                 create: dto.habilitations.map((h) => ({

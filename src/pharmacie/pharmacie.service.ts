@@ -31,7 +31,7 @@ export interface OrdonnanceExterneDto {
   clientNom?: string;
   prescripteur?: string;
   etablissement?: string;
-  dateOrdonnance?: string;
+  dateOrdonnance?: string; // date de prescription (AAAA-MM-JJ)
   lignes: { medicamentId: number; quantite: number }[];
   // Règlement : COMPTANT (défaut), CREDIT ou CAS_SOCIAL (ces deux derniers : patient assuré)
   type?: string;
@@ -615,7 +615,8 @@ export class PharmacieService {
         clientNom: avecAssurance ? null : dto.clientNom?.trim().toUpperCase() || null,
         prescripteur: dto.prescripteur?.trim() || null,
         etablissement: dto.etablissement?.trim() || null,
-        dateOrdonnance: dto.dateOrdonnance ? new Date(dto.dateOrdonnance) : null,
+        // Date écrite sur l'ordonnance ; date du jour si elle n'est pas précisée
+        dateOrdonnance: dto.dateOrdonnance ? new Date(dto.dateOrdonnance) : new Date(),
         creeParId: utilisateurId,
       },
     });
@@ -1202,15 +1203,49 @@ export class PharmacieService {
     });
   }
 
-  /** Inventaire PAR LOT : le stock réel saisi devient le stock du lot. */
+  /**
+   * Corrections constatées pendant l'inventaire : numéro de lot et date de péremption
+   * lus sur la boîte. Renvoie les données à enregistrer et le texte tracé dans le mouvement.
+   */
+  private correctionLot(
+    lot: { numeroLot: string; datePeremption: Date },
+    correction: { numeroLot?: string; datePeremption?: string },
+  ) {
+    const data: { numeroLot?: string; datePeremption?: Date } = {};
+    const notes: string[] = [];
+    const numero = correction.numeroLot?.trim();
+    if (correction.numeroLot !== undefined && !numero) {
+      throw new BadRequestException('Le numéro de lot ne peut pas être vide.');
+    }
+    if (numero && numero !== lot.numeroLot) {
+      data.numeroLot = numero;
+      notes.push(`N° de lot : ${lot.numeroLot} → ${numero}`);
+    }
+    if (correction.datePeremption) {
+      const date = new Date(`${correction.datePeremption.slice(0, 10)}T00:00:00Z`);
+      if (isNaN(date.getTime())) throw new BadRequestException('Date de péremption invalide.');
+      const avant = lot.datePeremption.toISOString().slice(0, 10);
+      const apres = date.toISOString().slice(0, 10);
+      if (apres !== avant) {
+        data.datePeremption = date;
+        const jour = (iso: string) => iso.split('-').reverse().join('/');
+        notes.push(`Péremption : ${jour(avant)} → ${jour(apres)}`);
+      }
+    }
+    return { data, note: notes.join(' ; ') };
+  }
+
+  /** Inventaire PAR LOT : le stock réel saisi devient le stock du lot (n° de lot et péremption corrigeables). */
   async inventaireLot(
     lotId: number,
     quantiteReelle: number,
     commentaire: string | undefined,
     utilisateurId: number,
+    correction: { numeroLot?: string; datePeremption?: string } = {},
   ) {
     const lot = await this.prisma.lot.findUnique({ where: { id: lotId } });
     if (!lot) throw new NotFoundException('Lot introuvable.');
+    const { data: corrige, note } = this.correctionLot(lot, correction);
     const ecart = quantiteReelle - lot.quantiteRestante;
     // Tracé même sans écart : la fiche d'inventaire liste tout ce qui a été compté
     await this.prisma.mouvementStock.create({
@@ -1221,14 +1256,14 @@ export class PharmacieService {
         stockAvant: lot.quantiteRestante,
         stockApres: quantiteReelle,
         lotId,
-        reference: `Inventaire lot ${lot.numeroLot}`,
+        reference: `Inventaire lot ${corrige.numeroLot ?? lot.numeroLot}`,
         utilisateurId,
-        commentaire,
+        commentaire: [commentaire, note].filter(Boolean).join(' ; ') || undefined,
       },
     });
     await this.prisma.lot.update({
       where: { id: lotId },
-      data: { quantiteRestante: quantiteReelle },
+      data: { quantiteRestante: quantiteReelle, ...corrige },
     });
     // Le stock du médicament reflète la somme des lots
     const total = await this.prisma.lot.aggregate({
@@ -1243,7 +1278,7 @@ export class PharmacieService {
 
   /** Inventaire GROUPÉ : valide plusieurs lots en une seule fois. */
   async inventaireMultiple(
-    lignes: { lotId: number; quantiteReelle: number }[],
+    lignes: { lotId: number; quantiteReelle: number; numeroLot?: string; datePeremption?: string }[],
     utilisateurId: number,
   ) {
     let ajustes = 0;
@@ -1251,6 +1286,7 @@ export class PharmacieService {
     for (const l of lignes) {
       const lot = await this.prisma.lot.findUnique({ where: { id: l.lotId } });
       if (!lot) continue;
+      const { data: corrige, note } = this.correctionLot(lot, l);
       const quantiteReelle = Number(l.quantiteReelle) || 0;
       const ecart = quantiteReelle - lot.quantiteRestante;
       // Tracé même sans écart : la fiche d'inventaire liste tout ce qui a été compté
@@ -1262,14 +1298,15 @@ export class PharmacieService {
           stockAvant: lot.quantiteRestante,
           stockApres: quantiteReelle,
           lotId: lot.id,
-          reference: `Inventaire lot ${lot.numeroLot}`,
+          reference: `Inventaire lot ${corrige.numeroLot ?? lot.numeroLot}`,
           utilisateurId,
+          commentaire: note || undefined,
         },
       });
-      if (ecart !== 0) {
+      if (ecart !== 0 || note) {
         await this.prisma.lot.update({
           where: { id: lot.id },
-          data: { quantiteRestante: quantiteReelle },
+          data: { quantiteRestante: quantiteReelle, ...corrige },
         });
         medicaments.add(lot.medicamentId);
         ajustes++;

@@ -24,6 +24,7 @@ const includeUtilisateur = {
         },
     },
 };
+const sansImages = { signature: true, cachet: true };
 const includeBase = {
     service: true,
     clinique: { select: { id: true, code: true, nom: true } },
@@ -52,6 +53,7 @@ let PersonnelService = class PersonnelService {
             this.prisma.personnel.findMany({
                 where,
                 include: includeBase,
+                omit: sansImages,
                 orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
                 ...(perPage > 0 ? { skip: (page - 1) * perPage, take: perPage } : {}),
             }),
@@ -69,6 +71,7 @@ let PersonnelService = class PersonnelService {
         const personnel = await this.prisma.personnel.findUnique({
             where: { id },
             include: includeBase,
+            omit: sansImages,
         });
         if (!personnel)
             throw new common_1.NotFoundException('Personnel introuvable.');
@@ -93,6 +96,7 @@ let PersonnelService = class PersonnelService {
                     dateEmbauche: dto.dateEmbauche ? new Date(dto.dateEmbauche) : undefined,
                 },
                 include: includeBase,
+                omit: sansImages,
             });
         }
         catch (e) {
@@ -129,6 +133,7 @@ let PersonnelService = class PersonnelService {
                     dateEmbauche: dto.dateEmbauche ? new Date(dto.dateEmbauche) : undefined,
                 },
                 include: includeBase,
+                omit: sansImages,
             });
         }
         catch (e) {
@@ -144,6 +149,7 @@ let PersonnelService = class PersonnelService {
             where: { id },
             data: { statut: 'INACTIF' },
             include: includeBase,
+            omit: sansImages,
         });
     }
 };

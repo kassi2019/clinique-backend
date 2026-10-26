@@ -35,6 +35,9 @@ let RolesController = class RolesController {
     create(dto) {
         return this.rolesService.create(dto);
     }
+    autoriserSignature(id, dto) {
+        return this.rolesService.autoriserSignature(id, dto.signatureAutorisee === true);
+    }
     update(id, dto) {
         return this.rolesService.update(id, dto);
     }
@@ -65,6 +68,14 @@ __decorate([
     __metadata("design:paramtypes", [create_role_dto_1.CreateRoleDto]),
     __metadata("design:returntype", void 0)
 ], RolesController.prototype, "create", null);
+__decorate([
+    (0, common_1.Patch)(':id/signature'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], RolesController.prototype, "autoriserSignature", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),

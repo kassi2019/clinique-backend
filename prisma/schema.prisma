@@ -1054,6 +1054,8 @@ model Personnel {
   prenom       String
   sexe         String? // M / F
   photo        String?   @db.NVarChar(Max) // photo du membre du personnel (data URL base64)
+  signature    String?   @db.NVarChar(Max) // signature du prescripteur (data URL, fond transparent)
+  cachet       String?   @db.NVarChar(Max) // cachet du prescripteur (data URL, fond transparent)
   fonction     String // médecin, agent d'accueil, pharmacien...
   serviceId    Int?
   telephone    String?
@@ -1131,6 +1133,8 @@ model Role {
   code        String   @unique // ADMINISTRATEUR, ACCUEIL, CAISSE, MEDECIN...
   nom         String
   description String?
+  // Rôle autorisé à enregistrer et apposer sa signature / son cachet (bouton « Ma signature »)
+  signatureAutorisee Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

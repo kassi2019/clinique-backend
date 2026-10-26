@@ -40,6 +40,10 @@ export class CreateRoleDto {
   description?: string;
 
   @IsOptional()
+  @IsBoolean()
+  signatureAutorisee?: boolean;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => HabilitationDto)

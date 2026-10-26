@@ -1,9 +1,11 @@
 import { CreatePersonnelDto } from './dto/create-personnel.dto';
 import { UpdatePersonnelDto } from './dto/update-personnel.dto';
 import { PersonnelService } from './personnel.service';
+import { SignatureCachetDto, SignatureService } from './signature.service';
 export declare class PersonnelController {
     private personnelService;
-    constructor(personnelService: PersonnelService);
+    private signatureService;
+    constructor(personnelService: PersonnelService, signatureService: SignatureService);
     findAll(search?: string, statut?: string, cliniqueId?: string, page?: string, perPage?: string): Promise<{
         data: ({
             clinique: {
@@ -51,6 +53,20 @@ export declare class PersonnelController {
         page: number;
         perPage: number;
         totalPages: number;
+    }>;
+    signature(id: number): Promise<{
+        id: number;
+        nom: string;
+        prenom: string;
+        signature: string;
+        cachet: string;
+    }>;
+    enregistrerSignature(id: number, dto: SignatureCachetDto): Promise<{
+        id: number;
+        nom: string;
+        prenom: string;
+        signature: string;
+        cachet: string;
     }>;
     findOne(id: number): Promise<{
         clinique: {

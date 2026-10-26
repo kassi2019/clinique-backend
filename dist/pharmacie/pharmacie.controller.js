@@ -95,7 +95,10 @@ let PharmacieController = class PharmacieController {
         return this.pharmacieService.lotsClinique(cliniqueId);
     }
     inventaireLot(id, dto, req) {
-        return this.pharmacieService.inventaireLot(id, Number(dto.quantiteReelle) || 0, dto.commentaire, req.user.id);
+        return this.pharmacieService.inventaireLot(id, Number(dto.quantiteReelle) || 0, dto.commentaire, req.user.id, {
+            numeroLot: dto.numeroLot,
+            datePeremption: dto.datePeremption,
+        });
     }
     mouvements(medicamentId) {
         return this.pharmacieService.mouvements(medicamentId);
