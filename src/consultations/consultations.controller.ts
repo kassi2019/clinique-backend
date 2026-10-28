@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   Query,
@@ -110,6 +111,12 @@ export class ConsultationsController {
     return this.consultationsService.ajouterExamen(id, dto, req.user?.id);
   }
 
+  /** « Le patient fait cet examen hors de la clinique » (case de l'onglet Examens). */
+  @Patch('examens/:id/hors-clinique')
+  examenHorsClinique(@Param('id', ParseIntPipe) id: number, @Body() dto: { horsClinique: boolean }) {
+    return this.consultationsService.examenHorsClinique(id, dto.horsClinique === true);
+  }
+
   @Delete('examens/:id')
   retirerExamen(@Param('id', ParseIntPipe) id: number) {
     return this.consultationsService.retirerExamen(id);
@@ -139,6 +146,12 @@ export class ConsultationsController {
   @Post(':id/ordonnances')
   nouvelleOrdonnance(@Param('id', ParseIntPipe) id: number) {
     return this.consultationsService.nouvelleOrdonnance(id);
+  }
+
+  /** « Le patient achète hors de la clinique » (case de l'onglet Prescription). */
+  @Patch('ordonnances/:id/hors-clinique')
+  ordonnanceHorsClinique(@Param('id', ParseIntPipe) id: number, @Body() dto: { horsClinique: boolean }) {
+    return this.consultationsService.ordonnanceHorsClinique(id, dto.horsClinique === true);
   }
 
   /** Sauvegarde l'ordonnance (horodatée). */

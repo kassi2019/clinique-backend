@@ -56,6 +56,9 @@ let ConsultationsController = class ConsultationsController {
     ajouterExamen(id, dto, req) {
         return this.consultationsService.ajouterExamen(id, dto, req.user?.id);
     }
+    examenHorsClinique(id, dto) {
+        return this.consultationsService.examenHorsClinique(id, dto.horsClinique === true);
+    }
     retirerExamen(id) {
         return this.consultationsService.retirerExamen(id);
     }
@@ -70,6 +73,9 @@ let ConsultationsController = class ConsultationsController {
     }
     nouvelleOrdonnance(id) {
         return this.consultationsService.nouvelleOrdonnance(id);
+    }
+    ordonnanceHorsClinique(id, dto) {
+        return this.consultationsService.ordonnanceHorsClinique(id, dto.horsClinique === true);
     }
     sauvegarderOrdonnance(id) {
         return this.consultationsService.sauvegarderOrdonnance(id);
@@ -187,6 +193,14 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "ajouterExamen", null);
 __decorate([
+    (0, common_1.Patch)('examens/:id/hors-clinique'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "examenHorsClinique", null);
+__decorate([
     (0, common_1.Delete)('examens/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -223,6 +237,14 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "nouvelleOrdonnance", null);
+__decorate([
+    (0, common_1.Patch)('ordonnances/:id/hors-clinique'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], ConsultationsController.prototype, "ordonnanceHorsClinique", null);
 __decorate([
     (0, common_1.Post)(':id/ordonnance-sauvegarder'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),

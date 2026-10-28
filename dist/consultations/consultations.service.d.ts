@@ -294,6 +294,7 @@ export declare class ConsultationsService {
                     type: string;
                     consultationId: number;
                     numero: string;
+                    horsClinique: boolean;
                     sauveeLe: Date | null;
                 }[];
             } & {
@@ -364,9 +365,9 @@ export declare class ConsultationsService {
                     parametre: string;
                     id: number;
                     unite: string | null;
+                    examenLaboId: number;
                     valeur: string | null;
                     normes: string | null;
-                    examenLaboId: number;
                 }[];
                 validePar: {
                     personnel: {
@@ -475,9 +476,9 @@ export declare class ConsultationsService {
                         parametre: string;
                         id: number;
                         unite: string | null;
+                        examenLaboId: number;
                         valeur: string | null;
                         normes: string | null;
-                        examenLaboId: number;
                     }[];
                     validePar: {
                         personnel: {
@@ -565,6 +566,7 @@ export declare class ConsultationsService {
                 type: string;
                 consultationId: number;
                 numero: string;
+                horsClinique: boolean;
                 sauveeLe: Date | null;
             }[];
         } & {
@@ -733,6 +735,7 @@ export declare class ConsultationsService {
             type: string;
             consultationId: number;
             numero: string;
+            horsClinique: boolean;
             sauveeLe: Date | null;
         }[];
     } & {
@@ -813,6 +816,7 @@ export declare class ConsultationsService {
         type: string;
         consultationId: number;
         numero: string;
+        horsClinique: boolean;
         sauveeLe: Date | null;
     }>;
     ajouterMedicament(consultationId: number, dto: PrescriptionDto): Promise<{
@@ -892,6 +896,22 @@ export declare class ConsultationsService {
         paiementId: number | null;
         creditId: number | null;
     }>;
+    examenHorsClinique(ligneId: number, horsClinique: boolean): Promise<{
+        createdAt: Date;
+        id: number;
+        statut: string;
+        updatedAt: Date;
+        serviceId: number | null;
+        libelle: string;
+        passageId: number;
+        agentId: number | null;
+        prestationId: number | null;
+        montant: Prisma.Decimal;
+        source: string;
+        gratuit: boolean;
+        paiementId: number | null;
+        creditId: number | null;
+    }>;
     joindreResultatExterne(ligneId: number, dto: {
         nomFichier?: string;
         contenu?: string;
@@ -928,6 +948,18 @@ export declare class ConsultationsService {
     }>;
     supprimerResultatExterne(ligneId: number): Promise<{
         ok: boolean;
+    }>;
+    ordonnanceHorsClinique(ordonnanceId: number, horsClinique: boolean): Promise<{
+        createdAt: Date;
+        id: number;
+        cliniqueId: number;
+        statut: string;
+        updatedAt: Date;
+        type: string;
+        consultationId: number;
+        numero: string;
+        horsClinique: boolean;
+        sauveeLe: Date | null;
     }>;
     sauvegarderOrdonnance(consultationId: number): Promise<{
         medicaments: ({
@@ -1031,6 +1063,7 @@ export declare class ConsultationsService {
             type: string;
             consultationId: number;
             numero: string;
+            horsClinique: boolean;
             sauveeLe: Date | null;
         }[];
     } & {
@@ -1535,6 +1568,7 @@ export declare class ConsultationsService {
             type: string;
             consultationId: number;
             numero: string;
+            horsClinique: boolean;
             sauveeLe: Date | null;
         }[];
     } & {

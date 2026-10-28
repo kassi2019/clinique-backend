@@ -50,6 +50,8 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 createdAt: { gte: debut, lte: fin },
                 statut: filtres.statut === 'TRAITEE' ? 'TRAITEE' : 'EN_ATTENTE',
             };
+            if (where.statut === 'EN_ATTENTE')
+                where.horsClinique = false;
             if (filtres.medecinId)
                 where.consultation = { medecinId: filtres.medecinId };
             const ordonnances = await this.prisma.ordonnance.findMany({
@@ -139,6 +141,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                 numeroOrdonnance: o.numero,
                 ordonnanceType: o.type,
                 ordonnanceStatut: o.statut,
+                horsClinique: o.horsClinique,
                 medicaments: o.medicaments,
                 dispensations: o.dispensations.map((d) => ({
                     ...d,
@@ -1490,6 +1493,89 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             prixAchat: Number(l.prixAchat ?? 0),
             montant: l.quantiteRestante * Number(l.prixAchat ?? 0),
         }));
+    }
+    async recapSorties(cliniqueId, debut, fin, medicamentIds = [], categorie = 'TOUS') {
+        const d = debut && /^\d{4}-\d{2}-\d{2}$/.test(debut)
+            ? new Date(`${debut}T00:00:00`)
+            : new Date(new Date().setHours(0, 0, 0, 0));
+        const f = fin && /^\d{4}-\d{2}-\d{2}$/.test(fin)
+            ? new Date(`${fin}T23:59:59.999`)
+            : new Date(new Date().setHours(23, 59, 59, 999));
+        const filtreMedicament = { cliniqueId };
+        if (categorie === 'MEDICAMENTS')
+            filtreMedicament.consommable = false;
+        if (categorie === 'CONSOMMABLES')
+            filtreMedicament.consommable = true;
+        const groupes = await this.prisma.mouvementStock.groupBy({
+            by: ['medicamentId', 'type'],
+            where: {
+                type: { in: ['SORTIE', 'RETRAIT', 'INVENTAIRE'] },
+                createdAt: { gte: d, lte: f },
+                medicament: filtreMedicament,
+                ...(medicamentIds.length ? { medicamentId: { in: medicamentIds } } : {}),
+            },
+            _sum: { quantite: true },
+            _count: { _all: true },
+        });
+        const medicaments = await this.prisma.medicament.findMany({
+            where: { id: { in: [...new Set(groupes.map((g) => g.medicamentId))] } },
+            select: { id: true, nom: true, forme: true, dosage: true, uniteVente: true, consommable: true, prixVente: true, stock: true },
+        });
+        const parId = new Map(medicaments.map((m) => [m.id, m]));
+        const lignes = new Map();
+        for (const g of groupes) {
+            const m = parId.get(g.medicamentId);
+            if (!m)
+                continue;
+            if (!lignes.has(m.id)) {
+                lignes.set(m.id, {
+                    medicamentId: m.id,
+                    nom: m.nom,
+                    forme: m.forme,
+                    dosage: m.dosage,
+                    unite: m.uniteVente,
+                    consommable: m.consommable,
+                    prixVente: Number(m.prixVente ?? 0),
+                    stockActuel: m.stock,
+                    dispense: 0,
+                    retire: 0,
+                    ecartInventaire: 0,
+                    nbSorties: 0,
+                });
+            }
+            const l = lignes.get(m.id);
+            const q = g._sum.quantite ?? 0;
+            if (g.type === 'SORTIE') {
+                l.dispense += -q;
+                l.nbSorties += g._count._all;
+            }
+            else if (g.type === 'RETRAIT') {
+                l.retire += -q;
+                l.nbSorties += g._count._all;
+            }
+            else {
+                l.ecartInventaire += q;
+            }
+        }
+        const resultat = [...lignes.values()]
+            .map((l) => {
+            const total = l.dispense + l.retire;
+            return { ...l, total, valeur: l.consommable ? 0 : total * l.prixVente };
+        })
+            .filter((l) => l.total > 0 || l.ecartInventaire !== 0)
+            .sort((a, b) => b.total - a.total || a.nom.localeCompare(b.nom));
+        return {
+            periode: { debut: d, fin: f },
+            lignes: resultat,
+            totaux: {
+                produits: resultat.filter((l) => l.total > 0).length,
+                dispense: resultat.reduce((s, l) => s + l.dispense, 0),
+                retire: resultat.reduce((s, l) => s + l.retire, 0),
+                total: resultat.reduce((s, l) => s + l.total, 0),
+                ecartInventaire: resultat.reduce((s, l) => s + l.ecartInventaire, 0),
+                valeur: resultat.reduce((s, l) => s + l.valeur, 0),
+            },
+        };
     }
     async pointsFinanciers(cliniqueId, debut, fin) {
         const periode = {};

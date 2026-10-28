@@ -120,6 +120,28 @@ export declare class ImpressionService {
         erreur: string | null;
         printedAt: Date | null;
     }>;
+    private static readonly POSTES_AGENT;
+    private normaliserPostes;
+    signalAgent(nom: string, postesLocaux: unknown): Promise<{
+        postes: string[];
+    }>;
+    listAgents(): Promise<{
+        id: number;
+        nom: string;
+        postes: string[];
+        dernierContact: Date;
+    }[]>;
+    updateAgentPostes(id: number, postes: unknown): Promise<{
+        createdAt: Date;
+        id: number;
+        updatedAt: Date;
+        nom: string;
+        postes: string;
+        dernierContact: Date;
+    }>;
+    deleteAgent(id: number): Promise<{
+        ok: boolean;
+    }>;
     private sendRawToNetwork;
     private sendTextToWindowsPrinter;
 }

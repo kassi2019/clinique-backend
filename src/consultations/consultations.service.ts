@@ -974,6 +974,46 @@ export class ConsultationsService {
     });
   }
 
+  /**
+   * « Le patient fait cet examen hors de la clinique » (case de l'onglet Examens) :
+   * l'examen passe EXTERNE → il n'est plus à payer à la caisse et n'arrive donc jamais
+   * au laboratoire / à l'imagerie (qui ne voient que les examens payés ou pris en charge).
+   * Décocher le renvoie à la caisse. Impossible une fois payé ou réalisé.
+   */
+  async examenHorsClinique(ligneId: number, horsClinique: boolean) {
+    const ligne = await this.prisma.passagePrestation.findUnique({
+      where: { id: ligneId },
+      include: {
+        resultatExterne: { select: { id: true } },
+        prestation: { select: { type: true } },
+        examenLabo: { select: { id: true } },
+        examenImagerie: { select: { id: true } },
+      },
+    });
+    if (!ligne) throw new NotFoundException('Examen introuvable.');
+    if (!ligne.prestationId || !['EXAMEN_LABO', 'IMAGERIE'].includes(ligne.prestation?.type ?? '')) {
+      throw new BadRequestException("Seul un examen du catalogue labo / imagerie peut être fait à la clinique.");
+    }
+    if (ligne.examenLabo || ligne.examenImagerie) {
+      throw new BadRequestException('Cet examen est déjà en cours ou réalisé à la clinique.');
+    }
+    if (horsClinique) {
+      if (ligne.statut === 'EXTERNE') return ligne;
+      if (ligne.statut !== 'EN_ATTENTE') {
+        throw new BadRequestException('Cet examen est déjà payé ou pris en charge : il sera fait à la clinique.');
+      }
+    } else {
+      if (ligne.statut !== 'EXTERNE') return ligne;
+      if (ligne.resultatExterne) {
+        throw new BadRequestException('Un résultat fait ailleurs est joint : supprimez-le avant de renvoyer l\'examen à la clinique.');
+      }
+    }
+    return this.prisma.passagePrestation.update({
+      where: { id: ligneId },
+      data: { statut: horsClinique ? 'EXTERNE' : 'EN_ATTENTE' },
+    });
+  }
+
   // ── Résultat scanné d'un examen réalisé hors clinique ──
 
   /** Joint (ou remplace) le document scanné du résultat d'un examen hors clinique. */
@@ -1069,6 +1109,22 @@ export class ConsultationsService {
   }
 
   /** Sauvegarde explicite de l'ordonnance (horodatée, traçable). */
+  /**
+   * « Le patient achète hors de la clinique » : l'ordonnance sort de la liste « en attente »
+   * de la pharmacie (elle reste trouvable par recherche). Impossible sur une ordonnance déjà délivrée.
+   */
+  async ordonnanceHorsClinique(ordonnanceId: number, horsClinique: boolean) {
+    const ordonnance = await this.prisma.ordonnance.findUnique({ where: { id: ordonnanceId } });
+    if (!ordonnance) throw new NotFoundException('Ordonnance introuvable.');
+    if (ordonnance.statut === 'TRAITEE') {
+      throw new BadRequestException('Cette ordonnance a déjà été délivrée par la pharmacie.');
+    }
+    return this.prisma.ordonnance.update({
+      where: { id: ordonnanceId },
+      data: { horsClinique: !!horsClinique },
+    });
+  }
+
   async sauvegarderOrdonnance(consultationId: number) {
     const consultation = await this.prisma.consultation.findUnique({
       where: { id: consultationId },

@@ -232,6 +232,7 @@ export declare class ConsultationsController {
                     type: string;
                     consultationId: number;
                     numero: string;
+                    horsClinique: boolean;
                     sauveeLe: Date | null;
                 }[];
             } & {
@@ -302,9 +303,9 @@ export declare class ConsultationsController {
                     parametre: string;
                     id: number;
                     unite: string | null;
+                    examenLaboId: number;
                     valeur: string | null;
                     normes: string | null;
-                    examenLaboId: number;
                 }[];
                 validePar: {
                     personnel: {
@@ -413,9 +414,9 @@ export declare class ConsultationsController {
                         parametre: string;
                         id: number;
                         unite: string | null;
+                        examenLaboId: number;
                         valeur: string | null;
                         normes: string | null;
-                        examenLaboId: number;
                     }[];
                     validePar: {
                         personnel: {
@@ -503,6 +504,7 @@ export declare class ConsultationsController {
                 type: string;
                 consultationId: number;
                 numero: string;
+                horsClinique: boolean;
                 sauveeLe: Date | null;
             }[];
         } & {
@@ -671,6 +673,7 @@ export declare class ConsultationsController {
             type: string;
             consultationId: number;
             numero: string;
+            horsClinique: boolean;
             sauveeLe: Date | null;
         }[];
     } & {
@@ -1001,6 +1004,24 @@ export declare class ConsultationsController {
         paiementId: number | null;
         creditId: number | null;
     }>;
+    examenHorsClinique(id: number, dto: {
+        horsClinique: boolean;
+    }): Promise<{
+        createdAt: Date;
+        id: number;
+        statut: string;
+        updatedAt: Date;
+        serviceId: number | null;
+        libelle: string;
+        passageId: number;
+        agentId: number | null;
+        prestationId: number | null;
+        montant: import("@prisma/client/runtime/library").Decimal;
+        source: string;
+        gratuit: boolean;
+        paiementId: number | null;
+        creditId: number | null;
+    }>;
     retirerExamen(id: number): Promise<{
         createdAt: Date;
         id: number;
@@ -1063,6 +1084,21 @@ export declare class ConsultationsController {
         type: string;
         consultationId: number;
         numero: string;
+        horsClinique: boolean;
+        sauveeLe: Date | null;
+    }>;
+    ordonnanceHorsClinique(id: number, dto: {
+        horsClinique: boolean;
+    }): Promise<{
+        createdAt: Date;
+        id: number;
+        cliniqueId: number;
+        statut: string;
+        updatedAt: Date;
+        type: string;
+        consultationId: number;
+        numero: string;
+        horsClinique: boolean;
         sauveeLe: Date | null;
     }>;
     sauvegarderOrdonnance(id: number): Promise<{
@@ -1167,6 +1203,7 @@ export declare class ConsultationsController {
             type: string;
             consultationId: number;
             numero: string;
+            horsClinique: boolean;
             sauveeLe: Date | null;
         }[];
     } & {
@@ -1382,6 +1419,7 @@ export declare class ConsultationsController {
             type: string;
             consultationId: number;
             numero: string;
+            horsClinique: boolean;
             sauveeLe: Date | null;
         }[];
     } & {

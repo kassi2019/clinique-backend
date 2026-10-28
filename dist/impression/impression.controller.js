@@ -50,6 +50,18 @@ let ImpressionController = class ImpressionController {
     updateStatut(id, body) {
         return this.impressionService.updateStatutFile(id, body.statut, body.erreur);
     }
+    signalAgent(body) {
+        return this.impressionService.signalAgent(body.nom, body.postes);
+    }
+    listAgents() {
+        return this.impressionService.listAgents();
+    }
+    updateAgent(id, body) {
+        return this.impressionService.updateAgentPostes(id, body.postes);
+    }
+    deleteAgent(id) {
+        return this.impressionService.deleteAgent(id);
+    }
     updateConfig(body) {
         return this.impressionService.updateConfig(Number(body.cliniqueId), body.poste, {
             type: body.type,
@@ -133,6 +145,41 @@ __decorate([
     __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", void 0)
 ], ImpressionController.prototype, "updateStatut", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('agents/signal'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ImpressionController.prototype, "signalAgent", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Get)('agents'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ImpressionController.prototype, "listAgents", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Put)('agents/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", void 0)
+], ImpressionController.prototype, "updateAgent", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),
+    (0, common_1.Delete)('agents/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], ImpressionController.prototype, "deleteAgent", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('ADMINISTRATEUR'),

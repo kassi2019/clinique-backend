@@ -181,6 +181,32 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
                 message: `Imprimante Bluetooth "${config.bluetooth || 'Non spécifiée'}" — le test doit être fait depuis le navigateur (Web Bluetooth)`,
             };
         }
+        if (config.type === 'AGENT') {
+            const texte = [
+                '',
+                '===== TEST IMPRESSION =====',
+                '',
+                'Si vous voyez ce ticket,',
+                `l'imprimante "${config.nom}"`,
+                `(partage "${config.partage}")`,
+                'est bien configuree !',
+                '',
+                new Date().toLocaleString('fr-FR'),
+                '',
+                '',
+            ].join('\r\n');
+            const r = await this.imprimer(texte, config, {
+                poste,
+                cliniqueId,
+                libelle: `Test impression ${poste}`,
+            });
+            return {
+                ok: r.ok,
+                message: r.ok
+                    ? `Ticket test envoyé à l'agent d'impression : il doit sortir dans quelques secondes sur "${config.nom}" (partage "${config.partage}"). Sinon, vérifiez que l'agent tourne sur le PC de l'imprimante avec le poste ${poste} coché.`
+                    : r.message,
+            };
+        }
         return this.testWindowsPrinter(config);
     }
     async testWindowsPrinter(config) {
@@ -697,6 +723,51 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
             },
         });
     }
+    normaliserPostes(postes) {
+        if (!Array.isArray(postes))
+            return [];
+        return ImpressionService_1.POSTES_AGENT.filter((p) => postes.includes(p));
+    }
+    async signalAgent(nom, postesLocaux) {
+        const nomPc = String(nom ?? '').trim().slice(0, 200);
+        if (!nomPc)
+            return { postes: this.normaliserPostes(postesLocaux) };
+        const existant = await this.prisma.agentImpression.findUnique({ where: { nom: nomPc } });
+        const agent = existant
+            ? await this.prisma.agentImpression.update({
+                where: { id: existant.id },
+                data: { dernierContact: new Date() },
+            })
+            : await this.prisma.agentImpression.create({
+                data: { nom: nomPc, postes: this.normaliserPostes(postesLocaux).join(',') },
+            });
+        return { postes: agent.postes ? agent.postes.split(',') : [] };
+    }
+    async listAgents() {
+        const agents = await this.prisma.agentImpression.findMany({ orderBy: { nom: 'asc' } });
+        return agents.map((a) => ({
+            id: a.id,
+            nom: a.nom,
+            postes: a.postes ? a.postes.split(',') : [],
+            dernierContact: a.dernierContact,
+        }));
+    }
+    async updateAgentPostes(id, postes) {
+        const agent = await this.prisma.agentImpression.findUnique({ where: { id } });
+        if (!agent)
+            throw new common_1.NotFoundException('Agent introuvable');
+        return this.prisma.agentImpression.update({
+            where: { id },
+            data: { postes: this.normaliserPostes(postes).join(',') },
+        });
+    }
+    async deleteAgent(id) {
+        const agent = await this.prisma.agentImpression.findUnique({ where: { id } });
+        if (!agent)
+            throw new common_1.NotFoundException('Agent introuvable');
+        await this.prisma.agentImpression.delete({ where: { id } });
+        return { ok: true };
+    }
     sendRawToNetwork(config, data) {
         return new Promise((resolve, reject) => {
             const client = new net.Socket();
@@ -784,6 +855,7 @@ ImpressionService.LIBELLES_POSTES = {
     ORDONNANCE: 'Imprimante des ordonnances (consultation)',
     IMAGERIE: 'Imprimante du service imagerie',
 };
+ImpressionService.POSTES_AGENT = ['TICKET', 'RECU', 'PHARMACIE', 'ORDONNANCE', 'IMAGERIE'];
 exports.ImpressionService = ImpressionService = ImpressionService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])

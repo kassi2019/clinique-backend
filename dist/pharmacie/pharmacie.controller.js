@@ -100,6 +100,14 @@ let PharmacieController = class PharmacieController {
             datePeremption: dto.datePeremption,
         });
     }
+    recapSorties(cliniqueId, debut, fin, medicamentIds, categorie) {
+        const ids = (medicamentIds ?? '')
+            .split(',')
+            .map((v) => parseInt(v, 10))
+            .filter((v) => v > 0);
+        const cat = categorie === 'MEDICAMENTS' || categorie === 'CONSOMMABLES' ? categorie : 'TOUS';
+        return this.pharmacieService.recapSorties(cliniqueId, debut, fin, ids, cat);
+    }
     mouvements(medicamentId) {
         return this.pharmacieService.mouvements(medicamentId);
     }
@@ -330,6 +338,17 @@ __decorate([
     __metadata("design:paramtypes", [Number, Object, Object]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "inventaireLot", null);
+__decorate([
+    (0, common_1.Get)('sorties'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('debut')),
+    __param(2, (0, common_1.Query)('fin')),
+    __param(3, (0, common_1.Query)('medicamentIds')),
+    __param(4, (0, common_1.Query)('categorie')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String, String, String]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "recapSorties", null);
 __decorate([
     (0, common_1.Get)('mouvements/:medicamentId'),
     __param(0, (0, common_1.Param)('medicamentId', common_1.ParseIntPipe)),

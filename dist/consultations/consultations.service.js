@@ -778,6 +778,43 @@ let ConsultationsService = class ConsultationsService {
             data: { statut: 'NON_PRESCRITE' },
         });
     }
+    async examenHorsClinique(ligneId, horsClinique) {
+        const ligne = await this.prisma.passagePrestation.findUnique({
+            where: { id: ligneId },
+            include: {
+                resultatExterne: { select: { id: true } },
+                prestation: { select: { type: true } },
+                examenLabo: { select: { id: true } },
+                examenImagerie: { select: { id: true } },
+            },
+        });
+        if (!ligne)
+            throw new common_1.NotFoundException('Examen introuvable.');
+        if (!ligne.prestationId || !['EXAMEN_LABO', 'IMAGERIE'].includes(ligne.prestation?.type ?? '')) {
+            throw new common_1.BadRequestException("Seul un examen du catalogue labo / imagerie peut être fait à la clinique.");
+        }
+        if (ligne.examenLabo || ligne.examenImagerie) {
+            throw new common_1.BadRequestException('Cet examen est déjà en cours ou réalisé à la clinique.');
+        }
+        if (horsClinique) {
+            if (ligne.statut === 'EXTERNE')
+                return ligne;
+            if (ligne.statut !== 'EN_ATTENTE') {
+                throw new common_1.BadRequestException('Cet examen est déjà payé ou pris en charge : il sera fait à la clinique.');
+            }
+        }
+        else {
+            if (ligne.statut !== 'EXTERNE')
+                return ligne;
+            if (ligne.resultatExterne) {
+                throw new common_1.BadRequestException('Un résultat fait ailleurs est joint : supprimez-le avant de renvoyer l\'examen à la clinique.');
+            }
+        }
+        return this.prisma.passagePrestation.update({
+            where: { id: ligneId },
+            data: { statut: horsClinique ? 'EXTERNE' : 'EN_ATTENTE' },
+        });
+    }
     async joindreResultatExterne(ligneId, dto, utilisateurId) {
         const ligne = await this.prisma.passagePrestation.findUnique({
             where: { id: ligneId },
@@ -856,6 +893,18 @@ let ConsultationsService = class ConsultationsService {
             throw new common_1.NotFoundException('Aucun document joint à cet examen.');
         await this.prisma.resultatExterne.delete({ where: { id: doc.id } });
         return { ok: true };
+    }
+    async ordonnanceHorsClinique(ordonnanceId, horsClinique) {
+        const ordonnance = await this.prisma.ordonnance.findUnique({ where: { id: ordonnanceId } });
+        if (!ordonnance)
+            throw new common_1.NotFoundException('Ordonnance introuvable.');
+        if (ordonnance.statut === 'TRAITEE') {
+            throw new common_1.BadRequestException('Cette ordonnance a déjà été délivrée par la pharmacie.');
+        }
+        return this.prisma.ordonnance.update({
+            where: { id: ordonnanceId },
+            data: { horsClinique: !!horsClinique },
+        });
     }
     async sauvegarderOrdonnance(consultationId) {
         const consultation = await this.prisma.consultation.findUnique({

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -83,6 +84,37 @@ export class ImpressionController {
     @Body() body: { statut: 'IMPRIMEE' | 'ECHEC'; erreur?: string },
   ) {
     return this.impressionService.updateStatutFile(id, body.statut, body.erreur);
+  }
+
+  /** Signal de vie de l'agent local : renvoie les postes qu'il doit imprimer. */
+  @UseGuards(JwtAuthGuard)
+  @Post('agents/signal')
+  signalAgent(@Body() body: { nom: string; postes?: string[] }) {
+    return this.impressionService.signalAgent(body.nom, body.postes);
+  }
+
+  /** Liste des agents d'impression (PC de la clinique) et de leurs postes. */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMINISTRATEUR')
+  @Get('agents')
+  listAgents() {
+    return this.impressionService.listAgents();
+  }
+
+  /** Modifie les postes imprimés par un agent. */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMINISTRATEUR')
+  @Put('agents/:id')
+  updateAgent(@Param('id', ParseIntPipe) id: number, @Body() body: { postes: string[] }) {
+    return this.impressionService.updateAgentPostes(id, body.postes);
+  }
+
+  /** Retire un agent de la liste (PC désinstallé). */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMINISTRATEUR')
+  @Delete('agents/:id')
+  deleteAgent(@Param('id', ParseIntPipe) id: number) {
+    return this.impressionService.deleteAgent(id);
   }
 
   /** Enregistre la configuration d'une imprimante (par poste, en base). */

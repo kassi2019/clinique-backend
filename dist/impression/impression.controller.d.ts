@@ -50,6 +50,31 @@ export declare class ImpressionController {
         erreur: string | null;
         printedAt: Date | null;
     }>;
+    signalAgent(body: {
+        nom: string;
+        postes?: string[];
+    }): Promise<{
+        postes: string[];
+    }>;
+    listAgents(): Promise<{
+        id: number;
+        nom: string;
+        postes: string[];
+        dernierContact: Date;
+    }[]>;
+    updateAgent(id: number, body: {
+        postes: string[];
+    }): Promise<{
+        createdAt: Date;
+        id: number;
+        updatedAt: Date;
+        nom: string;
+        postes: string;
+        dernierContact: Date;
+    }>;
+    deleteAgent(id: number): Promise<{
+        ok: boolean;
+    }>;
     updateConfig(body: any): Promise<{
         createdAt: Date;
         id: number;

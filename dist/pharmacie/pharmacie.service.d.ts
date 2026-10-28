@@ -82,6 +82,7 @@ export declare class PharmacieService {
             numeroOrdonnance: string;
             ordonnanceType: string;
             ordonnanceStatut: string;
+            horsClinique: boolean;
             medicaments: {
                 posologie: string | null;
                 createdAt: Date;
@@ -1002,6 +1003,21 @@ export declare class PharmacieService {
         prixAchat: number;
         montant: number;
     }[]>;
+    recapSorties(cliniqueId: number, debut?: string, fin?: string, medicamentIds?: number[], categorie?: 'TOUS' | 'MEDICAMENTS' | 'CONSOMMABLES'): Promise<{
+        periode: {
+            debut: Date;
+            fin: Date;
+        };
+        lignes: any[];
+        totaux: {
+            produits: number;
+            dispense: any;
+            retire: any;
+            total: any;
+            ecartInventaire: any;
+            valeur: any;
+        };
+    }>;
     pointsFinanciers(cliniqueId: number, debut?: string, fin?: string): Promise<{
         periode: {
             debut: string;

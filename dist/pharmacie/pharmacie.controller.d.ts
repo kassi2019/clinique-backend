@@ -45,6 +45,7 @@ export declare class PharmacieController {
             numeroOrdonnance: string;
             ordonnanceType: string;
             ordonnanceStatut: string;
+            horsClinique: boolean;
             medicaments: {
                 posologie: string | null;
                 createdAt: Date;
@@ -897,6 +898,21 @@ export declare class PharmacieController {
         stock: number;
         seuilAlerte: number;
         prixVente: import("@prisma/client/runtime/library").Decimal | null;
+    }>;
+    recapSorties(cliniqueId: number, debut?: string, fin?: string, medicamentIds?: string, categorie?: string): Promise<{
+        periode: {
+            debut: Date;
+            fin: Date;
+        };
+        lignes: any[];
+        totaux: {
+            produits: number;
+            dispense: any;
+            retire: any;
+            total: any;
+            ecartInventaire: any;
+            valeur: any;
+        };
     }>;
     mouvements(medicamentId: number): Promise<{
         utilisateur: {

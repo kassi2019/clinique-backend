@@ -211,6 +211,23 @@ export class PharmacieController {
     });
   }
 
+  /** Récapitulatif des sorties par produit sur une période (onglet Mouvements). */
+  @Get('sorties')
+  recapSorties(
+    @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
+    @Query('debut') debut?: string,
+    @Query('fin') fin?: string,
+    @Query('medicamentIds') medicamentIds?: string,
+    @Query('categorie') categorie?: string,
+  ) {
+    const ids = (medicamentIds ?? '')
+      .split(',')
+      .map((v) => parseInt(v, 10))
+      .filter((v) => v > 0);
+    const cat = categorie === 'MEDICAMENTS' || categorie === 'CONSOMMABLES' ? categorie : 'TOUS';
+    return this.pharmacieService.recapSorties(cliniqueId, debut, fin, ids, cat);
+  }
+
   @Get('mouvements/:medicamentId')
   mouvements(@Param('medicamentId', ParseIntPipe) medicamentId: number) {
     return this.pharmacieService.mouvements(medicamentId);
