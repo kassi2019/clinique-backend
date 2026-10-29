@@ -551,7 +551,7 @@ export class ImpressionService {
             personnel: { select: { nom: true, prenom: true } },
           },
         },
-        medicaments: ordonnanceId ? { where: { ordonnanceId } } : true,
+        medicaments: ordonnanceId ? { where: { ordonnanceId }, orderBy: { id: 'asc' } } : { orderBy: { id: 'asc' } },
         ordonnances: ordonnanceId ? { where: { id: ordonnanceId } } : { orderBy: { id: 'asc' } },
       },
     });

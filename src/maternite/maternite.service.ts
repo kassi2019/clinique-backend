@@ -565,7 +565,7 @@ export class MaterniteService {
         consultations: {
           take: 1,
           orderBy: { id: 'desc' },
-          include: { medicaments: true },
+          include: { medicaments: { orderBy: { id: 'asc' } } }, // ordre de saisie sur l'ordonnance
         },
       },
     });

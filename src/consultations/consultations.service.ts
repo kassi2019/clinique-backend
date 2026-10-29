@@ -56,6 +56,8 @@ const includeConsultation = {
     where: { OR: [{ ordonnanceId: null }, { ordonnance: { type: 'MEDICAMENTS' } }] },
     // Unité de vente (boîte / plaquette) pour afficher « 2 plaquettes »
     include: { medicament: { select: { uniteVente: true } } },
+    // Ordre de saisie : sans tri, SQL Server peut renvoyer les lignes dans n'importe quel ordre
+    orderBy: { id: 'asc' },
   },
   ordonnances: { where: { type: 'MEDICAMENTS' }, orderBy: { id: 'asc' } },
   soins: includeSoinsPrescrits,
@@ -222,7 +224,7 @@ export class ConsultationsService {
     const historique = await this.prisma.consultation.findMany({
       where: { patientId: passage.patientId },
       include: {
-        medicaments: true,
+        medicaments: { orderBy: { id: 'asc' } },
         ordonnances: { orderBy: { id: 'asc' } },
         medecin: {
           select: {
