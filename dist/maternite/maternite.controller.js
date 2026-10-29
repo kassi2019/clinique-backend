@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MaterniteController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const onglet_decorator_1 = require("../auth/onglet.decorator");
+const onglet_guard_1 = require("../auth/onglet.guard");
 const maternite_dto_1 = require("./dto/maternite.dto");
 const maternite_service_1 = require("./maternite.service");
 let MaterniteController = class MaterniteController {
@@ -195,6 +197,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MaterniteController.prototype, "dossierPatient", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('MATERNITE.CPON'),
     (0, common_1.Post)('passages/:id/cpon'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -204,6 +207,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MaterniteController.prototype, "creerCpon", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('MATERNITE.CPON'),
     (0, common_1.Patch)('cpon/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -212,6 +216,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MaterniteController.prototype, "modifierCpon", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('MATERNITE.PF'),
     (0, common_1.Post)('passages/:id/pf'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -221,6 +226,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MaterniteController.prototype, "creerPf", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('MATERNITE.PF'),
     (0, common_1.Patch)('pf/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -262,6 +268,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MaterniteController.prototype, "modifier", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('MATERNITE.CPN'),
     (0, common_1.Post)('grossesses/:id/cpn'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -271,6 +278,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MaterniteController.prototype, "creerVisite", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('MATERNITE.CPN'),
     (0, common_1.Patch)('cpn/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -279,6 +287,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MaterniteController.prototype, "modifierVisite", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('MATERNITE.ACCOUCHEMENT'),
     (0, common_1.Post)('grossesses/:id/accouchement'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -288,6 +297,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MaterniteController.prototype, "creerAccouchement", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('MATERNITE.ACCOUCHEMENT'),
     (0, common_1.Patch)('accouchements/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -306,7 +316,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MaterniteController.prototype, "accouchements", null);
 exports.MaterniteController = MaterniteController = __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, onglet_guard_1.OngletGuard),
     (0, common_1.Controller)('maternite'),
     __metadata("design:paramtypes", [maternite_service_1.MaterniteService])
 ], MaterniteController);

@@ -12,6 +12,7 @@ export declare class AuthService {
         user: {
             id: number;
             matricule: string;
+            onglets: string[];
             role: {
                 code: string;
                 nom: string;
@@ -46,6 +47,7 @@ export declare class AuthService {
     me(userId: number): Promise<{
         id: number;
         matricule: string;
+        onglets: string[];
         role: {
             code: string;
             nom: string;

@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FinancesController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const onglet_decorator_1 = require("../auth/onglet.decorator");
+const onglet_guard_1 = require("../auth/onglet.guard");
 const finances_guard_1 = require("./finances.guard");
 const finances_service_1 = require("./finances.service");
 let FinancesController = class FinancesController {
@@ -95,6 +97,7 @@ __decorate([
 ], FinancesController.prototype, "presence", null);
 __decorate([
     (0, common_1.UseGuards)(finances_guard_1.FinancesGuard),
+    (0, onglet_decorator_1.Onglet)('FINANCES.DIRECT'),
     (0, common_1.Get)('en-service'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -103,6 +106,7 @@ __decorate([
 ], FinancesController.prototype, "enService", null);
 __decorate([
     (0, common_1.UseGuards)(finances_guard_1.FinancesGuard),
+    (0, onglet_decorator_1.Onglet)('FINANCES.SERVICES'),
     (0, common_1.Get)('services'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('mois')),
@@ -113,6 +117,7 @@ __decorate([
 ], FinancesController.prototype, "services", null);
 __decorate([
     (0, common_1.UseGuards)(finances_guard_1.FinancesGuard),
+    (0, onglet_decorator_1.Onglet)('FINANCES.SERVICES'),
     (0, common_1.Patch)('services/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -131,6 +136,7 @@ __decorate([
 ], FinancesController.prototype, "remunerations", null);
 __decorate([
     (0, common_1.UseGuards)(finances_guard_1.FinancesGuard),
+    (0, onglet_decorator_1.Onglet)('FINANCES.TARIFS'),
     (0, common_1.Put)('remunerations/:personnelId'),
     __param(0, (0, common_1.Param)('personnelId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -140,6 +146,7 @@ __decorate([
 ], FinancesController.prototype, "definirRemuneration", null);
 __decorate([
     (0, common_1.UseGuards)(finances_guard_1.FinancesGuard),
+    (0, onglet_decorator_1.Onglet)('FINANCES.FICHES'),
     (0, common_1.Post)('fiches/generer'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -148,6 +155,7 @@ __decorate([
 ], FinancesController.prototype, "genererFiches", null);
 __decorate([
     (0, common_1.UseGuards)(finances_guard_1.FinancesGuard),
+    (0, onglet_decorator_1.Onglet)('FINANCES.FICHES'),
     (0, common_1.Get)('fiches'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('mois')),
@@ -157,6 +165,7 @@ __decorate([
 ], FinancesController.prototype, "fiches", null);
 __decorate([
     (0, common_1.UseGuards)(finances_guard_1.FinancesGuard),
+    (0, onglet_decorator_1.Onglet)('FINANCES.FICHES'),
     (0, common_1.Get)('fiches/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -165,6 +174,7 @@ __decorate([
 ], FinancesController.prototype, "detailFiche", null);
 __decorate([
     (0, common_1.UseGuards)(finances_guard_1.FinancesGuard),
+    (0, onglet_decorator_1.Onglet)('FINANCES.FICHES'),
     (0, common_1.Patch)('fiches/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -174,6 +184,7 @@ __decorate([
 ], FinancesController.prototype, "modifierFiche", null);
 __decorate([
     (0, common_1.UseGuards)(finances_guard_1.FinancesGuard),
+    (0, onglet_decorator_1.Onglet)('FINANCES.FICHES'),
     (0, common_1.Post)('fiches/:id/statut'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -183,7 +194,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], FinancesController.prototype, "statutFiche", null);
 exports.FinancesController = FinancesController = __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, onglet_guard_1.OngletGuard),
     (0, common_1.Controller)('finances'),
     __metadata("design:paramtypes", [finances_service_1.FinancesService])
 ], FinancesController);

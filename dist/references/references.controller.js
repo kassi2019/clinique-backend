@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReferencesController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const onglet_decorator_1 = require("../auth/onglet.decorator");
+const onglet_guard_1 = require("../auth/onglet.guard");
 const references_service_1 = require("./references.service");
 let ReferencesController = class ReferencesController {
     constructor(referencesService) {
@@ -38,6 +40,7 @@ let ReferencesController = class ReferencesController {
 };
 exports.ReferencesController = ReferencesController;
 __decorate([
+    (0, onglet_decorator_1.Onglet)('CONSULTATION.REFERENCE', 'MATERNITE.REFERENCE'),
     (0, common_1.Post)('passages/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -61,6 +64,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ReferencesController.prototype, "parPatient", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('CONSULTATION.REFERENCE', 'MATERNITE.REFERENCE'),
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -69,6 +73,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ReferencesController.prototype, "modifier", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('CONSULTATION.REFERENCE', 'MATERNITE.REFERENCE'),
     (0, common_1.Post)(':id/imprimer'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -76,7 +81,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ReferencesController.prototype, "imprimer", null);
 exports.ReferencesController = ReferencesController = __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, onglet_guard_1.OngletGuard),
     (0, common_1.Controller)('references'),
     __metadata("design:paramtypes", [references_service_1.ReferencesService])
 ], ReferencesController);

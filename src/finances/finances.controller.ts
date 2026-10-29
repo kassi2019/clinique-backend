@@ -12,6 +12,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Onglet } from '../auth/onglet.decorator';
+import { OngletGuard } from '../auth/onglet.guard';
 import { FinancesGuard } from './finances.guard';
 import { FinancesService } from './finances.service';
 
@@ -21,7 +23,8 @@ import { FinancesService } from './finances.service';
  * - Le pointage (« Prendre / Terminer mon service ») est ouvert à tout utilisateur connecté.
  * - Le reste est réservé à l'administrateur et aux rôles habilités au module FINANCES.
  */
-@UseGuards(JwtAuthGuard)
+// Droits par onglet : @Onglet(...) sur les routes propres à un onglet (cf. src/auth/onglets.ts)
+@UseGuards(JwtAuthGuard, OngletGuard)
 @Controller('finances')
 export class FinancesController {
   constructor(private finances: FinancesService) {}
@@ -50,12 +53,14 @@ export class FinancesController {
 
   // ── Réservé au module Finances ──
   @UseGuards(FinancesGuard)
+  @Onglet('FINANCES.DIRECT')
   @Get('en-service')
   enService(@Query('cliniqueId', ParseIntPipe) cliniqueId: number) {
     return this.finances.enService(cliniqueId);
   }
 
   @UseGuards(FinancesGuard)
+  @Onglet('FINANCES.SERVICES')
   @Get('services')
   services(
     @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
@@ -66,6 +71,7 @@ export class FinancesController {
   }
 
   @UseGuards(FinancesGuard)
+  @Onglet('FINANCES.SERVICES')
   @Patch('services/:id')
   modifierService(@Param('id', ParseIntPipe) id: number, @Body() dto: any, @Req() req) {
     return this.finances.modifierService(id, dto ?? {}, req.user.id);
@@ -78,36 +84,42 @@ export class FinancesController {
   }
 
   @UseGuards(FinancesGuard)
+  @Onglet('FINANCES.TARIFS')
   @Put('remunerations/:personnelId')
   definirRemuneration(@Param('personnelId', ParseIntPipe) personnelId: number, @Body() dto: any) {
     return this.finances.definirRemuneration(personnelId, dto ?? {});
   }
 
   @UseGuards(FinancesGuard)
+  @Onglet('FINANCES.FICHES')
   @Post('fiches/generer')
   genererFiches(@Body() dto: { cliniqueId: number; mois: string }) {
     return this.finances.genererFiches(Number(dto.cliniqueId), dto.mois);
   }
 
   @UseGuards(FinancesGuard)
+  @Onglet('FINANCES.FICHES')
   @Get('fiches')
   fiches(@Query('cliniqueId', ParseIntPipe) cliniqueId: number, @Query('mois') mois: string) {
     return this.finances.fiches(cliniqueId, mois);
   }
 
   @UseGuards(FinancesGuard)
+  @Onglet('FINANCES.FICHES')
   @Get('fiches/:id')
   detailFiche(@Param('id', ParseIntPipe) id: number) {
     return this.finances.detailFiche(id);
   }
 
   @UseGuards(FinancesGuard)
+  @Onglet('FINANCES.FICHES')
   @Patch('fiches/:id')
   modifierFiche(@Param('id', ParseIntPipe) id: number, @Body() dto: any) {
     return this.finances.modifierFiche(id, dto ?? {});
   }
 
   @UseGuards(FinancesGuard)
+  @Onglet('FINANCES.FICHES')
   @Post('fiches/:id/statut')
   statutFiche(@Param('id', ParseIntPipe) id: number, @Body() dto: { statut: any }, @Req() req) {
     return this.finances.changerStatutFiche(id, dto.statut, req.user.id);

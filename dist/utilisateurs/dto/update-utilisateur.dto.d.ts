@@ -3,6 +3,7 @@ export declare class UpdateUtilisateurDto {
     matricule?: string;
     roleId?: number;
     statut?: string;
+    onglets?: string[];
 }
 export declare class ResetMotDePasseDto {
     motDePasse?: string;

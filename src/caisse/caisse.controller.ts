@@ -11,6 +11,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Onglet } from '../auth/onglet.decorator';
+import { OngletGuard } from '../auth/onglet.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { CaisseService } from './caisse.service';
@@ -20,7 +22,8 @@ import {
   EncaisserDto,
 } from './dto/encaisser.dto';
 
-@UseGuards(JwtAuthGuard)
+// Droits par onglet : @Onglet(...) sur les routes propres à un onglet (cf. src/auth/onglets.ts)
+@UseGuards(JwtAuthGuard, OngletGuard)
 @Controller('caisse')
 export class CaisseController {
   constructor(private caisseService: CaisseService) {}
@@ -127,6 +130,7 @@ export class CaisseController {
   }
 
   /** Tickets en cours (impayés) de la clinique. */
+  @Onglet('CAISSE.CREDITS')
   @Get('credits')
   credits(
     @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
@@ -141,6 +145,7 @@ export class CaisseController {
   }
 
   /** Annule un ticket : les lignes repassent en attente de paiement. */
+  @Onglet('CAISSE.CREDITS')
   @Post('credits/:id/annuler')
   annulerCredit(@Param('id', ParseIntPipe) id: number) {
     return this.caisseService.annulerCredit(id);

@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConsultationsController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const onglet_decorator_1 = require("../auth/onglet.decorator");
+const onglet_guard_1 = require("../auth/onglet.guard");
 const consultations_service_1 = require("./consultations.service");
 const consultation_dto_1 = require("./dto/consultation.dto");
 let ConsultationsController = class ConsultationsController {
@@ -153,6 +155,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "soins", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('CONSULTATION.SOINS'),
     (0, common_1.Post)(':id/soins'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -162,6 +165,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "prescrireSoin", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('CONSULTATION.SOINS'),
     (0, common_1.Delete)('soins/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -169,6 +173,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "retirerSoin", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('CONSULTATION.SOINS'),
     (0, common_1.Post)('soins/:id/arreter'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -253,6 +258,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "sauvegarderOrdonnance", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('CONSULTATION.CERTIFICAT'),
     (0, common_1.Post)(':id/certificat-arret'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -262,6 +268,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "enregistrerCertificat", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('CONSULTATION.CERTIFICAT'),
     (0, common_1.Get)(':id/certificats-arret'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -313,7 +320,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "fermerAffectation", null);
 exports.ConsultationsController = ConsultationsController = __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, onglet_guard_1.OngletGuard),
     (0, common_1.Controller)('consultations'),
     __metadata("design:paramtypes", [consultations_service_1.ConsultationsService])
 ], ConsultationsController);

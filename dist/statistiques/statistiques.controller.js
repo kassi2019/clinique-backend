@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.StatistiquesController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const onglet_decorator_1 = require("../auth/onglet.decorator");
+const onglet_guard_1 = require("../auth/onglet.guard");
 const statistiques_service_1 = require("./statistiques.service");
 let StatistiquesController = class StatistiquesController {
     constructor(statistiquesService) {
@@ -63,6 +65,7 @@ let StatistiquesController = class StatistiquesController {
 };
 exports.StatistiquesController = StatistiquesController;
 __decorate([
+    (0, onglet_decorator_1.Onglet)('STATISTIQUES.TABLEAU-BORD'),
     (0, common_1.Get)('tableau-bord'),
     __param(0, (0, common_1.Query)('jour')),
     __param(1, (0, common_1.Query)('cliniqueId')),
@@ -71,6 +74,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], StatistiquesController.prototype, "tableauBord", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('STATISTIQUES.FREQUENTATION'),
     (0, common_1.Get)('frequentation'),
     __param(0, (0, common_1.Query)('debut')),
     __param(1, (0, common_1.Query)('fin')),
@@ -82,6 +86,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], StatistiquesController.prototype, "frequentation", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('STATISTIQUES.RECETTES'),
     (0, common_1.Get)('recettes'),
     __param(0, (0, common_1.Query)('debut')),
     __param(1, (0, common_1.Query)('fin')),
@@ -91,6 +96,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], StatistiquesController.prototype, "recettes", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('STATISTIQUES.LABORATOIRE'),
     (0, common_1.Get)('laboratoire'),
     __param(0, (0, common_1.Query)('debut')),
     __param(1, (0, common_1.Query)('fin')),
@@ -100,6 +106,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], StatistiquesController.prototype, "laboratoire", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('STATISTIQUES.IMAGERIE'),
     (0, common_1.Get)('imagerie'),
     __param(0, (0, common_1.Query)('debut')),
     __param(1, (0, common_1.Query)('fin')),
@@ -109,6 +116,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], StatistiquesController.prototype, "imagerie", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('STATISTIQUES.HOSPITALISATION'),
     (0, common_1.Get)('hospitalisation'),
     __param(0, (0, common_1.Query)('debut')),
     __param(1, (0, common_1.Query)('fin')),
@@ -118,6 +126,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], StatistiquesController.prototype, "hospitalisation", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('STATISTIQUES.PHARMACIE'),
     (0, common_1.Get)('pharmacie'),
     __param(0, (0, common_1.Query)('debut')),
     __param(1, (0, common_1.Query)('fin')),
@@ -127,6 +136,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], StatistiquesController.prototype, "pharmacie", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('STATISTIQUES.MATERNITE'),
     (0, common_1.Get)('maternite'),
     __param(0, (0, common_1.Query)('debut')),
     __param(1, (0, common_1.Query)('fin')),
@@ -136,7 +146,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], StatistiquesController.prototype, "maternite", null);
 exports.StatistiquesController = StatistiquesController = __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, onglet_guard_1.OngletGuard),
     (0, common_1.Controller)('statistiques'),
     __metadata("design:paramtypes", [statistiques_service_1.StatistiquesService])
 ], StatistiquesController);

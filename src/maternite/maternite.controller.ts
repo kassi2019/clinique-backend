@@ -11,6 +11,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Onglet } from '../auth/onglet.decorator';
+import { OngletGuard } from '../auth/onglet.guard';
 import {
   CreateAccouchementDto,
   CreateCponDto,
@@ -25,7 +27,8 @@ import {
 } from './dto/maternite.dto';
 import { MaterniteService } from './maternite.service';
 
-@UseGuards(JwtAuthGuard)
+// Droits par onglet : @Onglet(...) sur les routes propres à un onglet (cf. src/auth/onglets.ts)
+@UseGuards(JwtAuthGuard, OngletGuard)
 @Controller('maternite')
 export class MaterniteController {
   constructor(private materniteService: MaterniteService) {}
@@ -131,6 +134,7 @@ export class MaterniteController {
   }
 
   /** Consultation postnatale (registre CPoN). */
+  @Onglet('MATERNITE.CPON')
   @Post('passages/:id/cpon')
   creerCpon(
     @Param('id', ParseIntPipe) id: number,
@@ -140,12 +144,14 @@ export class MaterniteController {
     return this.materniteService.creerCpon(id, dto, req.user.id);
   }
 
+  @Onglet('MATERNITE.CPON')
   @Patch('cpon/:id')
   modifierCpon(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCponDto) {
     return this.materniteService.modifierCpon(id, dto);
   }
 
   /** Consultation de planification familiale (registre PF). */
+  @Onglet('MATERNITE.PF')
   @Post('passages/:id/pf')
   creerPf(
     @Param('id', ParseIntPipe) id: number,
@@ -155,6 +161,7 @@ export class MaterniteController {
     return this.materniteService.creerPf(id, dto, req.user.id);
   }
 
+  @Onglet('MATERNITE.PF')
   @Patch('pf/:id')
   modifierPf(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdatePfDto) {
     return this.materniteService.modifierPf(id, dto);
@@ -196,6 +203,7 @@ export class MaterniteController {
   }
 
   /** Nouvelle visite CPN (CPN1, CPN2… numérotées automatiquement). */
+  @Onglet('MATERNITE.CPN')
   @Post('grossesses/:id/cpn')
   creerVisite(
     @Param('id', ParseIntPipe) id: number,
@@ -205,12 +213,14 @@ export class MaterniteController {
     return this.materniteService.creerVisite(id, dto, req.user.id);
   }
 
+  @Onglet('MATERNITE.CPN')
   @Patch('cpn/:id')
   modifierVisite(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateVisiteCpnDto) {
     return this.materniteService.modifierVisite(id, dto);
   }
 
   /** Enregistre (ou met à jour) l'accouchement d'une grossesse. */
+  @Onglet('MATERNITE.ACCOUCHEMENT')
   @Post('grossesses/:id/accouchement')
   creerAccouchement(
     @Param('id', ParseIntPipe) id: number,
@@ -220,6 +230,7 @@ export class MaterniteController {
     return this.materniteService.creerAccouchement(id, dto, req.user.id);
   }
 
+  @Onglet('MATERNITE.ACCOUCHEMENT')
   @Patch('accouchements/:id')
   modifierAccouchement(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateAccouchementDto) {
     return this.materniteService.modifierAccouchement(id, dto);

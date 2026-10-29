@@ -4,4 +4,5 @@ export declare class CreateUtilisateurDto {
     motDePasse: string;
     roleId: number;
     statut?: string;
+    onglets?: string[];
 }

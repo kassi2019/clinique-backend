@@ -1,4 +1,4 @@
-import { IsIn, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsIn, IsInt, IsOptional, IsString } from 'class-validator';
 
 export class UpdateUtilisateurDto {
   @IsOptional()
@@ -16,6 +16,12 @@ export class UpdateUtilisateurDto {
   @IsOptional()
   @IsIn(['ACTIF', 'SUSPENDU'])
   statut?: string;
+
+  /** Onglets autorisés (remplace la liste ; aucun pour un module = tous ses onglets). */
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  onglets?: string[];
 }
 
 export class ResetMotDePasseDto {

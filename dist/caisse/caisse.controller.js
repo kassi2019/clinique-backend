@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CaisseController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const onglet_decorator_1 = require("../auth/onglet.decorator");
+const onglet_guard_1 = require("../auth/onglet.guard");
 const roles_decorator_1 = require("../auth/roles.decorator");
 const roles_guard_1 = require("../auth/roles.guard");
 const caisse_service_1 = require("./caisse.service");
@@ -149,6 +151,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CaisseController.prototype, "creerCredit", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('CAISSE.CREDITS'),
     (0, common_1.Get)('credits'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('page')),
@@ -158,6 +161,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CaisseController.prototype, "credits", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('CAISSE.CREDITS'),
     (0, common_1.Post)('credits/:id/annuler'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -165,7 +169,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CaisseController.prototype, "annulerCredit", null);
 exports.CaisseController = CaisseController = __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, onglet_guard_1.OngletGuard),
     (0, common_1.Controller)('caisse'),
     __metadata("design:paramtypes", [caisse_service_1.CaisseService])
 ], CaisseController);

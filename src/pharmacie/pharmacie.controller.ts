@@ -10,17 +10,22 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Onglet } from '../auth/onglet.decorator';
+import { OngletGuard } from '../auth/onglet.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { OrdonnanceExterneDto, PharmacieService } from './pharmacie.service';
 
-@UseGuards(JwtAuthGuard)
+// Droits par onglet : @Onglet(...) sur les routes propres à un onglet ; les lectures
+// partagées (stocks, alertes, péremptions…) restent ouvertes au module.
+@UseGuards(JwtAuthGuard, OngletGuard)
 @Controller('pharmacie')
 export class PharmacieController {
   constructor(private pharmacieService: PharmacieService) {}
 
   // ── Ordonnances (§9.1) ──
 
+  @Onglet('PHARMACIE.ORDONNANCES')
   @Get('ordonnances')
   rechercherOrdonnances(
     @Query('code') code?: string,
@@ -40,12 +45,14 @@ export class PharmacieController {
   }
 
   /** Détail d'une ordonnance (par identifiant d'ordonnance). */
+  @Onglet('PHARMACIE.ORDONNANCES')
   @Get('ordonnances/:id')
   detailOrdonnance(@Param('id', ParseIntPipe) id: number) {
     return this.pharmacieService.detailOrdonnance(id);
   }
 
   /** Dispense les médicaments d'une ordonnance (sortie de stock FEFO). */
+  @Onglet('PHARMACIE.ORDONNANCES')
   @Post('ordonnances/:id/dispenser')
   dispenser(
     @Param('id', ParseIntPipe) id: number,
@@ -58,12 +65,14 @@ export class PharmacieController {
   // ── Ordonnances externes (prescrites hors du centre) ──
 
   /** Saisie + sortie de stock + règlement d'une ordonnance externe, en une validation. */
+  @Onglet('PHARMACIE.ORDONNANCES', 'PHARMACIE.EXTERNES')
   @Post('ordonnances-externes')
   creerOrdonnanceExterne(@Body() dto: OrdonnanceExterneDto, @Req() req) {
     return this.pharmacieService.creerOrdonnanceExterne(dto, req.user.id);
   }
 
   /** Rapport dédié des ordonnances externes (défaut : aujourd'hui). */
+  @Onglet('PHARMACIE.EXTERNES')
   @Get('ordonnances-externes')
   ordonnancesExternes(
     @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
@@ -74,6 +83,7 @@ export class PharmacieController {
   }
 
   /** Recherche rapide d'un patient (nom, code, téléphone) avec son assurance active. */
+  @Onglet('PHARMACIE.ORDONNANCES', 'PHARMACIE.EXTERNES')
   @Get('ordonnances-externes/patients')
   rechercherPatientsExterne(
     @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
@@ -83,6 +93,7 @@ export class PharmacieController {
   }
 
   // Anciennes routes (par consultation), gardées pour les applications non mises à jour
+  @Onglet('PHARMACIE.ORDONNANCES')
   @Get('consultations/:id')
   async detailOrdonnanceConsultation(@Param('id', ParseIntPipe) id: number) {
     return this.pharmacieService.detailOrdonnance(
@@ -90,6 +101,7 @@ export class PharmacieController {
     );
   }
 
+  @Onglet('PHARMACIE.ORDONNANCES')
   @Post('dispensations/:consultationId')
   async dispenserConsultation(
     @Param('consultationId', ParseIntPipe) consultationId: number,
@@ -103,12 +115,14 @@ export class PharmacieController {
     );
   }
 
+  @Onglet('PHARMACIE.ORDONNANCES')
   @Post('dispensations/:id/cloturer')
   cloturer(@Param('id', ParseIntPipe) id: number) {
     return this.pharmacieService.cloturer(id);
   }
 
   /** Encaissement à la caisse pharmacie + reçu imprimé. */
+  @Onglet('PHARMACIE.ORDONNANCES')
   @Post('dispensations/:id/payer')
   payer(
     @Param('id', ParseIntPipe) id: number,
@@ -122,12 +136,14 @@ export class PharmacieController {
   }
 
   /** Crédits pharmacie non réglés + cas sociaux. */
+  @Onglet('PHARMACIE.CREDITS')
   @Get('credits')
   credits(@Query('cliniqueId', ParseIntPipe) cliniqueId: number) {
     return this.pharmacieService.credits(cliniqueId);
   }
 
   /** Encaisse un crédit pharmacie. */
+  @Onglet('PHARMACIE.CREDITS')
   @Post('paiements/:id/regler')
   reglerCredit(
     @Param('id', ParseIntPipe) id: number,
@@ -157,17 +173,20 @@ export class PharmacieController {
     return this.pharmacieService.stocks(cliniqueId, search);
   }
 
+  @Onglet('PHARMACIE.STOCKS')
   @Post('entrees')
   entrerStock(@Body() dto: any, @Req() req) {
     return this.pharmacieService.entrerStock(dto, req.user.id);
   }
 
+  @Onglet('PHARMACIE.STOCKS')
   @Post('inventaire')
   inventaire(@Body() dto: any, @Req() req) {
     return this.pharmacieService.inventaire(dto, req.user.id);
   }
 
   /** Fiche d'inventaire : lots comptés sur la période (jour courant par défaut). */
+  @Onglet('PHARMACIE.STOCKS')
   @Get('inventaires/fiche')
   ficheInventaire(
     @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
@@ -178,6 +197,7 @@ export class PharmacieController {
   }
 
   /** Inventaire groupé : valide plusieurs lots en une seule fois. */
+  @Onglet('PHARMACIE.STOCKS')
   @Post('lots/inventaire-multiple')
   inventaireMultiple(
     @Body() dto: { lignes: { lotId: number; quantiteReelle: number; numeroLot?: string; datePeremption?: string }[] },
@@ -193,12 +213,14 @@ export class PharmacieController {
   }
 
   /** Tous les lots de la clinique, groupés par médicament (sous-onglet Inventaire). */
+  @Onglet('PHARMACIE.STOCKS')
   @Get('lots')
   lotsClinique(@Query('cliniqueId', ParseIntPipe) cliniqueId: number) {
     return this.pharmacieService.lotsClinique(cliniqueId);
   }
 
   /** Inventaire par lot : le stock réel saisi devient le stock actuel du lot. */
+  @Onglet('PHARMACIE.STOCKS')
   @Post('lots/:id/inventaire')
   inventaireLot(
     @Param('id', ParseIntPipe) id: number,
@@ -212,6 +234,7 @@ export class PharmacieController {
   }
 
   /** Récapitulatif des sorties par produit sur une période (onglet Mouvements). */
+  @Onglet('PHARMACIE.STOCKS')
   @Get('sorties')
   recapSorties(
     @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
@@ -228,6 +251,7 @@ export class PharmacieController {
     return this.pharmacieService.recapSorties(cliniqueId, debut, fin, ids, cat);
   }
 
+  @Onglet('PHARMACIE.STOCKS')
   @Get('mouvements/:medicamentId')
   mouvements(@Param('medicamentId', ParseIntPipe) medicamentId: number) {
     return this.pharmacieService.mouvements(medicamentId);
@@ -240,6 +264,7 @@ export class PharmacieController {
   }
 
   /** Recalcule les seuils automatiques (consommation 60 j ÷ 120) de tous les médicaments. */
+  @Onglet('PHARMACIE.STOCKS')
   @Post('seuils/recalculer')
   recalculerSeuils(@Query('cliniqueId', ParseIntPipe) cliniqueId: number) {
     return this.pharmacieService.recalculerTousSeuils(cliniqueId);
@@ -248,6 +273,7 @@ export class PharmacieController {
   // ─── Retraits / péremptions / points financiers ───
 
   /** Retire une quantité d'un lot (retour fournisseur, périmé, casse, perte…). */
+  @Onglet('PHARMACIE.STOCKS')
   @Post('lots/:id/retrait')
   retirerLot(
     @Param('id', ParseIntPipe) id: number,
@@ -268,12 +294,14 @@ export class PharmacieController {
   }
 
   /** Retire automatiquement les lots périmés (déclenchement manuel ; la tâche nocturne le fait aussi). */
+  @Onglet('PHARMACIE.STOCKS')
   @Post('perimes/retirer-auto')
   retirerPerimesAuto(@Query('cliniqueId', ParseIntPipe) cliniqueId: number) {
     return this.pharmacieService.retirerPerimesAuto(cliniqueId);
   }
 
   /** Historique des retraits (rapport des périmés/pertes/casses). */
+  @Onglet('PHARMACIE.FINANCIER')
   @Get('retraits')
   retraits(
     @Query('cliniqueId', ParseIntPipe) cliniqueId?: number,
@@ -285,6 +313,7 @@ export class PharmacieController {
   }
 
   /** Points financiers de la pharmacie (reçus, vendus, perdus, restants, correctifs). */
+  @Onglet('PHARMACIE.FINANCIER')
   @Get('financier')
   pointsFinanciers(
     @Query('cliniqueId', ParseIntPipe) cliniqueId?: number,
@@ -296,6 +325,7 @@ export class PharmacieController {
   }
 
   /** Détail d'un bloc financier (liste des lignes qui composent le montant). */
+  @Onglet('PHARMACIE.FINANCIER')
   @Get('financier/detail')
   detailFinancier(
     @Query('cliniqueId', ParseIntPipe) cliniqueId?: number,
@@ -329,6 +359,7 @@ export class PharmacieController {
     return this.pharmacieService.majConsommable(id, dto);
   }
 
+  @Onglet('PHARMACIE.STOCKS')
   @Post('consommables/:id/mouvement')
   mouvementConsommable(
     @Param('id', ParseIntPipe) id: number,
@@ -338,6 +369,7 @@ export class PharmacieController {
     return this.pharmacieService.mouvementConsommable(id, dto, req.user.id);
   }
 
+  @Onglet('PHARMACIE.STOCKS')
   @Get('consommables/:id/mouvements')
   mouvementsConsommable(@Param('id', ParseIntPipe) id: number) {
     return this.pharmacieService.mouvementsConsommable(id);

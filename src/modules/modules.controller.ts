@@ -1,5 +1,6 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ONGLETS } from '../auth/onglets';
 import { PrismaService } from '../prisma/prisma.service';
 
 /**
@@ -14,5 +15,11 @@ export class ModulesController {
   @Get()
   findAll() {
     return this.prisma.module.findMany({ orderBy: { nom: 'asc' } });
+  }
+
+  /** Catalogue des onglets protégeables (fiche utilisateur → onglets autorisés). */
+  @Get('onglets')
+  onglets() {
+    return ONGLETS;
   }
 }

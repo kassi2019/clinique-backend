@@ -26,6 +26,9 @@ export declare class UtilisateursService {
                 nom: string;
                 code: string;
             };
+            onglets: {
+                onglet: string;
+            }[];
         } & {
             createdAt: Date;
             id: number;
@@ -62,6 +65,9 @@ export declare class UtilisateursService {
             nom: string;
             code: string;
         };
+        onglets: {
+            onglet: string;
+        }[];
     } & {
         createdAt: Date;
         id: number;
@@ -93,6 +99,9 @@ export declare class UtilisateursService {
             nom: string;
             code: string;
         };
+        onglets: {
+            onglet: string;
+        }[];
     } & {
         createdAt: Date;
         id: number;
@@ -124,6 +133,9 @@ export declare class UtilisateursService {
             nom: string;
             code: string;
         };
+        onglets: {
+            onglet: string;
+        }[];
     } & {
         createdAt: Date;
         id: number;
@@ -137,6 +149,7 @@ export declare class UtilisateursService {
         disponibilite: string;
         derniereActivite: Date | null;
     }>;
+    private verifierOnglets;
     resetMotDePasse(id: number, motDePasse: string): Promise<{
         personnel: {
             fonction: string;
@@ -155,6 +168,9 @@ export declare class UtilisateursService {
             nom: string;
             code: string;
         };
+        onglets: {
+            onglet: string;
+        }[];
     } & {
         createdAt: Date;
         id: number;
@@ -186,6 +202,9 @@ export declare class UtilisateursService {
             nom: string;
             code: string;
         };
+        onglets: {
+            onglet: string;
+        }[];
     } & {
         createdAt: Date;
         id: number;

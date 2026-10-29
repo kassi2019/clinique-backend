@@ -51,6 +51,7 @@ const includeConsultation = {
     medicaments: {
         where: { OR: [{ ordonnanceId: null }, { ordonnance: { type: 'MEDICAMENTS' } }] },
         include: { medicament: { select: { uniteVente: true } } },
+        orderBy: { id: 'asc' },
     },
     ordonnances: { where: { type: 'MEDICAMENTS' }, orderBy: { id: 'asc' } },
     soins: exports.includeSoinsPrescrits,
@@ -190,7 +191,7 @@ let ConsultationsService = class ConsultationsService {
         const historique = await this.prisma.consultation.findMany({
             where: { patientId: passage.patientId },
             include: {
-                medicaments: true,
+                medicaments: { orderBy: { id: 'asc' } },
                 ordonnances: { orderBy: { id: 'asc' } },
                 medecin: {
                     select: {

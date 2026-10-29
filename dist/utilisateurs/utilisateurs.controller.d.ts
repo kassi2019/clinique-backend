@@ -23,6 +23,9 @@ export declare class UtilisateursController {
                 nom: string;
                 code: string;
             };
+            onglets: {
+                onglet: string;
+            }[];
         } & {
             createdAt: Date;
             id: number;
@@ -59,6 +62,9 @@ export declare class UtilisateursController {
             nom: string;
             code: string;
         };
+        onglets: {
+            onglet: string;
+        }[];
     } & {
         createdAt: Date;
         id: number;
@@ -90,6 +96,9 @@ export declare class UtilisateursController {
             nom: string;
             code: string;
         };
+        onglets: {
+            onglet: string;
+        }[];
     } & {
         createdAt: Date;
         id: number;
@@ -121,6 +130,9 @@ export declare class UtilisateursController {
             nom: string;
             code: string;
         };
+        onglets: {
+            onglet: string;
+        }[];
     } & {
         createdAt: Date;
         id: number;
@@ -152,6 +164,9 @@ export declare class UtilisateursController {
             nom: string;
             code: string;
         };
+        onglets: {
+            onglet: string;
+        }[];
     } & {
         createdAt: Date;
         id: number;
@@ -183,6 +198,9 @@ export declare class UtilisateursController {
             nom: string;
             code: string;
         };
+        onglets: {
+            onglet: string;
+        }[];
     } & {
         createdAt: Date;
         id: number;

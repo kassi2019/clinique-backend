@@ -1140,8 +1140,21 @@ model Utilisateur {
   fichesValidees             FicheVacation[]          @relation("FichesValidees")
   disponibilite              String                   @default("INDISPONIBLE") // DISPONIBLE / INDISPONIBLE (médecins)
   derniereActivite           DateTime? // signal de vie : le poste du médecin est allumé (heartbeat)
+  onglets                    UtilisateurOnglet[]
 
   @@map("utilisateurs")
+}
+
+// ---------- Onglets autorisés par utilisateur ----------
+// Aucun onglet coché pour un module = tous les onglets de ce module (catalogue : src/auth/onglets.ts).
+model UtilisateurOnglet {
+  utilisateurId Int
+  onglet        String @db.NVarChar(100) // code du catalogue, ex. PHARMACIE.STOCKS
+
+  utilisateur Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
+
+  @@id([utilisateurId, onglet])
+  @@map("utilisateurs_onglets")
 }
 
 // ---------- Rôles ----------

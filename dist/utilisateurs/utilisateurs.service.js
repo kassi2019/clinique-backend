@@ -13,6 +13,7 @@ exports.UtilisateursService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const bcrypt = require("bcryptjs");
+const onglets_1 = require("../auth/onglets");
 const prisma_service_1 = require("../prisma/prisma.service");
 const includeBase = {
     personnel: {
@@ -27,6 +28,7 @@ const includeBase = {
         },
     },
     role: { select: { id: true, code: true, nom: true } },
+    onglets: { select: { onglet: true } },
 };
 let UtilisateursService = class UtilisateursService {
     constructor(prisma) {
@@ -73,10 +75,18 @@ let UtilisateursService = class UtilisateursService {
         if (existant) {
             throw new common_1.ConflictException('Un compte utilisateur existe déjà pour ce personnel.');
         }
+        const { onglets, ...champs } = dto;
+        this.verifierOnglets(onglets);
         const motDePasse = await bcrypt.hash(dto.motDePasse, 10);
         try {
             return await this.prisma.utilisateur.create({
-                data: { ...dto, motDePasse },
+                data: {
+                    ...champs,
+                    motDePasse,
+                    ...(onglets?.length
+                        ? { onglets: { create: [...new Set(onglets)].map((onglet) => ({ onglet })) } }
+                        : {}),
+                },
                 include: includeBase,
             });
         }
@@ -89,10 +99,17 @@ let UtilisateursService = class UtilisateursService {
     }
     async update(id, dto) {
         await this.findOne(id);
+        const { onglets, ...champs } = dto;
+        this.verifierOnglets(onglets);
         try {
             return await this.prisma.utilisateur.update({
                 where: { id },
-                data: dto,
+                data: {
+                    ...champs,
+                    ...(onglets
+                        ? { onglets: { deleteMany: {}, create: [...new Set(onglets)].map((onglet) => ({ onglet })) } }
+                        : {}),
+                },
                 include: includeBase,
             });
         }
@@ -101,6 +118,12 @@ let UtilisateursService = class UtilisateursService {
                 throw new common_1.ConflictException('Ce matricule de connexion existe déjà.');
             }
             throw e;
+        }
+    }
+    verifierOnglets(onglets) {
+        const inconnus = (onglets ?? []).filter((o) => !onglets_1.CODES_ONGLETS.has(o));
+        if (inconnus.length) {
+            throw new common_1.BadRequestException(`Onglet(s) inconnu(s) : ${inconnus.join(', ')}.`);
         }
     }
     async resetMotDePasse(id, motDePasse) {

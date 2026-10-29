@@ -18,6 +18,7 @@ const affectation_service_1 = require("../affectation/affectation.service");
 const includeUtilisateur = {
     personnel: { include: { service: true, clinique: true } },
     role: { include: { habilitations: { include: { module: true } } } },
+    onglets: { select: { onglet: true } },
 };
 let AuthService = class AuthService {
     constructor(prisma, jwt, affectationService) {
@@ -29,6 +30,7 @@ let AuthService = class AuthService {
         return {
             id: u.id,
             matricule: u.matricule,
+            onglets: u.onglets.map((o) => o.onglet),
             role: {
                 code: u.role.code,
                 nom: u.role.nom,

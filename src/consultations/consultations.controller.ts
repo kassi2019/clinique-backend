@@ -13,6 +13,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Onglet } from '../auth/onglet.decorator';
+import { OngletGuard } from '../auth/onglet.guard';
 import { ConsultationsService } from './consultations.service';
 import {
   CreerConsultationDto,
@@ -22,7 +24,8 @@ import {
   PrescrireExamensDto,
 } from './dto/consultation.dto';
 
-@UseGuards(JwtAuthGuard)
+// Droits par onglet : @Onglet(...) sur les routes propres à un onglet (cf. src/auth/onglets.ts)
+@UseGuards(JwtAuthGuard, OngletGuard)
 @Controller('consultations')
 export class ConsultationsController {
   constructor(private consultationsService: ConsultationsService) {}
@@ -73,6 +76,7 @@ export class ConsultationsController {
   }
 
   /** Prescrit un soin : visible tout de suite dans le module Soins. */
+  @Onglet('CONSULTATION.SOINS')
   @Post(':id/soins')
   prescrireSoin(
     @Param('id', ParseIntPipe) id: number,
@@ -82,11 +86,13 @@ export class ConsultationsController {
     return this.consultationsService.prescrireSoin(id, req.user.id, dto);
   }
 
+  @Onglet('CONSULTATION.SOINS')
   @Delete('soins/:id')
   retirerSoin(@Param('id', ParseIntPipe) id: number) {
     return this.consultationsService.retirerSoin(id);
   }
 
+  @Onglet('CONSULTATION.SOINS')
   @Post('soins/:id/arreter')
   arreterSoin(@Param('id', ParseIntPipe) id: number) {
     return this.consultationsService.arreterSoin(id);
@@ -161,6 +167,7 @@ export class ConsultationsController {
   }
 
   /** Enregistre un certificat d'arrêt de travail (numéro séquentiel annuel). */
+  @Onglet('CONSULTATION.CERTIFICAT')
   @Post(':id/certificat-arret')
   enregistrerCertificat(
     @Param('id', ParseIntPipe) id: number,
@@ -181,6 +188,7 @@ export class ConsultationsController {
   }
 
   /** Liste des certificats d'arrêt établis pour une consultation. */
+  @Onglet('CONSULTATION.CERTIFICAT')
   @Get(':id/certificats-arret')
   certificatsArret(@Param('id', ParseIntPipe) id: number) {
     return this.consultationsService.certificatsArret(id);

@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PharmacieController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const onglet_decorator_1 = require("../auth/onglet.decorator");
+const onglet_guard_1 = require("../auth/onglet.guard");
 const roles_decorator_1 = require("../auth/roles.decorator");
 const roles_guard_1 = require("../auth/roles.guard");
 const pharmacie_service_1 = require("./pharmacie.service");
@@ -165,6 +167,7 @@ let PharmacieController = class PharmacieController {
 };
 exports.PharmacieController = PharmacieController;
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.ORDONNANCES'),
     (0, common_1.Get)('ordonnances'),
     __param(0, (0, common_1.Query)('code')),
     __param(1, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
@@ -177,6 +180,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "rechercherOrdonnances", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.ORDONNANCES'),
     (0, common_1.Get)('ordonnances/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -184,6 +188,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "detailOrdonnance", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.ORDONNANCES'),
     (0, common_1.Post)('ordonnances/:id/dispenser'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -193,6 +198,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "dispenser", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.ORDONNANCES', 'PHARMACIE.EXTERNES'),
     (0, common_1.Post)('ordonnances-externes'),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
@@ -201,6 +207,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "creerOrdonnanceExterne", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.EXTERNES'),
     (0, common_1.Get)('ordonnances-externes'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('debut')),
@@ -210,6 +217,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "ordonnancesExternes", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.ORDONNANCES', 'PHARMACIE.EXTERNES'),
     (0, common_1.Get)('ordonnances-externes/patients'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('q')),
@@ -218,6 +226,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "rechercherPatientsExterne", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.ORDONNANCES'),
     (0, common_1.Get)('consultations/:id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -225,6 +234,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PharmacieController.prototype, "detailOrdonnanceConsultation", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.ORDONNANCES'),
     (0, common_1.Post)('dispensations/:consultationId'),
     __param(0, (0, common_1.Param)('consultationId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -234,6 +244,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PharmacieController.prototype, "dispenserConsultation", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.ORDONNANCES'),
     (0, common_1.Post)('dispensations/:id/cloturer'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -241,6 +252,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "cloturer", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.ORDONNANCES'),
     (0, common_1.Post)('dispensations/:id/payer'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -250,6 +262,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "payer", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.CREDITS'),
     (0, common_1.Get)('credits'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -257,6 +270,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "credits", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.CREDITS'),
     (0, common_1.Post)('paiements/:id/regler'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -283,6 +297,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "stocks", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Post)('entrees'),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
@@ -291,6 +306,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "entrerStock", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Post)('inventaire'),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
@@ -299,6 +315,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "inventaire", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Get)('inventaires/fiche'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('debut')),
@@ -308,6 +325,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "ficheInventaire", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Post)('lots/inventaire-multiple'),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
@@ -323,6 +341,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "lots", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Get)('lots'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -330,6 +349,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "lotsClinique", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Post)('lots/:id/inventaire'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -339,6 +359,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "inventaireLot", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Get)('sorties'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('debut')),
@@ -350,6 +371,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "recapSorties", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Get)('mouvements/:medicamentId'),
     __param(0, (0, common_1.Param)('medicamentId', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -364,6 +386,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "alertes", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Post)('seuils/recalculer'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -371,6 +394,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "recalculerSeuils", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Post)('lots/:id/retrait'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -388,6 +412,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "peremptionsProches", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Post)('perimes/retirer-auto'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -395,6 +420,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "retirerPerimesAuto", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.FINANCIER'),
     (0, common_1.Get)('retraits'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('debut')),
@@ -404,6 +430,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "retraits", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.FINANCIER'),
     (0, common_1.Get)('financier'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('debut')),
@@ -413,6 +440,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "pointsFinanciers", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.FINANCIER'),
     (0, common_1.Get)('financier/detail'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('type')),
@@ -449,6 +477,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "majConsommable", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Post)('consommables/:id/mouvement'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -458,6 +487,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "mouvementConsommable", null);
 __decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Get)('consommables/:id/mouvements'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -465,7 +495,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "mouvementsConsommable", null);
 exports.PharmacieController = PharmacieController = __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, onglet_guard_1.OngletGuard),
     (0, common_1.Controller)('pharmacie'),
     __metadata("design:paramtypes", [pharmacie_service_1.PharmacieService])
 ], PharmacieController);

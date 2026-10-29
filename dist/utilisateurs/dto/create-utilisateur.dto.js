@@ -37,4 +37,10 @@ __decorate([
     (0, class_validator_1.IsIn)(['ACTIF', 'SUSPENDU']),
     __metadata("design:type", String)
 ], CreateUtilisateurDto.prototype, "statut", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], CreateUtilisateurDto.prototype, "onglets", void 0);
 //# sourceMappingURL=create-utilisateur.dto.js.map

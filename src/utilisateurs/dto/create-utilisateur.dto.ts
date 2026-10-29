@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsIn,
   IsInt,
   IsNotEmpty,
@@ -25,4 +26,10 @@ export class CreateUtilisateurDto {
   @IsOptional()
   @IsIn(['ACTIF', 'SUSPENDU'])
   statut?: string;
+
+  /** Onglets autorisés (aucun pour un module = tous ses onglets). */
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  onglets?: string[];
 }

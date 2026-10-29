@@ -11,6 +11,7 @@ export declare class AuthController {
         user: {
             id: number;
             matricule: string;
+            onglets: string[];
             role: {
                 code: string;
                 nom: string;
@@ -45,6 +46,7 @@ export declare class AuthController {
     me(req: any): Promise<{
         id: number;
         matricule: string;
+        onglets: string[];
         role: {
             code: string;
             nom: string;

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ModulesController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const onglets_1 = require("../auth/onglets");
 const prisma_service_1 = require("../prisma/prisma.service");
 let ModulesController = class ModulesController {
     constructor(prisma) {
@@ -19,6 +20,9 @@ let ModulesController = class ModulesController {
     }
     findAll() {
         return this.prisma.module.findMany({ orderBy: { nom: 'asc' } });
+    }
+    onglets() {
+        return onglets_1.ONGLETS;
     }
 };
 exports.ModulesController = ModulesController;
@@ -28,6 +32,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ModulesController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('onglets'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ModulesController.prototype, "onglets", null);
 exports.ModulesController = ModulesController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('modules'),

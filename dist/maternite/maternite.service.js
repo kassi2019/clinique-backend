@@ -524,7 +524,7 @@ let MaterniteService = class MaterniteService {
                 consultations: {
                     take: 1,
                     orderBy: { id: 'desc' },
-                    include: { medicaments: true },
+                    include: { medicaments: { orderBy: { id: 'asc' } } },
                 },
             },
         });

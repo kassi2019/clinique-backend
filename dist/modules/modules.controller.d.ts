@@ -8,4 +8,9 @@ export declare class ModulesController {
         code: string;
         description: string | null;
     }[]>;
+    onglets(): {
+        module: string;
+        code: string;
+        nom: string;
+    }[];
 }

@@ -7,6 +7,7 @@ import { AffectationService } from '../affectation/affectation.service';
 const includeUtilisateur = {
   personnel: { include: { service: true, clinique: true } },
   role: { include: { habilitations: { include: { module: true } } } },
+  onglets: { select: { onglet: true } },
 } as const;
 
 @Injectable()
@@ -24,6 +25,7 @@ export class AuthService {
   private buildUser(u: {
     id: number;
     matricule: string;
+    onglets: { onglet: string }[];
     personnel: {
       id: number;
       matricule: string;
@@ -49,6 +51,8 @@ export class AuthService {
     return {
       id: u.id,
       matricule: u.matricule,
+      // Onglets cochés sur la fiche utilisateur (aucun pour un module = tous ses onglets)
+      onglets: u.onglets.map((o) => o.onglet),
       role: {
         code: u.role.code,
         nom: u.role.nom,
