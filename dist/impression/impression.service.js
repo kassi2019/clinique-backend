@@ -373,7 +373,7 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
             lignes.push(centrer(paiement.clinique.adresse));
         }
         lignes.push(trait());
-        lignes.push(centrer('RECU DE PAIEMENT'));
+        lignes.push(centrer('RECU DE LA CAISSE'));
         lignes.push(CMDS.BOLD_ON + centrer(paiement.numeroRecu) + CMDS.BOLD_OFF);
         lignes.push(trait());
         lignes.push(deuxColonnes('Patient', `${paiement.passage.patient.nom} ${paiement.passage.patient.prenom}`.toUpperCase()));
@@ -402,7 +402,7 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         return this.imprimer(texte, config, {
             poste: 'RECU',
             cliniqueId: paiement.cliniqueId,
-            libelle: `Reçu de paiement ${paiement.numeroRecu}`,
+            libelle: `Reçu de la caisse ${paiement.numeroRecu}`,
         });
     }
     async imprimerOrdonnance(consultationId, ordonnanceId) {
