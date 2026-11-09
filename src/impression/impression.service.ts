@@ -27,6 +27,15 @@ const CMDS = {
   CUT_FULL: GS + 'V' + '\x00',
 };
 
+/** Date (JJ/MM/AAAA) et heure (HH:MM) séparées, pour les tickets thermiques. */
+function dateEtHeure(d: Date): { date: string; heure: string } {
+  const p = (n: number) => String(n).padStart(2, '0');
+  return {
+    date: `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`,
+    heure: `${p(d.getHours())}:${p(d.getMinutes())}`,
+  };
+}
+
 export interface ConfigImprimante {
   type: 'WINDOWS' | 'NETWORK' | 'BLUETOOTH' | 'AGENT' | 'NONE';
   ip: string;
@@ -463,13 +472,7 @@ export class ImpressionService {
       gauche + ' '.repeat(Math.max(1, L - gauche.length - droite.length)) + droite;
 
     const COEUR = '\x03'; // ♥
-    const d = paiement.createdAt;
-    const dateHeure = `${String(d.getDate()).padStart(2, '0')}/${String(
-      d.getMonth() + 1,
-    ).padStart(2, '0')}/${d.getFullYear()} ${String(d.getHours()).padStart(
-      2,
-      '0',
-    )}:${String(d.getMinutes()).padStart(2, '0')}`;
+    const { date, heure } = dateEtHeure(paiement.createdAt);
 
     const lignes: string[] = [];
     lignes.push(centrer(paiement.clinique.nom.toUpperCase()));
@@ -479,6 +482,8 @@ export class ImpressionService {
     lignes.push(trait());
     lignes.push(centrer('RECU DE LA CAISSE'));
     lignes.push(CMDS.BOLD_ON + centrer(paiement.numeroRecu) + CMDS.BOLD_OFF);
+    lignes.push(deuxColonnes('Date', date));
+    lignes.push(deuxColonnes('Heure', heure));
     lignes.push(trait());
     lignes.push(
       deuxColonnes(
@@ -693,6 +698,9 @@ export class ImpressionService {
     lignes.push(trait());
     lignes.push(centrer('RECU PHARMACIE'));
     lignes.push(CMDS.BOLD_ON + centrer(paiement.numeroRecu) + CMDS.BOLD_OFF);
+    const { date, heure } = dateEtHeure(paiement.createdAt);
+    lignes.push(deuxColonnes('Date', date));
+    lignes.push(deuxColonnes('Heure', heure));
     lignes.push(trait());
     if (p) {
       lignes.push(deuxColonnes('Patient', `${p.nom} ${p.prenom}`.toUpperCase()));
