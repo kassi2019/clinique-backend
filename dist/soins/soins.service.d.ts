@@ -170,8 +170,8 @@ export declare class SoinsService {
             } & {
                 createdAt: Date;
                 id: number;
-                agentId: number | null;
                 date: Date;
+                agentId: number | null;
                 observations: string | null;
                 soinId: number;
             })[];
@@ -230,8 +230,8 @@ export declare class SoinsService {
             } & {
                 createdAt: Date;
                 id: number;
-                agentId: number | null;
                 date: Date;
+                agentId: number | null;
                 observations: string | null;
                 prescriptionSoinId: number;
             })[];
@@ -299,8 +299,8 @@ export declare class SoinsService {
         } & {
             createdAt: Date;
             id: number;
-            agentId: number | null;
             date: Date;
+            agentId: number | null;
             observations: string | null;
             prescriptionSoinId: number;
         })[];
@@ -335,8 +335,8 @@ export declare class SoinsService {
         } & {
             createdAt: Date;
             id: number;
-            agentId: number | null;
             date: Date;
+            agentId: number | null;
             observations: string | null;
             soinId: number;
         })[];
@@ -383,8 +383,8 @@ export declare class SoinsService {
         } & {
             createdAt: Date;
             id: number;
-            agentId: number | null;
             date: Date;
+            agentId: number | null;
             observations: string | null;
             soinId: number;
         }) | {

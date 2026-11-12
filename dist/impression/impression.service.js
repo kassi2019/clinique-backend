@@ -36,6 +36,13 @@ const CMDS = {
     CUT_PARTIAL: GS + 'V' + '\x01',
     CUT_FULL: GS + 'V' + '\x00',
 };
+function dateEtHeure(d) {
+    const p = (n) => String(n).padStart(2, '0');
+    return {
+        date: `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`,
+        heure: `${p(d.getHours())}:${p(d.getMinutes())}`,
+    };
+}
 function normalizeText(texte) {
     const MAP = {
         À: 'A', Á: 'A', Â: 'A', Ã: 'A', Ä: 'A', Å: 'A',
@@ -365,8 +372,7 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         const centrer = (t) => ' '.repeat(Math.max(0, Math.floor((L - t.length) / 2))) + t;
         const deuxColonnes = (gauche, droite) => gauche + ' '.repeat(Math.max(1, L - gauche.length - droite.length)) + droite;
         const COEUR = '\x03';
-        const d = paiement.createdAt;
-        const dateHeure = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        const { date, heure } = dateEtHeure(paiement.createdAt);
         const lignes = [];
         lignes.push(centrer(paiement.clinique.nom.toUpperCase()));
         if (paiement.clinique.adresse) {
@@ -375,6 +381,8 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         lignes.push(trait());
         lignes.push(centrer('RECU DE LA CAISSE'));
         lignes.push(CMDS.BOLD_ON + centrer(paiement.numeroRecu) + CMDS.BOLD_OFF);
+        lignes.push(deuxColonnes('Date', date));
+        lignes.push(deuxColonnes('Heure', heure));
         lignes.push(trait());
         lignes.push(deuxColonnes('Patient', `${paiement.passage.patient.nom} ${paiement.passage.patient.prenom}`.toUpperCase()));
         lignes.push(deuxColonnes('Code', paiement.passage.patient.code));
@@ -547,6 +555,9 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         lignes.push(trait());
         lignes.push(centrer('RECU PHARMACIE'));
         lignes.push(CMDS.BOLD_ON + centrer(paiement.numeroRecu) + CMDS.BOLD_OFF);
+        const { date, heure } = dateEtHeure(paiement.createdAt);
+        lignes.push(deuxColonnes('Date', date));
+        lignes.push(deuxColonnes('Heure', heure));
         lignes.push(trait());
         if (p) {
             lignes.push(deuxColonnes('Patient', `${p.nom} ${p.prenom}`.toUpperCase()));

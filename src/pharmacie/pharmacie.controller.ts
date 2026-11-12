@@ -251,6 +251,31 @@ export class PharmacieController {
     return this.pharmacieService.recapSorties(cliniqueId, debut, fin, ids, cat);
   }
 
+  /** Entrées de stock ou ajustements (+/−) sur une période (onglet Mouvements). */
+  @Onglet('PHARMACIE.STOCKS')
+  @Get('mouvements-stock')
+  mouvementsStock(
+    @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
+    @Query('nature') nature?: string,
+    @Query('debut') debut?: string,
+    @Query('fin') fin?: string,
+    @Query('medicamentIds') medicamentIds?: string,
+    @Query('sens') sens?: string,
+    @Query('origine') origine?: string,
+  ) {
+    const ids = (medicamentIds ?? '')
+      .split(',')
+      .map((v) => parseInt(v, 10))
+      .filter((v) => v > 0);
+    return this.pharmacieService.mouvementsStock(cliniqueId, nature === 'AJUSTEMENTS' ? 'AJUSTEMENTS' : 'ENTREES', {
+      debut,
+      fin,
+      medicamentIds: ids,
+      sens: sens === 'PLUS' || sens === 'MOINS' ? sens : undefined,
+      origine: origine === 'INVENTAIRE' || origine === 'RETRAIT' ? origine : undefined,
+    });
+  }
+
   @Onglet('PHARMACIE.STOCKS')
   @Get('mouvements/:medicamentId')
   mouvements(@Param('medicamentId', ParseIntPipe) medicamentId: number) {

@@ -1070,6 +1070,13 @@ export class PharmacieService {
       datePeremption: string;
       prixAchat?: number;
       fournisseur?: string;
+      /** Ex. « Lot ajouté depuis l'inventaire » (sinon « Entrée de stock »). */
+      commentaire?: string;
+      /**
+       * Vrai = rattacher du stock déjà compté dans le total mais sans lot
+       * (stock total > somme des lots) : le lot est créé SANS augmenter le stock total.
+       */
+      rattacher?: boolean;
     },
     utilisateurId: number,
   ) {
@@ -1077,6 +1084,49 @@ export class PharmacieService {
       where: { id: dto.medicamentId },
     });
     if (!medicament) throw new NotFoundException('Médicament introuvable.');
+    if (!dto.quantite || dto.quantite <= 0) {
+      throw new BadRequestException('La quantité doit être supérieure à 0.');
+    }
+
+    if (dto.rattacher) {
+      const somme = await this.prisma.lot.aggregate({
+        where: { medicamentId: dto.medicamentId, quantiteRestante: { gt: 0 } },
+        _sum: { quantiteRestante: true },
+      });
+      const sansLot = medicament.stock - (somme._sum.quantiteRestante ?? 0);
+      if (sansLot <= 0) {
+        throw new BadRequestException("Ce produit n'a pas de stock sans lot à rattacher.");
+      }
+      if (dto.quantite > sansLot) {
+        throw new BadRequestException(`Au plus ${sansLot} unité(s) sans lot peuvent être rattachées.`);
+      }
+      const lot = await this.prisma.lot.create({
+        data: {
+          medicamentId: dto.medicamentId,
+          numeroLot: dto.numeroLot,
+          quantiteInitiale: dto.quantite,
+          quantiteRestante: dto.quantite,
+          datePeremption: new Date(dto.datePeremption),
+          prixAchat: dto.prixAchat,
+          fournisseur: dto.fournisseur?.trim() || null,
+        },
+      });
+      // Tracé comme un inventaire sans écart : le stock total ne change pas
+      await this.prisma.mouvementStock.create({
+        data: {
+          medicamentId: dto.medicamentId,
+          type: 'INVENTAIRE',
+          quantite: 0,
+          stockAvant: dto.quantite,
+          stockApres: dto.quantite,
+          lotId: lot.id,
+          reference: dto.numeroLot,
+          utilisateurId,
+          commentaire: `Stock sans lot rattaché au lot ${dto.numeroLot} (${dto.quantite})`,
+        },
+      });
+      return lot;
+    }
 
     const lot = await this.prisma.lot.create({
       data: {
@@ -1097,7 +1147,7 @@ export class PharmacieService {
         lotId: lot.id,
         reference: dto.numeroLot,
         utilisateurId,
-        commentaire: 'Entrée de stock',
+        commentaire: dto.commentaire?.trim() || 'Entrée de stock',
       },
     });
     await this.prisma.medicament.update({
@@ -1805,6 +1855,116 @@ export class PharmacieService {
    *   - ecartInventaire : correctifs d'inventaire (signés), à part : hors total des sorties
    * Sans date : aujourd'hui. Sans produit choisi : tous les produits sortis sur la période.
    */
+  /**
+   * Mouvements de stock d'une période, séparés en deux natures (onglet Mouvements) :
+   *  - ENTREES     : approvisionnements (type ENTREE, y compris lots ajoutés depuis l'inventaire) ;
+   *  - AJUSTEMENTS : corrections manuelles — écarts d'inventaire (+/−, hors comptages sans écart)
+   *                  et retraits (périmé, casse, perte, retour fournisseur…), toujours négatifs.
+   * Les dispensations (SORTIE) restent dans le récapitulatif des sorties.
+   */
+  async mouvementsStock(
+    cliniqueId: number,
+    nature: 'ENTREES' | 'AJUSTEMENTS',
+    options: {
+      debut?: string;
+      fin?: string;
+      medicamentIds?: number[];
+      sens?: 'PLUS' | 'MOINS';
+      origine?: 'INVENTAIRE' | 'RETRAIT';
+    } = {},
+  ) {
+    const jourValide = (v?: string) => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v);
+    const d = jourValide(options.debut)
+      ? new Date(`${options.debut}T00:00:00`)
+      : new Date(new Date().setHours(0, 0, 0, 0));
+    const f = jourValide(options.fin)
+      ? new Date(`${options.fin}T23:59:59.999`)
+      : new Date(new Date().setHours(23, 59, 59, 999));
+
+    const where: any = {
+      medicament: { cliniqueId },
+      createdAt: { gte: d, lte: f },
+    };
+    if (options.medicamentIds?.length) where.medicamentId = { in: options.medicamentIds };
+    if (nature === 'ENTREES') {
+      where.type = 'ENTREE';
+    } else {
+      const inventaire = { type: 'INVENTAIRE', quantite: { not: 0 } };
+      const retrait = { type: 'RETRAIT' };
+      where.OR =
+        options.origine === 'INVENTAIRE' ? [inventaire] : options.origine === 'RETRAIT' ? [retrait] : [inventaire, retrait];
+      if (options.sens === 'PLUS') where.quantite = { gt: 0 };
+      if (options.sens === 'MOINS') where.quantite = { lt: 0 };
+    }
+
+    const mouvements = await this.prisma.mouvementStock.findMany({
+      where,
+      include: {
+        medicament: { select: { id: true, nom: true, dosage: true, forme: true, prixVente: true } },
+        lot: { select: { numeroLot: true, datePeremption: true, prixAchat: true, fournisseur: true } },
+        utilisateur: { select: { matricule: true, personnel: { select: { nom: true, prenom: true } } } },
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    });
+
+    const origineDe = (m: (typeof mouvements)[number]) => {
+      const commentaire = (m.commentaire ?? '').toLowerCase();
+      if (m.type === 'ENTREE') {
+        return commentaire.includes('inventaire') ? "Lot ajouté depuis l'inventaire" : 'Entrée de stock';
+      }
+      if (m.type === 'RETRAIT') {
+        return commentaire.startsWith('retrait automatique')
+          ? 'Retrait automatique (périmé)'
+          : `Retrait — ${m.reference ?? 'Autre'}`;
+      }
+      return "Correction d'inventaire";
+    };
+
+    const lignes = mouvements.map((m) => {
+      // Valeur : prix d'achat du lot (sinon prix de vente du produit)
+      const prix = Number(m.lot?.prixAchat ?? (m.type === 'ENTREE' ? 0 : m.medicament.prixVente ?? 0));
+      return {
+        id: m.id,
+        date: m.createdAt,
+        type: m.type,
+        medicamentId: m.medicamentId,
+        produit: [m.medicament.nom, m.medicament.dosage].filter(Boolean).join(' '),
+        lot: m.lot?.numeroLot ?? (m.type === 'INVENTAIRE' ? '— (produit)' : '—'),
+        peremption: m.lot?.datePeremption ?? null,
+        fournisseur: m.lot?.fournisseur ?? null,
+        quantite: m.quantite,
+        sens: m.quantite > 0 ? '+' : '−',
+        origine: origineDe(m),
+        stockAvant: m.stockAvant,
+        stockApres: m.stockApres,
+        prixUnitaire: prix,
+        valeur: m.quantite * prix,
+        par: m.utilisateur?.personnel
+          ? `${m.utilisateur.personnel.nom} ${m.utilisateur.personnel.prenom}`
+          : m.utilisateur?.matricule ?? 'Système',
+        commentaire: m.commentaire ?? '',
+      };
+    });
+
+    const somme = (liste: typeof lignes, champ: 'quantite' | 'valeur') =>
+      liste.reduce((s, l) => s + l[champ], 0);
+    const plus = lignes.filter((l) => l.quantite > 0);
+    const moins = lignes.filter((l) => l.quantite < 0);
+    return {
+      lignes,
+      totaux: {
+        operations: lignes.length,
+        produits: new Set(lignes.map((l) => l.medicamentId)).size,
+        quantite: somme(lignes, 'quantite'),
+        valeur: somme(lignes, 'valeur'),
+        nbPlus: plus.length,
+        quantitePlus: somme(plus, 'quantite'),
+        nbMoins: moins.length,
+        quantiteMoins: somme(moins, 'quantite'),
+      },
+    };
+  }
+
   async recapSorties(
     cliniqueId: number,
     debut?: string,

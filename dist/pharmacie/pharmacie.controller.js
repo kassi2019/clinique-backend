@@ -110,6 +110,19 @@ let PharmacieController = class PharmacieController {
         const cat = categorie === 'MEDICAMENTS' || categorie === 'CONSOMMABLES' ? categorie : 'TOUS';
         return this.pharmacieService.recapSorties(cliniqueId, debut, fin, ids, cat);
     }
+    mouvementsStock(cliniqueId, nature, debut, fin, medicamentIds, sens, origine) {
+        const ids = (medicamentIds ?? '')
+            .split(',')
+            .map((v) => parseInt(v, 10))
+            .filter((v) => v > 0);
+        return this.pharmacieService.mouvementsStock(cliniqueId, nature === 'AJUSTEMENTS' ? 'AJUSTEMENTS' : 'ENTREES', {
+            debut,
+            fin,
+            medicamentIds: ids,
+            sens: sens === 'PLUS' || sens === 'MOINS' ? sens : undefined,
+            origine: origine === 'INVENTAIRE' || origine === 'RETRAIT' ? origine : undefined,
+        });
+    }
     mouvements(medicamentId) {
         return this.pharmacieService.mouvements(medicamentId);
     }
@@ -370,6 +383,20 @@ __decorate([
     __metadata("design:paramtypes", [Number, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "recapSorties", null);
+__decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
+    (0, common_1.Get)('mouvements-stock'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('nature')),
+    __param(2, (0, common_1.Query)('debut')),
+    __param(3, (0, common_1.Query)('fin')),
+    __param(4, (0, common_1.Query)('medicamentIds')),
+    __param(5, (0, common_1.Query)('sens')),
+    __param(6, (0, common_1.Query)('origine')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, String, String, String, String, String]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "mouvementsStock", null);
 __decorate([
     (0, onglet_decorator_1.Onglet)('PHARMACIE.STOCKS'),
     (0, common_1.Get)('mouvements/:medicamentId'),

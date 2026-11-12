@@ -914,6 +914,37 @@ export declare class PharmacieController {
             valeur: any;
         };
     }>;
+    mouvementsStock(cliniqueId: number, nature?: string, debut?: string, fin?: string, medicamentIds?: string, sens?: string, origine?: string): Promise<{
+        lignes: {
+            id: number;
+            date: Date;
+            type: string;
+            medicamentId: number;
+            produit: string;
+            lot: string;
+            peremption: Date;
+            fournisseur: string;
+            quantite: number;
+            sens: string;
+            origine: string;
+            stockAvant: number;
+            stockApres: number;
+            prixUnitaire: number;
+            valeur: number;
+            par: string;
+            commentaire: string;
+        }[];
+        totaux: {
+            operations: number;
+            produits: number;
+            quantite: number;
+            valeur: number;
+            nbPlus: number;
+            quantitePlus: number;
+            nbMoins: number;
+            quantiteMoins: number;
+        };
+    }>;
     mouvements(medicamentId: number): Promise<{
         utilisateur: {
             matricule: string;

@@ -235,6 +235,7 @@ export declare class MaterniteService {
                 createdAt: Date;
                 id: number;
                 updatedAt: Date;
+                date: Date;
                 agentId: number | null;
                 taille: string | null;
                 tensionGauche: string | null;
@@ -242,7 +243,6 @@ export declare class MaterniteService {
                 poids: import("@prisma/client/runtime/library").Decimal | null;
                 mildaRemise: boolean | null;
                 numero: number;
-                date: Date;
                 ageGestationnelSA: string | null;
                 hauteurUterine: string | null;
                 bcf: string | null;
@@ -412,6 +412,7 @@ export declare class MaterniteService {
             createdAt: Date;
             id: number;
             updatedAt: Date;
+            date: Date;
             agentId: number | null;
             taille: string | null;
             tensionGauche: string | null;
@@ -419,7 +420,6 @@ export declare class MaterniteService {
             poids: import("@prisma/client/runtime/library").Decimal | null;
             mildaRemise: boolean | null;
             numero: number;
-            date: Date;
             ageGestationnelSA: string | null;
             hauteurUterine: string | null;
             bcf: string | null;
@@ -484,6 +484,7 @@ export declare class MaterniteService {
         createdAt: Date;
         id: number;
         updatedAt: Date;
+        date: Date;
         agentId: number | null;
         taille: string | null;
         tensionGauche: string | null;
@@ -491,7 +492,6 @@ export declare class MaterniteService {
         poids: import("@prisma/client/runtime/library").Decimal | null;
         mildaRemise: boolean | null;
         numero: number;
-        date: Date;
         ageGestationnelSA: string | null;
         hauteurUterine: string | null;
         bcf: string | null;
@@ -526,6 +526,7 @@ export declare class MaterniteService {
         createdAt: Date;
         id: number;
         updatedAt: Date;
+        date: Date;
         agentId: number | null;
         taille: string | null;
         tensionGauche: string | null;
@@ -533,7 +534,6 @@ export declare class MaterniteService {
         poids: import("@prisma/client/runtime/library").Decimal | null;
         mildaRemise: boolean | null;
         numero: number;
-        date: Date;
         ageGestationnelSA: string | null;
         hauteurUterine: string | null;
         bcf: string | null;
@@ -1203,6 +1203,7 @@ export declare class MaterniteService {
                 createdAt: Date;
                 id: number;
                 updatedAt: Date;
+                date: Date;
                 agentId: number | null;
                 taille: string | null;
                 tensionGauche: string | null;
@@ -1210,7 +1211,6 @@ export declare class MaterniteService {
                 poids: import("@prisma/client/runtime/library").Decimal | null;
                 mildaRemise: boolean | null;
                 numero: number;
-                date: Date;
                 ageGestationnelSA: string | null;
                 hauteurUterine: string | null;
                 bcf: string | null;
@@ -1277,10 +1277,10 @@ export declare class MaterniteService {
             cliniqueId: number;
             updatedAt: Date;
             passageId: number;
+            date: Date;
             patientId: number;
             agentId: number | null;
             modeEntree: string | null;
-            date: Date;
             observations: string | null;
             statutVih: string | null;
             conseils: string | null;
@@ -1309,9 +1309,9 @@ export declare class MaterniteService {
             cliniqueId: number;
             updatedAt: Date;
             passageId: number;
+            date: Date;
             patientId: number;
             agentId: number | null;
-            date: Date;
             observations: string | null;
             nouvelleUtilisatrice: boolean;
             protégée: boolean;
@@ -1492,6 +1492,7 @@ export declare class MaterniteService {
             createdAt: Date;
             id: number;
             updatedAt: Date;
+            date: Date;
             agentId: number | null;
             taille: string | null;
             tensionGauche: string | null;
@@ -1499,7 +1500,6 @@ export declare class MaterniteService {
             poids: import("@prisma/client/runtime/library").Decimal | null;
             mildaRemise: boolean | null;
             numero: number;
-            date: Date;
             ageGestationnelSA: string | null;
             hauteurUterine: string | null;
             bcf: string | null;
@@ -1558,10 +1558,10 @@ export declare class MaterniteService {
         cliniqueId: number;
         updatedAt: Date;
         passageId: number;
+        date: Date;
         patientId: number;
         agentId: number | null;
         modeEntree: string | null;
-        date: Date;
         observations: string | null;
         statutVih: string | null;
         conseils: string | null;
@@ -1581,10 +1581,10 @@ export declare class MaterniteService {
         cliniqueId: number;
         updatedAt: Date;
         passageId: number;
+        date: Date;
         patientId: number;
         agentId: number | null;
         modeEntree: string | null;
-        date: Date;
         observations: string | null;
         statutVih: string | null;
         conseils: string | null;
@@ -1605,9 +1605,9 @@ export declare class MaterniteService {
         cliniqueId: number;
         updatedAt: Date;
         passageId: number;
+        date: Date;
         patientId: number;
         agentId: number | null;
-        date: Date;
         observations: string | null;
         nouvelleUtilisatrice: boolean;
         protégée: boolean;
@@ -1630,9 +1630,9 @@ export declare class MaterniteService {
         cliniqueId: number;
         updatedAt: Date;
         passageId: number;
+        date: Date;
         patientId: number;
         agentId: number | null;
-        date: Date;
         observations: string | null;
         nouvelleUtilisatrice: boolean;
         protégée: boolean;

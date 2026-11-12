@@ -639,6 +639,8 @@ export declare class PharmacieService {
         datePeremption: string;
         prixAchat?: number;
         fournisseur?: string;
+        commentaire?: string;
+        rattacher?: boolean;
     }, utilisateurId: number): Promise<{
         fournisseur: string | null;
         createdAt: Date;
@@ -1003,6 +1005,43 @@ export declare class PharmacieService {
         prixAchat: number;
         montant: number;
     }[]>;
+    mouvementsStock(cliniqueId: number, nature: 'ENTREES' | 'AJUSTEMENTS', options?: {
+        debut?: string;
+        fin?: string;
+        medicamentIds?: number[];
+        sens?: 'PLUS' | 'MOINS';
+        origine?: 'INVENTAIRE' | 'RETRAIT';
+    }): Promise<{
+        lignes: {
+            id: number;
+            date: Date;
+            type: string;
+            medicamentId: number;
+            produit: string;
+            lot: string;
+            peremption: Date;
+            fournisseur: string;
+            quantite: number;
+            sens: string;
+            origine: string;
+            stockAvant: number;
+            stockApres: number;
+            prixUnitaire: number;
+            valeur: number;
+            par: string;
+            commentaire: string;
+        }[];
+        totaux: {
+            operations: number;
+            produits: number;
+            quantite: number;
+            valeur: number;
+            nbPlus: number;
+            quantitePlus: number;
+            nbMoins: number;
+            quantiteMoins: number;
+        };
+    }>;
     recapSorties(cliniqueId: number, debut?: string, fin?: string, medicamentIds?: number[], categorie?: 'TOUS' | 'MEDICAMENTS' | 'CONSOMMABLES'): Promise<{
         periode: {
             debut: Date;

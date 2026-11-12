@@ -254,8 +254,8 @@ export declare class ConsultationsService {
                     } & {
                         createdAt: Date;
                         id: number;
-                        agentId: number | null;
                         date: Date;
+                        agentId: number | null;
                         observations: string | null;
                         prescriptionSoinId: number;
                     })[];
@@ -695,8 +695,8 @@ export declare class ConsultationsService {
             } & {
                 createdAt: Date;
                 id: number;
-                agentId: number | null;
                 date: Date;
+                agentId: number | null;
                 observations: string | null;
                 prescriptionSoinId: number;
             })[];
@@ -1023,8 +1023,8 @@ export declare class ConsultationsService {
             } & {
                 createdAt: Date;
                 id: number;
-                agentId: number | null;
                 date: Date;
+                agentId: number | null;
                 observations: string | null;
                 prescriptionSoinId: number;
             })[];
@@ -1173,8 +1173,8 @@ export declare class ConsultationsService {
         } & {
             createdAt: Date;
             id: number;
-            agentId: number | null;
             date: Date;
+            agentId: number | null;
             observations: string | null;
             prescriptionSoinId: number;
         })[];
@@ -1241,8 +1241,8 @@ export declare class ConsultationsService {
         } & {
             createdAt: Date;
             id: number;
-            agentId: number | null;
             date: Date;
+            agentId: number | null;
             observations: string | null;
             prescriptionSoinId: number;
         })[];
@@ -1312,8 +1312,8 @@ export declare class ConsultationsService {
         } & {
             createdAt: Date;
             id: number;
-            agentId: number | null;
             date: Date;
+            agentId: number | null;
             observations: string | null;
             prescriptionSoinId: number;
         })[];
@@ -1528,8 +1528,8 @@ export declare class ConsultationsService {
             } & {
                 createdAt: Date;
                 id: number;
-                agentId: number | null;
                 date: Date;
+                agentId: number | null;
                 observations: string | null;
                 prescriptionSoinId: number;
             })[];
