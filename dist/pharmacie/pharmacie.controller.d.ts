@@ -2,7 +2,7 @@ import { OrdonnanceExterneDto, PharmacieService } from './pharmacie.service';
 export declare class PharmacieController {
     private pharmacieService;
     constructor(pharmacieService: PharmacieService);
-    rechercherOrdonnances(code?: string, cliniqueId?: number, medecinId?: string, statut?: string, debut?: string, fin?: string): Promise<{
+    rechercherOrdonnances(code?: string, cliniqueId?: number, medecinId?: string, statut?: string, debut?: string, fin?: string, heureDebut?: string, heureFin?: string): Promise<{
         liste: boolean;
         id: number;
         numeroOrdre: string;
@@ -363,7 +363,7 @@ export declare class PharmacieController {
             dateOrdonnance: Date | null;
         };
     }>;
-    ordonnancesExternes(cliniqueId: number, debut?: string, fin?: string): Promise<{
+    ordonnancesExternes(cliniqueId: number, debut?: string, fin?: string, heureDebut?: string, heureFin?: string, utilisateurId?: string): Promise<{
         periode: {
             debut: Date;
             fin: Date;
@@ -413,6 +413,10 @@ export declare class PharmacieController {
             resteCredits: number;
         };
     }>;
+    vendeursExternes(cliniqueId: number): Promise<{
+        id: number;
+        nom: string;
+    }[]>;
     rechercherPatientsExterne(cliniqueId: number, q?: string): Promise<{
         assurance: {
             assurance: string;
@@ -899,7 +903,7 @@ export declare class PharmacieController {
         seuilAlerte: number;
         prixVente: import("@prisma/client/runtime/library").Decimal | null;
     }>;
-    recapSorties(cliniqueId: number, debut?: string, fin?: string, medicamentIds?: string, categorie?: string): Promise<{
+    recapSorties(cliniqueId: number, debut?: string, fin?: string, medicamentIds?: string, categorie?: string, heureDebut?: string, heureFin?: string, utilisateurId?: string): Promise<{
         periode: {
             debut: Date;
             fin: Date;
@@ -914,7 +918,7 @@ export declare class PharmacieController {
             valeur: any;
         };
     }>;
-    mouvementsStock(cliniqueId: number, nature?: string, debut?: string, fin?: string, medicamentIds?: string, sens?: string, origine?: string): Promise<{
+    mouvementsStock(cliniqueId: number, nature?: string, debut?: string, fin?: string, medicamentIds?: string, sens?: string, origine?: string, heureDebut?: string, heureFin?: string, utilisateurId?: string): Promise<{
         lignes: {
             id: number;
             date: Date;
@@ -1092,7 +1096,7 @@ export declare class PharmacieController {
         stockApres: number | null;
         lotId: number | null;
     })[]>;
-    pointsFinanciers(cliniqueId?: number, debut?: string, fin?: string): Promise<{
+    pointsFinanciers(cliniqueId?: number, debut?: string, fin?: string, heureDebut?: string, heureFin?: string): Promise<{
         periode: {
             debut: string;
             fin: string;
@@ -1110,7 +1114,7 @@ export declare class PharmacieController {
         restants: number;
         periode: {};
     };
-    detailFinancier(cliniqueId?: number, type?: string, debut?: string, fin?: string): any[] | Promise<{
+    detailFinancier(cliniqueId?: number, type?: string, debut?: string, fin?: string, heureDebut?: string, heureFin?: string): any[] | Promise<{
         date: Date;
         medicament: string;
         lot: string;

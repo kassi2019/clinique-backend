@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SoinsService = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const recherche_patient_1 = require("../common/recherche-patient");
@@ -210,13 +211,14 @@ let SoinsService = class SoinsService {
             include: { realisations: { include: includeRealisation, orderBy: { date: 'desc' } } },
         });
     }
-    async realisations(cliniqueId, page = 1, perPage = 10, jour, recherche) {
-        const debut = jour ? new Date(`${jour}T00:00:00`) : undefined;
-        const fin = jour ? new Date(`${jour}T23:59:59.999`) : undefined;
+    async realisations(cliniqueId, page = 1, perPage = 10, jour, recherche, filtres = {}) {
+        const periode = (0, filtre_periode_1.bornesJourOptionnel)(jour, filtres.heureDebut, filtres.heureFin);
+        const parAgent = filtres.utilisateurId ? { agentId: filtres.utilisateurId } : {};
         const ref = recherche?.trim().toUpperCase();
         const where = {
             soin: { cliniqueId },
-            ...(debut ? { date: { gte: debut, lte: fin } } : {}),
+            ...(periode ? { date: periode } : {}),
+            ...parAgent,
             ...(ref
                 ? {
                     OR: [
@@ -231,7 +233,8 @@ let SoinsService = class SoinsService {
         };
         const whereAdmin = {
             prescriptionSoin: { cliniqueId },
-            ...(debut ? { date: { gte: debut, lte: fin } } : {}),
+            ...(periode ? { date: periode } : {}),
+            ...parAgent,
             ...(ref
                 ? {
                     OR: [

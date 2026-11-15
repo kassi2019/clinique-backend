@@ -43,7 +43,7 @@ export declare class CaisseController {
             code: string;
         };
     }[]>;
-    fileAttente(cliniqueId: number, jour?: string, page?: string, perPage?: string): Promise<{
+    fileAttente(cliniqueId: number, jour?: string, page?: string, perPage?: string, heureDebut?: string, heureFin?: string, utilisateurId?: string): Promise<{
         data: {
             id: number;
             numeroOrdre: string;

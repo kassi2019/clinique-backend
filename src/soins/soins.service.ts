@@ -1,3 +1,4 @@
+import { bornesJourOptionnel } from '../common/filtre-periode';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { critereNomPrenoms } from '../common/recherche-patient';
@@ -250,13 +251,16 @@ export class SoinsService {
     perPage = 10,
     jour?: string,
     recherche?: string,
+    filtres: { heureDebut?: string; heureFin?: string; utilisateurId?: number } = {},
   ) {
-    const debut = jour ? new Date(`${jour}T00:00:00`) : undefined;
-    const fin = jour ? new Date(`${jour}T23:59:59.999`) : undefined;
+    // Jour vide = tous les jours ; heures et agent facultatifs (combinables)
+    const periode = bornesJourOptionnel(jour, filtres.heureDebut, filtres.heureFin);
+    const parAgent = filtres.utilisateurId ? { agentId: filtres.utilisateurId } : {};
     const ref = recherche?.trim().toUpperCase();
     const where = {
       soin: { cliniqueId },
-      ...(debut ? { date: { gte: debut, lte: fin } } : {}),
+      ...(periode ? { date: periode } : {}),
+      ...parAgent,
       ...(ref
         ? {
             OR: [
@@ -272,7 +276,8 @@ export class SoinsService {
     // Administrations des soins prescrits : même filtre, même forme de ligne
     const whereAdmin = {
       prescriptionSoin: { cliniqueId },
-      ...(debut ? { date: { gte: debut, lte: fin } } : {}),
+      ...(periode ? { date: periode } : {}),
+      ...parAgent,
       ...(ref
         ? {
             OR: [

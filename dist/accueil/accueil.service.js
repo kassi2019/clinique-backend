@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var AccueilService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AccueilService = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const impression_service_1 = require("../impression/impression.service");
 const prisma_service_1 = require("../prisma/prisma.service");
@@ -86,6 +87,12 @@ let AccueilService = AccueilService_1 = class AccueilService {
             fin = opts.fin
                 ? new Date(`${opts.fin}T23:59:59.999`)
                 : new Date(2999, 11, 31);
+            const hd = (0, filtre_periode_1.heureValide)(opts.heureDebut);
+            const hf = (0, filtre_periode_1.heureValide)(opts.heureFin);
+            if (opts.debut && hd)
+                debut = new Date(`${opts.debut}T${hd}:00`);
+            if (opts.fin && hf)
+                fin = new Date(`${opts.fin}T${hf}:59.999`);
         }
         else if (opts.date) {
             debut = new Date(`${opts.date}T00:00:00`);
@@ -96,6 +103,9 @@ let AccueilService = AccueilService_1 = class AccueilService {
             fin = new Date(debut.getTime() + 24 * 3600 * 1000);
         }
         const conditions = [];
+        if (opts.utilisateurId) {
+            conditions.push({ agentId: opts.utilisateurId });
+        }
         if (opts.serviceId) {
             conditions.push({ serviceId: opts.serviceId });
         }

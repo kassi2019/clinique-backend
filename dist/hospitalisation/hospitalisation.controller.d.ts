@@ -761,7 +761,7 @@ export declare class HospitalisationController {
         montantJournalier: import("@prisma/client/runtime/library").Decimal | null;
         passagePrestationId: number | null;
     }>;
-    historique(jour?: string, recherche?: string, statut?: string, page?: string, perPage?: string, cliniqueId?: string): Promise<{
+    historique(jour?: string, recherche?: string, statut?: string, page?: string, perPage?: string, cliniqueId?: string, heureDebut?: string, heureFin?: string, utilisateurId?: string): Promise<{
         data: {
             montantJournalier: number;
             patient: {

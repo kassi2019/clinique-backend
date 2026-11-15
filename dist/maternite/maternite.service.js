@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MaterniteService = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const accueil_service_1 = require("../accueil/accueil.service");
@@ -491,13 +492,12 @@ let MaterniteService = class MaterniteService {
             credit: p.prestations.some((l) => l.statut === 'CREDIT' || l.statut === 'CAS_SOCIAL'),
         }));
     }
-    async traites(cliniqueId, jour, page = 1, perPage = 10) {
-        const debut = jour ? new Date(`${jour}T00:00:00`) : undefined;
-        const fin = jour ? new Date(`${jour}T23:59:59.999`) : undefined;
+    async traites(cliniqueId, jour, page = 1, perPage = 10, heureDebut, heureFin) {
+        const periode = (0, filtre_periode_1.bornesJourOptionnel)(jour, heureDebut, heureFin);
         const where = {
             cliniqueId,
             materniteTraiteLe: { not: null },
-            ...(debut ? { materniteTraiteLe: { gte: debut, lte: fin } } : {}),
+            ...(periode ? { materniteTraiteLe: periode } : {}),
         };
         const [data, total] = await Promise.all([
             this.prisma.passage.findMany({

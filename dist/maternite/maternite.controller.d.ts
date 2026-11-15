@@ -161,7 +161,7 @@ export declare class MaterniteController {
         paye: boolean;
         credit: boolean;
     }[]>;
-    traites(cliniqueId: number, jour?: string, page?: string, perPage?: string): Promise<{
+    traites(cliniqueId: number, jour?: string, page?: string, perPage?: string, heureDebut?: string, heureFin?: string): Promise<{
         data: ({
             patient: {
                 nationalite: string | null;

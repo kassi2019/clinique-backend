@@ -1,3 +1,4 @@
+import { bornesJourOptionnel } from '../common/filtre-periode';
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -19,18 +20,20 @@ export class AuditController {
     @Query('cliniqueId') cliniqueId?: string,
     @Query('jour') jour?: string,
     @Query('entite') entite?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
   ) {
     const p = page ? Number(page) : 1;
     const pp = perPage ? Number(perPage) : 50;
     const uid = utilisateurId ? Number(utilisateurId) : undefined;
     const cid = cliniqueId ? Number(cliniqueId) : undefined;
+    const periode = bornesJourOptionnel(jour, heureDebut, heureFin);
     const where: any = {
       ...(cid ? { cliniqueId: cid } : {}),
       ...(uid ? { utilisateurId: uid } : {}),
       ...(entite && entite.trim() ? { entite: entite.trim() } : {}),
-      ...(jour && /^\d{4}-\d{2}-\d{2}$/.test(jour)
-        ? { createdAt: { gte: new Date(`${jour}T00:00:00`), lte: new Date(`${jour}T23:59:59.999`) } }
-        : {}),
+      // Jour vide = tous les jours ; heures facultatives (heure seule = aujourd'hui)
+      ...(periode ? { createdAt: periode } : {}),
     };
     const [data, total] = await Promise.all([
       this.prisma.journalAction.findMany({

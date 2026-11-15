@@ -1,3 +1,4 @@
+import { bornesJourOptionnel } from '../common/filtre-periode';
 import {
   BadRequestException,
   Injectable,
@@ -410,13 +411,18 @@ export class CaisseService {
    * File de la caisse : passages ayant des prestations à payer,
    * dans l'ordre d'arrivée. Données du jour par défaut (vide = tout).
    */
-  async fileAttente(cliniqueId: number, page = 1, perPage = 100, jour?: string) {
+  async fileAttente(
+    cliniqueId: number,
+    page = 1,
+    perPage = 100,
+    jour?: string,
+    filtres: { heureDebut?: string; heureFin?: string; utilisateurId?: number } = {},
+  ) {
     const where: any = { cliniqueId, prestations: { some: { statut: 'EN_ATTENTE' } } };
-    if (jour) {
-      const debut = new Date(`${jour}T00:00:00`);
-      const fin = new Date(`${jour}T23:59:59.999`);
-      where.createdAt = { gte: debut, lte: fin };
-    }
+    // Jour vide = tous les jours ; heures (d'arrivée) et agent d'accueil facultatifs
+    const periode = bornesJourOptionnel(jour, filtres.heureDebut, filtres.heureFin);
+    if (periode) where.createdAt = periode;
+    if (filtres.utilisateurId) where.agentId = filtres.utilisateurId;
     const passages = await this.prisma.passage.findMany({
       where,
       include: {
@@ -591,6 +597,9 @@ export class CaisseService {
 
   /** Tickets en cours (impayés) de la clinique, paginés. */
   async credits(cliniqueId: number, page = 1, perPage = 20) {
+    // Page / taille invalides (ex. NaN) : valeurs par défaut au lieu d'une erreur Prisma
+    page = Number.isInteger(page) && page > 0 ? page : 1;
+    perPage = Number.isInteger(perPage) && perPage > 0 ? perPage : 20;
     const where = { cliniqueId, statut: 'EN_COURS' };
     const [data, total] = await Promise.all([
       this.prisma.creditTicket.findMany({

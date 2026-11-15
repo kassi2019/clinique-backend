@@ -13,6 +13,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ImagerieController = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const roles_decorator_1 = require("../auth/roles.decorator");
@@ -42,11 +43,14 @@ let ImagerieController = class ImagerieController {
     valider(id, req) {
         return this.imagerieService.valider(id, req.user.id);
     }
-    historique(jour, recherche, page, perPage, cliniqueId) {
+    historique(jour, recherche, page, perPage, cliniqueId, heureDebut, heureFin, utilisateurId) {
         if (!cliniqueId)
             return { data: [], total: 0, page: 1, perPage: 10, totalPages: 0 };
         return this.imagerieService.historique({
             jour,
+            heureDebut,
+            heureFin,
+            utilisateurId: (0, filtre_periode_1.utilisateurFiltre)(utilisateurId),
             recherche,
             page: page ? Number(page) : 1,
             perPage: perPage ? Number(perPage) : 10,
@@ -125,8 +129,11 @@ __decorate([
     __param(2, (0, common_1.Query)('page')),
     __param(3, (0, common_1.Query)('perPage')),
     __param(4, (0, common_1.Query)('cliniqueId')),
+    __param(5, (0, common_1.Query)('heureDebut')),
+    __param(6, (0, common_1.Query)('heureFin')),
+    __param(7, (0, common_1.Query)('utilisateurId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], ImagerieController.prototype, "historique", null);
 __decorate([

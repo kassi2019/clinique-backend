@@ -13,6 +13,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HospitalisationController = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const hospitalisation_dto_1 = require("./dto/hospitalisation.dto");
@@ -77,11 +78,14 @@ let HospitalisationController = class HospitalisationController {
     sortie(id, dto, req) {
         return this.hospitalisationService.sortie(id, dto, req.user.id);
     }
-    historique(jour, recherche, statut, page, perPage, cliniqueId) {
+    historique(jour, recherche, statut, page, perPage, cliniqueId, heureDebut, heureFin, utilisateurId) {
         if (!cliniqueId)
             return { data: [], total: 0, page: 1, perPage: 10, totalPages: 0 };
         return this.hospitalisationService.historique({
             jour,
+            heureDebut,
+            heureFin,
+            utilisateurId: (0, filtre_periode_1.utilisateurFiltre)(utilisateurId),
             recherche,
             statut,
             page: page ? Number(page) : 1,
@@ -222,8 +226,11 @@ __decorate([
     __param(3, (0, common_1.Query)('page')),
     __param(4, (0, common_1.Query)('perPage')),
     __param(5, (0, common_1.Query)('cliniqueId')),
+    __param(6, (0, common_1.Query)('heureDebut')),
+    __param(7, (0, common_1.Query)('heureFin')),
+    __param(8, (0, common_1.Query)('utilisateurId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], HospitalisationController.prototype, "historique", null);
 exports.HospitalisationController = HospitalisationController = __decorate([

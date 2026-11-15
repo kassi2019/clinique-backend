@@ -1390,7 +1390,7 @@ export declare class ConsultationsService {
     ping(utilisateurId: number): Promise<{
         ok: boolean;
     }>;
-    maFile(utilisateurId: number, jour?: string): Promise<{
+    maFile(utilisateurId: number, jour?: string, heureDebut?: string, heureFin?: string): Promise<{
         disponibilite: string;
         enAttente: ({
             passage: {

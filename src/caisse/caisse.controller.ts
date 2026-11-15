@@ -1,3 +1,4 @@
+import { utilisateurFiltre } from '../common/filtre-periode';
 import {
   Body,
   Controller,
@@ -45,12 +46,16 @@ export class CaisseController {
     @Query('jour') jour?: string,
     @Query('page') page?: string,
     @Query('perPage') perPage?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
+    @Query('utilisateurId') utilisateurId?: string,
   ) {
     return this.caisseService.fileAttente(
       cliniqueId,
       page ? Number(page) : 1,
       perPage ? Number(perPage) : 100,
       jour,
+      { heureDebut, heureFin, utilisateurId: utilisateurFiltre(utilisateurId) },
     );
   }
 

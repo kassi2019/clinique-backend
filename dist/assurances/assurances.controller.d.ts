@@ -49,7 +49,7 @@ export declare class AssurancesController {
         adresse: string | null;
         numeroAgrement: string | null;
     })[]>;
-    facturation(cliniqueId?: string, debut?: string, fin?: string, assuranceId?: string, patientId?: string, page?: string, perPage?: string): Promise<{
+    facturation(cliniqueId?: string, debut?: string, fin?: string, assuranceId?: string, patientId?: string, page?: string, perPage?: string, heureDebut?: string, heureFin?: string): Promise<{
         periode: {
             debut: string;
             fin: string;

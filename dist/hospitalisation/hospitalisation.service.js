@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HospitalisationService = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../prisma/prisma.service");
@@ -370,12 +371,13 @@ let HospitalisationService = class HospitalisationService {
     async historique(params) {
         const { jour, recherche, statut, page, perPage, cliniqueId } = params;
         const jourRef = jour && /^\d{4}-\d{2}-\d{2}$/.test(jour) ? jour : new Date().toISOString().slice(0, 10);
-        const debut = new Date(`${jourRef}T00:00:00`);
-        const fin = new Date(`${jourRef}T23:59:59.999`);
+        const { gte: debut, lte: fin } = (0, filtre_periode_1.bornesPeriode)(jourRef, jourRef, params.heureDebut, params.heureFin);
         const where = {
             cliniqueId,
             dateEntree: { gte: debut, lte: fin },
         };
+        if (params.utilisateurId)
+            where.AND = [{ OR: [{ agentId: params.utilisateurId }, { sortieParId: params.utilisateurId }] }];
         if (statut === 'EN_COURS' || statut === 'SORTI')
             where.statut = statut;
         const ref = recherche?.trim().toUpperCase();

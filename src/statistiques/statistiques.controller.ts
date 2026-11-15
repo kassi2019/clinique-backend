@@ -3,6 +3,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Onglet } from '../auth/onglet.decorator';
 import { OngletGuard } from '../auth/onglet.guard';
 import { StatistiquesService } from './statistiques.service';
+import { utilisateurFiltre } from '../pharmacie/filtre-ventes';
 
 // Droits par onglet : @Onglet(...) sur les routes propres à un onglet (cf. src/auth/onglets.ts)
 @UseGuards(JwtAuthGuard, OngletGuard)
@@ -86,9 +87,25 @@ export class StatistiquesController {
     @Query('debut') debut?: string,
     @Query('fin') fin?: string,
     @Query('cliniqueId') cliniqueId?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
+    @Query('utilisateurId') utilisateurId?: string,
   ) {
     if (!cliniqueId) return {};
-    return this.statistiquesService.pharmacie(Number(cliniqueId), debut, fin);
+    return this.statistiquesService.pharmacie(Number(cliniqueId), {
+      debut,
+      fin,
+      heureDebut,
+      heureFin,
+      utilisateurId: utilisateurFiltre(utilisateurId),
+    });
+  }
+
+  @Onglet('STATISTIQUES.PHARMACIE')
+  @Get('pharmacie/utilisateurs')
+  vendeursPharmacie(@Query('cliniqueId') cliniqueId?: string) {
+    if (!cliniqueId) return [];
+    return this.statistiquesService.vendeursPharmacie(Number(cliniqueId));
   }
 
   @Onglet('STATISTIQUES.MATERNITE')

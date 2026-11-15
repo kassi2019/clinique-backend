@@ -1493,7 +1493,7 @@ export declare class ConsultationsController {
     ping(req: any): Promise<{
         ok: boolean;
     }>;
-    maFile(req: any, jour?: string): Promise<{
+    maFile(req: any, jour?: string, heureDebut?: string, heureFin?: string): Promise<{
         disponibilite: string;
         enAttente: ({
             passage: {

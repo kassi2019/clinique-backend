@@ -356,7 +356,7 @@ export declare class SoinsController {
         nbAdministrations: number;
         arreteLe: Date | null;
     }>;
-    realisations(cliniqueId: number, page?: string, perPage?: string, jour?: string, recherche?: string): Promise<{
+    realisations(cliniqueId: number, page?: string, perPage?: string, jour?: string, recherche?: string, heureDebut?: string, heureFin?: string, utilisateurId?: string): Promise<{
         data: (({
             soin: {
                 patient: {

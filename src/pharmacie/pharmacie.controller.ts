@@ -15,6 +15,7 @@ import { OngletGuard } from '../auth/onglet.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { OrdonnanceExterneDto, PharmacieService } from './pharmacie.service';
+import { utilisateurFiltre } from '../common/filtre-periode';
 
 // Droits par onglet : @Onglet(...) sur les routes propres à un onglet ; les lectures
 // partagées (stocks, alertes, péremptions…) restent ouvertes au module.
@@ -34,6 +35,8 @@ export class PharmacieController {
     @Query('statut') statut?: string,
     @Query('debut') debut?: string,
     @Query('fin') fin?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
   ) {
     if (!cliniqueId) return { liste: true, ordonnances: [] };
     return this.pharmacieService.rechercherOrdonnances(code ?? '', cliniqueId, {
@@ -41,6 +44,8 @@ export class PharmacieController {
       statut,
       debut,
       fin,
+      heureDebut,
+      heureFin,
     });
   }
 
@@ -78,8 +83,24 @@ export class PharmacieController {
     @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
     @Query('debut') debut?: string,
     @Query('fin') fin?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
+    @Query('utilisateurId') utilisateurId?: string,
   ) {
-    return this.pharmacieService.ordonnancesExternes(cliniqueId, debut, fin);
+    return this.pharmacieService.ordonnancesExternes(cliniqueId, {
+      debut,
+      fin,
+      heureDebut,
+      heureFin,
+      utilisateurId: utilisateurFiltre(utilisateurId),
+    });
+  }
+
+  /** Liste du filtre « Utilisateur » du rapport des ordonnances externes. */
+  @Onglet('PHARMACIE.EXTERNES')
+  @Get('ordonnances-externes/utilisateurs')
+  vendeursExternes(@Query('cliniqueId', ParseIntPipe) cliniqueId: number) {
+    return this.pharmacieService.vendeurs(cliniqueId);
   }
 
   /** Recherche rapide d'un patient (nom, code, téléphone) avec son assurance active. */
@@ -242,13 +263,20 @@ export class PharmacieController {
     @Query('fin') fin?: string,
     @Query('medicamentIds') medicamentIds?: string,
     @Query('categorie') categorie?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
+    @Query('utilisateurId') utilisateurId?: string,
   ) {
     const ids = (medicamentIds ?? '')
       .split(',')
       .map((v) => parseInt(v, 10))
       .filter((v) => v > 0);
     const cat = categorie === 'MEDICAMENTS' || categorie === 'CONSOMMABLES' ? categorie : 'TOUS';
-    return this.pharmacieService.recapSorties(cliniqueId, debut, fin, ids, cat);
+    return this.pharmacieService.recapSorties(cliniqueId, debut, fin, ids, cat, {
+      heureDebut,
+      heureFin,
+      utilisateurId: utilisateurFiltre(utilisateurId),
+    });
   }
 
   /** Entrées de stock ou ajustements (+/−) sur une période (onglet Mouvements). */
@@ -262,6 +290,9 @@ export class PharmacieController {
     @Query('medicamentIds') medicamentIds?: string,
     @Query('sens') sens?: string,
     @Query('origine') origine?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
+    @Query('utilisateurId') utilisateurId?: string,
   ) {
     const ids = (medicamentIds ?? '')
       .split(',')
@@ -270,6 +301,9 @@ export class PharmacieController {
     return this.pharmacieService.mouvementsStock(cliniqueId, nature === 'AJUSTEMENTS' ? 'AJUSTEMENTS' : 'ENTREES', {
       debut,
       fin,
+      heureDebut,
+      heureFin,
+      utilisateurId: utilisateurFiltre(utilisateurId),
       medicamentIds: ids,
       sens: sens === 'PLUS' || sens === 'MOINS' ? sens : undefined,
       origine: origine === 'INVENTAIRE' || origine === 'RETRAIT' ? origine : undefined,
@@ -344,9 +378,11 @@ export class PharmacieController {
     @Query('cliniqueId', ParseIntPipe) cliniqueId?: number,
     @Query('debut') debut?: string,
     @Query('fin') fin?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
   ) {
     if (!cliniqueId) return { recus: 0, vendus: 0, perdus: 0, correctifs: 0, restants: 0, periode: {} };
-    return this.pharmacieService.pointsFinanciers(cliniqueId, debut, fin);
+    return this.pharmacieService.pointsFinanciers(cliniqueId, debut, fin, heureDebut, heureFin);
   }
 
   /** Détail d'un bloc financier (liste des lignes qui composent le montant). */
@@ -357,9 +393,11 @@ export class PharmacieController {
     @Query('type') type?: string,
     @Query('debut') debut?: string,
     @Query('fin') fin?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
   ) {
     if (!cliniqueId || !type) return [];
-    return this.pharmacieService.detailFinancier(cliniqueId, type, debut, fin);
+    return this.pharmacieService.detailFinancier(cliniqueId, type, debut, fin, heureDebut, heureFin);
   }
 
   // ── Consommables (§9.3) ──

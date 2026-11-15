@@ -45,8 +45,8 @@ let MaterniteController = class MaterniteController {
             return [];
         return this.materniteService.rechercher(code ?? '', cliniqueId);
     }
-    traites(cliniqueId, jour, page, perPage) {
-        return this.materniteService.traites(cliniqueId, jour, page ? Number(page) : 1, perPage ? Number(perPage) : 10);
+    traites(cliniqueId, jour, page, perPage, heureDebut, heureFin) {
+        return this.materniteService.traites(cliniqueId, jour, page ? Number(page) : 1, perPage ? Number(perPage) : 10, heureDebut, heureFin);
     }
     detailPassage(id) {
         return this.materniteService.detailPassage(id);
@@ -163,8 +163,10 @@ __decorate([
     __param(1, (0, common_1.Query)('jour')),
     __param(2, (0, common_1.Query)('page')),
     __param(3, (0, common_1.Query)('perPage')),
+    __param(4, (0, common_1.Query)('heureDebut')),
+    __param(5, (0, common_1.Query)('heureFin')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, String, String]),
+    __metadata("design:paramtypes", [Number, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], MaterniteController.prototype, "traites", null);
 __decorate([

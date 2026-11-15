@@ -764,6 +764,9 @@ export declare class HospitalisationService {
     }>;
     historique(params: {
         jour?: string;
+        heureDebut?: string;
+        heureFin?: string;
+        utilisateurId?: number;
         recherche?: string;
         statut?: string;
         page: number;

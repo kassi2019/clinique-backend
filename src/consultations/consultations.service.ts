@@ -1,3 +1,4 @@
+import { bornesPeriode } from '../common/filtre-periode';
 import {
   BadRequestException,
   Injectable,
@@ -1414,15 +1415,15 @@ export class ConsultationsService {
   }
 
   /** File d'attente du médecin connecté : patients en attente + terminés (jour courant par défaut). */
-  async maFile(utilisateurId: number, jour?: string) {
+  async maFile(utilisateurId: number, jour?: string, heureDebut?: string, heureFin?: string) {
     const utilisateur = await this.prisma.utilisateur.findUnique({
       where: { id: utilisateurId },
       include: { personnel: { select: { cliniqueId: true } } },
     });
     if (!utilisateur) throw new NotFoundException('Utilisateur introuvable.');
 
-    const debut = jour ? new Date(`${jour}T00:00:00`) : new Date(new Date().setHours(0, 0, 0, 0));
-    const fin = jour ? new Date(`${jour}T23:59:59.999`) : new Date(new Date().setHours(23, 59, 59, 999));
+    // Jour vide = aujourd'hui ; heures facultatives
+    const { gte: debut, lte: fin } = bornesPeriode(jour ?? '', jour ?? '', heureDebut, heureFin);
 
     const enAttente = await this.prisma.affectation.findMany({
       where: {

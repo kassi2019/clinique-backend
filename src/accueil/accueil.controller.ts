@@ -1,3 +1,4 @@
+import { utilisateurFiltre } from '../common/filtre-periode';
 import {
   Req,
   Body,
@@ -49,11 +50,17 @@ export class AccueilController {
     @Query('serviceId') serviceId?: string,
     @Query('page') page?: string,
     @Query('perPage') perPage?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
+    @Query('utilisateurId') utilisateurId?: string,
   ) {
     return this.accueilService.listerPassages(cliniqueId, {
       date,
       debut,
       fin,
+      heureDebut,
+      heureFin,
+      utilisateurId: utilisateurFiltre(utilisateurId),
       constantes:
         constantes === 'OUI' || constantes === 'NON' ? constantes : undefined,
       search,

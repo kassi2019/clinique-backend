@@ -27,12 +27,14 @@ let AssurancesController = class AssurancesController {
             return [];
         return this.assurancesService.listerAssurances(Number(cliniqueId));
     }
-    facturation(cliniqueId, debut, fin, assuranceId, patientId, page, perPage) {
+    facturation(cliniqueId, debut, fin, assuranceId, patientId, page, perPage, heureDebut, heureFin) {
         if (!cliniqueId)
             return { lignes: [], total: 0, parAssurance: [] };
         return this.assurancesService.facturation(Number(cliniqueId), {
             debut,
             fin,
+            heureDebut,
+            heureFin,
             assuranceId: assuranceId ? Number(assuranceId) : undefined,
             patientId: patientId ? Number(patientId) : undefined,
             page: page ? Number(page) : 1,
@@ -118,8 +120,10 @@ __decorate([
     __param(4, (0, common_1.Query)('patientId')),
     __param(5, (0, common_1.Query)('page')),
     __param(6, (0, common_1.Query)('perPage')),
+    __param(7, (0, common_1.Query)('heureDebut')),
+    __param(8, (0, common_1.Query)('heureFin')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], AssurancesController.prototype, "facturation", null);
 __decorate([

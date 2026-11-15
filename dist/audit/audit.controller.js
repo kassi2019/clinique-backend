@@ -13,6 +13,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuditController = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const roles_decorator_1 = require("../auth/roles.decorator");
@@ -22,18 +23,17 @@ let AuditController = class AuditController {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async lister(page, perPage, utilisateurId, cliniqueId, jour, entite) {
+    async lister(page, perPage, utilisateurId, cliniqueId, jour, entite, heureDebut, heureFin) {
         const p = page ? Number(page) : 1;
         const pp = perPage ? Number(perPage) : 50;
         const uid = utilisateurId ? Number(utilisateurId) : undefined;
         const cid = cliniqueId ? Number(cliniqueId) : undefined;
+        const periode = (0, filtre_periode_1.bornesJourOptionnel)(jour, heureDebut, heureFin);
         const where = {
             ...(cid ? { cliniqueId: cid } : {}),
             ...(uid ? { utilisateurId: uid } : {}),
             ...(entite && entite.trim() ? { entite: entite.trim() } : {}),
-            ...(jour && /^\d{4}-\d{2}-\d{2}$/.test(jour)
-                ? { createdAt: { gte: new Date(`${jour}T00:00:00`), lte: new Date(`${jour}T23:59:59.999`) } }
-                : {}),
+            ...(periode ? { createdAt: periode } : {}),
         };
         const [data, total] = await Promise.all([
             this.prisma.journalAction.findMany({
@@ -62,8 +62,10 @@ __decorate([
     __param(3, (0, common_1.Query)('cliniqueId')),
     __param(4, (0, common_1.Query)('jour')),
     __param(5, (0, common_1.Query)('entite')),
+    __param(6, (0, common_1.Query)('heureDebut')),
+    __param(7, (0, common_1.Query)('heureFin')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], AuditController.prototype, "lister", null);
 exports.AuditController = AuditController = __decorate([

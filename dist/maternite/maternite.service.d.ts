@@ -899,7 +899,7 @@ export declare class MaterniteService {
         paye: boolean;
         credit: boolean;
     }[]>;
-    traites(cliniqueId: number, jour?: string, page?: number, perPage?: number): Promise<{
+    traites(cliniqueId: number, jour?: string, page?: number, perPage?: number, heureDebut?: string, heureFin?: string): Promise<{
         data: ({
             patient: {
                 nationalite: string | null;

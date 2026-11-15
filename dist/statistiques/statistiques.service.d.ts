@@ -1,4 +1,5 @@
 import { PrismaService } from '../prisma/prisma.service';
+import { FiltreVentes } from '../pharmacie/filtre-ventes';
 export declare class StatistiquesService {
     private prisma;
     constructor(prisma: PrismaService);
@@ -123,10 +124,14 @@ export declare class StatistiquesService {
             nombre: number;
         }[];
     }>;
-    pharmacie(cliniqueId: number, debut?: string, fin?: string): Promise<{
+    pharmacie(cliniqueId: number, filtre?: FiltreVentes): Promise<{
         periode: string;
         totalVentes: number;
+        ventesExternes: number;
+        ventesCircuit: number;
         quantitesVendues: number;
+        unitesExternes: number;
+        unitesCircuit: number;
         topMedicaments: {
             montant: number;
             quantite: number;
@@ -144,6 +149,10 @@ export declare class StatistiquesService {
             peremption: string;
         }[];
     }>;
+    vendeursPharmacie(cliniqueId: number): Promise<{
+        id: number;
+        nom: string;
+    }[]>;
     maternite(cliniqueId: number, debut?: string, fin?: string): Promise<{
         periode: string;
         total: number;

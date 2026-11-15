@@ -1,3 +1,4 @@
+import { utilisateurFiltre } from '../common/filtre-periode';
 import {
   Body,
   Controller,
@@ -74,6 +75,9 @@ export class SoinsController {
     @Query('perPage') perPage?: string,
     @Query('jour') jour?: string,
     @Query('recherche') recherche?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
+    @Query('utilisateurId') utilisateurId?: string,
   ) {
     return this.soinsService.realisations(
       cliniqueId,
@@ -81,6 +85,7 @@ export class SoinsController {
       perPage ? Number(perPage) : 10,
       jour,
       recherche,
+      { heureDebut, heureFin, utilisateurId: utilisateurFiltre(utilisateurId) },
     );
   }
 }

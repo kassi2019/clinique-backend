@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LaboratoireService = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const recherche_patient_1 = require("../common/recherche-patient");
@@ -266,12 +267,13 @@ let LaboratoireService = class LaboratoireService {
     async historique(params) {
         const { jour, recherche, page, perPage, cliniqueId } = params;
         const jourRef = jour && /^\d{4}-\d{2}-\d{2}$/.test(jour) ? jour : new Date().toISOString().slice(0, 10);
-        const debut = new Date(`${jourRef}T00:00:00`);
-        const fin = new Date(`${jourRef}T23:59:59.999`);
+        const { gte: debut, lte: fin } = (0, filtre_periode_1.bornesPeriode)(jourRef, jourRef, params.heureDebut, params.heureFin);
         const where = {
             cliniqueId,
             preleveLe: { gte: debut, lte: fin },
         };
+        if (params.utilisateurId)
+            where.AND = [{ OR: [{ preleveParId: params.utilisateurId }, { valideParId: params.utilisateurId }] }];
         const ref = recherche?.trim().toUpperCase();
         if (ref) {
             where.OR = [

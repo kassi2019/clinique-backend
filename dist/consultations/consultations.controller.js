@@ -97,8 +97,8 @@ let ConsultationsController = class ConsultationsController {
     ping(req) {
         return this.consultationsService.ping(req.user.id);
     }
-    maFile(req, jour) {
-        return this.consultationsService.maFile(req.user.id, jour);
+    maFile(req, jour, heureDebut, heureFin) {
+        return this.consultationsService.maFile(req.user.id, jour, heureDebut, heureFin);
     }
     ouvrirAffectation(id) {
         return this.consultationsService.ouvrirAffectation(id);
@@ -301,8 +301,10 @@ __decorate([
     (0, common_1.Get)('moi'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Query)('jour')),
+    __param(2, (0, common_1.Query)('heureDebut')),
+    __param(3, (0, common_1.Query)('heureFin')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object, String, String, String]),
     __metadata("design:returntype", void 0)
 ], ConsultationsController.prototype, "maFile", null);
 __decorate([

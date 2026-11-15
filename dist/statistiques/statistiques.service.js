@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.StatistiquesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const filtre_ventes_1 = require("../pharmacie/filtre-ventes");
 const N = (x) => Number(x);
 let StatistiquesService = class StatistiquesService {
     constructor(prisma) {
@@ -290,8 +291,8 @@ let StatistiquesService = class StatistiquesService {
             parJour: this.parJour(entrees, (s) => s.dateEntree),
         };
     }
-    async pharmacie(cliniqueId, debut, fin) {
-        const { debut: d, fin: f, libelle } = this.bornes(debut, fin);
+    async pharmacie(cliniqueId, filtre = {}) {
+        const { debut: d, fin: f, libelle } = (0, filtre_ventes_1.bornesVentes)(filtre);
         const lignes = await this.prisma.ligneDispensation.findMany({
             where: {
                 dispensation: {
@@ -300,12 +301,31 @@ let StatistiquesService = class StatistiquesService {
                         { ordonnanceExterne: { cliniqueId } },
                     ],
                     createdAt: { gte: d, lte: f },
+                    paiement: {
+                        is: {
+                            statut: 'VALIDE',
+                            ...(filtre.utilisateurId ? { caissierId: filtre.utilisateurId } : {}),
+                        },
+                    },
                 },
             },
-            select: { medicamentNom: true, quantiteDelivree: true, montant: true },
+            select: {
+                medicamentNom: true,
+                quantiteDelivree: true,
+                montant: true,
+                dispensation: { select: { ordonnanceExterneId: true } },
+            },
         });
         const totalVentes = lignes.reduce((s, l) => s + N(l.montant), 0);
         const quantites = lignes.reduce((s, l) => s + l.quantiteDelivree, 0);
+        const ventesExternes = lignes
+            .filter((l) => l.dispensation.ordonnanceExterneId)
+            .reduce((s, l) => s + N(l.montant), 0);
+        const ventesCircuit = totalVentes - ventesExternes;
+        const unitesExternes = lignes
+            .filter((l) => l.dispensation.ordonnanceExterneId)
+            .reduce((s, l) => s + l.quantiteDelivree, 0);
+        const unitesCircuit = quantites - unitesExternes;
         const topMap = new Map();
         for (const l of lignes) {
             const e = topMap.get(l.medicamentNom) ?? { montant: 0, quantite: 0 };
@@ -342,11 +362,18 @@ let StatistiquesService = class StatistiquesService {
         return {
             periode: libelle,
             totalVentes,
+            ventesExternes,
+            ventesCircuit,
             quantitesVendues: quantites,
+            unitesExternes,
+            unitesCircuit,
             topMedicaments,
             stocksFaibles,
             peremptions,
         };
+    }
+    vendeursPharmacie(cliniqueId) {
+        return (0, filtre_ventes_1.vendeursPharmacie)(this.prisma, cliniqueId);
     }
     async maternite(cliniqueId, debut, fin) {
         const { debut: d, fin: f, libelle } = this.bornes(debut, fin);

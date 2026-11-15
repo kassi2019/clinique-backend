@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AssurancesService = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../prisma/prisma.service");
@@ -376,12 +377,12 @@ let AssurancesService = class AssurancesService {
         ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     }
     async facturation(cliniqueId, opts) {
-        const debut = opts.debut
-            ? new Date(`${opts.debut}T00:00:00`)
-            : new Date(new Date().setHours(0, 0, 0, 0));
-        const fin = opts.fin
-            ? new Date(`${opts.fin}T23:59:59.999`)
-            : new Date(new Date().setHours(23, 59, 59, 999));
+        const hd = (0, filtre_periode_1.heureValide)(opts.heureDebut) ?? '00:00';
+        const hf = (0, filtre_periode_1.heureValide)(opts.heureFin);
+        const debut = new Date(`${opts.debut || (0, filtre_periode_1.jourLocal)()}T${hd}:00`);
+        const fin = hf
+            ? new Date(`${opts.fin || (0, filtre_periode_1.jourLocal)()}T${hf}:59.999`)
+            : new Date(`${opts.fin || (0, filtre_periode_1.jourLocal)()}T23:59:59.999`);
         const page = opts.page ?? 1;
         const perPage = opts.perPage ?? 20;
         const tout = perPage === 0;

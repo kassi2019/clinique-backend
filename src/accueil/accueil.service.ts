@@ -1,3 +1,4 @@
+import { heureValide } from '../common/filtre-periode';
 import {
   BadRequestException,
   Injectable,
@@ -98,6 +99,9 @@ export class AccueilService {
       date?: string;
       debut?: string;
       fin?: string;
+      heureDebut?: string;
+      heureFin?: string;
+      utilisateurId?: number;
       constantes?: 'OUI' | 'NON';
       search?: string;
       serviceId?: number;
@@ -114,6 +118,11 @@ export class AccueilService {
       fin = opts.fin
         ? new Date(`${opts.fin}T23:59:59.999`)
         : new Date(2999, 11, 31);
+      // Heures facultatives : sur le jour de début / le jour de fin
+      const hd = heureValide(opts.heureDebut);
+      const hf = heureValide(opts.heureFin);
+      if (opts.debut && hd) debut = new Date(`${opts.debut}T${hd}:00`);
+      if (opts.fin && hf) fin = new Date(`${opts.fin}T${hf}:59.999`);
     } else if (opts.date) {
       debut = new Date(`${opts.date}T00:00:00`);
       fin = new Date(debut.getTime() + 24 * 3600 * 1000);
@@ -123,6 +132,9 @@ export class AccueilService {
     }
 
     const conditions: Prisma.PassageWhereInput[] = [];
+    if (opts.utilisateurId) {
+      conditions.push({ agentId: opts.utilisateurId });
+    }
     if (opts.serviceId) {
       conditions.push({ serviceId: opts.serviceId });
     }

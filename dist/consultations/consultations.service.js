@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConsultationsService = exports.includeSoinsPrescrits = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const affectation_service_1 = require("../affectation/affectation.service");
@@ -1133,15 +1134,14 @@ let ConsultationsService = class ConsultationsService {
         }
         return { ok: true };
     }
-    async maFile(utilisateurId, jour) {
+    async maFile(utilisateurId, jour, heureDebut, heureFin) {
         const utilisateur = await this.prisma.utilisateur.findUnique({
             where: { id: utilisateurId },
             include: { personnel: { select: { cliniqueId: true } } },
         });
         if (!utilisateur)
             throw new common_1.NotFoundException('Utilisateur introuvable.');
-        const debut = jour ? new Date(`${jour}T00:00:00`) : new Date(new Date().setHours(0, 0, 0, 0));
-        const fin = jour ? new Date(`${jour}T23:59:59.999`) : new Date(new Date().setHours(23, 59, 59, 999));
+        const { gte: debut, lte: fin } = (0, filtre_periode_1.bornesPeriode)(jour ?? '', jour ?? '', heureDebut, heureFin);
         const enAttente = await this.prisma.affectation.findMany({
             where: {
                 medecinId: utilisateurId,

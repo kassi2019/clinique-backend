@@ -1,6 +1,7 @@
 import { AccueilService } from '../accueil/accueil.service';
 import { ImpressionService } from '../impression/impression.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { FiltreVentes } from './filtre-ventes';
 export interface OrdonnanceExterneDto {
     cliniqueId: number;
     avecAssurance?: boolean;
@@ -39,6 +40,8 @@ export declare class PharmacieService {
         statut?: string;
         debut?: string;
         fin?: string;
+        heureDebut?: string;
+        heureFin?: string;
     }): Promise<{
         liste: boolean;
         id: number;
@@ -398,7 +401,7 @@ export declare class PharmacieService {
             dateOrdonnance: Date | null;
         };
     }>;
-    ordonnancesExternes(cliniqueId: number, debut?: string, fin?: string): Promise<{
+    ordonnancesExternes(cliniqueId: number, filtre?: FiltreVentes): Promise<{
         periode: {
             debut: Date;
             fin: Date;
@@ -448,6 +451,10 @@ export declare class PharmacieService {
             resteCredits: number;
         };
     }>;
+    vendeurs(cliniqueId: number): Promise<{
+        id: number;
+        nom: string;
+    }[]>;
     rechercherPatientsExterne(cliniqueId: number, saisie: string): Promise<{
         assurance: {
             assurance: string;
@@ -969,7 +976,7 @@ export declare class PharmacieService {
         stockApres: number | null;
         lotId: number | null;
     })[]>;
-    detailFinancier(cliniqueId: number, type: string, debut?: string, fin?: string): Promise<{
+    detailFinancier(cliniqueId: number, type: string, debut?: string, fin?: string, heureDebut?: string, heureFin?: string): Promise<{
         date: Date;
         medicament: string;
         lot: string;
@@ -1008,9 +1015,12 @@ export declare class PharmacieService {
     mouvementsStock(cliniqueId: number, nature: 'ENTREES' | 'AJUSTEMENTS', options?: {
         debut?: string;
         fin?: string;
+        heureDebut?: string;
+        heureFin?: string;
         medicamentIds?: number[];
         sens?: 'PLUS' | 'MOINS';
         origine?: 'INVENTAIRE' | 'RETRAIT';
+        utilisateurId?: number;
     }): Promise<{
         lignes: {
             id: number;
@@ -1042,7 +1052,11 @@ export declare class PharmacieService {
             quantiteMoins: number;
         };
     }>;
-    recapSorties(cliniqueId: number, debut?: string, fin?: string, medicamentIds?: number[], categorie?: 'TOUS' | 'MEDICAMENTS' | 'CONSOMMABLES'): Promise<{
+    recapSorties(cliniqueId: number, debut?: string, fin?: string, medicamentIds?: number[], categorie?: 'TOUS' | 'MEDICAMENTS' | 'CONSOMMABLES', filtres?: {
+        heureDebut?: string;
+        heureFin?: string;
+        utilisateurId?: number;
+    }): Promise<{
         periode: {
             debut: Date;
             fin: Date;
@@ -1057,7 +1071,7 @@ export declare class PharmacieService {
             valeur: any;
         };
     }>;
-    pointsFinanciers(cliniqueId: number, debut?: string, fin?: string): Promise<{
+    pointsFinanciers(cliniqueId: number, debut?: string, fin?: string, heureDebut?: string, heureFin?: string): Promise<{
         periode: {
             debut: string;
             fin: string;

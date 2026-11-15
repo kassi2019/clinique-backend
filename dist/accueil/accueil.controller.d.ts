@@ -42,7 +42,7 @@ export declare class AccueilController {
         residenceHabituelle: string | null;
         residenceActuelle: string | null;
     })[]>;
-    listerPassages(cliniqueId: number, date?: string, debut?: string, fin?: string, constantes?: string, search?: string, serviceId?: string, page?: string, perPage?: string): Promise<{
+    listerPassages(cliniqueId: number, date?: string, debut?: string, fin?: string, constantes?: string, search?: string, serviceId?: string, page?: string, perPage?: string, heureDebut?: string, heureFin?: string, utilisateurId?: string): Promise<{
         data: ({
             clinique: {
                 id: number;

@@ -11,10 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var PharmacieService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PharmacieService = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const accueil_service_1 = require("../accueil/accueil.service");
 const impression_service_1 = require("../impression/impression.service");
 const prisma_service_1 = require("../prisma/prisma.service");
+const filtre_ventes_1 = require("./filtre-ventes");
 const recherche_patient_1 = require("../common/recherche-patient");
 const N = (x) => Number(x);
 const dispensationsDeLaClinique = (cliniqueId) => ({
@@ -27,6 +29,16 @@ function quantiteDemandee(q) {
     const t = (q ?? '').trim();
     return /^\d+$/.test(t) ? Number(t) : null;
 }
+function periodeOuverte(debut, fin, heureDebut, heureFin) {
+    const periode = {};
+    if (debut && filtre_periode_1.DATE_RE.test(debut))
+        periode.gte = new Date(`${debut}T${(0, filtre_periode_1.heureValide)(heureDebut) ?? '00:00'}:00`);
+    if (fin && filtre_periode_1.DATE_RE.test(fin)) {
+        const hf = (0, filtre_periode_1.heureValide)(heureFin);
+        periode.lte = hf ? new Date(`${fin}T${hf}:59.999`) : new Date(`${fin}T23:59:59.999`);
+    }
+    return periode;
+}
 let PharmacieService = PharmacieService_1 = class PharmacieService {
     constructor(prisma, impressionService, accueilService) {
         this.prisma = prisma;
@@ -38,12 +50,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         const ref = reference.trim().toUpperCase();
         const refSans = ref.replace(/[\s-]/g, '');
         if (!ref) {
-            const debut = filtres.debut
-                ? new Date(`${filtres.debut}T00:00:00`)
-                : new Date(new Date().setHours(0, 0, 0, 0));
-            const fin = filtres.fin
-                ? new Date(`${filtres.fin}T23:59:59.999`)
-                : new Date(new Date().setHours(23, 59, 59, 999));
+            const { gte: debut, lte: fin } = (0, filtre_periode_1.bornesPeriode)(filtres.debut ?? '', filtres.fin || filtres.debut || '', filtres.heureDebut, filtres.heureFin);
             const where = {
                 cliniqueId,
                 medicaments: { some: {} },
@@ -527,15 +534,16 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         });
         return { ordonnanceExterne, ...reglement };
     }
-    async ordonnancesExternes(cliniqueId, debut, fin) {
-        const d = debut && /^\d{4}-\d{2}-\d{2}$/.test(debut)
-            ? new Date(`${debut}T00:00:00`)
-            : new Date(new Date().setHours(0, 0, 0, 0));
-        const f = fin && /^\d{4}-\d{2}-\d{2}$/.test(fin)
-            ? new Date(`${fin}T23:59:59.999`)
-            : new Date(new Date().setHours(23, 59, 59, 999));
+    async ordonnancesExternes(cliniqueId, filtre = {}) {
+        const { debut: d, fin: f } = (0, filtre_ventes_1.bornesVentes)(filtre);
         const liste = await this.prisma.ordonnanceExterne.findMany({
-            where: { cliniqueId, createdAt: { gte: d, lte: f } },
+            where: {
+                cliniqueId,
+                createdAt: { gte: d, lte: f },
+                ...(filtre.utilisateurId
+                    ? { dispensations: { some: { paiement: { is: { caissierId: filtre.utilisateurId } } } } }
+                    : {}),
+            },
             include: {
                 patient: { select: { nom: true, prenom: true, code: true, telephone: true } },
                 creePar: { select: { personnel: { select: { nom: true, prenom: true } } } },
@@ -599,6 +607,9 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
                     .reduce((s, l) => s + l.montantPatient, 0),
             },
         };
+    }
+    vendeurs(cliniqueId) {
+        return (0, filtre_ventes_1.vendeursPharmacie)(this.prisma, cliniqueId);
     }
     async rechercherPatientsExterne(cliniqueId, saisie) {
         const ref = (saisie ?? '').trim();
@@ -1415,12 +1426,8 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             take: 500,
         });
     }
-    async detailFinancier(cliniqueId, type, debut, fin) {
-        const periode = {};
-        if (debut && /^\d{4}-\d{2}-\d{2}$/.test(debut))
-            periode.gte = new Date(`${debut}T00:00:00`);
-        if (fin && /^\d{4}-\d{2}-\d{2}$/.test(fin))
-            periode.lte = new Date(`${fin}T23:59:59.999`);
+    async detailFinancier(cliniqueId, type, debut, fin, heureDebut, heureFin) {
+        const periode = periodeOuverte(debut, fin, heureDebut, heureFin);
         const dansPeriode = (champ) => Object.keys(periode).length ? { [champ]: periode } : {};
         if (type === 'recus') {
             const lots = await this.prisma.lot.findMany({
@@ -1440,7 +1447,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         if (type === 'vendus') {
             const ds = await this.prisma.dispensation.findMany({
                 where: {
-                    statut: 'CLOTUREE',
+                    paiement: { is: { statut: 'VALIDE' } },
                     ...dispensationsDeLaClinique(cliniqueId),
                     ...dansPeriode('createdAt'),
                 },
@@ -1536,16 +1543,11 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         }));
     }
     async mouvementsStock(cliniqueId, nature, options = {}) {
-        const jourValide = (v) => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v);
-        const d = jourValide(options.debut)
-            ? new Date(`${options.debut}T00:00:00`)
-            : new Date(new Date().setHours(0, 0, 0, 0));
-        const f = jourValide(options.fin)
-            ? new Date(`${options.fin}T23:59:59.999`)
-            : new Date(new Date().setHours(23, 59, 59, 999));
+        const { gte: d, lte: f } = (0, filtre_periode_1.bornesPeriode)(options.debut || (0, filtre_periode_1.jourLocal)(), options.fin || (0, filtre_periode_1.jourLocal)(), options.heureDebut, options.heureFin);
         const where = {
             medicament: { cliniqueId },
             createdAt: { gte: d, lte: f },
+            ...(options.utilisateurId ? { utilisateurId: options.utilisateurId } : {}),
         };
         if (options.medicamentIds?.length)
             where.medicamentId = { in: options.medicamentIds };
@@ -1624,13 +1626,8 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             },
         };
     }
-    async recapSorties(cliniqueId, debut, fin, medicamentIds = [], categorie = 'TOUS') {
-        const d = debut && /^\d{4}-\d{2}-\d{2}$/.test(debut)
-            ? new Date(`${debut}T00:00:00`)
-            : new Date(new Date().setHours(0, 0, 0, 0));
-        const f = fin && /^\d{4}-\d{2}-\d{2}$/.test(fin)
-            ? new Date(`${fin}T23:59:59.999`)
-            : new Date(new Date().setHours(23, 59, 59, 999));
+    async recapSorties(cliniqueId, debut, fin, medicamentIds = [], categorie = 'TOUS', filtres = {}) {
+        const { gte: d, lte: f } = (0, filtre_periode_1.bornesPeriode)(debut || (0, filtre_periode_1.jourLocal)(), fin || (0, filtre_periode_1.jourLocal)(), filtres.heureDebut, filtres.heureFin);
         const filtreMedicament = { cliniqueId };
         if (categorie === 'MEDICAMENTS')
             filtreMedicament.consommable = false;
@@ -1641,6 +1638,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             where: {
                 type: { in: ['SORTIE', 'RETRAIT', 'INVENTAIRE'] },
                 createdAt: { gte: d, lte: f },
+                ...(filtres.utilisateurId ? { utilisateurId: filtres.utilisateurId } : {}),
                 medicament: filtreMedicament,
                 ...(medicamentIds.length ? { medicamentId: { in: medicamentIds } } : {}),
             },
@@ -1707,12 +1705,8 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
             },
         };
     }
-    async pointsFinanciers(cliniqueId, debut, fin) {
-        const periode = {};
-        if (debut && /^\d{4}-\d{2}-\d{2}$/.test(debut))
-            periode.gte = new Date(`${debut}T00:00:00`);
-        if (fin && /^\d{4}-\d{2}-\d{2}$/.test(fin))
-            periode.lte = new Date(`${fin}T23:59:59.999`);
+    async pointsFinanciers(cliniqueId, debut, fin, heureDebut, heureFin) {
+        const periode = periodeOuverte(debut, fin, heureDebut, heureFin);
         const dansPeriode = (champ) => ({ ...(Object.keys(periode).length ? { [champ]: periode } : {}) });
         const lotsPeriode = await this.prisma.lot.findMany({
             where: { medicament: { cliniqueId }, ...dansPeriode('createdAt') },
@@ -1721,7 +1715,7 @@ let PharmacieService = PharmacieService_1 = class PharmacieService {
         const recus = lotsPeriode.reduce((s, l) => s + l.quantiteInitiale * Number(l.prixAchat ?? 0), 0);
         const vendusAgg = await this.prisma.dispensation.aggregate({
             where: {
-                statut: 'CLOTUREE',
+                paiement: { is: { statut: 'VALIDE' } },
                 ...dispensationsDeLaClinique(cliniqueId),
                 ...dansPeriode('createdAt'),
             },

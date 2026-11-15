@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { bornesVentes, FiltreVentes, vendeursPharmacie } from '../pharmacie/filtre-ventes';
 
 const N = (x: any) => Number(x);
 
@@ -333,8 +334,9 @@ export class StatistiquesService {
   }
 
   // ─────────── Pharmacie ───────────
-  async pharmacie(cliniqueId: number, debut?: string, fin?: string) {
-    const { debut: d, fin: f, libelle } = this.bornes(debut, fin);
+  /** Filtres combinables : dates, heures, utilisateur (cf. filtre-ventes.ts). */
+  async pharmacie(cliniqueId: number, filtre: FiltreVentes = {}) {
+    const { debut: d, fin: f, libelle } = bornesVentes(filtre);
 
     const lignes = await this.prisma.ligneDispensation.findMany({
       where: {
@@ -345,13 +347,35 @@ export class StatistiquesService {
             { ordonnanceExterne: { cliniqueId } },
           ],
           createdAt: { gte: d, lte: f },
+          // Seules les ventes réglées comptent (même règle que le rapport
+          // « Ordonnances externes » : paiement non annulé)
+          paiement: {
+            is: {
+              statut: 'VALIDE',
+              ...(filtre.utilisateurId ? { caissierId: filtre.utilisateurId } : {}),
+            },
+          },
         },
       },
-      select: { medicamentNom: true, quantiteDelivree: true, montant: true },
+      select: {
+        medicamentNom: true,
+        quantiteDelivree: true,
+        montant: true,
+        dispensation: { select: { ordonnanceExterneId: true } },
+      },
     });
 
     const totalVentes = lignes.reduce((s, l) => s + N(l.montant), 0);
     const quantites = lignes.reduce((s, l) => s + l.quantiteDelivree, 0);
+    // Détail : ordonnances externes / circuit normal (consultations)
+    const ventesExternes = lignes
+      .filter((l) => l.dispensation.ordonnanceExterneId)
+      .reduce((s, l) => s + N(l.montant), 0);
+    const ventesCircuit = totalVentes - ventesExternes;
+    const unitesExternes = lignes
+      .filter((l) => l.dispensation.ordonnanceExterneId)
+      .reduce((s, l) => s + l.quantiteDelivree, 0);
+    const unitesCircuit = quantites - unitesExternes;
 
     const topMap = new Map<string, { montant: number; quantite: number }>();
     for (const l of lignes) {
@@ -394,11 +418,20 @@ export class StatistiquesService {
     return {
       periode: libelle,
       totalVentes,
+      ventesExternes,
+      ventesCircuit,
       quantitesVendues: quantites,
+      unitesExternes,
+      unitesCircuit,
       topMedicaments,
       stocksFaibles,
       peremptions,
     };
+  }
+
+  /** Liste du filtre « Utilisateur » de la rubrique Pharmacie. */
+  vendeursPharmacie(cliniqueId: number) {
+    return vendeursPharmacie(this.prisma, cliniqueId);
   }
 
   // ─────────── Maternité ───────────

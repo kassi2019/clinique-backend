@@ -275,7 +275,7 @@ export declare class ImagerieController {
         technique: string | null;
         resultat: string | null;
     }>;
-    historique(jour?: string, recherche?: string, page?: string, perPage?: string, cliniqueId?: string): Promise<{
+    historique(jour?: string, recherche?: string, page?: string, perPage?: string, cliniqueId?: string, heureDebut?: string, heureFin?: string, utilisateurId?: string): Promise<{
         data: ({
             patient: {
                 nom: string;

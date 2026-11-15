@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var CaisseService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CaisseService = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const impression_service_1 = require("../impression/impression.service");
 const prisma_service_1 = require("../prisma/prisma.service");
@@ -355,13 +356,13 @@ let CaisseService = CaisseService_1 = class CaisseService {
             impression,
         };
     }
-    async fileAttente(cliniqueId, page = 1, perPage = 100, jour) {
+    async fileAttente(cliniqueId, page = 1, perPage = 100, jour, filtres = {}) {
         const where = { cliniqueId, prestations: { some: { statut: 'EN_ATTENTE' } } };
-        if (jour) {
-            const debut = new Date(`${jour}T00:00:00`);
-            const fin = new Date(`${jour}T23:59:59.999`);
-            where.createdAt = { gte: debut, lte: fin };
-        }
+        const periode = (0, filtre_periode_1.bornesJourOptionnel)(jour, filtres.heureDebut, filtres.heureFin);
+        if (periode)
+            where.createdAt = periode;
+        if (filtres.utilisateurId)
+            where.agentId = filtres.utilisateurId;
         const passages = await this.prisma.passage.findMany({
             where,
             include: {

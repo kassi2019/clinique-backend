@@ -93,12 +93,16 @@ export class MaterniteController {
     @Query('jour') jour?: string,
     @Query('page') page?: string,
     @Query('perPage') perPage?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
   ) {
     return this.materniteService.traites(
       cliniqueId,
       jour,
       page ? Number(page) : 1,
       perPage ? Number(perPage) : 10,
+      heureDebut,
+      heureFin,
     );
   }
 

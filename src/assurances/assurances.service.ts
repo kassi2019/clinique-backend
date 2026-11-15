@@ -1,3 +1,4 @@
+import { heureValide, jourLocal } from '../common/filtre-periode';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -405,14 +406,24 @@ export class AssurancesService {
   /** Facturation des assurances : prises en charge (caisse + pharmacie) + totaux par assurance. */
   async facturation(
     cliniqueId: number,
-    opts: { debut?: string; fin?: string; assuranceId?: number; patientId?: number; page?: number; perPage?: number },
+    opts: {
+      debut?: string;
+      fin?: string;
+      heureDebut?: string;
+      heureFin?: string;
+      assuranceId?: number;
+      patientId?: number;
+      page?: number;
+      perPage?: number;
+    },
   ) {
-    const debut = opts.debut
-      ? new Date(`${opts.debut}T00:00:00`)
-      : new Date(new Date().setHours(0, 0, 0, 0));
-    const fin = opts.fin
-      ? new Date(`${opts.fin}T23:59:59.999`)
-      : new Date(new Date().setHours(23, 59, 59, 999));
+    // Dates vides = aujourd'hui ; heures facultatives (début sur le 1er jour, fin sur le dernier)
+    const hd = heureValide(opts.heureDebut) ?? '00:00';
+    const hf = heureValide(opts.heureFin);
+    const debut = new Date(`${opts.debut || jourLocal()}T${hd}:00`);
+    const fin = hf
+      ? new Date(`${opts.fin || jourLocal()}T${hf}:59.999`)
+      : new Date(`${opts.fin || jourLocal()}T23:59:59.999`);
     const page = opts.page ?? 1;
     // perPage = 0 : toutes les lignes (impression / export Excel)
     const perPage = opts.perPage ?? 20;

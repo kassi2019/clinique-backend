@@ -351,7 +351,11 @@ export declare class SoinsService {
         patientId: number;
         passagePrestationId: number;
     }>;
-    realisations(cliniqueId: number, page?: number, perPage?: number, jour?: string, recherche?: string): Promise<{
+    realisations(cliniqueId: number, page?: number, perPage?: number, jour?: string, recherche?: string, filtres?: {
+        heureDebut?: string;
+        heureFin?: string;
+        utilisateurId?: number;
+    }): Promise<{
         data: (({
             soin: {
                 patient: {

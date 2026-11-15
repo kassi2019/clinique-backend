@@ -1,3 +1,4 @@
+import { utilisateurFiltre } from '../common/filtre-periode';
 import {
   Body,
   Controller,
@@ -66,10 +67,16 @@ export class ImagerieController {
     @Query('page') page?: string,
     @Query('perPage') perPage?: string,
     @Query('cliniqueId') cliniqueId?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
+    @Query('utilisateurId') utilisateurId?: string,
   ) {
     if (!cliniqueId) return { data: [], total: 0, page: 1, perPage: 10, totalPages: 0 };
     return this.imagerieService.historique({
       jour,
+      heureDebut,
+      heureFin,
+      utilisateurId: utilisateurFiltre(utilisateurId),
       recherche,
       page: page ? Number(page) : 1,
       perPage: perPage ? Number(perPage) : 10,

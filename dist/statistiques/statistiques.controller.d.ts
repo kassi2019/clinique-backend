@@ -8,6 +8,10 @@ export declare class StatistiquesController {
     laboratoire(debut?: string, fin?: string, cliniqueId?: string): {};
     imagerie(debut?: string, fin?: string, cliniqueId?: string): {};
     hospitalisation(debut?: string, fin?: string, cliniqueId?: string): {};
-    pharmacie(debut?: string, fin?: string, cliniqueId?: string): {};
+    pharmacie(debut?: string, fin?: string, cliniqueId?: string, heureDebut?: string, heureFin?: string, utilisateurId?: string): {};
+    vendeursPharmacie(cliniqueId?: string): any[] | Promise<{
+        id: number;
+        nom: string;
+    }[]>;
     maternite(debut?: string, fin?: string, cliniqueId?: string): {};
 }

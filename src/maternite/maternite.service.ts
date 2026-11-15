@@ -1,3 +1,4 @@
+import { bornesJourOptionnel } from '../common/filtre-periode';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AccueilService } from '../accueil/accueil.service';
@@ -530,13 +531,20 @@ export class MaterniteService {
   }
 
   /** Patientes traitées (prise en charge terminée), filtrables par jour. */
-  async traites(cliniqueId: number, jour?: string, page = 1, perPage = 10) {
-    const debut = jour ? new Date(`${jour}T00:00:00`) : undefined;
-    const fin = jour ? new Date(`${jour}T23:59:59.999`) : undefined;
+  async traites(
+    cliniqueId: number,
+    jour?: string,
+    page = 1,
+    perPage = 10,
+    heureDebut?: string,
+    heureFin?: string,
+  ) {
+    // Jour vide = tous les jours ; heures facultatives
+    const periode = bornesJourOptionnel(jour, heureDebut, heureFin);
     const where: any = {
       cliniqueId,
       materniteTraiteLe: { not: null },
-      ...(debut ? { materniteTraiteLe: { gte: debut, lte: fin } } : {}),
+      ...(periode ? { materniteTraiteLe: periode } : {}),
     };
     const [data, total] = await Promise.all([
       this.prisma.passage.findMany({

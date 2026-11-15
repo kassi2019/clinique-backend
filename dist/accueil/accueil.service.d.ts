@@ -50,6 +50,9 @@ export declare class AccueilService {
         date?: string;
         debut?: string;
         fin?: string;
+        heureDebut?: string;
+        heureFin?: string;
+        utilisateurId?: number;
         constantes?: 'OUI' | 'NON';
         search?: string;
         serviceId?: number;

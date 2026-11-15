@@ -18,6 +18,7 @@ const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const onglet_decorator_1 = require("../auth/onglet.decorator");
 const onglet_guard_1 = require("../auth/onglet.guard");
 const statistiques_service_1 = require("./statistiques.service");
+const filtre_ventes_1 = require("../pharmacie/filtre-ventes");
 let StatistiquesController = class StatistiquesController {
     constructor(statistiquesService) {
         this.statistiquesService = statistiquesService;
@@ -52,10 +53,21 @@ let StatistiquesController = class StatistiquesController {
             return {};
         return this.statistiquesService.hospitalisation(Number(cliniqueId), debut, fin);
     }
-    pharmacie(debut, fin, cliniqueId) {
+    pharmacie(debut, fin, cliniqueId, heureDebut, heureFin, utilisateurId) {
         if (!cliniqueId)
             return {};
-        return this.statistiquesService.pharmacie(Number(cliniqueId), debut, fin);
+        return this.statistiquesService.pharmacie(Number(cliniqueId), {
+            debut,
+            fin,
+            heureDebut,
+            heureFin,
+            utilisateurId: (0, filtre_ventes_1.utilisateurFiltre)(utilisateurId),
+        });
+    }
+    vendeursPharmacie(cliniqueId) {
+        if (!cliniqueId)
+            return [];
+        return this.statistiquesService.vendeursPharmacie(Number(cliniqueId));
     }
     maternite(debut, fin, cliniqueId) {
         if (!cliniqueId)
@@ -131,10 +143,21 @@ __decorate([
     __param(0, (0, common_1.Query)('debut')),
     __param(1, (0, common_1.Query)('fin')),
     __param(2, (0, common_1.Query)('cliniqueId')),
+    __param(3, (0, common_1.Query)('heureDebut')),
+    __param(4, (0, common_1.Query)('heureFin')),
+    __param(5, (0, common_1.Query)('utilisateurId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], StatistiquesController.prototype, "pharmacie", null);
+__decorate([
+    (0, onglet_decorator_1.Onglet)('STATISTIQUES.PHARMACIE'),
+    (0, common_1.Get)('pharmacie/utilisateurs'),
+    __param(0, (0, common_1.Query)('cliniqueId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], StatistiquesController.prototype, "vendeursPharmacie", null);
 __decorate([
     (0, onglet_decorator_1.Onglet)('STATISTIQUES.MATERNITE'),
     (0, common_1.Get)('maternite'),

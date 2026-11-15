@@ -1,3 +1,4 @@
+import { bornesPeriode, DATE_RE, heureValide, jourLocal } from '../common/filtre-periode';
 import {
   BadRequestException,
   Injectable,
@@ -7,6 +8,7 @@ import {
 import { AccueilService } from '../accueil/accueil.service';
 import { ImpressionService } from '../impression/impression.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { bornesVentes, FiltreVentes, vendeursPharmacie } from './filtre-ventes';
 import { critereNomPrenoms } from '../common/recherche-patient';
 
 const N = (x: any) => Number(x);
@@ -45,6 +47,20 @@ function quantiteDemandee(q?: string | null): number | null {
   return /^\d+$/.test(t) ? Number(t) : null;
 }
 
+/**
+ * Période « ouverte » des points financiers : date vide = sans limite.
+ * Les heures s'appliquent à la date de début / de fin quand elles sont données.
+ */
+function periodeOuverte(debut?: string, fin?: string, heureDebut?: string, heureFin?: string) {
+  const periode: any = {};
+  if (debut && DATE_RE.test(debut)) periode.gte = new Date(`${debut}T${heureValide(heureDebut) ?? '00:00'}:00`);
+  if (fin && DATE_RE.test(fin)) {
+    const hf = heureValide(heureFin);
+    periode.lte = hf ? new Date(`${fin}T${hf}:59.999`) : new Date(`${fin}T23:59:59.999`);
+  }
+  return periode;
+}
+
 @Injectable()
 export class PharmacieService {
   private readonly logger = new Logger(PharmacieService.name);
@@ -69,6 +85,8 @@ export class PharmacieService {
       statut?: string;
       debut?: string;
       fin?: string;
+      heureDebut?: string;
+      heureFin?: string;
     } = {},
   ) {
     const ref = reference.trim().toUpperCase();
@@ -76,12 +94,13 @@ export class PharmacieService {
 
     // ── Mode liste : ordonnances en attente (pas de code saisi) ──
     if (!ref) {
-      const debut = filtres.debut
-        ? new Date(`${filtres.debut}T00:00:00`)
-        : new Date(new Date().setHours(0, 0, 0, 0));
-      const fin = filtres.fin
-        ? new Date(`${filtres.fin}T23:59:59.999`)
-        : new Date(new Date().setHours(23, 59, 59, 999));
+      // Dates vides = aujourd'hui ; heures facultatives
+      const { gte: debut, lte: fin } = bornesPeriode(
+        filtres.debut ?? '',
+        filtres.fin || filtres.debut || '',
+        filtres.heureDebut,
+        filtres.heureFin,
+      );
 
       // Une ligne par ORDONNANCE (une consultation peut en porter plusieurs)
       const where: any = {
@@ -660,17 +679,22 @@ export class PharmacieService {
     return { ordonnanceExterne, ...reglement };
   }
 
-  /** Rapport dédié des ordonnances externes servies (défaut : aujourd'hui). */
-  async ordonnancesExternes(cliniqueId: number, debut?: string, fin?: string) {
-    const d = debut && /^\d{4}-\d{2}-\d{2}$/.test(debut)
-      ? new Date(`${debut}T00:00:00`)
-      : new Date(new Date().setHours(0, 0, 0, 0));
-    const f = fin && /^\d{4}-\d{2}-\d{2}$/.test(fin)
-      ? new Date(`${fin}T23:59:59.999`)
-      : new Date(new Date().setHours(23, 59, 59, 999));
+  /**
+   * Rapport dédié des ordonnances externes servies.
+   * Filtres combinables : dates (défaut aujourd'hui), heures, utilisateur
+   * (celui qui a encaissé) — mêmes règles que Statistiques → Pharmacie.
+   */
+  async ordonnancesExternes(cliniqueId: number, filtre: FiltreVentes = {}) {
+    const { debut: d, fin: f } = bornesVentes(filtre);
 
     const liste = await this.prisma.ordonnanceExterne.findMany({
-      where: { cliniqueId, createdAt: { gte: d, lte: f } },
+      where: {
+        cliniqueId,
+        createdAt: { gte: d, lte: f },
+        ...(filtre.utilisateurId
+          ? { dispensations: { some: { paiement: { is: { caissierId: filtre.utilisateurId } } } } }
+          : {}),
+      },
       include: {
         patient: { select: { nom: true, prenom: true, code: true, telephone: true } },
         creePar: { select: { personnel: { select: { nom: true, prenom: true } } } },
@@ -736,6 +760,11 @@ export class PharmacieService {
           .reduce((s, l) => s + l.montantPatient, 0),
       },
     };
+  }
+
+  /** Liste du filtre « Utilisateur » (vendeurs pharmacie de la clinique). */
+  vendeurs(cliniqueId: number) {
+    return vendeursPharmacie(this.prisma, cliniqueId);
   }
 
   /** Recherche rapide d'un patient (ordonnance externe avec assurance) + son assurance active. */
@@ -1721,10 +1750,10 @@ export class PharmacieService {
     type: string,
     debut?: string,
     fin?: string,
+    heureDebut?: string,
+    heureFin?: string,
   ) {
-    const periode: any = {};
-    if (debut && /^\d{4}-\d{2}-\d{2}$/.test(debut)) periode.gte = new Date(`${debut}T00:00:00`);
-    if (fin && /^\d{4}-\d{2}-\d{2}$/.test(fin)) periode.lte = new Date(`${fin}T23:59:59.999`);
+    const periode = periodeOuverte(debut, fin, heureDebut, heureFin);
     const dansPeriode = (champ: string) =>
       Object.keys(periode).length ? { [champ]: periode } : {};
 
@@ -1747,7 +1776,8 @@ export class PharmacieService {
     if (type === 'vendus') {
       const ds = await this.prisma.dispensation.findMany({
         where: {
-          statut: 'CLOTUREE',
+          // Vente = paiement non annulé (même règle que Statistiques et Ordonnances externes)
+          paiement: { is: { statut: 'VALIDE' } },
           ...dispensationsDeLaClinique(cliniqueId),
           ...dansPeriode('createdAt'),
         },
@@ -1868,22 +1898,26 @@ export class PharmacieService {
     options: {
       debut?: string;
       fin?: string;
+      heureDebut?: string;
+      heureFin?: string;
       medicamentIds?: number[];
       sens?: 'PLUS' | 'MOINS';
       origine?: 'INVENTAIRE' | 'RETRAIT';
+      utilisateurId?: number;
     } = {},
   ) {
-    const jourValide = (v?: string) => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v);
-    const d = jourValide(options.debut)
-      ? new Date(`${options.debut}T00:00:00`)
-      : new Date(new Date().setHours(0, 0, 0, 0));
-    const f = jourValide(options.fin)
-      ? new Date(`${options.fin}T23:59:59.999`)
-      : new Date(new Date().setHours(23, 59, 59, 999));
+    // Dates vides = aujourd'hui ; heures et utilisateur facultatifs
+    const { gte: d, lte: f } = bornesPeriode(
+      options.debut || jourLocal(),
+      options.fin || jourLocal(), // fin vide = aujourd'hui (comportement d'origine)
+      options.heureDebut,
+      options.heureFin,
+    );
 
     const where: any = {
       medicament: { cliniqueId },
       createdAt: { gte: d, lte: f },
+      ...(options.utilisateurId ? { utilisateurId: options.utilisateurId } : {}),
     };
     if (options.medicamentIds?.length) where.medicamentId = { in: options.medicamentIds };
     if (nature === 'ENTREES') {
@@ -1971,13 +2005,15 @@ export class PharmacieService {
     fin?: string,
     medicamentIds: number[] = [],
     categorie: 'TOUS' | 'MEDICAMENTS' | 'CONSOMMABLES' = 'TOUS',
+    filtres: { heureDebut?: string; heureFin?: string; utilisateurId?: number } = {},
   ) {
-    const d = debut && /^\d{4}-\d{2}-\d{2}$/.test(debut)
-      ? new Date(`${debut}T00:00:00`)
-      : new Date(new Date().setHours(0, 0, 0, 0));
-    const f = fin && /^\d{4}-\d{2}-\d{2}$/.test(fin)
-      ? new Date(`${fin}T23:59:59.999`)
-      : new Date(new Date().setHours(23, 59, 59, 999));
+    // Dates vides = aujourd'hui ; heures et utilisateur facultatifs
+    const { gte: d, lte: f } = bornesPeriode(
+      debut || jourLocal(),
+      fin || jourLocal(), // fin vide = aujourd'hui (comportement d'origine)
+      filtres.heureDebut,
+      filtres.heureFin,
+    );
 
     const filtreMedicament: any = { cliniqueId };
     if (categorie === 'MEDICAMENTS') filtreMedicament.consommable = false;
@@ -1988,6 +2024,7 @@ export class PharmacieService {
       where: {
         type: { in: ['SORTIE', 'RETRAIT', 'INVENTAIRE'] },
         createdAt: { gte: d, lte: f },
+        ...(filtres.utilisateurId ? { utilisateurId: filtres.utilisateurId } : {}),
         medicament: filtreMedicament,
         ...(medicamentIds.length ? { medicamentId: { in: medicamentIds } } : {}),
       },
@@ -2065,10 +2102,14 @@ export class PharmacieService {
    *   - correctifs : écarts d'inventaire valorisés (signés)
    *   - restants : valeur du stock actuel (lots en stock au prix d'achat)
    */
-  async pointsFinanciers(cliniqueId: number, debut?: string, fin?: string) {
-    const periode: any = {};
-    if (debut && /^\d{4}-\d{2}-\d{2}$/.test(debut)) periode.gte = new Date(`${debut}T00:00:00`);
-    if (fin && /^\d{4}-\d{2}-\d{2}$/.test(fin)) periode.lte = new Date(`${fin}T23:59:59.999`);
+  async pointsFinanciers(
+    cliniqueId: number,
+    debut?: string,
+    fin?: string,
+    heureDebut?: string,
+    heureFin?: string,
+  ) {
+    const periode = periodeOuverte(debut, fin, heureDebut, heureFin);
     const dansPeriode = (champ: string) => ({ ...(Object.keys(periode).length ? { [champ]: periode } : {}) });
 
     const lotsPeriode = await this.prisma.lot.findMany({
@@ -2082,7 +2123,8 @@ export class PharmacieService {
 
     const vendusAgg = await this.prisma.dispensation.aggregate({
       where: {
-        statut: 'CLOTUREE',
+        // Vente = paiement non annulé (même règle que Statistiques et Ordonnances externes)
+        paiement: { is: { statut: 'VALIDE' } },
         ...dispensationsDeLaClinique(cliniqueId),
         ...dansPeriode('createdAt'),
       },

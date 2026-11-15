@@ -1,3 +1,4 @@
+import { utilisateurFiltre } from '../common/filtre-periode';
 import {
   Body,
   Controller,
@@ -138,10 +139,16 @@ export class HospitalisationController {
     @Query('page') page?: string,
     @Query('perPage') perPage?: string,
     @Query('cliniqueId') cliniqueId?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
+    @Query('utilisateurId') utilisateurId?: string,
   ) {
     if (!cliniqueId) return { data: [], total: 0, page: 1, perPage: 10, totalPages: 0 };
     return this.hospitalisationService.historique({
       jour,
+      heureDebut,
+      heureFin,
+      utilisateurId: utilisateurFiltre(utilisateurId),
       recherche,
       statut,
       page: page ? Number(page) : 1,

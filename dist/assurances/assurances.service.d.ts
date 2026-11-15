@@ -317,6 +317,8 @@ export declare class AssurancesService {
     facturation(cliniqueId: number, opts: {
         debut?: string;
         fin?: string;
+        heureDebut?: string;
+        heureFin?: string;
         assuranceId?: number;
         patientId?: number;
         page?: number;

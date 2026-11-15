@@ -13,6 +13,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CaisseController = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const onglet_decorator_1 = require("../auth/onglet.decorator");
@@ -30,8 +31,8 @@ let CaisseController = class CaisseController {
             return [];
         return this.caisseService.rechercher(search ?? '', cliniqueId);
     }
-    fileAttente(cliniqueId, jour, page, perPage) {
-        return this.caisseService.fileAttente(cliniqueId, page ? Number(page) : 1, perPage ? Number(perPage) : 100, jour);
+    fileAttente(cliniqueId, jour, page, perPage, heureDebut, heureFin, utilisateurId) {
+        return this.caisseService.fileAttente(cliniqueId, page ? Number(page) : 1, perPage ? Number(perPage) : 100, jour, { heureDebut, heureFin, utilisateurId: (0, filtre_periode_1.utilisateurFiltre)(utilisateurId) });
     }
     payesDuJour(cliniqueId, page, perPage) {
         return this.caisseService.payesDuJour(cliniqueId, page ? Number(page) : 1, perPage ? Number(perPage) : 100);
@@ -79,8 +80,11 @@ __decorate([
     __param(1, (0, common_1.Query)('jour')),
     __param(2, (0, common_1.Query)('page')),
     __param(3, (0, common_1.Query)('perPage')),
+    __param(4, (0, common_1.Query)('heureDebut')),
+    __param(5, (0, common_1.Query)('heureFin')),
+    __param(6, (0, common_1.Query)('utilisateurId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, String, String]),
+    __metadata("design:paramtypes", [Number, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], CaisseController.prototype, "fileAttente", null);
 __decorate([

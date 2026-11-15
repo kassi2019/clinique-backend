@@ -13,6 +13,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SoinsController = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const soins_service_1 = require("./soins.service");
@@ -37,8 +38,8 @@ let SoinsController = class SoinsController {
     administrer(id, body, req) {
         return this.soinsService.administrer(id, body.date ?? new Date().toISOString(), body.observations, req.user.id);
     }
-    realisations(cliniqueId, page, perPage, jour, recherche) {
-        return this.soinsService.realisations(cliniqueId, page ? Number(page) : 1, perPage ? Number(perPage) : 10, jour, recherche);
+    realisations(cliniqueId, page, perPage, jour, recherche, heureDebut, heureFin, utilisateurId) {
+        return this.soinsService.realisations(cliniqueId, page ? Number(page) : 1, perPage ? Number(perPage) : 10, jour, recherche, { heureDebut, heureFin, utilisateurId: (0, filtre_periode_1.utilisateurFiltre)(utilisateurId) });
     }
 };
 exports.SoinsController = SoinsController;
@@ -89,8 +90,11 @@ __decorate([
     __param(2, (0, common_1.Query)('perPage')),
     __param(3, (0, common_1.Query)('jour')),
     __param(4, (0, common_1.Query)('recherche')),
+    __param(5, (0, common_1.Query)('heureDebut')),
+    __param(6, (0, common_1.Query)('heureFin')),
+    __param(7, (0, common_1.Query)('utilisateurId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, String, String, String]),
+    __metadata("design:paramtypes", [Number, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], SoinsController.prototype, "realisations", null);
 exports.SoinsController = SoinsController = __decorate([

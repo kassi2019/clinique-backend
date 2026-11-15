@@ -38,11 +38,15 @@ export class AssurancesController {
     @Query('patientId') patientId?: string,
     @Query('page') page?: string,
     @Query('perPage') perPage?: string,
+    @Query('heureDebut') heureDebut?: string,
+    @Query('heureFin') heureFin?: string,
   ) {
     if (!cliniqueId) return { lignes: [], total: 0, parAssurance: [] };
     return this.assurancesService.facturation(Number(cliniqueId), {
       debut,
       fin,
+      heureDebut,
+      heureFin,
       assuranceId: assuranceId ? Number(assuranceId) : undefined,
       patientId: patientId ? Number(patientId) : undefined,
       page: page ? Number(page) : 1,

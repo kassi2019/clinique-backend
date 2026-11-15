@@ -370,6 +370,9 @@ export declare class LaboratoireService {
     }>;
     historique(params: {
         jour?: string;
+        heureDebut?: string;
+        heureFin?: string;
+        utilisateurId?: number;
         recherche?: string;
         page: number;
         perPage: number;

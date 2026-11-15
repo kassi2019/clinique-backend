@@ -1,3 +1,4 @@
+import { bornesPeriode } from '../common/filtre-periode';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -263,6 +264,9 @@ export class ImagerieService {
   /** Historique des examens réalisés, paginé (défaut : jour courant). */
   async historique(params: {
     jour?: string;
+    heureDebut?: string;
+    heureFin?: string;
+    utilisateurId?: number;
     recherche?: string;
     page: number;
     perPage: number;
@@ -271,13 +275,15 @@ export class ImagerieService {
     const { jour, recherche, page, perPage, cliniqueId } = params;
     const jourRef =
       jour && /^\d{4}-\d{2}-\d{2}$/.test(jour) ? jour : new Date().toISOString().slice(0, 10);
-    const debut = new Date(`${jourRef}T00:00:00`);
-    const fin = new Date(`${jourRef}T23:59:59.999`);
+    // Heures facultatives (heure de début / de fin dans la journée)
+    const { gte: debut, lte: fin } = bornesPeriode(jourRef, jourRef, params.heureDebut, params.heureFin);
 
     const where: Prisma.ExamenImagerieWhereInput = {
       cliniqueId,
       createdAt: { gte: debut, lte: fin },
     };
+    // Utilisateur : celui qui a réalisé OU validé (facultatif)
+    if (params.utilisateurId) where.AND = [{ OR: [{ saisiParId: params.utilisateurId }, { valideParId: params.utilisateurId }] }];
     const ref = recherche?.trim().toUpperCase();
     if (ref) {
       where.OR = [

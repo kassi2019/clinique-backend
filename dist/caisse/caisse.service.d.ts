@@ -374,7 +374,11 @@ export declare class CaisseService {
         };
         impression: any;
     }>;
-    fileAttente(cliniqueId: number, page?: number, perPage?: number, jour?: string): Promise<{
+    fileAttente(cliniqueId: number, page?: number, perPage?: number, jour?: string, filtres?: {
+        heureDebut?: string;
+        heureFin?: string;
+        utilisateurId?: number;
+    }): Promise<{
         data: {
             id: number;
             numeroOrdre: string;

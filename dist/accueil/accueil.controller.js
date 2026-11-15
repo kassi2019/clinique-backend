@@ -13,6 +13,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AccueilController = void 0;
+const filtre_periode_1 = require("../common/filtre-periode");
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const accueil_service_1 = require("./accueil.service");
@@ -24,11 +25,14 @@ let AccueilController = class AccueilController {
     rechercherPatients(search, cliniqueId) {
         return this.accueilService.rechercherPatients(search ?? '', cliniqueId ? Number(cliniqueId) : undefined);
     }
-    listerPassages(cliniqueId, date, debut, fin, constantes, search, serviceId, page, perPage) {
+    listerPassages(cliniqueId, date, debut, fin, constantes, search, serviceId, page, perPage, heureDebut, heureFin, utilisateurId) {
         return this.accueilService.listerPassages(cliniqueId, {
             date,
             debut,
             fin,
+            heureDebut,
+            heureFin,
+            utilisateurId: (0, filtre_periode_1.utilisateurFiltre)(utilisateurId),
             constantes: constantes === 'OUI' || constantes === 'NON' ? constantes : undefined,
             search,
             serviceId: serviceId ? Number(serviceId) : undefined,
@@ -69,8 +73,11 @@ __decorate([
     __param(6, (0, common_1.Query)('serviceId')),
     __param(7, (0, common_1.Query)('page')),
     __param(8, (0, common_1.Query)('perPage')),
+    __param(9, (0, common_1.Query)('heureDebut')),
+    __param(10, (0, common_1.Query)('heureFin')),
+    __param(11, (0, common_1.Query)('utilisateurId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Number, String, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], AccueilController.prototype, "listerPassages", null);
 __decorate([

@@ -20,11 +20,12 @@ const onglet_guard_1 = require("../auth/onglet.guard");
 const roles_decorator_1 = require("../auth/roles.decorator");
 const roles_guard_1 = require("../auth/roles.guard");
 const pharmacie_service_1 = require("./pharmacie.service");
+const filtre_periode_1 = require("../common/filtre-periode");
 let PharmacieController = class PharmacieController {
     constructor(pharmacieService) {
         this.pharmacieService = pharmacieService;
     }
-    rechercherOrdonnances(code, cliniqueId, medecinId, statut, debut, fin) {
+    rechercherOrdonnances(code, cliniqueId, medecinId, statut, debut, fin, heureDebut, heureFin) {
         if (!cliniqueId)
             return { liste: true, ordonnances: [] };
         return this.pharmacieService.rechercherOrdonnances(code ?? '', cliniqueId, {
@@ -32,6 +33,8 @@ let PharmacieController = class PharmacieController {
             statut,
             debut,
             fin,
+            heureDebut,
+            heureFin,
         });
     }
     detailOrdonnance(id) {
@@ -43,8 +46,17 @@ let PharmacieController = class PharmacieController {
     creerOrdonnanceExterne(dto, req) {
         return this.pharmacieService.creerOrdonnanceExterne(dto, req.user.id);
     }
-    ordonnancesExternes(cliniqueId, debut, fin) {
-        return this.pharmacieService.ordonnancesExternes(cliniqueId, debut, fin);
+    ordonnancesExternes(cliniqueId, debut, fin, heureDebut, heureFin, utilisateurId) {
+        return this.pharmacieService.ordonnancesExternes(cliniqueId, {
+            debut,
+            fin,
+            heureDebut,
+            heureFin,
+            utilisateurId: (0, filtre_periode_1.utilisateurFiltre)(utilisateurId),
+        });
+    }
+    vendeursExternes(cliniqueId) {
+        return this.pharmacieService.vendeurs(cliniqueId);
     }
     rechercherPatientsExterne(cliniqueId, q) {
         return this.pharmacieService.rechercherPatientsExterne(cliniqueId, q ?? '');
@@ -102,15 +114,19 @@ let PharmacieController = class PharmacieController {
             datePeremption: dto.datePeremption,
         });
     }
-    recapSorties(cliniqueId, debut, fin, medicamentIds, categorie) {
+    recapSorties(cliniqueId, debut, fin, medicamentIds, categorie, heureDebut, heureFin, utilisateurId) {
         const ids = (medicamentIds ?? '')
             .split(',')
             .map((v) => parseInt(v, 10))
             .filter((v) => v > 0);
         const cat = categorie === 'MEDICAMENTS' || categorie === 'CONSOMMABLES' ? categorie : 'TOUS';
-        return this.pharmacieService.recapSorties(cliniqueId, debut, fin, ids, cat);
+        return this.pharmacieService.recapSorties(cliniqueId, debut, fin, ids, cat, {
+            heureDebut,
+            heureFin,
+            utilisateurId: (0, filtre_periode_1.utilisateurFiltre)(utilisateurId),
+        });
     }
-    mouvementsStock(cliniqueId, nature, debut, fin, medicamentIds, sens, origine) {
+    mouvementsStock(cliniqueId, nature, debut, fin, medicamentIds, sens, origine, heureDebut, heureFin, utilisateurId) {
         const ids = (medicamentIds ?? '')
             .split(',')
             .map((v) => parseInt(v, 10))
@@ -118,6 +134,9 @@ let PharmacieController = class PharmacieController {
         return this.pharmacieService.mouvementsStock(cliniqueId, nature === 'AJUSTEMENTS' ? 'AJUSTEMENTS' : 'ENTREES', {
             debut,
             fin,
+            heureDebut,
+            heureFin,
+            utilisateurId: (0, filtre_periode_1.utilisateurFiltre)(utilisateurId),
             medicamentIds: ids,
             sens: sens === 'PLUS' || sens === 'MOINS' ? sens : undefined,
             origine: origine === 'INVENTAIRE' || origine === 'RETRAIT' ? origine : undefined,
@@ -150,15 +169,15 @@ let PharmacieController = class PharmacieController {
             return [];
         return this.pharmacieService.retraits(cliniqueId, debut, fin);
     }
-    pointsFinanciers(cliniqueId, debut, fin) {
+    pointsFinanciers(cliniqueId, debut, fin, heureDebut, heureFin) {
         if (!cliniqueId)
             return { recus: 0, vendus: 0, perdus: 0, correctifs: 0, restants: 0, periode: {} };
-        return this.pharmacieService.pointsFinanciers(cliniqueId, debut, fin);
+        return this.pharmacieService.pointsFinanciers(cliniqueId, debut, fin, heureDebut, heureFin);
     }
-    detailFinancier(cliniqueId, type, debut, fin) {
+    detailFinancier(cliniqueId, type, debut, fin, heureDebut, heureFin) {
         if (!cliniqueId || !type)
             return [];
-        return this.pharmacieService.detailFinancier(cliniqueId, type, debut, fin);
+        return this.pharmacieService.detailFinancier(cliniqueId, type, debut, fin, heureDebut, heureFin);
     }
     consommables(cliniqueId) {
         if (!cliniqueId)
@@ -188,8 +207,10 @@ __decorate([
     __param(3, (0, common_1.Query)('statut')),
     __param(4, (0, common_1.Query)('debut')),
     __param(5, (0, common_1.Query)('fin')),
+    __param(6, (0, common_1.Query)('heureDebut')),
+    __param(7, (0, common_1.Query)('heureFin')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, String, String, String, String]),
+    __metadata("design:paramtypes", [String, Number, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "rechercherOrdonnances", null);
 __decorate([
@@ -225,10 +246,21 @@ __decorate([
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('debut')),
     __param(2, (0, common_1.Query)('fin')),
+    __param(3, (0, common_1.Query)('heureDebut')),
+    __param(4, (0, common_1.Query)('heureFin')),
+    __param(5, (0, common_1.Query)('utilisateurId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, String]),
+    __metadata("design:paramtypes", [Number, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "ordonnancesExternes", null);
+__decorate([
+    (0, onglet_decorator_1.Onglet)('PHARMACIE.EXTERNES'),
+    (0, common_1.Get)('ordonnances-externes/utilisateurs'),
+    __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], PharmacieController.prototype, "vendeursExternes", null);
 __decorate([
     (0, onglet_decorator_1.Onglet)('PHARMACIE.ORDONNANCES', 'PHARMACIE.EXTERNES'),
     (0, common_1.Get)('ordonnances-externes/patients'),
@@ -379,8 +411,11 @@ __decorate([
     __param(2, (0, common_1.Query)('fin')),
     __param(3, (0, common_1.Query)('medicamentIds')),
     __param(4, (0, common_1.Query)('categorie')),
+    __param(5, (0, common_1.Query)('heureDebut')),
+    __param(6, (0, common_1.Query)('heureFin')),
+    __param(7, (0, common_1.Query)('utilisateurId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, String, String, String]),
+    __metadata("design:paramtypes", [Number, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "recapSorties", null);
 __decorate([
@@ -393,8 +428,11 @@ __decorate([
     __param(4, (0, common_1.Query)('medicamentIds')),
     __param(5, (0, common_1.Query)('sens')),
     __param(6, (0, common_1.Query)('origine')),
+    __param(7, (0, common_1.Query)('heureDebut')),
+    __param(8, (0, common_1.Query)('heureFin')),
+    __param(9, (0, common_1.Query)('utilisateurId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Number, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "mouvementsStock", null);
 __decorate([
@@ -462,8 +500,10 @@ __decorate([
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Query)('debut')),
     __param(2, (0, common_1.Query)('fin')),
+    __param(3, (0, common_1.Query)('heureDebut')),
+    __param(4, (0, common_1.Query)('heureFin')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, String]),
+    __metadata("design:paramtypes", [Number, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "pointsFinanciers", null);
 __decorate([
@@ -473,8 +513,10 @@ __decorate([
     __param(1, (0, common_1.Query)('type')),
     __param(2, (0, common_1.Query)('debut')),
     __param(3, (0, common_1.Query)('fin')),
+    __param(4, (0, common_1.Query)('heureDebut')),
+    __param(5, (0, common_1.Query)('heureFin')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, String, String]),
+    __metadata("design:paramtypes", [Number, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], PharmacieController.prototype, "detailFinancier", null);
 __decorate([
