@@ -82,6 +82,7 @@ export declare class CaisseController {
         totalPages: number;
     }>;
     detail(id: number): Promise<{
+        ticketValable: import("../common/ticket-consultation").TicketValable;
         assurancePatient: {
             assurance: {
                 code: string;
@@ -100,17 +101,20 @@ export declare class CaisseController {
             service: {
                 nom: string;
             };
+            prestation: {
+                type: string;
+            };
             createdAt: Date;
             id: number;
             statut: string;
             updatedAt: Date;
             serviceId: number | null;
-            libelle: string;
             passageId: number;
-            agentId: number | null;
             prestationId: number | null;
+            libelle: string;
             source: string;
             gratuit: boolean;
+            agentId: number | null;
             paiementId: number | null;
             creditId: number | null;
         }[];
@@ -125,12 +129,12 @@ export declare class CaisseController {
                 statut: string;
                 updatedAt: Date;
                 serviceId: number | null;
-                libelle: string;
                 passageId: number;
-                agentId: number | null;
                 prestationId: number | null;
+                libelle: string;
                 source: string;
                 gratuit: boolean;
+                agentId: number | null;
                 paiementId: number | null;
                 creditId: number | null;
             }[];
@@ -198,13 +202,13 @@ export declare class CaisseController {
         statut: string;
         updatedAt: Date;
         serviceId: number;
+        agentId: number | null;
         patientId: number;
         numeroOrdre: string;
         typePatient: string;
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
-        agentId: number | null;
         taille: string | null;
         temperature: import("@prisma/client/runtime/library").Decimal | null;
         pouls: number | null;
@@ -227,12 +231,12 @@ export declare class CaisseController {
             statut: string;
             updatedAt: Date;
             serviceId: number | null;
-            libelle: string;
             passageId: number;
-            agentId: number | null;
             prestationId: number | null;
+            libelle: string;
             source: string;
             gratuit: boolean;
+            agentId: number | null;
             paiementId: number | null;
             creditId: number | null;
         }[];
@@ -292,13 +296,13 @@ export declare class CaisseController {
             statut: string;
             updatedAt: Date;
             serviceId: number;
+            agentId: number | null;
             patientId: number;
             numeroOrdre: string;
             typePatient: string;
             motif: string | null;
             referent: string | null;
             prestationDemandee: string | null;
-            agentId: number | null;
             taille: string | null;
             temperature: import("@prisma/client/runtime/library").Decimal | null;
             pouls: number | null;
@@ -341,12 +345,12 @@ export declare class CaisseController {
         statut: string;
         updatedAt: Date;
         serviceId: number | null;
-        libelle: string;
         passageId: number;
-        agentId: number | null;
         prestationId: number | null;
+        libelle: string;
         source: string;
         gratuit: boolean;
+        agentId: number | null;
         paiementId: number | null;
         creditId: number | null;
     }>;
@@ -356,13 +360,13 @@ export declare class CaisseController {
         statut: string;
         updatedAt: Date;
         serviceId: number | null;
-        libelle: string;
         passageId: number;
-        agentId: number | null;
         prestationId: number | null;
+        libelle: string;
         montant: import("@prisma/client/runtime/library").Decimal;
         source: string;
         gratuit: boolean;
+        agentId: number | null;
         paiementId: number | null;
         creditId: number | null;
     }>;
@@ -436,11 +440,11 @@ export declare class CaisseController {
         cliniqueId: number;
         statut: string;
         updatedAt: Date;
-        type: string;
         passageId: number;
-        montantTotal: import("@prisma/client/runtime/library").Decimal;
-        motif: string | null;
         agentId: number | null;
+        type: string;
+        motif: string | null;
+        montantTotal: import("@prisma/client/runtime/library").Decimal;
         numero: string;
     }>;
     credits(cliniqueId: number, page?: string, perPage?: string): Promise<{
@@ -453,11 +457,6 @@ export declare class CaisseController {
                 };
                 numeroOrdre: string;
             };
-            lignes: {
-                statut: string;
-                libelle: string;
-                montant: import("@prisma/client/runtime/library").Decimal;
-            }[];
             agent: {
                 personnel: {
                     nom: string;
@@ -465,17 +464,22 @@ export declare class CaisseController {
                 };
                 matricule: string;
             };
+            lignes: {
+                statut: string;
+                libelle: string;
+                montant: import("@prisma/client/runtime/library").Decimal;
+            }[];
         } & {
             createdAt: Date;
             id: number;
             cliniqueId: number;
             statut: string;
             updatedAt: Date;
-            type: string;
             passageId: number;
-            montantTotal: import("@prisma/client/runtime/library").Decimal;
-            motif: string | null;
             agentId: number | null;
+            type: string;
+            motif: string | null;
+            montantTotal: import("@prisma/client/runtime/library").Decimal;
             numero: string;
         })[];
         total: number;
@@ -489,11 +493,11 @@ export declare class CaisseController {
         cliniqueId: number;
         statut: string;
         updatedAt: Date;
-        type: string;
         passageId: number;
-        montantTotal: import("@prisma/client/runtime/library").Decimal;
-        motif: string | null;
         agentId: number | null;
+        type: string;
+        motif: string | null;
+        montantTotal: import("@prisma/client/runtime/library").Decimal;
         numero: string;
     }>;
 }

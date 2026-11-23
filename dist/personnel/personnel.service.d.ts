@@ -23,8 +23,8 @@ export declare class PersonnelService {
                 cliniqueId: number;
                 updatedAt: Date;
                 nom: string;
-                actif: boolean;
                 code: string;
+                actif: boolean;
                 description: string | null;
             };
             utilisateur: {
@@ -70,8 +70,8 @@ export declare class PersonnelService {
             cliniqueId: number;
             updatedAt: Date;
             nom: string;
-            actif: boolean;
             code: string;
+            actif: boolean;
             description: string | null;
         };
         utilisateur: {
@@ -112,8 +112,8 @@ export declare class PersonnelService {
             cliniqueId: number;
             updatedAt: Date;
             nom: string;
-            actif: boolean;
             code: string;
+            actif: boolean;
             description: string | null;
         };
         utilisateur: {
@@ -155,8 +155,8 @@ export declare class PersonnelService {
             cliniqueId: number;
             updatedAt: Date;
             nom: string;
-            actif: boolean;
             code: string;
+            actif: boolean;
             description: string | null;
         };
         utilisateur: {
@@ -197,8 +197,8 @@ export declare class PersonnelService {
             cliniqueId: number;
             updatedAt: Date;
             nom: string;
-            actif: boolean;
             code: string;
+            actif: boolean;
             description: string | null;
         };
         utilisateur: {

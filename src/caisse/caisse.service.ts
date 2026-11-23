@@ -11,6 +11,7 @@ import { AffectationService } from '../affectation/affectation.service';
 import { AssurancesService } from '../assurances/assurances.service';
 import { EncaisserDto } from './dto/encaisser.dto';
 import { critereNomPrenoms } from '../common/recherche-patient';
+import { ticketConsultationValable } from '../common/ticket-consultation';
 
 const formatMontant = (x: any) => Number(x);
 
@@ -66,7 +67,10 @@ export class CaisseService {
         patient: true,
         service: { select: { id: true, code: true, nom: true } },
         prestations: {
-          include: { service: { select: { nom: true } } },
+          include: {
+            service: { select: { nom: true } },
+            prestation: { select: { type: true } },
+          },
           orderBy: { createdAt: 'asc' },
         },
         paiements: {
@@ -84,6 +88,38 @@ export class CaisseService {
       },
     });
     if (!passage) throw new NotFoundException('Passage introuvable.');
+
+    // Ticket de consultation encore valable (≤ 10 jours, tous services) : toute
+    // consultation non encore réglée de ce passage passe à 0 FCFA (filet de
+    // sécurité si elle a été créée avant/à côté de l'accueil).
+    const ticketValable = await ticketConsultationValable(
+      this.prisma,
+      passage.cliniqueId,
+      passage.patientId,
+      passage.id,
+    );
+    if (ticketValable) {
+      const aRendreGratuites = passage.prestations.filter(
+        (l) =>
+          l.statut === 'EN_ATTENTE' &&
+          !l.gratuit &&
+          l.prestation?.type === 'CONSULTATION' &&
+          Number(l.montant) > 0,
+      );
+      if (aRendreGratuites.length) {
+        await this.prisma.passagePrestation.updateMany({
+          where: { id: { in: aRendreGratuites.map((l) => l.id) } },
+          data: { montant: 0, gratuit: true },
+        });
+        for (const l of aRendreGratuites) {
+          (l as any).montant = 0;
+          l.gratuit = true;
+        }
+        this.logger.log(
+          `Passage #${passage.id} : ${aRendreGratuites.length} consultation(s) rendue(s) gratuite(s) (ticket ${ticketValable.numeroOrdre} valable).`,
+        );
+      }
+    }
 
     // Assurance du patient : rattachement actif (affiché en bandeau à la caisse)
     const rattachement = await this.assurancesService.couvertureActiveDuPatient(
@@ -105,6 +141,7 @@ export class CaisseService {
 
     return {
       ...passage,
+      ticketValable,
       assurancePatient: rattachement
         ? {
             assurance: {
@@ -161,12 +198,25 @@ export class CaisseService {
       throw new BadRequestException('Prestation introuvable ou inactive.');
     }
 
+    // Consultation ajoutée à la main alors que le patient a un ticket encore
+    // valable (≤ 10 jours, tous services) : elle sort gratuite, on n'encaisse pas.
+    const ticket =
+      prestation.type === 'CONSULTATION'
+        ? await ticketConsultationValable(
+            this.prisma,
+            passage.cliniqueId,
+            passage.patientId,
+            passage.id,
+          )
+        : null;
+
     const ligne = await this.prisma.passagePrestation.create({
       data: {
         passageId,
         prestationId: prestation.id,
         libelle: prestation.libelle,
-        montant: prestation.montant,
+        montant: ticket ? 0 : prestation.montant,
+        gratuit: !!ticket,
         serviceId: prestation.serviceId,
         agentId: utilisateurId ?? null,
         source: 'MANUEL',

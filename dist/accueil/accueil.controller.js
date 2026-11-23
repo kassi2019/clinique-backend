@@ -25,6 +25,9 @@ let AccueilController = class AccueilController {
     rechercherPatients(search, cliniqueId) {
         return this.accueilService.rechercherPatients(search ?? '', cliniqueId ? Number(cliniqueId) : undefined);
     }
+    ticketValable(id, cliniqueId) {
+        return this.accueilService.ticketValable(cliniqueId, id);
+    }
     listerPassages(cliniqueId, date, debut, fin, constantes, search, serviceId, page, perPage, heureDebut, heureFin, utilisateurId) {
         return this.accueilService.listerPassages(cliniqueId, {
             date,
@@ -62,6 +65,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], AccueilController.prototype, "rechercherPatients", null);
+__decorate([
+    (0, common_1.Get)('patients/:id/ticket-valable'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Number]),
+    __metadata("design:returntype", void 0)
+], AccueilController.prototype, "ticketValable", null);
 __decorate([
     (0, common_1.Get)('passages'),
     __param(0, (0, common_1.Query)('cliniqueId', common_1.ParseIntPipe)),

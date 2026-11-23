@@ -137,6 +137,7 @@ export declare class FinancesController {
             personnelId: number;
             statut: string;
             updatedAt: Date;
+            payeLe: Date | null;
             commentaire: string | null;
             valideParId: number | null;
             valideLe: Date | null;
@@ -145,7 +146,6 @@ export declare class FinancesController {
             mois: string;
             nbServices: number;
             nbAVerifier: number;
-            payeLe: Date | null;
         }[];
         total: number;
     }>;
@@ -179,6 +179,7 @@ export declare class FinancesController {
         personnelId: number;
         statut: string;
         updatedAt: Date;
+        payeLe: Date | null;
         montantTotal: import("@prisma/client/runtime/library").Decimal;
         commentaire: string | null;
         valideParId: number | null;
@@ -194,7 +195,6 @@ export declare class FinancesController {
         montantBase: import("@prisma/client/runtime/library").Decimal;
         primes: import("@prisma/client/runtime/library").Decimal;
         retenues: import("@prisma/client/runtime/library").Decimal;
-        payeLe: Date | null;
     }>;
     statutFiche(id: number, dto: {
         statut: any;
@@ -205,6 +205,7 @@ export declare class FinancesController {
         personnelId: number;
         statut: string;
         updatedAt: Date;
+        payeLe: Date | null;
         montantTotal: import("@prisma/client/runtime/library").Decimal;
         commentaire: string | null;
         valideParId: number | null;
@@ -220,6 +221,5 @@ export declare class FinancesController {
         montantBase: import("@prisma/client/runtime/library").Decimal;
         primes: import("@prisma/client/runtime/library").Decimal;
         retenues: import("@prisma/client/runtime/library").Decimal;
-        payeLe: Date | null;
     }>;
 }

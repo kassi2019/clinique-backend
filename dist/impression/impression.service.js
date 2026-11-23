@@ -20,6 +20,7 @@ const os = require("os");
 const path = require("path");
 const util_1 = require("util");
 const prisma_service_1 = require("../prisma/prisma.service");
+const ticket_consultation_1 = require("../common/ticket-consultation");
 const execAsync = (0, util_1.promisify)(child_process_1.exec);
 const ESC = '\x1b';
 const GS = '\x1d';
@@ -303,7 +304,7 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
             debug: results.join(' | '),
         };
     }
-    genererTicketPassage(passage, largeur) {
+    genererTicketPassage(passage, largeur, controle) {
         const L = largeur;
         const trait = (c = '=') => c.repeat(L);
         const centrer = (t) => ' '.repeat(Math.max(0, Math.floor((L - t.length) / 2))) + t;
@@ -336,6 +337,17 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         if (infos.length)
             lignes.push(centrer(infos.join(' | ')));
         lignes.push(centrer(passage.service?.nom ?? '-'));
+        if (controle) {
+            lignes.push(trait('*'));
+            lignes.push(CMDS.BOLD_ON + centrer('CONTROLE - CONSULTATION 0 FCFA') + CMDS.BOLD_OFF);
+            if (controle.valableJusquau) {
+                const v = controle.valableJusquau;
+                lignes.push(centrer(`Ticket valable jusqu'au ${String(v.getDate()).padStart(2, '0')}/${String(v.getMonth() + 1).padStart(2, '0')}/${v.getFullYear()}`));
+            }
+            if (controle.numeroOrdre)
+                lignes.push(centrer(`(paye au passage ${controle.numeroOrdre})`));
+            lignes.push(trait('*'));
+        }
         lignes.push('');
         lignes.push(centrer('Date de passage'));
         lignes.push(CMDS.BOLD_ON + centrer(dateHeure) + CMDS.BOLD_OFF);
@@ -621,8 +633,18 @@ let ImpressionService = ImpressionService_1 = class ImpressionService {
         });
         if (!passage)
             throw new common_1.NotFoundException('Passage introuvable.');
+        const ligneGratuite = await this.prisma.passagePrestation.findFirst({
+            where: { passageId, gratuit: true },
+            select: { id: true },
+        });
+        const ticket = ligneGratuite
+            ? await (0, ticket_consultation_1.ticketConsultationValable)(this.prisma, passage.cliniqueId, passage.patientId, passage.id)
+            : null;
+        const controle = ligneGratuite
+            ? { numeroOrdre: ticket?.numeroOrdre ?? null, valableJusquau: ticket?.valableJusquau ?? null }
+            : null;
         const config = await this.getConfigPoste(passage.cliniqueId, 'TICKET');
-        const texte = normalizeText(this.genererTicketPassage(passage, config.largeur));
+        const texte = normalizeText(this.genererTicketPassage(passage, config.largeur, controle));
         return this.imprimer(texte, config, {
             poste: 'TICKET',
             cliniqueId: passage.cliniqueId,

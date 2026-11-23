@@ -8,8 +8,8 @@ export declare class AssurancesController {
                 prestation: {
                     id: number;
                     libelle: string;
-                    code: string;
                     montant: import("@prisma/client/runtime/library").Decimal;
+                    code: string;
                 };
             } & {
                 createdAt: Date;
@@ -29,9 +29,9 @@ export declare class AssurancesController {
             statut: string;
             updatedAt: Date;
             libelle: string;
-            assuranceId: number;
             code: string;
             description: string | null;
+            assuranceId: number;
             tauxPharmacie: number | null;
             dateDebut: Date | null;
             dateFin: Date | null;
@@ -180,8 +180,8 @@ export declare class AssurancesController {
             id: number;
             statut: string;
             updatedAt: Date;
-            assuranceId: number;
             patientId: number;
+            assuranceId: number;
             formuleId: number;
             dateDebut: Date | null;
             dateFin: Date | null;
@@ -249,9 +249,9 @@ export declare class AssurancesController {
         statut: string;
         updatedAt: Date;
         libelle: string;
-        assuranceId: number;
         code: string;
         description: string | null;
+        assuranceId: number;
         tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -264,9 +264,9 @@ export declare class AssurancesController {
         statut: string;
         updatedAt: Date;
         libelle: string;
-        assuranceId: number;
         code: string;
         description: string | null;
+        assuranceId: number;
         tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -277,9 +277,9 @@ export declare class AssurancesController {
         statut: string;
         updatedAt: Date;
         libelle: string;
-        assuranceId: number;
         code: string;
         description: string | null;
+        assuranceId: number;
         tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -290,9 +290,9 @@ export declare class AssurancesController {
         statut: string;
         updatedAt: Date;
         libelle: string;
-        assuranceId: number;
         code: string;
         description: string | null;
+        assuranceId: number;
         tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -349,8 +349,8 @@ export declare class AssurancesController {
         id: number;
         statut: string;
         updatedAt: Date;
-        assuranceId: number;
         patientId: number;
+        assuranceId: number;
         formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -364,8 +364,8 @@ export declare class AssurancesController {
         id: number;
         statut: string;
         updatedAt: Date;
-        assuranceId: number;
         patientId: number;
+        assuranceId: number;
         formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -379,8 +379,8 @@ export declare class AssurancesController {
         id: number;
         statut: string;
         updatedAt: Date;
-        assuranceId: number;
         patientId: number;
+        assuranceId: number;
         formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;

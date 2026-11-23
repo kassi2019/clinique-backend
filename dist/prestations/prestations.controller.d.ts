@@ -21,11 +21,11 @@ export declare class PrestationsController {
             cliniqueId: number;
             updatedAt: Date;
             serviceId: number;
-            type: string;
             libelle: string;
-            actif: boolean;
-            code: string;
             montant: import("@prisma/client/runtime/library").Decimal;
+            code: string;
+            type: string;
+            actif: boolean;
         } & {
             montant: number;
         })[];
@@ -51,11 +51,11 @@ export declare class PrestationsController {
         cliniqueId: number;
         updatedAt: Date;
         serviceId: number;
-        type: string;
         libelle: string;
-        actif: boolean;
-        code: string;
         montant: import("@prisma/client/runtime/library").Decimal;
+        code: string;
+        type: string;
+        actif: boolean;
     } & {
         montant: number;
     }>;
@@ -76,11 +76,11 @@ export declare class PrestationsController {
         cliniqueId: number;
         updatedAt: Date;
         serviceId: number;
-        type: string;
         libelle: string;
-        actif: boolean;
-        code: string;
         montant: import("@prisma/client/runtime/library").Decimal;
+        code: string;
+        type: string;
+        actif: boolean;
     } & {
         montant: number;
     }>;
@@ -101,11 +101,11 @@ export declare class PrestationsController {
         cliniqueId: number;
         updatedAt: Date;
         serviceId: number;
-        type: string;
         libelle: string;
-        actif: boolean;
-        code: string;
         montant: import("@prisma/client/runtime/library").Decimal;
+        code: string;
+        type: string;
+        actif: boolean;
     } & {
         montant: number;
     }>;
@@ -126,11 +126,11 @@ export declare class PrestationsController {
         cliniqueId: number;
         updatedAt: Date;
         serviceId: number;
-        type: string;
         libelle: string;
-        actif: boolean;
-        code: string;
         montant: import("@prisma/client/runtime/library").Decimal;
+        code: string;
+        type: string;
+        actif: boolean;
     } & {
         montant: number;
     }>;

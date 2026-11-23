@@ -158,6 +158,7 @@ export declare class FinancesService {
             personnelId: number;
             statut: string;
             updatedAt: Date;
+            payeLe: Date | null;
             commentaire: string | null;
             valideParId: number | null;
             valideLe: Date | null;
@@ -166,7 +167,6 @@ export declare class FinancesService {
             mois: string;
             nbServices: number;
             nbAVerifier: number;
-            payeLe: Date | null;
         }[];
         total: number;
     }>;
@@ -181,6 +181,7 @@ export declare class FinancesService {
         personnelId: number;
         statut: string;
         updatedAt: Date;
+        payeLe: Date | null;
         montantTotal: import("@prisma/client/runtime/library").Decimal;
         commentaire: string | null;
         valideParId: number | null;
@@ -196,7 +197,6 @@ export declare class FinancesService {
         montantBase: import("@prisma/client/runtime/library").Decimal;
         primes: import("@prisma/client/runtime/library").Decimal;
         retenues: import("@prisma/client/runtime/library").Decimal;
-        payeLe: Date | null;
     }>;
     changerStatutFiche(id: number, statut: 'VALIDEE' | 'PAYEE' | 'BROUILLON', utilisateurId: number): Promise<{
         createdAt: Date;
@@ -205,6 +205,7 @@ export declare class FinancesService {
         personnelId: number;
         statut: string;
         updatedAt: Date;
+        payeLe: Date | null;
         montantTotal: import("@prisma/client/runtime/library").Decimal;
         commentaire: string | null;
         valideParId: number | null;
@@ -220,7 +221,6 @@ export declare class FinancesService {
         montantBase: import("@prisma/client/runtime/library").Decimal;
         primes: import("@prisma/client/runtime/library").Decimal;
         retenues: import("@prisma/client/runtime/library").Decimal;
-        payeLe: Date | null;
     }>;
     detailFiche(id: number): Promise<{
         services: {

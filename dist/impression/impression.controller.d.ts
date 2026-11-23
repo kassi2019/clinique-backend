@@ -42,8 +42,8 @@ export declare class ImpressionController {
         cliniqueId: number;
         statut: string;
         nom: string | null;
-        poste: string;
         libelle: string | null;
+        poste: string;
         partage: string | null;
         contenu: string;
         format: string;
@@ -81,15 +81,15 @@ export declare class ImpressionController {
         cliniqueId: number;
         updatedAt: Date;
         nom: string | null;
-        type: string;
-        poste: string;
         libelle: string;
+        type: string;
+        actif: boolean;
+        poste: string;
         partage: string | null;
         ip: string | null;
         port: number;
         largeur: number;
         autoPrint: boolean;
-        actif: boolean;
     }>;
     test(body: any): Promise<{
         ok: boolean;

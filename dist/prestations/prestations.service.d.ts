@@ -28,11 +28,11 @@ export declare class PrestationsService {
             cliniqueId: number;
             updatedAt: Date;
             serviceId: number;
-            type: string;
             libelle: string;
-            actif: boolean;
-            code: string;
             montant: Prisma.Decimal;
+            code: string;
+            type: string;
+            actif: boolean;
         } & {
             montant: number;
         })[];
@@ -58,11 +58,11 @@ export declare class PrestationsService {
         cliniqueId: number;
         updatedAt: Date;
         serviceId: number;
-        type: string;
         libelle: string;
-        actif: boolean;
-        code: string;
         montant: Prisma.Decimal;
+        code: string;
+        type: string;
+        actif: boolean;
     } & {
         montant: number;
     }>;
@@ -83,11 +83,11 @@ export declare class PrestationsService {
         cliniqueId: number;
         updatedAt: Date;
         serviceId: number;
-        type: string;
         libelle: string;
-        actif: boolean;
-        code: string;
         montant: Prisma.Decimal;
+        code: string;
+        type: string;
+        actif: boolean;
     } & {
         montant: number;
     }>;
@@ -108,11 +108,11 @@ export declare class PrestationsService {
         cliniqueId: number;
         updatedAt: Date;
         serviceId: number;
-        type: string;
         libelle: string;
-        actif: boolean;
-        code: string;
         montant: Prisma.Decimal;
+        code: string;
+        type: string;
+        actif: boolean;
     } & {
         montant: number;
     }>;
@@ -133,11 +133,11 @@ export declare class PrestationsService {
         cliniqueId: number;
         updatedAt: Date;
         serviceId: number;
-        type: string;
         libelle: string;
-        actif: boolean;
-        code: string;
         montant: Prisma.Decimal;
+        code: string;
+        type: string;
+        actif: boolean;
     } & {
         montant: number;
     }>;

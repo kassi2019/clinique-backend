@@ -35,6 +35,15 @@ export class AccueilController {
     );
   }
 
+  /** Ticket de consultation encore valable (patient revenu dans les 10 jours). */
+  @Get('patients/:id/ticket-valable')
+  ticketValable(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('cliniqueId', ParseIntPipe) cliniqueId: number,
+  ) {
+    return this.accueilService.ticketValable(cliniqueId, id);
+  }
+
   /**
    * Passages : aujourd'hui par défaut, ou jour précis (date),
    * ou plage (debut/fin), avec filtre constantes (OUI/NON).

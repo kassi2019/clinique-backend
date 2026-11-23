@@ -6,6 +6,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { promisify } from 'util';
 import { PrismaService } from '../prisma/prisma.service';
+import { ticketConsultationValable } from '../common/ticket-consultation';
 
 const execAsync = promisify(exec);
 
@@ -385,7 +386,7 @@ export class ImpressionService {
     };
     service: { nom: string } | null;
     clinique: { nom: string; adresse: string | null };
-  }, largeur: number): string {
+  }, largeur: number, controle?: { numeroOrdre: string | null; valableJusquau: Date | null } | null): string {
     const L = largeur;
     const trait = (c = '=') => c.repeat(L);
     const centrer = (t: string) => ' '.repeat(Math.max(0, Math.floor((L - t.length) / 2))) + t;
@@ -431,6 +432,23 @@ export class ImpressionService {
     }
     if (infos.length) lignes.push(centrer(infos.join(' | ')));
     lignes.push(centrer(passage.service?.nom ?? '-'));
+    if (controle) {
+      // Ticket de consultation encore valable : le patient ne paie pas la consultation
+      lignes.push(trait('*'));
+      lignes.push(CMDS.BOLD_ON + centrer('CONTROLE - CONSULTATION 0 FCFA') + CMDS.BOLD_OFF);
+      if (controle.valableJusquau) {
+        const v = controle.valableJusquau;
+        lignes.push(
+          centrer(
+            `Ticket valable jusqu'au ${String(v.getDate()).padStart(2, '0')}/${String(
+              v.getMonth() + 1,
+            ).padStart(2, '0')}/${v.getFullYear()}`,
+          ),
+        );
+      }
+      if (controle.numeroOrdre) lignes.push(centrer(`(paye au passage ${controle.numeroOrdre})`));
+      lignes.push(trait('*'));
+    }
     lignes.push('');
     lignes.push(centrer('Date de passage'));
     lignes.push(CMDS.BOLD_ON + centrer(dateHeure) + CMDS.BOLD_OFF);
@@ -777,8 +795,27 @@ export class ImpressionService {
     });
     if (!passage) throw new NotFoundException('Passage introuvable.');
 
+    // Consultation gratuite (ticket encore valable ≤ 10 jours) : mention sur le ticket
+    const ligneGratuite = await this.prisma.passagePrestation.findFirst({
+      where: { passageId, gratuit: true },
+      select: { id: true },
+    });
+    const ticket = ligneGratuite
+      ? await ticketConsultationValable(
+          this.prisma,
+          passage.cliniqueId,
+          passage.patientId,
+          passage.id,
+        )
+      : null;
+    const controle = ligneGratuite
+      ? { numeroOrdre: ticket?.numeroOrdre ?? null, valableJusquau: ticket?.valableJusquau ?? null }
+      : null;
+
     const config = await this.getConfigPoste(passage.cliniqueId, 'TICKET');
-    const texte = normalizeText(this.genererTicketPassage(passage, config.largeur));
+    const texte = normalizeText(
+      this.genererTicketPassage(passage, config.largeur, controle),
+    );
     return this.imprimer(texte, config, {
       poste: 'TICKET',
       cliniqueId: passage.cliniqueId,

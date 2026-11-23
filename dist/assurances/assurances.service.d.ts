@@ -9,8 +9,8 @@ export declare class AssurancesService {
                 prestation: {
                     id: number;
                     libelle: string;
-                    code: string;
                     montant: Prisma.Decimal;
+                    code: string;
                 };
             } & {
                 createdAt: Date;
@@ -30,9 +30,9 @@ export declare class AssurancesService {
             statut: string;
             updatedAt: Date;
             libelle: string;
-            assuranceId: number;
             code: string;
             description: string | null;
+            assuranceId: number;
             tauxPharmacie: number | null;
             dateDebut: Date | null;
             dateFin: Date | null;
@@ -106,9 +106,9 @@ export declare class AssurancesService {
         statut: string;
         updatedAt: Date;
         libelle: string;
-        assuranceId: number;
         code: string;
         description: string | null;
+        assuranceId: number;
         tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -120,9 +120,9 @@ export declare class AssurancesService {
         statut: string;
         updatedAt: Date;
         libelle: string;
-        assuranceId: number;
         code: string;
         description: string | null;
+        assuranceId: number;
         tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -133,9 +133,9 @@ export declare class AssurancesService {
         statut: string;
         updatedAt: Date;
         libelle: string;
-        assuranceId: number;
         code: string;
         description: string | null;
+        assuranceId: number;
         tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -146,9 +146,9 @@ export declare class AssurancesService {
         statut: string;
         updatedAt: Date;
         libelle: string;
-        assuranceId: number;
         code: string;
         description: string | null;
+        assuranceId: number;
         tauxPharmacie: number | null;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -205,8 +205,8 @@ export declare class AssurancesService {
         id: number;
         statut: string;
         updatedAt: Date;
-        assuranceId: number;
         patientId: number;
+        assuranceId: number;
         formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -237,11 +237,11 @@ export declare class AssurancesService {
                     cliniqueId: number;
                     updatedAt: Date;
                     serviceId: number;
-                    type: string;
                     libelle: string;
-                    actif: boolean;
-                    code: string;
                     montant: Prisma.Decimal;
+                    code: string;
+                    type: string;
+                    actif: boolean;
                 };
             } & {
                 createdAt: Date;
@@ -261,9 +261,9 @@ export declare class AssurancesService {
             statut: string;
             updatedAt: Date;
             libelle: string;
-            assuranceId: number;
             code: string;
             description: string | null;
+            assuranceId: number;
             tauxPharmacie: number | null;
             dateDebut: Date | null;
             dateFin: Date | null;
@@ -273,8 +273,8 @@ export declare class AssurancesService {
         id: number;
         statut: string;
         updatedAt: Date;
-        assuranceId: number;
         patientId: number;
+        assuranceId: number;
         formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -288,8 +288,8 @@ export declare class AssurancesService {
         id: number;
         statut: string;
         updatedAt: Date;
-        assuranceId: number;
         patientId: number;
+        assuranceId: number;
         formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -303,8 +303,8 @@ export declare class AssurancesService {
         id: number;
         statut: string;
         updatedAt: Date;
-        assuranceId: number;
         patientId: number;
+        assuranceId: number;
         formuleId: number;
         dateDebut: Date | null;
         dateFin: Date | null;
@@ -445,8 +445,8 @@ export declare class AssurancesService {
             id: number;
             statut: string;
             updatedAt: Date;
-            assuranceId: number;
             patientId: number;
+            assuranceId: number;
             formuleId: number;
             dateDebut: Date | null;
             dateFin: Date | null;

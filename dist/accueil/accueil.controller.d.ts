@@ -42,6 +42,9 @@ export declare class AccueilController {
         residenceHabituelle: string | null;
         residenceActuelle: string | null;
     })[]>;
+    ticketValable(id: number, cliniqueId: number): Promise<{
+        ticket: import("../common/ticket-consultation").TicketValable;
+    }>;
     listerPassages(cliniqueId: number, date?: string, debut?: string, fin?: string, constantes?: string, search?: string, serviceId?: string, page?: string, perPage?: string, heureDebut?: string, heureFin?: string, utilisateurId?: string): Promise<{
         data: ({
             clinique: {
@@ -91,13 +94,13 @@ export declare class AccueilController {
             statut: string;
             updatedAt: Date;
             serviceId: number;
+            agentId: number | null;
             patientId: number;
             numeroOrdre: string;
             typePatient: string;
             motif: string | null;
             referent: string | null;
             prestationDemandee: string | null;
-            agentId: number | null;
             taille: string | null;
             temperature: import("@prisma/client/runtime/library").Decimal | null;
             pouls: number | null;
@@ -162,13 +165,13 @@ export declare class AccueilController {
         statut: string;
         updatedAt: Date;
         serviceId: number;
+        agentId: number | null;
         patientId: number;
         numeroOrdre: string;
         typePatient: string;
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
-        agentId: number | null;
         taille: string | null;
         temperature: import("@prisma/client/runtime/library").Decimal | null;
         pouls: number | null;
@@ -228,13 +231,13 @@ export declare class AccueilController {
         statut: string;
         updatedAt: Date;
         serviceId: number;
+        agentId: number | null;
         patientId: number;
         numeroOrdre: string;
         typePatient: string;
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
-        agentId: number | null;
         taille: string | null;
         temperature: import("@prisma/client/runtime/library").Decimal | null;
         pouls: number | null;
@@ -248,10 +251,7 @@ export declare class AccueilController {
     }>;
     creerPassage(dto: CreatePassageDto, req: any): Promise<{
         impression: any;
-        controleGratuit: {
-            passageId: number;
-            numeroOrdre: string;
-        };
+        controleGratuit: import("../common/ticket-consultation").TicketValable;
         clinique: {
             id: number;
             nom: string;
@@ -298,13 +298,13 @@ export declare class AccueilController {
         statut: string;
         updatedAt: Date;
         serviceId: number;
+        agentId: number | null;
         patientId: number;
         numeroOrdre: string;
         typePatient: string;
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
-        agentId: number | null;
         taille: string | null;
         temperature: import("@prisma/client/runtime/library").Decimal | null;
         pouls: number | null;
@@ -364,13 +364,13 @@ export declare class AccueilController {
         statut: string;
         updatedAt: Date;
         serviceId: number;
+        agentId: number | null;
         patientId: number;
         numeroOrdre: string;
         typePatient: string;
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
-        agentId: number | null;
         taille: string | null;
         temperature: import("@prisma/client/runtime/library").Decimal | null;
         pouls: number | null;

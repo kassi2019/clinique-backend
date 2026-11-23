@@ -7,6 +7,9 @@ export declare class AccueilService {
     private impressionService;
     private readonly logger;
     constructor(prisma: PrismaService, impressionService: ImpressionService);
+    ticketValable(cliniqueId: number, patientId: number): Promise<{
+        ticket: import("../common/ticket-consultation").TicketValable;
+    }>;
     rechercherPatients(search: string, cliniqueId?: number): Promise<({
         passages: {
             service: {
@@ -107,13 +110,13 @@ export declare class AccueilService {
             statut: string;
             updatedAt: Date;
             serviceId: number;
+            agentId: number | null;
             patientId: number;
             numeroOrdre: string;
             typePatient: string;
             motif: string | null;
             referent: string | null;
             prestationDemandee: string | null;
-            agentId: number | null;
             taille: string | null;
             temperature: Prisma.Decimal | null;
             pouls: number | null;
@@ -178,13 +181,13 @@ export declare class AccueilService {
         statut: string;
         updatedAt: Date;
         serviceId: number;
+        agentId: number | null;
         patientId: number;
         numeroOrdre: string;
         typePatient: string;
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
-        agentId: number | null;
         taille: string | null;
         temperature: Prisma.Decimal | null;
         pouls: number | null;
@@ -244,13 +247,13 @@ export declare class AccueilService {
         statut: string;
         updatedAt: Date;
         serviceId: number;
+        agentId: number | null;
         patientId: number;
         numeroOrdre: string;
         typePatient: string;
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
-        agentId: number | null;
         taille: string | null;
         temperature: Prisma.Decimal | null;
         pouls: number | null;
@@ -264,10 +267,7 @@ export declare class AccueilService {
     }>;
     creerPassage(dto: CreatePassageDto, utilisateurId?: number): Promise<{
         impression: any;
-        controleGratuit: {
-            passageId: number;
-            numeroOrdre: string;
-        };
+        controleGratuit: import("../common/ticket-consultation").TicketValable;
         clinique: {
             id: number;
             nom: string;
@@ -314,13 +314,13 @@ export declare class AccueilService {
         statut: string;
         updatedAt: Date;
         serviceId: number;
+        agentId: number | null;
         patientId: number;
         numeroOrdre: string;
         typePatient: string;
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
-        agentId: number | null;
         taille: string | null;
         temperature: Prisma.Decimal | null;
         pouls: number | null;
@@ -380,13 +380,13 @@ export declare class AccueilService {
         statut: string;
         updatedAt: Date;
         serviceId: number;
+        agentId: number | null;
         patientId: number;
         numeroOrdre: string;
         typePatient: string;
         motif: string | null;
         referent: string | null;
         prestationDemandee: string | null;
-        agentId: number | null;
         taille: string | null;
         temperature: Prisma.Decimal | null;
         pouls: number | null;

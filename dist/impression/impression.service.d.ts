@@ -51,15 +51,15 @@ export declare class ImpressionService {
         cliniqueId: number;
         updatedAt: Date;
         nom: string | null;
-        type: string;
-        poste: string;
         libelle: string;
+        type: string;
+        actif: boolean;
+        poste: string;
         partage: string | null;
         ip: string | null;
         port: number;
         largeur: number;
         autoPrint: boolean;
-        actif: boolean;
     }>;
     listWindowsPrinters(): Promise<string[]>;
     testPrinter(cliniqueId: number, poste: string): Promise<{
@@ -87,7 +87,10 @@ export declare class ImpressionService {
             nom: string;
             adresse: string | null;
         };
-    }, largeur: number): string;
+    }, largeur: number, controle?: {
+        numeroOrdre: string | null;
+        valableJusquau: Date | null;
+    } | null): string;
     imprimerRecuPaiement(paiementId: number): Promise<ResultatImpression>;
     imprimerOrdonnance(consultationId: number, ordonnanceId?: number): Promise<ResultatImpression>;
     imprimerRecuPharmacie(paiementId: number): Promise<ResultatImpression>;
@@ -112,8 +115,8 @@ export declare class ImpressionService {
         cliniqueId: number;
         statut: string;
         nom: string | null;
-        poste: string;
         libelle: string | null;
+        poste: string;
         partage: string | null;
         contenu: string;
         format: string;

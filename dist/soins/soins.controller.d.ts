@@ -118,13 +118,13 @@ export declare class SoinsController {
             statut: string;
             updatedAt: Date;
             serviceId: number;
+            agentId: number | null;
             patientId: number;
             numeroOrdre: string;
             typePatient: string;
             motif: string | null;
             referent: string | null;
             prestationDemandee: string | null;
-            agentId: number | null;
             taille: string | null;
             temperature: import("@prisma/client/runtime/library").Decimal | null;
             pouls: number | null;
@@ -146,13 +146,13 @@ export declare class SoinsController {
             statut: string;
             updatedAt: Date;
             serviceId: number | null;
-            libelle: string;
             passageId: number;
-            agentId: number | null;
             prestationId: number | null;
+            libelle: string;
             montant: import("@prisma/client/runtime/library").Decimal;
             source: string;
             gratuit: boolean;
+            agentId: number | null;
             paiementId: number | null;
             creditId: number | null;
         })[];
@@ -168,9 +168,9 @@ export declare class SoinsController {
             } & {
                 createdAt: Date;
                 id: number;
-                date: Date;
                 agentId: number | null;
                 observations: string | null;
+                date: Date;
                 soinId: number;
             })[];
         } & {
@@ -179,8 +179,8 @@ export declare class SoinsController {
             cliniqueId: number;
             statut: string;
             updatedAt: Date;
-            libelle: string;
             passageId: number;
+            libelle: string;
             patientId: number;
             passagePrestationId: number;
         })[];
@@ -228,9 +228,9 @@ export declare class SoinsController {
             } & {
                 createdAt: Date;
                 id: number;
-                date: Date;
                 agentId: number | null;
                 observations: string | null;
+                date: Date;
                 prescriptionSoinId: number;
             })[];
         } & {
@@ -269,9 +269,9 @@ export declare class SoinsController {
         } & {
             createdAt: Date;
             id: number;
-            date: Date;
             agentId: number | null;
             observations: string | null;
+            date: Date;
             soinId: number;
         })[];
     } & {
@@ -280,8 +280,8 @@ export declare class SoinsController {
         cliniqueId: number;
         statut: string;
         updatedAt: Date;
-        libelle: string;
         passageId: number;
+        libelle: string;
         patientId: number;
         passagePrestationId: number;
     }>;
@@ -332,9 +332,9 @@ export declare class SoinsController {
         } & {
             createdAt: Date;
             id: number;
-            date: Date;
             agentId: number | null;
             observations: string | null;
+            date: Date;
             prescriptionSoinId: number;
         })[];
     } & {
@@ -373,8 +373,8 @@ export declare class SoinsController {
                 cliniqueId: number;
                 statut: string;
                 updatedAt: Date;
-                libelle: string;
                 passageId: number;
+                libelle: string;
                 patientId: number;
                 passagePrestationId: number;
             };
@@ -388,9 +388,9 @@ export declare class SoinsController {
         } & {
             createdAt: Date;
             id: number;
-            date: Date;
             agentId: number | null;
             observations: string | null;
+            date: Date;
             soinId: number;
         }) | {
             id: string;

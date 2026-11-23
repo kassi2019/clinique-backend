@@ -16,6 +16,7 @@ const common_1 = require("@nestjs/common");
 const impression_service_1 = require("../impression/impression.service");
 const prisma_service_1 = require("../prisma/prisma.service");
 const recherche_patient_1 = require("../common/recherche-patient");
+const ticket_consultation_1 = require("../common/ticket-consultation");
 const includePassage = {
     patient: true,
     service: { select: { id: true, code: true, nom: true } },
@@ -28,6 +29,9 @@ let AccueilService = AccueilService_1 = class AccueilService {
         this.prisma = prisma;
         this.impressionService = impressionService;
         this.logger = new common_1.Logger(AccueilService_1.name);
+    }
+    async ticketValable(cliniqueId, patientId) {
+        return { ticket: await (0, ticket_consultation_1.ticketConsultationValable)(this.prisma, cliniqueId, patientId) };
     }
     async rechercherPatients(search, cliniqueId) {
         if (!search || search.trim().length < 2)
@@ -317,22 +321,7 @@ let AccueilService = AccueilService_1 = class AccueilService {
             }
         }
         const lignes = prestationsService.filter((p) => p.type !== 'CONSULTATION' || p.id === consultationChoisie?.id);
-        const controleGratuit = await this.prisma.passage.findFirst({
-            where: {
-                cliniqueId: dto.cliniqueId,
-                patientId: patient.id,
-                serviceId: dto.serviceId,
-                createdAt: { gte: new Date(Date.now() - 10 * 24 * 3600 * 1000) },
-                prestations: {
-                    some: {
-                        prestation: { type: 'CONSULTATION' },
-                        statut: { in: ['PAYEE', 'CREDIT', 'CAS_SOCIAL'] },
-                    },
-                },
-            },
-            orderBy: { createdAt: 'desc' },
-            select: { id: true, numeroOrdre: true },
-        });
+        const controleGratuit = await (0, ticket_consultation_1.ticketConsultationValable)(this.prisma, dto.cliniqueId, patient.id, passage.id);
         const serviceSansConsultation = consultations.length === 0;
         const typePatient = dto.typePatient ?? 'INTERNE';
         if (lignes.length > 0) {
@@ -370,9 +359,7 @@ let AccueilService = AccueilService_1 = class AccueilService {
         return {
             ...resultat,
             impression,
-            controleGratuit: controleGratuit
-                ? { passageId: controleGratuit.id, numeroOrdre: controleGratuit.numeroOrdre }
-                : null,
+            controleGratuit,
         };
     }
     async modifierPassage(id, dto, utilisateurId) {

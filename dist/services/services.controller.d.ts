@@ -16,8 +16,8 @@ export declare class ServicesController {
             cliniqueId: number;
             updatedAt: Date;
             nom: string;
-            actif: boolean;
             code: string;
+            actif: boolean;
             description: string | null;
         })[];
         total: number;
@@ -37,8 +37,8 @@ export declare class ServicesController {
         cliniqueId: number;
         updatedAt: Date;
         nom: string;
-        actif: boolean;
         code: string;
+        actif: boolean;
         description: string | null;
     }>;
     create(dto: CreateServiceDto): Promise<{
@@ -47,8 +47,8 @@ export declare class ServicesController {
         cliniqueId: number;
         updatedAt: Date;
         nom: string;
-        actif: boolean;
         code: string;
+        actif: boolean;
         description: string | null;
     }>;
     update(id: number, dto: UpdateServiceDto): Promise<{
@@ -57,8 +57,8 @@ export declare class ServicesController {
         cliniqueId: number;
         updatedAt: Date;
         nom: string;
-        actif: boolean;
         code: string;
+        actif: boolean;
         description: string | null;
     }>;
     remove(id: number): Promise<{
@@ -67,8 +67,8 @@ export declare class ServicesController {
         cliniqueId: number;
         updatedAt: Date;
         nom: string;
-        actif: boolean;
         code: string;
+        actif: boolean;
         description: string | null;
     }>;
 }

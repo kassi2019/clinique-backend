@@ -42,8 +42,8 @@ export declare class RapportsService {
         regionNom: string | null;
         regionCode: string | null;
         populationDesservie: number | null;
-        etablissement: string | null;
         observations: string | null;
+        etablissement: string | null;
         mois: number;
         annee: number;
         realiseParNom: string | null;
@@ -71,8 +71,8 @@ export declare class RapportsService {
         regionNom: string | null;
         regionCode: string | null;
         populationDesservie: number | null;
-        etablissement: string | null;
         observations: string | null;
+        etablissement: string | null;
         mois: number;
         annee: number;
         realiseParNom: string | null;
@@ -92,8 +92,8 @@ export declare class RapportsService {
         regionNom: string | null;
         regionCode: string | null;
         populationDesservie: number | null;
-        etablissement: string | null;
         observations: string | null;
+        etablissement: string | null;
         mois: number;
         annee: number;
         realiseParNom: string | null;

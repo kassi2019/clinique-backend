@@ -18,6 +18,7 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const affectation_service_1 = require("../affectation/affectation.service");
 const assurances_service_1 = require("../assurances/assurances.service");
 const recherche_patient_1 = require("../common/recherche-patient");
+const ticket_consultation_1 = require("../common/ticket-consultation");
 const formatMontant = (x) => Number(x);
 let CaisseService = CaisseService_1 = class CaisseService {
     constructor(prisma, impressionService, affectationService, assurancesService) {
@@ -63,7 +64,10 @@ let CaisseService = CaisseService_1 = class CaisseService {
                 patient: true,
                 service: { select: { id: true, code: true, nom: true } },
                 prestations: {
-                    include: { service: { select: { nom: true } } },
+                    include: {
+                        service: { select: { nom: true } },
+                        prestation: { select: { type: true } },
+                    },
                     orderBy: { createdAt: 'asc' },
                 },
                 paiements: {
@@ -82,6 +86,24 @@ let CaisseService = CaisseService_1 = class CaisseService {
         });
         if (!passage)
             throw new common_1.NotFoundException('Passage introuvable.');
+        const ticketValable = await (0, ticket_consultation_1.ticketConsultationValable)(this.prisma, passage.cliniqueId, passage.patientId, passage.id);
+        if (ticketValable) {
+            const aRendreGratuites = passage.prestations.filter((l) => l.statut === 'EN_ATTENTE' &&
+                !l.gratuit &&
+                l.prestation?.type === 'CONSULTATION' &&
+                Number(l.montant) > 0);
+            if (aRendreGratuites.length) {
+                await this.prisma.passagePrestation.updateMany({
+                    where: { id: { in: aRendreGratuites.map((l) => l.id) } },
+                    data: { montant: 0, gratuit: true },
+                });
+                for (const l of aRendreGratuites) {
+                    l.montant = 0;
+                    l.gratuit = true;
+                }
+                this.logger.log(`Passage #${passage.id} : ${aRendreGratuites.length} consultation(s) rendue(s) gratuite(s) (ticket ${ticketValable.numeroOrdre} valable).`);
+            }
+        }
         const rattachement = await this.assurancesService.couvertureActiveDuPatient(passage.patientId);
         const lignes = passage.prestations;
         const couvertures = {};
@@ -94,6 +116,7 @@ let CaisseService = CaisseService_1 = class CaisseService {
         }
         return {
             ...passage,
+            ticketValable,
             assurancePatient: rattachement
                 ? {
                     assurance: {
@@ -148,12 +171,16 @@ let CaisseService = CaisseService_1 = class CaisseService {
         if (!prestation || !prestation.actif) {
             throw new common_1.BadRequestException('Prestation introuvable ou inactive.');
         }
+        const ticket = prestation.type === 'CONSULTATION'
+            ? await (0, ticket_consultation_1.ticketConsultationValable)(this.prisma, passage.cliniqueId, passage.patientId, passage.id)
+            : null;
         const ligne = await this.prisma.passagePrestation.create({
             data: {
                 passageId,
                 prestationId: prestation.id,
                 libelle: prestation.libelle,
-                montant: prestation.montant,
+                montant: ticket ? 0 : prestation.montant,
+                gratuit: !!ticket,
                 serviceId: prestation.serviceId,
                 agentId: utilisateurId ?? null,
                 source: 'MANUEL',
@@ -508,6 +535,8 @@ let CaisseService = CaisseService_1 = class CaisseService {
         return ticket;
     }
     async credits(cliniqueId, page = 1, perPage = 20) {
+        page = Number.isInteger(page) && page > 0 ? page : 1;
+        perPage = Number.isInteger(perPage) && perPage > 0 ? perPage : 20;
         const where = { cliniqueId, statut: 'EN_COURS' };
         const [data, total] = await Promise.all([
             this.prisma.creditTicket.findMany({
